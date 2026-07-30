@@ -171,7 +171,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             tilbakekrevinger.size shouldBe 5
 
             tilbakekrevinger.forAll {
-                it.eksternFagsak.behandlinger.size shouldBe 2
+                it.eksternFagsak.behandlinger.innslag.size shouldBe 2
             }
         }
     }

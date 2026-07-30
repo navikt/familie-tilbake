@@ -24,7 +24,7 @@ data class LoggInnslag(
         behandlingsloggstype = behandlingsloggstype,
         rolle = rolle,
         behandlerIdent = behandlerIdent,
-        opprettetTid = opprettetTid,
+        opprettet = opprettetTid,
         sistOppdatert = sistOppdatert,
         ekstraInfo = ekstraInfo.mapKeys { it.key.name },
     )

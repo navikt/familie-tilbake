@@ -2,9 +2,12 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
+import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.tilstand.Avsluttet
@@ -19,14 +22,15 @@ import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.time.LocalDateTime
+import java.util.UUID
 
 data class TilbakekrevingEntity(
     val id: String,
     val nåværendeTilstand: TilbakekrevingTilstand,
     val eksternFagsak: EksternFagsakEntity,
-    val behandlingHistorikkEntities: List<BehandlingEntity>,
-    val kravgrunnlagHistorikkEntities: List<KravgrunnlagHendelseEntity>,
-    val brevHistorikkEntities: List<BrevEntity>,
+    val behandlingHistorikkEntities: HistorikkEntity<UUID, BehandlingEntity, Behandling>,
+    val kravgrunnlagHistorikkEntities: HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse>,
+    val brevHistorikkEntities: HistorikkEntity<UUID, BrevEntity, Brev>,
     val opprettet: LocalDateTime,
     val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
@@ -34,17 +38,17 @@ data class TilbakekrevingEntity(
 ) {
     fun fraEntity(): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
-            historikk = kravgrunnlagHistorikkEntities.map { it.fraEntity() }.toMutableList(),
+            historikk = kravgrunnlagHistorikkEntities.fraEntity { it.fraEntity() }.toMutableList(),
         )
 
-        val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(eksternFagsak.behandlinger.map { it.fraEntity() }.toMutableList())
+        val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(eksternFagsak.behandlinger.fraEntity { it.fraEntity() }.toMutableList())
 
         val brevHistorikk = BrevHistorikk(
-            historikk = brevHistorikkEntities.map { it.fraEntity(kravgrunnlagHistorikk) }.toMutableList(),
+            historikk = brevHistorikkEntities.fraEntity { it.fraEntity(kravgrunnlagHistorikk) }.toMutableList(),
         )
 
         val behandlingHistorikk = BehandlingHistorikk(
-            historikk = behandlingHistorikkEntities.map {
+            historikk = behandlingHistorikkEntities.fraEntity {
                 it.fraEntity(
                     eksternFagsakBehandlingHistorikk = eksternFagsakBehandlingHistorikk,
                     kravgrunnlagHistorikk = kravgrunnlagHistorikk,

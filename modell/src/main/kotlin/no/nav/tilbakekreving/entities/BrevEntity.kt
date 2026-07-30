@@ -6,13 +6,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BrevEntity(
-    val id: UUID,
+    override val id: UUID,
     val tilbakekrevingRef: String,
     val brevtype: Brevtype,
     val varselbrevEntity: VarselbrevEntity?,
     val vedtaksbrevEntity: VedtaksbrevEntity?,
-    val opprettet: LocalDateTime,
-) {
+    override val opprettet: LocalDateTime,
+) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
         return when (brevtype) {
             Brevtype.VARSELBREV, Brevtype.VARSEL_BREV -> {

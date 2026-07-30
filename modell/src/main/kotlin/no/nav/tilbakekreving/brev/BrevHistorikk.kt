@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.brev
 
 import no.nav.tilbakekreving.entities.BrevEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
@@ -41,7 +42,7 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Vedtaksbrev>().lastOrNull()
     }
 
-    fun tilEntity(tilbakekrevingId: String): List<BrevEntity> {
-        return historikk.map { it.tilEntity(tilbakekrevingId) }
+    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, BrevEntity, Brev> {
+        return HistorikkEntity(historikk.map { it.tilEntity(tilbakekrevingId) })
     }
 }

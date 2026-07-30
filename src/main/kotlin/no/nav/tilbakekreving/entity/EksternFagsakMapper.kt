@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.YtelseEntity
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import java.sql.ResultSet
@@ -29,7 +31,7 @@ object EksternFagsakMapper : Entity<EksternFagsakEntity, UUID, UUID>(
         FieldConverter.EnumConverter.of<Ytelsestype>().required(),
     )
 
-    fun map(resultSet: ResultSet, behandlinger: List<EksternFagsakBehandlingEntity>): EksternFagsakEntity {
+    fun map(resultSet: ResultSet, behandlinger: HistorikkEntity<UUID, EksternFagsakBehandlingEntity, EksternFagsakRevurdering>): EksternFagsakEntity {
         return EksternFagsakEntity(
             id = resultSet[id],
             tilbakekrevingRef = resultSet[tilbakekrevingRef],

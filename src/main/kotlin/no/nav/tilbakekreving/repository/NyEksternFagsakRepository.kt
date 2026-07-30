@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.repository
 
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.UtvidetPeriodeEntity
 import no.nav.tilbakekreving.entity.EksternFagsakBehandlingMapper
 import no.nav.tilbakekreving.entity.EksternFagsakMapper
@@ -19,14 +21,14 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
             tilbakekrevingId,
         ) { resultSet, _ ->
             val id = resultSet[EksternFagsakMapper.id]
-            val behandlinger = hentBehandling(id)
+            val behandlinger = HistorikkEntity<UUID, EksternFagsakBehandlingEntity, EksternFagsakRevurdering>(hentBehandling(id))
             EksternFagsakMapper.map(resultSet, behandlinger)
         }.single()
     }
 
     fun lagre(eksternFagsak: EksternFagsakEntity) {
         EksternFagsakMapper.upsertQuery(jdbcTemplate, eksternFagsak)
-        lagreBehandlinger(eksternFagsak.behandlinger)
+        lagreBehandlinger(eksternFagsak.behandlinger.innslag)
     }
 
     private fun hentBehandling(eksternFagsakId: UUID): List<EksternFagsakBehandlingEntity> {

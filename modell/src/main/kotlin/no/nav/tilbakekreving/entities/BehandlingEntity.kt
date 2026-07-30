@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class BehandlingEntity(
-    val id: UUID,
+    override val id: UUID,
     val tilbakekrevingId: String,
     val type: Behandlingstype,
-    val opprettet: LocalDateTime,
+    override val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val enhet: EnhetEntity?,
     val revurderingsårsak: Behandlingsårsakstype?,
@@ -29,7 +29,7 @@ data class BehandlingEntity(
     val fatteVedtakStegEntity: FatteVedtakStegEntity,
     val forhåndsvarselEntity: ForhåndsvarselEntity,
     val forrigeBehandlingsstatus: BehandlingsstatusModell,
-) {
+) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(
         eksternFagsakBehandlingHistorikk: EksternFagsakBehandlingHistorikk,
         kravgrunnlagHistorikk: KravgrunnlagHistorikk,

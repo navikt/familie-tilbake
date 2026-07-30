@@ -153,7 +153,7 @@ class TilbakekrevingService(
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
-            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.lastOrNull()?.id?.toString())
+            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.innslag.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity()
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->

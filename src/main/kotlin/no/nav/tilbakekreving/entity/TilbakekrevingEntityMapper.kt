@@ -1,14 +1,19 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.Behandling
+import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.sql.ResultSet
+import java.util.UUID
 
 object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
     tableName = "tilbakekreving",
@@ -39,9 +44,9 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
     fun map(
         resultSet: ResultSet,
         eksternFagsak: EksternFagsakEntity,
-        behandlingHistorikk: List<BehandlingEntity>,
-        kravgrunnlagHistorikk: List<KravgrunnlagHendelseEntity>,
-        brevHistorikk: List<BrevEntity>,
+        behandlingHistorikk: HistorikkEntity<UUID, BehandlingEntity, Behandling>,
+        kravgrunnlagHistorikk: HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse>,
+        brevHistorikk: HistorikkEntity<UUID, BrevEntity, Brev>,
         bruker: BrukerEntity?,
     ): TilbakekrevingEntity {
         return TilbakekrevingEntity(

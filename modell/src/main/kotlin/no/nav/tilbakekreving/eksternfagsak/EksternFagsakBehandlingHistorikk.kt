@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.eksternfagsak
 
 import no.nav.tilbakekreving.entities.EksternFagsakBehandlingEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
@@ -35,7 +36,7 @@ class EksternFagsakBehandlingHistorikk(
 
     fun harBehandling(): Boolean = historikk.isNotEmpty()
 
-    fun tilEntity(eksternFagsakRef: UUID): List<EksternFagsakBehandlingEntity> {
-        return historikk.map { it.tilEntity(eksternFagsakRef) }
+    fun tilEntity(eksternFagsakRef: UUID): HistorikkEntity<UUID, EksternFagsakBehandlingEntity, EksternFagsakRevurdering> {
+        return HistorikkEntity(historikk.map { it.tilEntity(eksternFagsakRef) })
     }
 }

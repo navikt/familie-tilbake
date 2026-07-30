@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.repository
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
@@ -48,9 +49,9 @@ class TilbakekrevingRepository(
         return TilbakekrevingEntityMapper.map(
             resultSet = resultSet,
             eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
-            behandlingHistorikk = behandlingRepository.hentBehandlinger(id),
-            kravgrunnlagHistorikk = kravgrunnlagRepository.hentKravgrunnlag(id),
-            brevHistorikk = brevRepository.hentBrev(id),
+            behandlingHistorikk = HistorikkEntity(behandlingRepository.hentBehandlinger(id)),
+            kravgrunnlagHistorikk = HistorikkEntity(kravgrunnlagRepository.hentKravgrunnlag(id)),
+            brevHistorikk = HistorikkEntity(brevRepository.hentBrev(id)),
             bruker = brukerRepository.hentBruker(id),
         )
     }
@@ -118,11 +119,11 @@ class TilbakekrevingRepository(
 
     private fun lagreUnderobjekter(entity: TilbakekrevingEntity, behandlingslogg: Behandlingslogg) {
         eksternFagsakRepository.lagre(entity.eksternFagsak)
-        kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities)
-        behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities)
-        brevRepository.lagre(entity.brevHistorikkEntities, entity.id)
+        kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities.innslag)
+        behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities.innslag)
+        brevRepository.lagre(entity.brevHistorikkEntities.innslag, entity.id)
         entity.bruker?.let { brukerRepository.lagre(it) }
-        behandlingsloggRepository.lagre(behandlingslogg.tilEntity(entity.id), entity.id)
+        behandlingsloggRepository.lagre(behandlingslogg.tilEntity(entity.id).innslag, entity.id)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {

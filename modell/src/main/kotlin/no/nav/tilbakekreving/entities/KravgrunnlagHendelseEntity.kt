@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class KravgrunnlagHendelseEntity(
-    val id: UUID,
+    override val id: UUID,
     val tilbakekrevingId: String,
     val vedtakId: BigInteger,
     val kravstatuskode: Kravstatuskode,
@@ -21,8 +21,8 @@ data class KravgrunnlagHendelseEntity(
     val kravgrunnlagId: String,
     val referanse: String,
     val perioder: List<KravgrunnlagPeriodeEntity>,
-    val opprettet: LocalDateTime,
-) {
+    override val opprettet: LocalDateTime,
+) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
             id = id,

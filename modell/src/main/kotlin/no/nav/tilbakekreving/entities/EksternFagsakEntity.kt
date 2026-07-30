@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import java.util.UUID
 
 data class EksternFagsakEntity(
@@ -9,11 +10,11 @@ data class EksternFagsakEntity(
     val tilbakekrevingRef: String,
     val eksternId: String,
     val ytelseEntity: YtelseEntity,
-    val behandlinger: List<EksternFagsakBehandlingEntity>,
+    val behandlinger: HistorikkEntity<UUID, EksternFagsakBehandlingEntity, EksternFagsakRevurdering>,
 ) {
     fun fraEntity(): EksternFagsak {
         val eksternFagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(
-            historikk = behandlinger.map { it.fraEntity() }.toMutableList(),
+            historikk = behandlinger.fraEntity { it.fraEntity() }.toMutableList(),
         )
         return EksternFagsak(
             id = id,

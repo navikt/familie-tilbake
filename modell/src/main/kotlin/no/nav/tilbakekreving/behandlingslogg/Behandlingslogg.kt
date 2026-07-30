@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandlingslogg
 
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -60,7 +61,7 @@ data class Behandlingslogg(
         }
     }
 
-    fun tilEntity(tilbakekrevingId: String): List<LoggInnlagEntity> {
-        return historikk.map { it.tilEntity(tilbakekrevingId) }
+    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, LoggInnlagEntity, LoggInnslag> {
+        return HistorikkEntity(historikk.map { it.tilEntity(tilbakekrevingId) })
     }
 }

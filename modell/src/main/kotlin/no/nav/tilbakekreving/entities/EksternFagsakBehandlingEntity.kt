@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class EksternFagsakBehandlingEntity(
-    val id: UUID,
+    override val id: UUID,
     val eksternFagsakRef: UUID,
     val type: EksternFagsakBehandlingType,
     val eksternId: String,
@@ -15,8 +15,8 @@ data class EksternFagsakBehandlingEntity(
     val vedtaksdato: LocalDate?,
     val utvidedePerioder: List<UtvidetPeriodeEntity>?,
     val url: String?,
-    val opprettet: LocalDateTime,
-) {
+    override val opprettet: LocalDateTime,
+) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(): EksternFagsakRevurdering {
         return when (type) {
             EksternFagsakBehandlingType.BEHANDLING -> EksternFagsakRevurdering.Revurdering(

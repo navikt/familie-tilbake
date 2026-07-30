@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsoppsummeringDto
 import no.nav.tilbakekreving.entities.BehandlingEntity
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
@@ -46,7 +47,7 @@ class BehandlingHistorikk(
         return historikk.dropLast(1).lastOrNull()?.let { HistorikkReferanse(this, it.id) }
     }
 
-    fun tilEntity(tilbakekrevingId: String): List<BehandlingEntity> {
-        return historikk.map { it.tilEntity(tilbakekrevingId) }
+    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, BehandlingEntity, Behandling> {
+        return HistorikkEntity(historikk.map { it.tilEntity(tilbakekrevingId) })
     }
 }

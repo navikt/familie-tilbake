@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
+import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -37,7 +38,7 @@ class KravgrunnlagHistorikk(
         return HistorikkReferanse(this, historikk.last().id)
     }
 
-    fun tilEntity(tilbakekrevingId: String): List<KravgrunnlagHendelseEntity> {
-        return historikk.map { it.tilEntity(tilbakekrevingId) }
+    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse> {
+        return HistorikkEntity(historikk.map { it.tilEntity(tilbakekrevingId) })
     }
 }

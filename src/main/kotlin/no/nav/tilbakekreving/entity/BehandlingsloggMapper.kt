@@ -43,7 +43,7 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
 
     val opprettetTid = field(
         "opprettet_tid",
-        { it.opprettetTid },
+        { it.opprettet },
         FieldConverter.LocalDateTimeConverter.required(),
     )
 
@@ -72,7 +72,7 @@ object BehandlingsloggMapper : Entity<LoggInnlagEntity, UUID, UUID>(
             behandlingId = resultSet[behandlingId],
             rolle = resultSet[rolle],
             behandlerIdent = resultSet[behandlerIdent],
-            opprettetTid = resultSet[opprettetTid],
+            opprettet = resultSet[opprettetTid],
             sistOppdatert = resultSet[sistOppdatert],
             behandlingsloggstype = behandlingsloggstype,
             ekstraInfo = resultSet[ekstraInfo],
