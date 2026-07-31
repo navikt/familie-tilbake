@@ -126,9 +126,8 @@ class TilbakekrevingService(
     fun hentTilbakekreving(filter: TilbakekrevingFilter, validerScope: Boolean = true): Tilbakekreving? {
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
-        val logContext = SecureLog.Context.fra(tilbakekreving)
         if (validerScope) {
-            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(tilbakekreving.eksternFagsak.eksternId, logContext.behandlingId)
+            tilbakekreving.validerInnenforScope()
         }
         return tilbakekreving
     }
@@ -153,8 +152,8 @@ class TilbakekrevingService(
         val observatør = Observatør()
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
-            kravgrunnlagBufferRepository.validerKravgrunnlagInnenforScope(it.eksternFagsak.eksternId, it.behandlingHistorikkEntities.innslag.lastOrNull()?.id?.toString())
             val tilbakekreving = it.fraEntity()
+            tilbakekreving.validerInnenforScope()
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->
                 sideeffektContext(behandler, observatør, behandlingslogg)

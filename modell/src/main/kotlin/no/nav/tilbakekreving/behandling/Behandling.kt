@@ -110,6 +110,7 @@ class Behandling internal constructor(
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+    private var nyttKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>?,
     internal val foreldelsesteg: Foreldelsesteg,
     private val faktasteg: Faktasteg,
     private val vilkårsvurderingsteg: Vilkårsvurderingsteg,
@@ -142,11 +143,13 @@ class Behandling internal constructor(
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, context: SideeffektContext) {
         if (oppdatertKravgrunnlag.entry == kravgrunnlag.entry) {
             kravgrunnlag = oppdatertKravgrunnlag
+            nyttKravgrunnlag = null
         } else if (steg().none { it.erPåbegynt() }) {
             kravgrunnlag = oppdatertKravgrunnlag
+            nyttKravgrunnlag = null
             medSaksbehandling(context, Saksbehandling::flyttTilbakeTilFakta)
         } else {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+            nyttKravgrunnlag = oppdatertKravgrunnlag
         }
     }
 
@@ -188,6 +191,7 @@ class Behandling internal constructor(
             ansvarligSaksbehandler = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
+            nyttKravgrunnlagRef = nyttKravgrunnlag?.tilEntity(),
             foreldelsestegEntity = foreldelsesteg.tilEntity(id),
             faktastegEntity = faktasteg.tilEntity(id),
             vilkårsvurderingstegEntity = vilkårsvurderingsteg.tilEntity(id),
@@ -582,6 +586,14 @@ class Behandling internal constructor(
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
+    internal fun validerInnenforScope() {
+        kravgrunnlag.entry.valider(sporingsinformasjon())
+        if (nyttKravgrunnlag != null) {
+            nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+        }
+    }
+
     inner class Saksbehandling internal constructor(
         private val context: SideeffektContext,
     ) {
@@ -915,6 +927,7 @@ class Behandling internal constructor(
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,
+                nyttKravgrunnlag = null,
                 foreldelsesteg = Foreldelsesteg.opprett(eksternFagsakRevurdering.entry, kravgrunnlag.entry),
                 faktasteg = Faktasteg.opprett(
                     eksternFagsakRevurdering = eksternFagsakRevurdering.entry,

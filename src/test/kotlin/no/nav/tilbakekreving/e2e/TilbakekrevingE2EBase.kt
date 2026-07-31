@@ -225,7 +225,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     }
 
     private fun tellUlesteKravgrunnlag(kravgrunnlagId: String): Int {
-        return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false AND kravgrunnlag_id=?;", kravgrunnlagId) { rs, _ ->
+        return jdbcTemplate.query("SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE lest=false AND kravgrunnlag_id=?;", kravgrunnlagId) { rs, _ ->
             rs.getInt("antall")
         }.single()
     }

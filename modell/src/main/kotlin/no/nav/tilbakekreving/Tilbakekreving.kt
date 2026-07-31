@@ -524,6 +524,12 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun validerInnenforScope() {
+        if (behandlingHistorikk.harBehandling()) {
+            behandlingHistorikk.nåværende().entry.validerInnenforScope()
+        }
+    }
+
     companion object {
         fun opprett(
             id: String,

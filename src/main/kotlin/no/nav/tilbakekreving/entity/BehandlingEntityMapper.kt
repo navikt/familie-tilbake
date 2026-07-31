@@ -63,6 +63,12 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         converter = FieldConverter.UUIDConverter.required(),
     )
 
+    val nyttKravgrunnlagRef = field(
+        column = "nytt_kravgrunnlag_ref",
+        getter = { it.nyttKravgrunnlagRef?.id },
+        converter = FieldConverter.UUIDConverter,
+    )
+
     val ansvarligSaksbehandlerType = field(
         column = "ansvarlig_saksbehandler_type",
         getter = { it.ansvarligSaksbehandler.type },
@@ -117,6 +123,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             ansvarligSaksbehandler = BehandlerEntity(type = resultSet[ansvarligSaksbehandlerType], ident = resultSet[ansvarligSaksbehandlerIdent]),
             eksternFagsakBehandlingRef = HistorikkReferanseEntity(resultSet[eksternFagsakBehandlingId]),
             kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagId]),
+            nyttKravgrunnlagRef = resultSet[nyttKravgrunnlagRef]?.let(::HistorikkReferanseEntity),
             foreldelsestegEntity = foreldelsessteg,
             faktastegEntity = faktasteg,
             vilkårsvurderingstegEntity = vilkårsvurdering,

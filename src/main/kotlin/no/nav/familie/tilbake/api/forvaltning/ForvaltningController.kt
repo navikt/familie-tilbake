@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
-import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -26,7 +25,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
@@ -370,31 +368,6 @@ class ForvaltningController(
     ): ResponseEntity<TilbakekrevingEntity> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak, validerScope = false)
         return ResponseEntity.ofNullable(tilbakekreving?.tilEntity())
-    }
-
-    @Operation(summary = "Henter alle kravgrunnlag markert som utenfor scope for sak")
-    @GetMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}")
-    fun hentAlleKravgrunnlagUtenforScope(
-        @PathVariable fagsystem: FagsystemDTO,
-        @PathVariable fagsystemId: String,
-    ): ResponseEntity<List<KravgrunnlagBufferRepository.Entity>> {
-        tilgangskontrollService.validerTilgangTilbakekreving(
-            fagsystem = fagsystem,
-            fagsystemId = fagsystemId,
-            valideringContext = ValideringContext.ForvaltningHentKravgrunnlag,
-            brukerIdent = null,
-            behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
-        )
-        return ResponseEntity.ofNullable(kravgrunnlagBufferRepository.hentKravgrunnlagUtenforScope(fagsystemId))
-    }
-
-    @Operation(summary = "Oppdaterer beløp for eksisterende fagsak med pågående behandling")
-    @PostMapping("/kravgrunnlag/{fagsystem}/{fagsystemId}/oppdater-belop")
-    fun oppdaterKravgrunnlagBeløp(
-        @PathVariable fagsystem: FagsystemDTO,
-        @PathVariable fagsystemId: String,
-    ): ResponseEntity<List<List<KravgrunnlagSammenligning.Forskjell>>> {
-        return ResponseEntity.ok(kravgrunnlagMediator.konsumerKravgrunnlagUtenforScope(fagsystemId, ValideringContext.ForvaltningOppdaterKravgrunnlag))
     }
 }
 

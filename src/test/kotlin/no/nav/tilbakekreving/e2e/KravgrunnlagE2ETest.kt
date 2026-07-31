@@ -230,11 +230,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekreving(behandlingId)
         }
-
-        shouldThrow<ModellFeil.UtenforScopeException> {
-            // Henting for skriving
-            tilbakekreving(behandlingId)
-        }
     }
 
     @Test

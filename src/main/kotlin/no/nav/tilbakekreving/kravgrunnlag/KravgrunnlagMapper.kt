@@ -6,7 +6,6 @@ import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -56,7 +55,6 @@ object KravgrunnlagMapper {
             },
             opprettet = klokke.nå(),
         )
-        kravgrunnlagHendelse.valider(Sporing(kravgrunnlag.fagsystemId, "Ukjent"))
         return kravgrunnlagHendelse
     }
 

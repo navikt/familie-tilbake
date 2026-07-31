@@ -2,14 +2,10 @@ package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.tilbakekreving.UtenforScope
-import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.feil.Sporing
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 
@@ -29,16 +25,11 @@ class KravgrunnlagBufferRepository(
 
     @Transactional
     fun konsumerKravgrunnlag(callback: (Entity) -> Unit) {
-        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false AND utenfor_scope=false ORDER BY mottatt FOR UPDATE LIMIT 5;", Mapper)
+        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false ORDER BY mottatt FOR UPDATE LIMIT 5;", Mapper)
         kravgrunnlag.forEach {
             try {
                 callback(it)
                 jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", it.kravgrunnlagId)
-            } catch (e: ModellFeil.UtenforScopeException) {
-                log.medContext(SecureLog.Context.medBehandling(e.sporing.fagsakId, e.sporing.behandlingId)) {
-                    error("Kunne ikke konsumere kravgrunnlag. Meldingen er ikke enda støttet", e)
-                }
-                jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET utenfor_scope=true WHERE kravgrunnlag_id=?;", it.kravgrunnlagId)
             } catch (e: Exception) {
                 log.medContext(SecureLog.Context.utenBehandling(it.fagsystemId)) {
                     error("Feilet under konsumering av kravgrunnlag, kravgrunnlagId={}", it.kravgrunnlagId, e)
@@ -47,25 +38,8 @@ class KravgrunnlagBufferRepository(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun oppdaterUtenforScope(fagsystemId: String) {
-        jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET utenfor_scope=false WHERE fagsystem_id=?;", fagsystemId)
-    }
-
-    fun validerKravgrunnlagInnenforScope(fagsystemId: String, behandlingId: String?) {
-        jdbcTemplate.query("SELECT COUNT(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=? AND utenfor_scope=true;", fagsystemId) { resultSet, _ ->
-            if (resultSet.getInt("antall") > 0) {
-                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, Sporing(fagsystemId, behandlingId ?: "Ukjent"))
-            }
-        }
-    }
-
     fun hentKravgrunnlag(kravgrunnlagId: String): List<Entity> {
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
-    }
-
-    fun hentKravgrunnlagUtenforScope(fagsystemId: String): List<Entity> {
-        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE utenfor_scope=true AND fagsystem_id=?", Mapper, fagsystemId)
     }
 
     object Mapper : RowMapper<Entity> {
