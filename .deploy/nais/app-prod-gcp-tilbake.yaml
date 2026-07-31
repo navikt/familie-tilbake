@@ -19,11 +19,11 @@ spec:
   liveness:
     path: /internal/status/isAlive
     initialDelay: 30
-    failureThreshold: 10
+    failureThreshold: 30
   readiness:
     path: /internal/status/isAlive
     initialDelay: 30
-    failureThreshold: 10
+    failureThreshold: 30
   prometheus:
     enabled: true
     path: /internal/prometheus
