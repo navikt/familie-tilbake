@@ -148,12 +148,19 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.BigDecimalConverter,
         )
 
+        val begrunnelseForIBehold = field(
+            "begrunnelse_for_i_behold",
+            GodTroEntity::begrunnelseForIBehold,
+            FieldConverter.StringConverter.required(),
+        )
+
         fun map(resultSet: ResultSet): GodTroEntity {
             return GodTroEntity(
                 periodeRef = resultSet[id],
                 begrunnelse = resultSet[begrunnelse],
                 beholdType = resultSet[beløpIBehold],
                 beløp = resultSet[beløp],
+                begrunnelseForIBehold = resultSet[begrunnelseForIBehold],
             )
         }
     }
