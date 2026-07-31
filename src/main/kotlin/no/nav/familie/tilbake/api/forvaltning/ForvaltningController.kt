@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api.forvaltning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -368,6 +369,26 @@ class ForvaltningController(
     ): ResponseEntity<TilbakekrevingEntity> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningDumpFagsak, validerScope = false)
         return ResponseEntity.ofNullable(tilbakekreving?.tilEntity())
+    }
+
+    @Operation(summary = "Henter hele JSON-objektet for en sak")
+    @PostMapping("/dump/{fagsystem}/{fagsystemId}")
+    fun dumpFagsakFagsystemId(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable fagsystemId: String,
+    ): ResponseEntity<TilbakekrevingEntity> {
+        tilgangskontrollService.validerTilgangTilbakekreving(
+            fagsystem = fagsystem,
+            fagsystemId = fagsystemId,
+            ValideringContext.ForvaltningDumpFagsak,
+            brukerIdent = null,
+            ContextService.hentBehandler(SecureLog.Context.utenBehandling(fagsystemId)),
+        )
+        return ResponseEntity.ofNullable(
+            tilbakekrevingRepository.hentTilbakekreving(
+                TilbakekrevingFilter.fagsak(fagsystemId, fagsystem),
+            ),
+        )
     }
 }
 
