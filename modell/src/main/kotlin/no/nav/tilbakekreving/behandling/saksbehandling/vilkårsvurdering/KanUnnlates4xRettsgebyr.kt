@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnnlatelseDto
@@ -109,6 +110,42 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun særligeGrunner(): ReduksjonSærligeGrunner {
             return reduksjonSærligeGrunner
+        }
+    }
+
+    object IkkeVurdert : KanUnnlates4xRettsgebyr {
+        override fun reduksjon(): Reduksjon {
+            return Reduksjon.FullstendigTilbakekreving()
+        }
+
+        override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
+            return VurdertUtbetaling.JaNeiVurdering.Nei
+        }
+
+        override fun tilEntity(): KanUnnlatesEntity {
+            return KanUnnlatesEntity.IKKE_VURDERT
+        }
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
+            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+        }
+
+        override fun skalTilbakekreves(): Boolean {
+            return true
+        }
+
+        override fun tilFrontendDTO(): SkalUnnlates {
+            return SkalUnnlates.TILBAKEKREVES
+        }
+
+        override fun tilFrontendDto(): UnnlatelseDto {
+            return IkkeAktueltDto(
+                NeiSaerligeGrunnerDto(
+                    særligeGrunnerMot = emptyList(),
+                    begrunnelse = "Vurdering av særlige grunner har tidligere ikke vært mulig",
+                    annetBegrunnelse = null,
+                ),
+            )
         }
     }
 

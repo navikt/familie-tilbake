@@ -45,6 +45,7 @@ enum class KanUnnlatesEntity {
     UNNLATES,
     SKAL_IKKE_UNNLATES,
     OVER_4_RETTSGEBYR,
+    IKKE_VURDERT,
     ;
 
     fun fraEntity(særligeGrunner: SærligeGrunnerEntity?): KanUnnlates4xRettsgebyr = when (this) {
@@ -55,6 +56,7 @@ enum class KanUnnlatesEntity {
         OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
             requireNotNull(særligeGrunner) { "SærligGrunner kreves for OVER_4_RETTSGEBYR" }.fraEntity(),
         )
+        IKKE_VURDERT -> KanUnnlates4xRettsgebyr.IkkeVurdert
     }
 }
 
