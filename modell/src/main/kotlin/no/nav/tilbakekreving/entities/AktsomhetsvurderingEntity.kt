@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
@@ -47,7 +46,7 @@ data class AktsomhetsvurderingEntity(
                 NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i FORSTOD" }.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(særligGrunner) ?: KanUnnlates4xRettsgebyr.IkkeVurdert,
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
                 )
             }
 
