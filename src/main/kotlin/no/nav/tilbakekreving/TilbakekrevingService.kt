@@ -146,6 +146,7 @@ class TilbakekrevingService(
 
     fun <T> hentOgLagreTilbakekreving(
         filter: TilbakekrevingFilter,
+        validerScope: Boolean = true,
         callback: (Tilbakekreving, (Behandler) -> SideeffektContext) -> T,
     ): T? {
         var result: T? = null
@@ -153,7 +154,9 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
             val tilbakekreving = it.fraEntity()
-            tilbakekreving.validerInnenforScope()
+            if (validerScope) {
+                tilbakekreving.validerInnenforScope()
+            }
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->
                 sideeffektContext(behandler, observatør, behandlingslogg)

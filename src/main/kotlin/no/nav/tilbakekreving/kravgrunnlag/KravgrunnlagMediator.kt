@@ -26,7 +26,10 @@ class KravgrunnlagMediator(
                 }
             } else {
                 val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
-                tilbakekrevingService.hentOgLagreTilbakekreving(TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem)) { tilbakekreving, context ->
+                tilbakekrevingService.hentOgLagreTilbakekreving(
+                    filter = TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem),
+                    validerScope = false,
+                ) { tilbakekreving, context ->
                     tilbakekreving.håndter(kravgrunnlagHendelse, context(Behandler.Vedtaksløsning))
                 }
             }

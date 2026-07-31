@@ -551,6 +551,68 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Test
+    fun `kravgrunnlag med nye perioder to ganger - behandling påbegynt`() {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId.toString(),
+                BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.234567",
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.345678",
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 28.februar(2021)),
+                    KravgrunnlagGenerator.standardPeriode(1.mars(2021) til 31.mars(2021)),
+                ),
+            ),
+        )
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            behandling(behandlingId).faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now())
+        }
+    }
+
     fun kravgrunnlagPeriode(
         periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
         ytelsesbeløp: List<KravgrunnlagHendelse.Periode.Beløp> = ytelsesbeløp(),
