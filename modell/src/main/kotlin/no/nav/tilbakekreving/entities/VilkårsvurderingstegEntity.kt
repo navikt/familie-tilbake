@@ -11,14 +11,14 @@ data class VilkårsvurderingstegEntity(
 ) {
     fun fraEntity(): Vilkårsvurderingsteg {
         val vurdertePerioder = buildMap {
-            vurderinger.forEach { vurdering ->
+            vurderinger.sortedBy { it.periode.fom }.forEach { vurdering ->
                 put(vurdering.id, vurdering.fraEntity(this))
             }
         }
 
         return Vilkårsvurderingsteg(
             id = id,
-            vurderinger = vurdertePerioder.values.toList().sortedBy { it.periode.fom },
+            vurderinger = vurdertePerioder.values.toList(),
             underkjent = trengerNyVurdering,
         )
     }
