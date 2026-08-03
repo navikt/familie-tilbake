@@ -29,7 +29,7 @@ class PåminnelseMediator(
     fun påminnSaker() {
         val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
         for (tilbakekrevingEntity in tilbakekrevinger) {
-            var logContext = SecureLog.Context.tom()
+            var logContext = SecureLog.Context.utenBehandling(tilbakekrevingEntity.eksternFagsak.eksternId)
             try {
                 tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingEntity.id)) { tilbakekreving, context ->
                     logContext = SecureLog.Context.fra(tilbakekreving)
@@ -40,7 +40,7 @@ class PåminnelseMediator(
                 }
             } catch (e: Exception) {
                 logger.medContext(logContext) {
-                    error("Feilet under påminnelse av sak med {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), e)
+                    error("Feilet under påminnelse av sak med {} og {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity), e)
                 }
             }
         }
