@@ -5,6 +5,8 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.bigquery.BigQueryService
+import no.nav.tilbakekreving.kontrakter.Varsel
+import no.nav.tilbakekreving.kontrakter.periode.til
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,6 +18,7 @@ class BigQueryAdapterService(
     fun oppdaterBigQuery(
         behandling: Behandling,
         harTilleggsfrist: Boolean?,
+        varsel: Varsel?,
     ) {
         val kravgrunnlag = kravgrunnlagRepository.findByBehandlingId(behandling.id).lastOrNull()
         val ytelsestype = fagsakService.finnFagsystemForBehandlingId(behandling.id).navn
@@ -23,10 +26,10 @@ class BigQueryAdapterService(
             BigQueryBehandlingDataDto(
                 behandlingId = behandling.id.toString(),
                 opprettetDato = behandling.opprettetTidspunkt,
-                periode = kravgrunnlag?.samletPeriode(),
+                periode = kravgrunnlag?.samletPeriode() ?: varsel?.perioder?.let { periode -> periode.minOf { it.fom } til periode.maxOf { it.tom } },
                 behandlingstype = behandling.type.name,
                 ytelse = ytelsestype,
-                beløp = kravgrunnlag?.sumFeilutbetaling()?.toLong(),
+                beløp = kravgrunnlag?.sumFeilutbetaling()?.toLong() ?: varsel?.sumFeilutbetaling?.toLong(),
                 enhetNavn = behandling.behandlendeEnhetsNavn,
                 enhetKode = behandling.behandlendeEnhet,
                 status = behandling.status.name,

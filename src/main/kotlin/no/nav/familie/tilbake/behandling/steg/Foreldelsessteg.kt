@@ -78,7 +78,7 @@ class Foreldelsessteg(
         foreldelseService.lagreVurdertForeldelse(behandlingId, (behandlingsstegDto as BehandlingsstegForeldelseDto), logContext)
         val harTilleggsfrist = behandlingsstegDto.foreldetPerioder
             .any { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
-        bigQueryAdapterService.oppdaterBigQuery(behandlingRepository.findByIdOrThrow(behandlingId), harTilleggsfrist)
+        bigQueryAdapterService.oppdaterBigQuery(behandlingRepository.findByIdOrThrow(behandlingId), harTilleggsfrist, null)
 
         oppgaveTaskService.oppdaterAnsvarligSaksbehandlerOppgaveTask(behandlingId, logContext)
 
