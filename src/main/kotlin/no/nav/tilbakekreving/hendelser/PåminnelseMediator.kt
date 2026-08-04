@@ -7,6 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
@@ -37,6 +38,10 @@ class PåminnelseMediator(
                         info("Sender påminnelse")
                     }
                     tilbakekreving.håndter(Påminnelse(LocalDateTime.now()), context(Behandler.Vedtaksløsning))
+                }
+            } catch (e: ModellFeil.UtenforScopeException) {
+                logger.medContext(logContext) {
+                    warn("Prøvde å påminne sak utenfor scope {} og {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity), e)
                 }
             } catch (e: Exception) {
                 logger.medContext(logContext) {
