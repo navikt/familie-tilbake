@@ -25,6 +25,7 @@ enum class Toggle(val default: Boolean) {
     FjernUttalelsesfrist(default = false),
     OppdragRestClient(default = false),
     ForhandsvarselTypst(default = false),
+    EndretKravgrunnlagVisning(default = false),
 }
 
 enum class FagsystemToggle(val default: Boolean)

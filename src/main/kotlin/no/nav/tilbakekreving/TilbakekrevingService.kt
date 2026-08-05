@@ -127,7 +127,7 @@ class TilbakekrevingService(
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
         if (validerScope) {
-            tilbakekreving.validerInnenforScope()
+            tilbakekreving.validerInnenforScope(featureService.modellFeatures)
         }
         return tilbakekreving
     }
@@ -155,7 +155,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
             val tilbakekreving = it.fraEntity()
             if (validerScope) {
-                tilbakekreving.validerInnenforScope()
+                tilbakekreving.validerInnenforScope(featureService.modellFeatures)
             }
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->

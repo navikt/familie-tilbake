@@ -45,6 +45,7 @@ data class BehandlingDto(
     val saksbehandlingstype: Saksbehandlingstype,
     val erNyModell: Boolean,
     val innloggetRolle: BehandlerRolle,
+    val endretKravgrunnlag: EndretKravgrunnlag?,
 )
 
 data class BehandlingsstegsinfoDto(

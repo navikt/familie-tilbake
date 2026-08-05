@@ -116,6 +116,7 @@ object BehandlingMapper {
             kanHenleggeBehandling = kanHenleggeBehandling,
             kanRevurderingOpprettes = kanRevurderingOpprettes,
             erBehandlingPåVent = erBehandlingPåVent,
+            endretKravgrunnlag = null,
             kanEndres = kanEndres,
             kanSetteTilbakeTilFakta = kanSetteBehandlingTilbakeTilFakta,
             varselSendt = varselSendt,
