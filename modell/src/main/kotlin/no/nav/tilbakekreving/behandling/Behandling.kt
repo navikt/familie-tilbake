@@ -122,7 +122,7 @@ class Behandling internal constructor(
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto =
         faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev, klokke)
 
-    private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String, klokke: Klokke): BigQueryBehandlingDataDto {
+    private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String, tilbakekrevingId: String, klokke: Klokke): BigQueryBehandlingDataDto {
         return BigQueryBehandlingDataDto(
             behandlingId = id.toString(),
             opprettetDato = opprettet,
@@ -135,6 +135,8 @@ class Behandling internal constructor(
             status = behandlingsstatus.gammelFrontendDTO.name,
             resultat = hentVedtaksresultat(klokke)?.name,
             harTilleggsfrist = foreldelsesteg.harTilleggsfrist(),
+            tilbakekrevingId = tilbakekrevingId,
+            oppdagetAv = if (faktasteg.oppdagetAv() == Faktasteg.Vurdering.Oppdaget.Av.Bruker) "Bruker" else "Nav",
         )
     }
 
@@ -504,6 +506,7 @@ class Behandling internal constructor(
         sideeffektContext: SideeffektContext,
         observatør: BehandlingObservatør,
         ytelse: Ytelse,
+        tilbakekrevingId: String,
         callback: Behandling.() -> T,
     ): T {
         val statusFør = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
@@ -511,7 +514,7 @@ class Behandling internal constructor(
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
-        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), sideeffektContext.klokke))
+        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
         }
