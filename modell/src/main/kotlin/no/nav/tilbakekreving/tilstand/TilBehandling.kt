@@ -42,7 +42,7 @@ object TilBehandling : Tilstand {
         sideeffektContext: SideeffektContext,
         callback: Behandling.Saksbehandling.() -> T,
     ): T {
-        return behandling.utførEndring(tilbakekreving::tilstand, sideeffektContext, tilbakekreving, tilbakekreving.eksternFagsak.ytelse) {
+        return behandling.utførEndring(tilbakekreving::tilstand, sideeffektContext, tilbakekreving, tilbakekreving.eksternFagsak.ytelse, tilbakekreving.id) {
             medSaksbehandling(sideeffektContext, callback).also {
                 if (behandling.kanUtbetales(sideeffektContext.klokke)) {
                     tilbakekreving.byttTilstand(IverksettVedtak, sideeffektContext)
