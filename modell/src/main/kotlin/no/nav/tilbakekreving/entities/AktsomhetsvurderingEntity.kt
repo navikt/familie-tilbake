@@ -90,18 +90,19 @@ data class GodTroEntity(
     val begrunnelse: String,
     val beholdType: BeholdType,
     val beløp: BigDecimal?,
+    val begrunnelseForIBehold: String,
 ) {
     fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
             BeholdType.HELE_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
+                NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(begrunnelseForIBehold)
             }
             BeholdType.JA, BeholdType.DELER_AV_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
+                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" }, begrunnelseForIBehold)
             }
 
             BeholdType.NEI -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.Nei
+                NivåAvForståelse.GodTro.BeløpIBehold.Nei(begrunnelseForIBehold)
             }
         }
     }
