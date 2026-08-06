@@ -465,6 +465,9 @@ class Behandling internal constructor(
     }
 
     private fun validerBehandlingstatus(steg: Saksbehandlingsteg, klokke: Klokke) {
+        if (nyttKravgrunnlag != null) {
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, sporingsinformasjon())
+        }
         if (!steg().klarTilVisning(klokke).contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Behandlingen er i ${steg().klarTilVisning(klokke).last().type} og kan ikke behandle vurdering for ${steg.type}",

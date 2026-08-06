@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import java.util.UUID
 
@@ -14,12 +15,13 @@ fun opprettTilbakekreving(
     )
 
 fun tilbakekrevingTilBehandling(
-    opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
+    opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(),
+    kravgrunnlag: KravgrunnlagHendelse = kravgrunnlag(),
     context: SideeffektContext = systemContext(),
 ): Tilbakekreving {
     val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context)
     tilbakekreving.apply {
-        håndter(kravgrunnlag(), context)
+        håndter(kravgrunnlag, context)
         håndter(fagsysteminfoHendelse(), context)
         håndter(brukerinfoHendelse(), context)
     }

@@ -4,14 +4,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
-import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
-import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
-import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
@@ -19,29 +16,21 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.nåværendeBehandlingId
-import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 class KravgrunnlagEndretE2ETest {
     @Test
     fun `endret kravgrunnlag med høyere beløp etter påbegynt vurdering`() {
         val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
-        val tilbakekreving = Tilbakekreving.opprett(
-            id = UUID.randomUUID().toString(),
-            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse(),
-            sideeffektContext = systemContext(features = features),
-        )
-
         val periode = 1.januar(2021) til 31.januar(2021)
         val opprinneligKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = periode)))
-        tilbakekreving.håndter(opprinneligKravgrunnlag, systemContext(features = features))
-        tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext(features = features))
-        tilbakekreving.håndter(brukerinfoHendelse(), systemContext(features = features))
+
+        val tilbakekreving = tilbakekrevingTilBehandling(kravgrunnlag = opprinneligKravgrunnlag)
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
             vurderFakta(faktastegVurdering())
@@ -77,22 +66,21 @@ class KravgrunnlagEndretE2ETest {
         shouldNotThrowAny {
             tilbakekreving.validerInnenforScope(features)
         }
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+                vurderVilkår(periode, forårsaketAvBruker().grovtUaktsomt())
+            }
+        }
     }
 
     @Test
     fun `endret kravgrunnlag når toggle er avslått etter påbegynt vurdering`() {
         val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to false))
-        val tilbakekreving = Tilbakekreving.opprett(
-            id = UUID.randomUUID().toString(),
-            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse(),
-            sideeffektContext = systemContext(features = features),
-        )
-
         val periode = 1.januar(2021) til 31.januar(2021)
         val opprinneligKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = periode)))
-        tilbakekreving.håndter(opprinneligKravgrunnlag, systemContext(features = features))
-        tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext(features = features))
-        tilbakekreving.håndter(brukerinfoHendelse(), systemContext(features = features))
+
+        val tilbakekreving = tilbakekrevingTilBehandling(kravgrunnlag = opprinneligKravgrunnlag)
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
             vurderFakta(faktastegVurdering())
