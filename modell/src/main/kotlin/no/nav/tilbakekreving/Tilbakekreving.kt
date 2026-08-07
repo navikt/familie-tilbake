@@ -101,7 +101,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext): List<KravgrunnlagSammenligning.Forskjell> {
-        val resultat = behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        val resultat = behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             val kravgrunnlagHistorikkEntry = kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHistorikkEntry)
         }
@@ -122,7 +122,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(brukerinfo: BrukerinfoHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this@Tilbakekreving, brukerinfo, sideeffektContext)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.BRUKERINFO_OPPDATERT,
                 behandlingId = null,
@@ -142,7 +142,7 @@ class Tilbakekreving internal constructor(
 
     fun håndter(hendelse: VarselbrevDistribueringHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.FORHÅNDSVARSEL_SENDT,
                 behandlingId = id,
@@ -169,7 +169,7 @@ class Tilbakekreving internal constructor(
     fun håndter(hendelse: DistribusjonHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
 
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.VEDTAKSBREV_SENDT,
                 behandlingId = id,
@@ -189,7 +189,7 @@ class Tilbakekreving internal constructor(
     }
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext)
         }
@@ -238,7 +238,7 @@ class Tilbakekreving internal constructor(
             brevHistorikk = brevHistorikk,
             klokke = sideeffektContext.klokke,
         )
-        behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(behandling)
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
@@ -263,7 +263,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun sendVarselbrev(behandlingId: UUID, varseltekstFraSaksbehandler: String, sideeffektContext: SideeffektContext) {
-        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse) {
+        hentBehandling(behandlingId).utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             val varselbrev = opprettVarselbrev(varseltekstFraSaksbehandler, sideeffektContext)
             nullstillForhåndsvarselUnntakOgUttalelse()
             brevHistorikk.lagre(varselbrev)

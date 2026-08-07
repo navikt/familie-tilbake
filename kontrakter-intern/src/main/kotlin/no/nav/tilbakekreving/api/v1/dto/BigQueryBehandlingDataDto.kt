@@ -15,4 +15,6 @@ data class BigQueryBehandlingDataDto(
     val status: String?,
     val resultat: String?,
     val harTilleggsfrist: Boolean?,
+    val tilbakekrevingId: String?,
+    val oppdagetAv: String?,
 )
