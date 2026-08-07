@@ -21,7 +21,7 @@ class ForeslåVedtakStegTest {
 
         foreslåVedtakSteg.underkjennSteget()
 
-        foreslåVedtakSteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+        foreslåVedtakSteg.tilEntity(UUID.randomUUID()).tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
     }
 
     @Test

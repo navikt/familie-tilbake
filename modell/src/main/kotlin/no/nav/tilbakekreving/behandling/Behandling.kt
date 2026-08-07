@@ -786,6 +786,14 @@ class Behandling internal constructor(
             vilkårsvurderingsteg.vurder(id, vurdering)
             return vilkårsvurderingsteg.tilFrontendDto().first { it.id == periodeId }
         }
+
+        fun brukNyesteKravgrunnlag() {
+            val nyesteKravgrunnlag = nyttKravgrunnlag?.entry ?: return
+            val sammenligning = kravgrunnlag.entry.sammenlign(nyesteKravgrunnlag, sporingsinformasjon())
+            steg().forEach { it.håndterNyttKravgrunnlag(sammenligning) }
+            kravgrunnlag = nyttKravgrunnlag!!
+            nyttKravgrunnlag = null
+        }
     }
 
     internal fun <T> medSaksbehandling(context: SideeffektContext, block: Saksbehandling.() -> T): T =

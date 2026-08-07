@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.tilFrontendDto
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
@@ -30,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.math.abs
@@ -37,7 +39,7 @@ import kotlin.math.abs
 class Vilkårsvurderingsteg(
     private val id: UUID,
     private var vurderinger: List<Vilkårsvurderingsperiode>,
-    private var underkjent: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
@@ -45,12 +47,12 @@ class Vilkårsvurderingsteg(
 
     override fun erPåbegynt(): Boolean = vurderinger.any { it.vurdering.underliggendeVurdering() !is ForårsaketAvBruker.IkkeVurdert }
 
-    override fun erUnderkjent(): Boolean {
-        return underkjent
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
+        return tilbakeført
     }
 
     override fun underkjennSteget() {
-        this.underkjent = true
+        tilbakeført = ÅrsakTilTilbakeføring.Underkjent
     }
 
     fun tilEntity(behandlingRef: UUID): VilkårsvurderingstegEntity {
@@ -58,7 +60,7 @@ class Vilkårsvurderingsteg(
             id = id,
             behandlingRef = behandlingRef,
             vurderinger = vurderinger.map { it.tilEntity(id) },
-            trengerNyVurdering = underkjent,
+            tilbakeført = tilbakeført,
         )
     }
 
@@ -83,7 +85,7 @@ class Vilkårsvurderingsteg(
     ) {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurderinger.single { it.id == id }.vurder(vurdering)
-        underkjent = false
+        tilbakeført = null
     }
 
     private fun finnIdForPeriode(periode: Datoperiode): UUID {
@@ -98,6 +100,10 @@ class Vilkårsvurderingsteg(
 
     private fun finnPeriodeMedId(id: UUID): Vilkårsvurderingsperiode {
         return vurderinger.single { it.id == id }
+    }
+
+    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
@@ -309,7 +315,7 @@ class Vilkårsvurderingsteg(
             return Vilkårsvurderingsteg(
                 id = UUID.randomUUID(),
                 vurderinger = tomVurdering(eksternFagsakRevurdering, kravgrunnlagHendelse),
-                underkjent = false,
+                tilbakeført = null,
             )
         }
 

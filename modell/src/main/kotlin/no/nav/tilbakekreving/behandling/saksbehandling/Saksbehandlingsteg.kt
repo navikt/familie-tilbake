@@ -7,7 +7,13 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.util.UUID
+
+enum class ÅrsakTilTilbakeføring {
+    NyttKravgrunnlag,
+    Underkjent,
+}
 
 internal interface Saksbehandlingsteg {
     val type: Behandlingssteg
@@ -19,12 +25,12 @@ internal interface Saksbehandlingsteg {
 
     fun erPåbegynt(): Boolean
 
-    fun erUnderkjent(): Boolean
+    fun trengerNyVurdering(): ÅrsakTilTilbakeføring?
 
     fun underkjennSteget()
 
     fun erKlar(klokke: Klokke): Boolean {
-        return erFullstendig(klokke) && !erUnderkjent()
+        return erFullstendig(klokke) && trengerNyVurdering() == null
     }
 
     fun nullstill(
@@ -41,6 +47,8 @@ internal interface Saksbehandlingsteg {
 
     fun venter(klokke: Klokke): Venter? = null
 
+    fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {}
+
     companion object {
         fun Saksbehandlingsteg?.behandlingsstegstatus(
             alleSynligeSteg: List<Saksbehandlingsteg>,
@@ -51,7 +59,7 @@ internal interface Saksbehandlingsteg {
                 .any { !it.erKlar(klokke) }
             return when {
                 this == null -> Behandlingsstegstatus.VENTER
-                this.erUnderkjent() -> Behandlingsstegstatus.TILBAKEFØRT
+                this.trengerNyVurdering() != null -> Behandlingsstegstatus.TILBAKEFØRT
                 tidligereStegManglerBehandling -> Behandlingsstegstatus.VENTER
                 this.erFullstendig(klokke) -> Behandlingsstegstatus.UTFØRT
                 else -> Behandlingsstegstatus.KLAR

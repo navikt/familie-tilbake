@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
 import java.sql.ResultSet
@@ -29,10 +30,10 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
         FieldConverter.StringConverter,
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        BrukeruttalelseEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        BrukeruttalelseEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     fun map(
@@ -45,7 +46,7 @@ object BrukerUttalelseEntityMapper : Entity<BrukeruttalelseEntity, UUID, UUID>(
             uttalelseVurdering = resultSet[uttalelseVurdering],
             uttalelseInfoEntity = uttalelseInfoEntity,
             kommentar = resultSet[kommentar],
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
         )
     }
 

@@ -95,7 +95,7 @@ class FaktastegEntityTest {
             uttalelse = FaktastegEntity.Uttalelse.Nei,
             vurderingAvBrukersUttalelse = null,
             oppdaget = null,
-            trengerNyVurdering = false,
+            tilbakeført = null,
             rettsgebyrÅrFraSaksbehandler = null,
         )
 

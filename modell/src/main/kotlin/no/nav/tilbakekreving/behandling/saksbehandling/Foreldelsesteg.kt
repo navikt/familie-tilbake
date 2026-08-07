@@ -26,7 +26,7 @@ import java.util.UUID
 class Foreldelsesteg(
     private val id: UUID,
     private var vurdertePerioder: List<Foreldelseperiode>,
-    private var underkjent: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) : Saksbehandlingsteg {
     override val type: Behandlingssteg = Behandlingssteg.FORELDELSE
 
@@ -38,12 +38,12 @@ class Foreldelsesteg(
 
     private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
 
-    override fun erUnderkjent(): Boolean {
-        return underkjent
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
+        return tilbakeført
     }
 
     override fun underkjennSteget() {
-        this.underkjent = true
+        tilbakeført = ÅrsakTilTilbakeføring.Underkjent
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {
@@ -97,7 +97,7 @@ class Foreldelsesteg(
     ) {
         val periodeId = finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
         vurderForeldelse(periodeId, vurdering)
-        underkjent = false
+        tilbakeført = null
     }
 
     internal fun vurderForeldelse(
@@ -162,7 +162,7 @@ class Foreldelsesteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdertePerioder = vurdertePerioder.map { it.tilEntity(id) },
-            trengerNyVurdering = underkjent,
+            tilbakeført = tilbakeført,
         )
     }
 
@@ -334,7 +334,7 @@ class Foreldelsesteg(
             return Foreldelsesteg(
                 id = UUID.randomUUID(),
                 vurdertePerioder = tomVurdering(eksternFagsakRevurdering, kravgrunnlag),
-                underkjent = false,
+                tilbakeført = null,
             )
         }
 

@@ -82,6 +82,6 @@ class KravgrunnlagSammenligningTest {
             sporing = Sporing("", ""),
         ).resultat().shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.JustertBeløp>()
 
-        forskjell.differanse shouldBe 1000.kroner
+        forskjell.endringIBeløp shouldBe 1000.kroner
     }
 }

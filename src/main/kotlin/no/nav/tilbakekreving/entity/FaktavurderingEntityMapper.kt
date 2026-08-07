@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity.FaktaPeriodeEntity
@@ -35,10 +36,10 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
         FieldConverter.StringConverter,
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        FaktastegEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        FaktastegEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     val rettsgebyrÅrFraSaksbehandler = field(
@@ -60,7 +61,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
             uttalelse = resultSet[uttalelse],
             vurderingAvBrukersUttalelse = resultSet[vurderingAvBrukersUttalelse],
             oppdaget = oppdaget,
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
             rettsgebyrÅrFraSaksbehandler = resultSet[rettsgebyrÅrFraSaksbehandler],
         )
     }
