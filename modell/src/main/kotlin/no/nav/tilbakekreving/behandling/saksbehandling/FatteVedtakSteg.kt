@@ -28,9 +28,7 @@ class FatteVedtakSteg internal constructor(
 
     override fun erPåbegynt(): Boolean = vurderteSteg.any { it.erFerdigvurdert() }
 
-    override fun erUnderkjent(): Boolean {
-        return false
-    }
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? = null
 
     override fun underkjennSteget() {}
 

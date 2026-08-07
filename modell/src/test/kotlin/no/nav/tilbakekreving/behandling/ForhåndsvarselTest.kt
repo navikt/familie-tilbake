@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import org.junit.jupiter.api.Test
@@ -47,8 +48,8 @@ class ForhåndsvarselTest {
         forhåndsvarsel.underkjennSteget()
 
         val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
-        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.trengerNyVurdering shouldBe true
-        forhåndsvarselEntity.brukeruttalelseEntity?.trengerNyVurdering shouldBe true
+        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
+        forhåndsvarselEntity.brukeruttalelseEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
     }
 
     @Test

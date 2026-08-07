@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -28,10 +29,10 @@ object ForhåndsvarselUnntakEntityMapper : Entity<ForhåndsvarselUnntakEntity, U
         FieldConverter.StringConverter.required(),
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        ForhåndsvarselUnntakEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        ForhåndsvarselUnntakEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     fun map(
@@ -42,7 +43,7 @@ object ForhåndsvarselUnntakEntityMapper : Entity<ForhåndsvarselUnntakEntity, U
             behandlingRef = resultSet[behandlingRef],
             beskrivelse = resultSet[beskrivelse],
             begrunnelseForUnntak = resultSet[begrunnelseForUnntak],
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
         )
     }
 }

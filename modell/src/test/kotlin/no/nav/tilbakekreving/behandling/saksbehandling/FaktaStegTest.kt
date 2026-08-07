@@ -235,7 +235,7 @@ class FaktaStegTest {
 
         faktasteg.underkjennSteget()
 
-        faktasteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+        faktasteg.tilEntity(UUID.randomUUID()).tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
     }
 
     @Test

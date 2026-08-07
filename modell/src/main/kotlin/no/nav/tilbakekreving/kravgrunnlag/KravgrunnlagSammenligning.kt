@@ -16,6 +16,8 @@ class KravgrunnlagSammenligning(
 
     fun resultat() = forskjeller
 
+    fun endringIBeløp() = forskjeller.sumOf { it.endringIBeløp }
+
     init {
         val originalePerioder = originaltKravgrunnlag.perioder().map { it.periode() }
         val perioderFraNyttKravgrunnlag = nyttKravgrunnlag.perioder().map { it.periode() }
@@ -37,6 +39,8 @@ class KravgrunnlagSammenligning(
     }
 
     sealed interface Forskjell {
-        data class JustertBeløp(val periode: Datoperiode, val differanse: BigDecimal) : Forskjell
+        val endringIBeløp: BigDecimal
+
+        data class JustertBeløp(val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell
     }
 }

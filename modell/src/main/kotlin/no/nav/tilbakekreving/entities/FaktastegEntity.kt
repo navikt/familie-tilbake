@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
@@ -15,7 +16,7 @@ data class FaktastegEntity(
     val uttalelse: Uttalelse,
     val vurderingAvBrukersUttalelse: String?,
     val oppdaget: OppdagetEntity?,
-    val trengerNyVurdering: Boolean,
+    val tilbakeført: ÅrsakTilTilbakeføring?,
     val rettsgebyrÅrFraSaksbehandler: Int?,
 ) {
     fun fraEntity(
@@ -23,7 +24,7 @@ data class FaktastegEntity(
     ): Faktasteg = Faktasteg(
         id = id,
         brevHistorikk = brevHistorikk,
-        underkjent = trengerNyVurdering,
+        tilbakeført = tilbakeført,
         vurdering = Faktasteg.Vurdering(
             perioder = perioder.sortedBy { it.periode }.map {
                 Faktasteg.FaktaPeriode(

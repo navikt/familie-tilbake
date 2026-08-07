@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.AktsomhetType
 import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
@@ -32,10 +33,10 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
         FieldConverter.UUIDConverter.required(),
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        VilkårsvurderingstegEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        VilkårsvurderingstegEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     fun map(resultSet: ResultSet, vurdertePerioder: List<VilkårsvurderingsperiodeEntity>): VilkårsvurderingstegEntity {
@@ -43,7 +44,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurderinger = vurdertePerioder,
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
         )
     }
 

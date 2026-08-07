@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -21,10 +22,10 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
         FieldConverter.BooleanConverter.required(),
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        ForeslåVedtakStegEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        ForeslåVedtakStegEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     fun map(
@@ -34,7 +35,7 @@ object ForeslåVedtakEntityMapper : Entity<ForeslåVedtakStegEntity, UUID, UUID>
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdert = resultSet[vurdert],
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
         )
     }
 }

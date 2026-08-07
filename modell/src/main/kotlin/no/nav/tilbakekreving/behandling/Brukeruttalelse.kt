@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
 import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
@@ -16,12 +17,12 @@ class Brukeruttalelse(
     private val uttalelseVurdering: UttalelseVurdering,
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
-    private var trengerNyVurdering: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
-    fun trengerNyVurdering(): Boolean = trengerNyVurdering
+    fun tilbakeført(): ÅrsakTilTilbakeføring? = tilbakeført
 
-    fun vurderPåNytt() {
-        trengerNyVurdering = true
+    fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
+        this.tilbakeført = tilbakeført
     }
 
     fun tilFrontendDto(): BrukeruttalelseDto {
@@ -73,7 +74,7 @@ class Brukeruttalelse(
             )
         },
         kommentar = kommentar,
-        trengerNyVurdering = trengerNyVurdering,
+        tilbakeført = tilbakeført,
     )
 
     fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler

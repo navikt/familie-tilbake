@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
 import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
@@ -11,12 +12,12 @@ data class ForhåndsvarselUnntak(
     private val id: UUID,
     private val begrunnelseForUnntak: BegrunnelseForUnntak,
     private val beskrivelse: String,
-    private var trengerNyVurdering: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
-    fun trengerNyVurdering(): Boolean = trengerNyVurdering
+    fun tilbakeført(): ÅrsakTilTilbakeføring? = tilbakeført
 
-    fun vurderPåNytt() {
-        trengerNyVurdering = true
+    fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
+        this.tilbakeført = tilbakeført
     }
 
     fun tilFrontendDto(): ForhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
@@ -41,7 +42,7 @@ data class ForhåndsvarselUnntak(
         behandlingRef = behandlingRef,
         begrunnelseForUnntak = begrunnelseForUnntak,
         beskrivelse = beskrivelse,
-        trengerNyVurdering = trengerNyVurdering,
+        tilbakeført = tilbakeført,
     )
 }
 

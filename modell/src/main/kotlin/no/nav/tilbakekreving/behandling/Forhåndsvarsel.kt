@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
@@ -17,6 +18,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -44,13 +47,13 @@ class Forhåndsvarsel(
         return brukeruttalelse != null || forhåndsvarselUnntak != null || uttalelsesfrist != null
     }
 
-    override fun erUnderkjent(): Boolean {
-        return brukeruttalelse?.trengerNyVurdering() == true || forhåndsvarselUnntak?.trengerNyVurdering() == true
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
+        return brukeruttalelse?.tilbakeført() ?: forhåndsvarselUnntak?.tilbakeført()
     }
 
     override fun underkjennSteget() {
-        brukeruttalelse?.vurderPåNytt()
-        forhåndsvarselUnntak?.vurderPåNytt()
+        brukeruttalelse?.vurderPåNytt(ÅrsakTilTilbakeføring.Underkjent)
+        forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.Underkjent)
     }
 
     override fun nullstill(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering) {}
@@ -87,7 +90,7 @@ class Forhåndsvarsel(
             uttalelseVurdering = uttalelseVurdering,
             uttalelseInfo = uttalelseInfo,
             kommentar = kommentar,
-            trengerNyVurdering = false,
+            tilbakeført = null,
         )
     }
 
@@ -116,7 +119,7 @@ class Forhåndsvarsel(
             id = UUID.randomUUID(),
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
-            trengerNyVurdering = false,
+            tilbakeført = null,
         )
     }
 
@@ -129,6 +132,16 @@ class Forhåndsvarsel(
 
     override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> {
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
+    }
+
+    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
+        val endringIBeløp = sammenligning.endringIBeløp()
+        when {
+            endringIBeløp > BigDecimal.ZERO -> {
+                brukeruttalelse?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
+                forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
+            }
+        }
     }
 
     fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto = when {
