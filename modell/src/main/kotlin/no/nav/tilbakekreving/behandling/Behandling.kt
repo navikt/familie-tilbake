@@ -1,9 +1,11 @@
 package no.nav.tilbakekreving.behandling
 
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.FrontendDto
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.SideeffektContext
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.aktør.Bruker
@@ -15,6 +17,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
@@ -83,6 +86,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.GodTroReduksjonType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
@@ -385,6 +389,14 @@ class Behandling internal constructor(
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             erBehandlingPåVent = false,
+            endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
+                EndretKravgrunnlag(
+                    gammeltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
+                    nyttBeløp = nyttKravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
+                    gammelPeriode = kravgrunnlag.entry.perioder().map { it.periode() }.overordnet(),
+                    nyPeriode = nyttKravgrunnlag.entry.perioder().map { it.periode() }.overordnet(),
+                )
+            },
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = true,
             harVerge = false,
@@ -455,6 +467,9 @@ class Behandling internal constructor(
     }
 
     private fun validerBehandlingstatus(steg: Saksbehandlingsteg, klokke: Klokke) {
+        if (nyttKravgrunnlag != null) {
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, sporingsinformasjon())
+        }
         if (!steg().klarTilVisning(klokke).contains(steg)) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Behandlingen er i ${steg().klarTilVisning(klokke).last().type} og kan ikke behandle vurdering for ${steg.type}",
@@ -589,11 +604,13 @@ class Behandling internal constructor(
         return kravgrunnlagPerioder.minOf { it.fom } til kravgrunnlagPerioder.maxOf { it.tom }
     }
 
-    internal fun validerInnenforScope() {
+    internal fun validerInnenforScope(toggles: FeatureToggles) {
         kravgrunnlag.entry.valider(sporingsinformasjon())
         if (nyttKravgrunnlag != null) {
             nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+            if (!toggles[Toggle.EndretKravgrunnlagVisning]) {
+                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+            }
         }
     }
 

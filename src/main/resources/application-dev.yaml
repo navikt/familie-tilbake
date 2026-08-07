@@ -25,6 +25,7 @@ tilbakekreving:
       FjernUttalelsesfrist: true
       OppdragRestClient: true
       ForhandsvarselTypst: false
+      EndretKravgrunnlagVisning: true
   tilgangsstyring:
     grupper:
       ts:
