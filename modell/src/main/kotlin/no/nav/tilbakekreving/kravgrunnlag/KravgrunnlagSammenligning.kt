@@ -17,11 +17,19 @@ class KravgrunnlagSammenligning(
     fun resultat() = forskjeller
 
     init {
-        if (originaltKravgrunnlag.perioder().map { it.periode() }.sorted() != nyttKravgrunnlag.perioder().map { it.periode() }.sorted()) {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporing)
+        val originalePerioder = originaltKravgrunnlag.perioder().map { it.periode() }
+        val perioderFraNyttKravgrunnlag = nyttKravgrunnlag.perioder().map { it.periode() }
+        val ukjentePerioder = perioderFraNyttKravgrunnlag.filter { it !in originalePerioder }
+
+        val feil = when {
+            ukjentePerioder.any { ny -> originalePerioder.any { ny.overlapper(it) } } -> UtenforScope.KravgrunnlagMedUlikePerioder
+            ukjentePerioder.isNotEmpty() -> UtenforScope.KravgrunnlagMedNyePerioder
+            originalePerioder.size != perioderFraNyttKravgrunnlag.size -> UtenforScope.KravgrunnlagMedFærrePerioder
+            !originaltKravgrunnlag.harNokOverlapp(nyttKravgrunnlag) -> UtenforScope.KravgrunnlagMedUlikeVerdier
+            else -> null
         }
-        if (!originaltKravgrunnlag.harNokOverlapp(nyttKravgrunnlag)) {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporing)
+        if (feil != null) {
+            throw ModellFeil.UtenforScopeException(feil, sporing)
         }
 
         forskjeller = originaltKravgrunnlag.perioder().zip(nyttKravgrunnlag.perioder())

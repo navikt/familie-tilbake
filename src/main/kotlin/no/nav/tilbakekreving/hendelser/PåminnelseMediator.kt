@@ -41,7 +41,13 @@ class PåminnelseMediator(
                 }
             } catch (e: ModellFeil.UtenforScopeException) {
                 logger.medContext(logContext) {
-                    warn("Prøvde å påminne sak utenfor scope {} og {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity), e)
+                    warn(
+                        "Prøvde å påminne sak utenfor scope, {} {} og {}",
+                        keyValue("grunn", e.utenforScope),
+                        keyValue("tilbakekrevingId", tilbakekrevingEntity.id),
+                        keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity),
+                        e,
+                    )
                 }
             } catch (e: Exception) {
                 logger.medContext(logContext) {
