@@ -1,16 +1,12 @@
 package no.nav.familie.tilbake.bigQuery
 
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.FagsakService
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.kontrakter.Varsel
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.repository.NyFaktavurderingRepository
-import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,7 +36,7 @@ class BigQueryAdapterService(
                 resultat = behandling.sisteResultat?.type?.name,
                 harTilleggsfrist = harTilleggsfrist,
                 tilbakekrevingId = tilbakekreving.id.toString(),
-                oppdagetAv = null
+                oppdagetAv = null,
             ),
         )
     }
