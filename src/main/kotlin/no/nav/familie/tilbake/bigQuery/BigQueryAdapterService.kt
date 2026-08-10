@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.bigquery.BigQueryService
-import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.kontrakter.Varsel
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.repository.NyFaktavurderingRepository
@@ -44,11 +43,7 @@ class BigQueryAdapterService(
                 resultat = behandling.sisteResultat?.type?.name,
                 harTilleggsfrist = harTilleggsfrist,
                 tilbakekrevingId = tilbakekreving?.id,
-                oppdagetAv = when (faktasteg?.oppdaget?.av) {
-                    FaktastegEntity.OppdagetAv.Bruker -> "Bruker"
-                    FaktastegEntity.OppdagetAv.Nav -> "Nav"
-                    null -> null
-                },
+                oppdagetAv = faktasteg?.oppdaget?.av?.name,
             ),
         )
     }
