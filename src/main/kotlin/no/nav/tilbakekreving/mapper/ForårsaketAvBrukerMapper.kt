@@ -39,7 +39,6 @@ object ForårsaketAvBrukerMapper {
         tilbakekreving: Tilbakekreving,
     ): ForårsaketAvBruker {
         val logContext = SecureLog.Context.fra(tilbakekreving)
-        val begrunnelse = vilkaarsvurderingDto.begrunnelse
 
         return when (val valg = vilkaarsvurderingDto.valg) {
             is ForstoEllerBurdeForstaattDto -> when (val forståelse = valg.forståelse) {
@@ -81,12 +80,12 @@ object ForårsaketAvBrukerMapper {
 
             is GodTroDto -> NivåAvForståelse.GodTro(
                 beløpIBehold = when (val beløpIBehold = valg.beløpIBehold) {
-                    is DelerDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(beløpIBehold.beløp.toBigDecimal(), beløpIBehold.begrunnelse)
+                    is DelerDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(beløpIBehold.beløp.toBigDecimal())
                     is HeleDto -> when (beløpIBehold.reduksjon) {
-                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(beløpIBehold.begrunnelse)
-                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(beløpIBehold.begrunnelse)
+                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
+                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
                     }
-                    is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(begrunnelseForIBehold = beløpIBehold.begrunnelse)
+                    is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                 },
                 begrunnelseForGodTro = valg.begrunnelse,
                 begrunnelse = "TODO",

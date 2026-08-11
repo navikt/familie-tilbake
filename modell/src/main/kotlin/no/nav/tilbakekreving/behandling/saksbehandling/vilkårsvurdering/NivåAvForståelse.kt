@@ -202,7 +202,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = GodTroDto(
             begrunnelse = begrunnelseForGodTro,
-            beløpIBehold = beløpIBehold.tilFrontendDto(),
+            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse),
         )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
@@ -232,26 +232,22 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         }
 
         sealed interface BeløpIBehold {
-            val begrunnelseForIBehold: String
-
             fun reduksjon(): Reduksjon
 
             fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
             fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity
 
-            fun tilFrontendDto(): BelopIBeholdDto
+            fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto
 
-            class HeleIBehold(
-                override val begrunnelseForIBehold: String,
-            ) : BeløpIBehold {
+            class HeleIBehold() : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.FullstendigTilbakekreving()
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = HeleDto(
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = HeleDto(
                     begrunnelse = begrunnelseForIBehold,
                     reduksjon = SkalIkkeReduseresDto(
                         relevans = emptyList(),
@@ -266,19 +262,18 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.HELE_BELØPET,
                         beløp = null,
-                        begrunnelseForIBehold = begrunnelseForIBehold,
                     )
                 }
             }
 
-            class DelerIBehold(val beløp: BigDecimal, override val begrunnelseForIBehold: String) : BeløpIBehold {
+            class DelerIBehold(val beløp: BigDecimal) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.ManueltBeløp(beløp)
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = DelerDto(
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = DelerDto(
                     beløp = beløp.toInt(),
                     begrunnelse = begrunnelseForIBehold,
                     reduksjon = SkalIkkeReduseresDto(
@@ -294,19 +289,18 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.DELER_AV_BELØPET,
                         beløp = beløp,
-                        begrunnelseForIBehold = begrunnelseForIBehold,
                     )
                 }
             }
 
-            class Nei(override val begrunnelseForIBehold: String) : BeløpIBehold {
+            data object Nei : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
                     return Reduksjon.IngenTilbakekreving()
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = IngentingDto(begrunnelseForIBehold)
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = IngentingDto(begrunnelseForIBehold)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
@@ -314,7 +308,6 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.NEI,
                         beløp = null,
-                        begrunnelseForIBehold = begrunnelseForIBehold,
                     )
                 }
             }

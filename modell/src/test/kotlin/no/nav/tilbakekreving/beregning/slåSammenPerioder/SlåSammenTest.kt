@@ -106,7 +106,7 @@ class SlåSammenTest {
             periode = 2.februar(2025) til 27.februar(2025),
             vurdering = NivåAvForståelse.GodTro(
                 begrunnelse = "God tro",
-                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei("Har kjøpt seg is"),
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei,
                 begrunnelseForGodTro = "begrunnelse for god tro",
             ),
         )
