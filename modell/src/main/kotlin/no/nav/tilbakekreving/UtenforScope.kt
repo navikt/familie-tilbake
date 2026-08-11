@@ -13,7 +13,23 @@ enum class UtenforScope(val tittel: String, val feilmelding: String) {
         tittel = "Kravgrunnlaget er endret",
         feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
     ),
-    KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt(
+    KravgrunnlagMedNyePerioder(
+        tittel = "Kravgrunnlaget er endret",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
+    ),
+    KravgrunnlagMedFærrePerioder(
+        tittel = "Kravgrunnlaget er endret",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
+    ),
+    KravgrunnlagMedUlikePerioder(
+        tittel = "Kravgrunnlaget er endret",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
+    ),
+    KravgrunnlagMedUlikeVerdier(
+        tittel = "Kravgrunnlaget er endret",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
+    ),
+    KravgrunnlagMedEndretBeløp(
         tittel = "Kravgrunnlaget er endret",
         feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
     ),

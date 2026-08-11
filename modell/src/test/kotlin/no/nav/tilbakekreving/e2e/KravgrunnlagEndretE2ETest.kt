@@ -6,15 +6,20 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
+import no.nav.tilbakekreving.assertions.skalHaStatus
+import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.nåværendeBehandling
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
@@ -71,6 +76,93 @@ class KravgrunnlagEndretE2ETest {
             tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
                 vurderVilkår(periode, forårsaketAvBruker().grovtUaktsomt())
             }
+        }
+    }
+
+    @Test
+    fun `tilbakefører relevante steg når man tar i bruk kravgrunnlag med høyere beløp`() {
+        val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val opprinneligKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = periode)))
+
+        val tilbakekreving = tilbakekrevingTilBehandling(kravgrunnlag = opprinneligKravgrunnlag)
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(periode, foreldelseVurdering())
+            vurderVilkår(periode, forårsaketAvBruker().uaktsomt())
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    periode = periode,
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner),
+                ),
+            ),
+        )
+        tilbakekreving.håndter(oppdatertKravgrunnlag, systemContext(features = features))
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FAKTA skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FORHÅNDSVARSEL skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderVilkår(periode, forårsaketAvBruker().uaktsomt())
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FAKTA skalHaStatus Behandlingsstegstatus.UTFØRT
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FORHÅNDSVARSEL skalHaStatus Behandlingsstegstatus.UTFØRT
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.UTFØRT
+    }
+
+    @Test
+    fun `tilbakefører relevante steg når man tar i bruk kravgrunnlag med lavere beløp`() {
+        val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val opprinneligKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = periode)))
+
+        val tilbakekreving = tilbakekrevingTilBehandling(kravgrunnlag = opprinneligKravgrunnlag)
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+            vurderForeldelse(periode, foreldelseVurdering())
+            vurderVilkår(periode, forårsaketAvBruker().uaktsomt())
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(
+                    periode = periode,
+                    ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 1000.kroner),
+                ),
+            ),
+        )
+        tilbakekreving.håndter(oppdatertKravgrunnlag, systemContext(features = features))
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FAKTA skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FORHÅNDSVARSEL skalHaStatus Behandlingsstegstatus.VENTER
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(features = features)) {
+            vurderFakta(faktastegVurdering())
+            tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FAKTA skalHaStatus Behandlingsstegstatus.UTFØRT
+            tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FORHÅNDSVARSEL skalHaStatus Behandlingsstegstatus.UTFØRT
+
+            vurderVilkår(periode, forårsaketAvBruker().uaktsomt())
+            tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.UTFØRT
         }
     }
 

@@ -38,7 +38,7 @@ class ForeldelsesstegEntityTest {
                     ),
                 ),
             ),
-            trengerNyVurdering = false,
+            tilbakeført = null,
         )
 
         val gjenopprettetEntity = entity.fraEntity().tilEntity(behandlingRef)

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
@@ -19,10 +20,10 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
         FieldConverter.UUIDConverter.required(),
     )
 
-    val trengerNyVurdering = field(
-        "trenger_ny_vurdering",
-        ForeldelsesstegEntity::trengerNyVurdering,
-        FieldConverter.BooleanConverter.required(),
+    val tilbakeført = field(
+        "tilbakeført",
+        ForeldelsesstegEntity::tilbakeført,
+        FieldConverter.EnumConverter.of<ÅrsakTilTilbakeføring>(),
     )
 
     fun map(
@@ -33,7 +34,7 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
             id = resultSet[id],
             behandlingRef = resultSet[behandlingRef],
             vurdertePerioder = vurdertePerioder,
-            trengerNyVurdering = resultSet[trengerNyVurdering],
+            tilbakeført = resultSet[tilbakeført],
         )
     }
 

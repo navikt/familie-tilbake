@@ -30,6 +30,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -38,7 +39,7 @@ class Faktasteg(
     private val id: UUID,
     private val brevHistorikk: BrevHistorikk,
     private var vurdering: Vurdering,
-    private var underkjent: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
     private var _rettsgebyrÅrFraSaksbehandler: Int?,
 ) : Saksbehandlingsteg {
     private val rettsgebyrÅrFraSaksbehandler: Int?
@@ -56,12 +57,12 @@ class Faktasteg(
         return vurdering.erPåbegynt()
     }
 
-    override fun erUnderkjent(): Boolean {
-        return underkjent
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
+        return tilbakeført
     }
 
     override fun underkjennSteget() {
-        this.underkjent = true
+        tilbakeført = ÅrsakTilTilbakeføring.Underkjent
     }
 
     override fun nullstill(
@@ -73,22 +74,22 @@ class Faktasteg(
 
     internal fun vurder(vurdering: Vurdering) {
         this.vurdering = vurdering
-        underkjent = false
+        tilbakeført = null
     }
 
     internal fun vurder(perioder: List<OppdaterFaktaPeriodeDto>) {
         vurdering.vurder(perioder)
-        underkjent = false
+        tilbakeført = null
     }
 
     internal fun vurder(oppdaget: OppdagetDto) {
         vurdering.vurder(oppdaget)
-        underkjent = false
+        tilbakeført = null
     }
 
     internal fun vurder(årsak: String) {
         vurdering.vurder(årsak)
-        underkjent = false
+        tilbakeført = null
     }
 
     internal fun vurder(rettsgebyrÅr: Int) {
@@ -183,8 +184,12 @@ class Faktasteg(
         )
     }
 
+    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+    }
+
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
-        return vurdering.tilEntity(id, behandlingRef, underkjent, rettsgebyrÅrFraSaksbehandler)
+        return vurdering.tilEntity(id, behandlingRef, tilbakeført, rettsgebyrÅrFraSaksbehandler)
     }
 
     companion object {
@@ -197,7 +202,7 @@ class Faktasteg(
                 id = UUID.randomUUID(),
                 brevHistorikk = brevHistorikk,
                 vurdering = tomVurdering(kravgrunnlag, eksternFagsakRevurdering),
-                underkjent = false,
+                tilbakeført = null,
                 _rettsgebyrÅrFraSaksbehandler = null,
             )
         }
@@ -267,7 +272,7 @@ class Faktasteg(
         fun tilEntity(
             id: UUID,
             behandlingRef: UUID,
-            underkjent: Boolean,
+            tilbakeført: ÅrsakTilTilbakeføring?,
             rettsgebyrÅrFraSaksbehandler: Int?,
         ): FaktastegEntity {
             return FaktastegEntity(
@@ -283,7 +288,7 @@ class Faktasteg(
                 årsakTilFeilutbetaling = årsakTilFeilutbetaling,
                 vurderingAvBrukersUttalelse = (uttalelse as? Uttalelse.Ja)?.begrunnelse,
                 oppdaget = oppdaget.tilEntity(id),
-                trengerNyVurdering = underkjent,
+                tilbakeført = tilbakeført,
                 rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
             )
         }

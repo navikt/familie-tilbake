@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.SystemKlokke
-import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -92,7 +91,7 @@ class ForeldelsestegTest {
 
         forelgelse.underkjennSteget()
 
-        forelgelse.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+        forelgelse.tilEntity(UUID.randomUUID()).tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
     }
 
     @Test

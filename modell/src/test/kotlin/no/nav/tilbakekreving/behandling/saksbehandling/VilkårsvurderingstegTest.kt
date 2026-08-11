@@ -178,7 +178,7 @@ class VilkårsvurderingstegTest {
 
         vilkårsvurderingssteg.underkjennSteget()
 
-        vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).trengerNyVurdering shouldBe true
+        vilkårsvurderingssteg.tilEntity(UUID.randomUUID()).tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
     }
 
     @Test

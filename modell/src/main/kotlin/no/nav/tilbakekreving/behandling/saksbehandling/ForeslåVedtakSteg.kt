@@ -10,7 +10,7 @@ import java.util.UUID
 class ForeslåVedtakSteg(
     private val id: UUID,
     private var vurdert: Boolean,
-    private var underkjent: Boolean,
+    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
@@ -18,18 +18,18 @@ class ForeslåVedtakSteg(
 
     override fun erPåbegynt(): Boolean = vurdert
 
-    override fun erUnderkjent(): Boolean {
-        return underkjent
+    override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
+        return tilbakeført
     }
 
     override fun underkjennSteget() {
         vurdert = false
-        this.underkjent = true
+        tilbakeført = ÅrsakTilTilbakeføring.Underkjent
     }
 
     internal fun håndter() {
         vurdert = true
-        underkjent = false
+        tilbakeført = null
     }
 
     fun tilEntity(behandlingRef: UUID): ForeslåVedtakStegEntity {
@@ -37,7 +37,7 @@ class ForeslåVedtakSteg(
             id = id,
             behandlingRef = behandlingRef,
             vurdert = vurdert,
-            trengerNyVurdering = underkjent,
+            tilbakeført = tilbakeført,
         )
     }
 
@@ -52,7 +52,7 @@ class ForeslåVedtakSteg(
         fun opprett() = ForeslåVedtakSteg(
             id = UUID.randomUUID(),
             vurdert = false,
-            underkjent = false,
+            tilbakeført = null,
         )
     }
 }

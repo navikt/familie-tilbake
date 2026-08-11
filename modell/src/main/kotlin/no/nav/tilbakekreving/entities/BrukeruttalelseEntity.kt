@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.behandling.Brukeruttalelse
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import java.time.LocalDate
 import java.util.UUID
 
@@ -12,14 +13,14 @@ data class BrukeruttalelseEntity(
     val uttalelseVurdering: UttalelseVurdering,
     val uttalelseInfoEntity: UttalelseInfoEntity?,
     val kommentar: String?,
-    val trengerNyVurdering: Boolean,
+    val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun fraEntity(): Brukeruttalelse = Brukeruttalelse(
         id = id,
         uttalelseVurdering = uttalelseVurdering,
         uttalelseInfo = uttalelseInfoEntity?.fraEntity(),
         kommentar = kommentar,
-        trengerNyVurdering = trengerNyVurdering,
+        tilbakeført = tilbakeført,
     )
 }
 

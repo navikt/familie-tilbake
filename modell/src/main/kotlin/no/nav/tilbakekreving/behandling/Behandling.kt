@@ -609,7 +609,7 @@ class Behandling internal constructor(
         if (nyttKravgrunnlag != null) {
             nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
             if (!toggles[Toggle.EndretKravgrunnlagVisning]) {
-                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttetEtterBehandlingenErPåbegynt, sporingsinformasjon())
+                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagMedEndretBeløp, sporingsinformasjon())
             }
         }
     }
@@ -788,6 +788,14 @@ class Behandling internal constructor(
         fun lagreVilkårsvurdering(periodeId: UUID, vurdering: ForårsaketAvBruker): VilkaarsvurderingDto {
             vilkårsvurderingsteg.vurder(id, vurdering)
             return vilkårsvurderingsteg.tilFrontendDto().first { it.id == periodeId }
+        }
+
+        fun brukNyesteKravgrunnlag() {
+            val nyesteKravgrunnlag = nyttKravgrunnlag?.entry ?: return
+            val sammenligning = kravgrunnlag.entry.sammenlign(nyesteKravgrunnlag, sporingsinformasjon())
+            steg().forEach { it.håndterNyttKravgrunnlag(sammenligning) }
+            kravgrunnlag = nyttKravgrunnlag!!
+            nyttKravgrunnlag = null
         }
     }
 

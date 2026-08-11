@@ -264,3 +264,5 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
 )
 
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
+
+fun Tilbakekreving.nåværendeBehandling() = hentBehandling(nåværendeBehandlingId())

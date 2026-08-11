@@ -11,8 +11,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.buildUrl
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
@@ -31,7 +33,7 @@ internal class OppdragRestClientImpl(
     override fun iverksettVedtak(request: TilbakekrevingsvedtakRequestDto): TilbakekrevingsvedtakResponseDto {
         return runBlocking {
             val token = tokenExchangeService.clientCredentialsToken(config.scope)
-            httpClient.post(
+            val response = httpClient.post(
                 buildUrl {
                     takeFrom(config.baseUrl)
                     appendPathSegments("api", "v1", "tilbakekreving", "vedtak")
@@ -41,7 +43,12 @@ internal class OppdragRestClientImpl(
                 accept(ContentType.Application.Json)
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(request)
-            }.body()
+            }
+            if (!response.status.isSuccess()) {
+                throw UnexpectedResponseException("Fikk uventet statuskode fra oppdrag", response.status, response.body())
+            }
+
+            response.body()
         }
     }
 
