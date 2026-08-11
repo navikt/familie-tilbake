@@ -130,6 +130,8 @@ class Faktasteg(
         )
     }
 
+    fun oppdagetAv(): Vurdering.Oppdaget.Av? = vurdering.oppdagetAv()
+
     fun erUnder4xRettsgebyr(kravgrunnlag: KravgrunnlagHendelse) = KanUnnlates4xRettsgebyr.kanUnnlates(
         fullstendigVedtaksperiode = kravgrunnlag.perioder().map { it.periode() }.overordnet(),
         årForRettsgebyr = rettsgebyrÅrFraSaksbehandler,
@@ -231,6 +233,8 @@ class Faktasteg(
         fun erFullstendig(): Boolean {
             return oppdaget.erFullstendig()
         }
+
+        fun oppdagetAv(): Oppdaget.Av? = (oppdaget as? Oppdaget.Vurdering)?.av
 
         fun erPåbegynt(): Boolean = uttalelse !is Uttalelse.IkkeVurdert || oppdaget !is Oppdaget.IkkeVurdert
 
