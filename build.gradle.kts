@@ -54,7 +54,7 @@ subprojects {
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("io.kotest:kotest-assertions-core:6.2.3")
     }
@@ -147,7 +147,7 @@ dependencies {
 
     testImplementation(project(":testdata"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.11")
