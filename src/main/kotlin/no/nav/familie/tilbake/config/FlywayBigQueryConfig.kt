@@ -32,7 +32,11 @@ class BigQueryMigrering(
         logger.info("BigQuery Flyway: starter (instansId=$instansId, dataset=${props.dataset})")
 
         val resultat = Flyway.configure()
-            .dataSource(DataSource.fromUrl(props.jdbcUrl))
+            .dataSource(
+                DataSource.fromUrl(props.jdbcUrl).apply {
+                    enableSession = true
+                },
+            )
             .schemas(props.dataset)
             .locations("classpath:db/migration-bigquery")
             .lockRetryCount(-1)
