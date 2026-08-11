@@ -10,12 +10,15 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -31,6 +34,7 @@ import no.nav.tilbakekreving.test.uaktsomt
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.util.UUID
 
 class VilkårsvurderingstegTest {
@@ -282,5 +286,37 @@ class VilkårsvurderingstegTest {
         )
         vilkårsvurderingsteg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
         vilkårsvurderingsteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `beløp i behold ny vilkårsvurdering`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            NivåAvForståelse.GodTro(
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(1000.kroner),
+                begrunnelse = "Begrunnelse for beløp i behold",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
+            size shouldBe 1
+            this[0].periode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+            this[0].valg.shouldBeInstanceOf<GodTroDto> {
+                it.begrunnelse shouldBe "Begrunnelse for god tro"
+                it.beløpIBehold.shouldBeInstanceOf<DelerDto> {
+                    BigDecimal(it.beløp) shouldBe 1000.kroner
+                    it.begrunnelse shouldBe "Begrunnelse for beløp i behold"
+                }
+            }
+        }
     }
 }

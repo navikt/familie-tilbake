@@ -202,7 +202,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = GodTroDto(
             begrunnelse = begrunnelseForGodTro,
-            beløpIBehold = beløpIBehold.tilFrontendDto(),
+            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse),
         )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
@@ -238,7 +238,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity
 
-            fun tilFrontendDto(): BelopIBeholdDto
+            fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto
 
             class HeleIBehold() : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
@@ -247,8 +247,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = HeleDto(
-                    begrunnelse = "TODO",
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = HeleDto(
+                    begrunnelse = begrunnelseForIBehold,
                     reduksjon = SkalIkkeReduseresDto(
                         relevans = emptyList(),
                         annetBegrunnelse = null,
@@ -273,9 +273,9 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = DelerDto(
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = DelerDto(
                     beløp = beløp.toInt(),
-                    begrunnelse = "TODO",
+                    begrunnelse = begrunnelseForIBehold,
                     reduksjon = SkalIkkeReduseresDto(
                         relevans = emptyList(),
                         annetBegrunnelse = null,
@@ -300,7 +300,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD)
 
-                override fun tilFrontendDto(): BelopIBeholdDto = IngentingDto("TODO")
+                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = IngentingDto(begrunnelseForIBehold)
 
                 override fun tilEntity(periodeRef: UUID, begrunnelse: String): GodTroEntity {
                     return GodTroEntity(
