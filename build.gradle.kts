@@ -124,6 +124,7 @@ dependencies {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
+    api("no.nav.familie:prosessering-web-nav-token-support:2.20260713101404_6072da6")
     api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
     api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
