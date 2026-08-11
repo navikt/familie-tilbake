@@ -154,7 +154,7 @@ class FaktaStegTest {
         faktasteg.vurder(
             listOf(
                 OppdaterFaktaPeriodeDto(
-                    id = perioder.single().id,
+                    id = perioder.single().id.toString(),
                     rettsligGrunnlag = listOf(
                         RettsligGrunnlagDto(
                             bestemmelse = Hendelsestype.VILKÅR_SØKER.name,

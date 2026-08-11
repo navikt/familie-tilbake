@@ -698,7 +698,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val periodeId = tilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
-                id = periodeId,
+                id = periodeId.toString(),
                 rettsligGrunnlag = listOf(
                     RettsligGrunnlagDto(
                         bestemmelse = Hendelsestype.VILKÅR_SØKER.name,
@@ -745,7 +745,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val periodeId = tilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
         val faktaPerioder = listOf(
             OppdaterFaktaPeriodeDto(
-                id = periodeId,
+                id = periodeId.toString(),
                 rettsligGrunnlag = listOf(
                     RettsligGrunnlagDto(
                         bestemmelse = Hendelsestype.ANNET.name,

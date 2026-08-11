@@ -374,7 +374,7 @@ class Faktasteg(
 
         internal fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, eksternFagsakRevurdering: EksternFagsakRevurdering): FaktaPeriodeDto {
             return FaktaPeriodeDto(
-                id = id.toString(),
+                id = id,
                 fom = periode.fom,
                 tom = periode.tom,
                 feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode, eksternFagsakRevurdering).toInt(),

@@ -916,7 +916,7 @@ class Behandling internal constructor(
         vurdering: VilkaarsvurderingDto,
         beregning: List<Delperiode<out Delperiode.Beløp>>,
     ): VilkaarsperiodeDto {
-        val sammenslåttPeriode = vurdering.periode.fom til vurdering.periode.tom
+        val sammenslåttPeriode = vurdering.fom til vurdering.tom
         val simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }
         val totaltBeløpForPerioden = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode, eksternFagsakRevurdering.entry)
         val fakta = FaktaDto(rettsligGrunnlag = emptyList())

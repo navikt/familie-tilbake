@@ -157,7 +157,6 @@ open class TilbakekrevingE2EBase : E2EBase() {
         .tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke)
         .perioder
         .map(FaktaPeriodeDto::id)
-        .map(UUID::fromString)
 
     fun <T> somSaksbehandler(
         ident: String,

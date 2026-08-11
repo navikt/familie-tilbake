@@ -309,7 +309,8 @@ class VilkårsvurderingstegTest {
 
         vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
             size shouldBe 1
-            this[0].periode shouldBe PeriodeDto(1.januar(2021), 31.januar(2021))
+            this[0].fom shouldBe 1.januar(2021)
+            this[0].tom shouldBe 31.januar(2021)
             this[0].valg.shouldBeInstanceOf<GodTroDto> {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<DelerDto> {

@@ -293,7 +293,8 @@ class Vilkårsvurderingsteg(
                 .map { (underliggendeVurdering, perioder) ->
                     VilkaarsvurderingDto(
                         id = perioder.first().id,
-                        periode = PeriodeDto(perioder.minOf { it.periode.fom }, perioder.maxOf { it.periode.tom }),
+                        fom = perioder.minOf { it.periode.fom },
+                        tom = perioder.maxOf { it.periode.tom },
                         delbarePerioder = perioder.map {
                             PeriodeInfoDto(
                                 periodeId = it.id,
