@@ -39,14 +39,12 @@ object ForårsaketAvBrukerMapper {
         tilbakekreving: Tilbakekreving,
     ): ForårsaketAvBruker {
         val logContext = SecureLog.Context.fra(tilbakekreving)
-        tilbakekreving
-        val begrunnelse = vilkaarsvurderingDto.begrunnelse
 
         return when (val valg = vilkaarsvurderingDto.valg) {
             is ForstoEllerBurdeForstaattDto -> when (val forståelse = valg.forståelse) {
                 is ForstoDto -> NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
-                    begrunnelse = begrunnelse,
+                    begrunnelse = "TODO",
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
                 )
 
@@ -54,26 +52,26 @@ object ForårsaketAvBrukerMapper {
                     grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
-                    begrunnelse = begrunnelse,
+                    begrunnelse = "TODO",
                 )
             }
 
             is ForaarsaketAvMottakerDto -> when (val aktsomhet = valg.aktsomhet) {
                 is ForsettligDto -> Skyldgrad.Forsett(
-                    begrunnelse = begrunnelse,
+                    begrunnelse = "TODO",
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
                 )
 
                 is GrovtUaktsomtDto -> Skyldgrad.GrovUaktsomhet(
-                    begrunnelse = begrunnelse,
+                    begrunnelse = "TODO",
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     reduksjonSærligeGrunner = mapReduksjonSærligeGrunner(aktsomhet.erDetSærligeGrunner, logContext),
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
                 )
 
                 is UaktsomtDto -> Skyldgrad.Uaktsomt(
-                    begrunnelse = begrunnelse,
+                    begrunnelse = "TODO",
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(aktsomhet.unnlatelse, logContext),
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
@@ -90,7 +88,7 @@ object ForårsaketAvBrukerMapper {
                     is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                 },
                 begrunnelseForGodTro = valg.begrunnelse,
-                begrunnelse = begrunnelse,
+                begrunnelse = "TODO",
             )
 
             is VilkaarsvurderingIkkeVurdertDto ->

@@ -235,4 +235,9 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Lagrer vilkårsvurdering",
     ),
+    OppdaterKravgrunnlag(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Oppdaterer kravgrunnlag",
+    ),
 }

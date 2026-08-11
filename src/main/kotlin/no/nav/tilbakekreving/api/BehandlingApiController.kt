@@ -305,4 +305,17 @@ class BehandlingApiController(
             )
         } ?: ResponseEntity.notFound().build()
     }
+
+    override fun behandlingBenyttNyesteKravgrunnlag(behandlingId: UUID): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.OppdaterKravgrunnlag,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(
+                tilbakekreving.gjørSaksbehandling(behandlingId, context) {
+                    brukNyesteKravgrunnlag()
+                },
+            )
+        } ?: ResponseEntity.notFound().build()
+    }
 }

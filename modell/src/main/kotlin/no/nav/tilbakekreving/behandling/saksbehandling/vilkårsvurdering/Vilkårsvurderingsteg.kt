@@ -301,7 +301,6 @@ class Vilkårsvurderingsteg(
                             )
                         },
                         valg = underliggendeVurdering.tilNyFrontendDto(),
-                        begrunnelse = underliggendeVurdering.begrunnelse ?: "TODO",
                     )
                 }
         }
