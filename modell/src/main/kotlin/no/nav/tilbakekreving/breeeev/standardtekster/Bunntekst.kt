@@ -32,9 +32,12 @@ enum class Bunntekst(
     RETT_TIL_Å_KLAGE(
         tittel = "Du har rett til å klage",
         avsnitt = arrayOf(
-            "Hvis du mener vedtaket er feil, kan du klage innen 6 uker fra den datoen vedtaket har kommet fram til deg. Du finner skjema og informasjon på nav.no/klage.",
-            "Nav kan veilede deg på telefon om hvordan du sender en klage. Nav-kontoret ditt kan også hjelpe deg med å skrive en klage. Kontakt oss på telefon 55 55 33 33 hvis du trenger hjelp.",
-            "Hvis du får medhold i klagen, kan du få dekket vesentlige utgifter som har vært nødvendige for å få endret vedtaket, for eksempel hjelp fra advokat. Du kan ha krav på fri rettshjelp etter rettshjelploven. Du kan få mer informasjon om denne ordningen hos advokater, statsforvalteren eller Nav.",
+            "Hvis du mener vedtaket er feil, kan du klage innen 6 uker fra den datoen vedtaket har kommet fram til deg. Nav klageinstans er klageinstans dersom du klager.",
+            "Du finner skjema og informasjon på nav.no/klage. Nav kan veilede deg på telefon om hvordan du sender en klage. Nav-kontoret ditt kan også hjelpe deg med å skrive en klage. Kontakt oss på telefon 55 55 33 33 hvis du trenger hjelp.",
+            "Du må klage på vedtaket for å kunne anke saken til Trygderetten og ta ut søksmål for domstolene. Dette følger av folketrygdloven § 21-12.",
+            "Du kan be om å få utsatt tilbakebetalingen frem til klagen din er behandlet. Dette følger av forvaltningsloven § 42. Du må som regel begynne å betale tilbake beløpet når du får fakturaen, selv om du klager på dette vedtaket. Hvis du får medhold i klagen din, betaler vi tilbake de pengene du allerede har betalt.",
+            "Hvis du får medhold i klagen, kan du få dekket vesentlige utgifter som har vært nødvendige for å få endret vedtaket, for eksempel hjelp fra advokat.",
+            "Du kan ha krav på fri rettshjelp etter rettshjelploven. Du kan få mer informasjon om denne ordningen hos advokater, statsforvalteren eller Nav.",
             "Du kan lese om saksomkostninger i forvaltningsloven § 36.",
             "Hvis du sender klage i posten, må du signere klagen.",
             "Mer informasjon om klagerettigheter finner du på http://nav.no/klagerettigheter.",
