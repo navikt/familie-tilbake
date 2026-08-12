@@ -161,12 +161,16 @@ spec:
   replicas:
     min: 2
     max: 4
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 100
+      scaleUpStabilizationWindowSeconds: 30
   resources:
     limits:
       memory: 1024Mi
     requests:
       memory: 1024Mi
-      cpu: 25m
+      cpu: 50m
   ingresses:
     - https://tilbakekreving-backend.intern.dev.nav.no
   env:
