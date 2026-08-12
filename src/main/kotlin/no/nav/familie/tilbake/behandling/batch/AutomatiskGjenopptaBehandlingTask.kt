@@ -23,7 +23,7 @@ class AutomatiskGjenopptaBehandlingTask(
     override fun doTask(task: Task) {
         log.medContext(task.logContext()) { info("AutomatiskGjenopptaBehandlingTask prosesserer med id={}", task.id) }
         val behandlingId = UUID.fromString(task.payload)
-        automatiskGjenopptaBehandlingService.gjenopptaBehandling(behandlingId, task.id, task.metadata)
+        automatiskGjenopptaBehandlingService.gjenopptaBehandling(behandlingId)
     }
 
     companion object {

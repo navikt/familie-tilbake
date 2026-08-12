@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -35,15 +34,11 @@ class AutomatiskGjenopptaBehandlingService(
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> = behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
 
     @Transactional
-    fun gjenopptaBehandling(
-        behandlingId: UUID,
-        taskId: Long,
-        taskMetadata: Properties,
-    ) {
+    fun gjenopptaBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
         log.medContext(logContext) {
-            info("AutomatiskGjenopptaBehandlingService prosesserer med id={}", taskId)
+            info("Prøver å automatisk gjenoppta behandling")
         }
         val behandlingsstegstilstand =
             behandlingskontrollService.finnAktivStegstilstand(behandlingId)
