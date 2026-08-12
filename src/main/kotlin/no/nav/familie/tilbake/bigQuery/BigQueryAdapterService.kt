@@ -28,7 +28,7 @@ class BigQueryAdapterService(
                 opprettetDato = behandling.opprettetTidspunkt,
                 periode = kravgrunnlag?.samletPeriode() ?: varsel?.perioder?.let { periode -> periode.minOf { it.fom } til periode.maxOf { it.tom } },
                 behandlingstype = behandling.type.name,
-                ytelse = tilbakekreving.fagsystem.name,
+                ytelse = tilbakekreving.fagsystem.navn,
                 beløp = kravgrunnlag?.sumFeilutbetaling()?.toLong() ?: varsel?.sumFeilutbetaling?.toLong(),
                 enhetNavn = behandling.behandlendeEnhetsNavn,
                 enhetKode = behandling.behandlendeEnhet,
