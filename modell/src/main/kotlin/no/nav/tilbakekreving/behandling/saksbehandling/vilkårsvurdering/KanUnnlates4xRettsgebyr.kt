@@ -75,7 +75,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun tilFrontendDto(): UnnlatelseDto {
             return SkalIkkeUnnlatesDto(
-                begrunnelse = "TODO",
+                begrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
             )
         }
