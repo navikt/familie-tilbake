@@ -152,6 +152,7 @@ class PdlClientImpl(
             FagsystemDTO.TS -> Tema.TSO
             FagsystemDTO.AAP -> Tema.AAP
             FagsystemDTO.TP -> Tema.IND
+            FagsystemDTO.DP -> Tema.DAG
             FagsystemDTO.IT01 -> throw IllegalStateException("Fagsystemet $fagsystem har ikke eget tema i PDL")
         }
 }

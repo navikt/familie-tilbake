@@ -65,6 +65,13 @@ object DefaultYtelseKatalog : YtelseKatalog {
                             Språkkode.NN to Ytelsesnavn("tiltakspengar", "tiltakspengar", "tiltakspengane dine"),
                         ),
                     )
+                    YtelsestypeDTO.DAGPENGER -> Ytelsesinfo(
+                        url = "nav.no/dagpenger",
+                        navn = mapOf(
+                            Språkkode.NB to Ytelsesnavn("dagpenger", "dagpengene", "dagpengene dine"),
+                            Språkkode.NN to Ytelsesnavn("dagpengar", "dagpengane", "dagpengane dine"),
+                        ),
+                    )
                     YtelsestypeDTO.INFOTRYGD -> error("INFOTRYGD støttes ikke.")
                 }
             }

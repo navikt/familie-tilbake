@@ -10,4 +10,5 @@ enum class YtelsestypeDTO {
     INFOTRYGD,
     ARBEIDSAVKLARINGSPENGER,
     TILTAKSPENGER,
+    DAGPENGER,
 }

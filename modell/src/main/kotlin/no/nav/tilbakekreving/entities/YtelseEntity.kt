@@ -12,6 +12,7 @@ data class YtelseEntity(
             Ytelsestype.TILLEGGSSTØNAD -> Ytelse.Tilleggsstønad
             Ytelsestype.ARBEIDSAVKLARINGSPENGER -> Ytelse.Arbeidsavklaringspenger
             Ytelsestype.TILTAKSPENGER -> Ytelse.Tiltakspenger
+            Ytelsestype.DAGPENGER -> Ytelse.Dagpenger
             Ytelsestype.KONTANTSTØTTE, Ytelsestype.OVERGANGSSTØNAD, Ytelsestype.INFOTRYGD -> TODO()
         }
     }
