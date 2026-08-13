@@ -70,6 +70,7 @@ interface ForårsaketAvBruker {
                 særligGrunner = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
+                begrunnelseForUnnlatelse = null,
             )
         }
     }
@@ -92,6 +93,7 @@ interface ForårsaketAvBruker {
                 kanUnnlates = null,
                 særligGrunner = null,
                 feilaktigEllerMangelfull = null,
+                begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = forrigePeriodeId,
             )
         }

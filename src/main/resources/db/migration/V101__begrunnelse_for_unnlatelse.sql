@@ -1,0 +1,1 @@
+ALTER TABLE tilbakekreving_vilkårsvurdering_periode ADD COLUMN begrunnelse_for_unnlatelse TEXT;

@@ -32,7 +32,11 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun tilFrontendDto(): UnnlatelseDto
 
-    data object Unnlates : KanUnnlates4xRettsgebyr {
+    fun begrunnelseForUnnlatelse(): String? = null
+
+    class Unnlates(
+        private val begrunnelseForUnnlatelse: String?,
+    ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
@@ -49,9 +53,11 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun tilFrontendDto(): UnnlatelseDto {
             return SkalUnnlatesDto(
-                begrunnelse = "TODO",
+                begrunnelse = begrunnelseForUnnlatelse!!,
             )
         }
+
+        override fun begrunnelseForUnnlatelse() = begrunnelseForUnnlatelse
     }
 
     class SkalIkkeUnnlates(
