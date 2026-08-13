@@ -1,0 +1,46 @@
+Date: Wed Aug 12 15:08:16 CEST 2026
+MQ Build Level=X.X.X(p1000-L260522)
+Java version: 25.0.2(25.0.2+10-LTS)
+Process ID: 91017
+--------------------------------------------------------------------
+12. august 2026, 15:08:16 CEST[RMI TCP Connection(1)-192.168.68.55] com.ibm.mq.jmqi.remote.impl.RemoteTCPConnection
+The TCP.ClntSndBuffSize property is not set in either mqclient.ini or the JVM system properties, so the network layer is using a TCP send buffer size of 131 072 bytes.
+
+EXPLANATION:
+Because the TCP.ClntSndBuffSize property is not configured, the IBM MQ messaging client will not set the send buffer size. The network layer will choose the send buffer size instead.
+
+ACTION:
+None.
+--------------------------------------------------------------------
+12. august 2026, 15:08:16 CEST[RMI TCP Connection(1)-192.168.68.55] com.ibm.mq.jmqi.remote.impl.RemoteTCPConnection
+The TCP.ClntRcvBuffSize property is not set in either mqclient.ini or the JVM system properties, so the network layer is using a TCP receive buffer size of 131 072 bytes.
+
+EXPLANATION:
+Because the TCP.ClntRcvBuffSize property is not configured, the IBM MQ messaging client will not set the receive buffer size. The network layer will choose the receive buffer size instead.
+
+ACTION:
+None.
+--------------------------------------------------------------------
+Date: Thu Aug 13 08:25:48 CEST 2026
+MQ Build Level=X.X.X(p1000-L260522)
+Java version: 25.0.2(25.0.2+10-LTS)
+Process ID: 17880
+--------------------------------------------------------------------
+13. august 2026, 08:25:48 CEST[RMI TCP Connection(3)-10.119.225.224] com.ibm.mq.jmqi.remote.impl.RemoteTCPConnection
+The TCP.ClntSndBuffSize property is not set in either mqclient.ini or the JVM system properties, so the network layer is using a TCP send buffer size of 131 072 bytes.
+
+EXPLANATION:
+Because the TCP.ClntSndBuffSize property is not configured, the IBM MQ messaging client will not set the send buffer size. The network layer will choose the send buffer size instead.
+
+ACTION:
+None.
+--------------------------------------------------------------------
+13. august 2026, 08:25:48 CEST[RMI TCP Connection(3)-10.119.225.224] com.ibm.mq.jmqi.remote.impl.RemoteTCPConnection
+The TCP.ClntRcvBuffSize property is not set in either mqclient.ini or the JVM system properties, so the network layer is using a TCP receive buffer size of 131 072 bytes.
+
+EXPLANATION:
+Because the TCP.ClntRcvBuffSize property is not configured, the IBM MQ messaging client will not set the receive buffer size. The network layer will choose the receive buffer size instead.
+
+ACTION:
+None.
+--------------------------------------------------------------------
