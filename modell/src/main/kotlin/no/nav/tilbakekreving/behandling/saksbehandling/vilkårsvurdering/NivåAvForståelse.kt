@@ -34,11 +34,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
     class Forstod(
         val begrunnelseMottakersForståelse: String,
         override val begrunnelse: String,
-        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr,
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?,
     ) : NivåAvForståelse {
         override fun vurderingstype(): Vurdering = Type.Forstod
 
-        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr.reduksjon()
+        override fun reduksjon(): Reduksjon = kanUnnlates4XRettsgebyr?.reduksjon() ?: Reduksjon.FullstendigTilbakekreving()
 
         override fun renter(): Boolean = false
 
@@ -46,7 +46,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return ForstoEllerBurdeForstaattDto(
                 forståelse = ForstoDto(
                     begrunnelse = begrunnelseMottakersForståelse,
-                    unnlatelse = kanUnnlates4XRettsgebyr.tilFrontendDto(),
+                    unnlatelse = kanUnnlates4XRettsgebyr!!.tilFrontendDto(),
                 ),
             )
         }
@@ -93,8 +93,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
-                kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
+                kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
+                særligGrunner = kanUnnlates4XRettsgebyr?.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
