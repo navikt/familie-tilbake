@@ -184,8 +184,9 @@ class Faktasteg(
         )
     }
 
-    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurdering.finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
     }
 
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
@@ -215,6 +216,7 @@ class Faktasteg(
                         periode = it,
                         rettsligGrunnlag = Hendelsestype.ANNET,
                         rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                        endringIKravgrunnlag = null,
                     )
                 },
                 årsakTilFeilutbetaling = eksternFagsakRevurdering.årsakTilFeilutbetaling,
@@ -293,6 +295,10 @@ class Faktasteg(
             )
         }
 
+        internal fun finnPeriode(periode: Datoperiode): FaktaPeriode {
+            return perioder.single { it.periode == periode }
+        }
+
         sealed interface Oppdaget {
             fun tilFrontendDto(): OppdagetDto
 
@@ -361,6 +367,7 @@ class Faktasteg(
         val periode: Datoperiode,
         var rettsligGrunnlag: Hendelsestype,
         var rettsligGrunnlagUnderkategori: Hendelsesundertype,
+        var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
     ) {
         fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
@@ -369,6 +376,10 @@ class Faktasteg(
                 periode = DatoperiodeEntity(fom = periode.fom, tom = periode.tom),
                 rettsligGrunnlag = rettsligGrunnlag,
                 rettsligGrunnlagUnderkategori = rettsligGrunnlagUnderkategori,
+                endringIKravgrunnlag = endringIKravgrunnlag?.tilEntity(
+                    faktavurderingPeriodeRef = id,
+                    vilkårsvurderingPeriodeRef = null,
+                ),
             )
         }
 
@@ -391,6 +402,10 @@ class Faktasteg(
         fun vurder(oppdatering: OppdaterFaktaPeriodeDto) {
             rettsligGrunnlag = enumValueOf(oppdatering.rettsligGrunnlag.single().bestemmelse)
             rettsligGrunnlagUnderkategori = enumValueOf(oppdatering.rettsligGrunnlag.single().grunnlag)
+        }
+
+        fun periodeEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+            endringIKravgrunnlag = forskjell
         }
     }
 

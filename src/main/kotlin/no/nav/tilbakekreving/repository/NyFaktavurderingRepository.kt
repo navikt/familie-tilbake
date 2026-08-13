@@ -1,8 +1,10 @@
 package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.FaktastegEntity
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FaktavurderingEntityMapper
+import no.nav.tilbakekreving.entity.ForskjellEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
@@ -49,7 +51,11 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             "SELECT * FROM tilbakekreving_faktavurdering_periode WHERE faktavurdering_ref=?",
             faktavurderingRef,
         ) { resultSet, _ ->
-            FaktavurderingEntityMapper.FaktavurderingPeriodeEntityMapper.map(resultSet)
+            val periodeId = resultSet[FaktavurderingEntityMapper.FaktavurderingPeriodeEntityMapper.id]
+            FaktavurderingEntityMapper.FaktavurderingPeriodeEntityMapper.map(
+                resultSet,
+                hentEndringIKravgrunnlag(periodeId),
+            )
         }
     }
 
@@ -57,6 +63,19 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
         jdbcTemplate.update("DELETE FROM tilbakekreving_faktavurdering_periode WHERE faktavurdering_ref=?", faktavurderingRef)
         for (periode in perioder) {
             FaktavurderingEntityMapper.FaktavurderingPeriodeEntityMapper.upsertQuery(jdbcTemplate, periode)
+            val endringIKravgrunnlag = periode.endringIKravgrunnlag
+            if (endringIKravgrunnlag != null) {
+                ForskjellEntityMapper.upsertQuery(jdbcTemplate, endringIKravgrunnlag)
+            }
         }
+    }
+
+    private fun hentEndringIKravgrunnlag(faktavurderingPeriodeId: UUID): ForskjellEntity? {
+        return jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_kravgrunnlag_forskjell WHERE faktavurdering_periode_ref=?",
+            faktavurderingPeriodeId,
+        ) { resultSet, _ ->
+            ForskjellEntityMapper.map(resultSet)
+        }.singleOrNull()
     }
 }

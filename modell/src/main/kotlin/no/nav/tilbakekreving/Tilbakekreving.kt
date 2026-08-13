@@ -100,7 +100,7 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext): List<KravgrunnlagSammenligning.Forskjell> {
+    internal fun oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext): List<KravgrunnlagSammenligning.Forskjell> {
         val resultat = behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             val kravgrunnlagHistorikkEntry = kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHistorikkEntry)

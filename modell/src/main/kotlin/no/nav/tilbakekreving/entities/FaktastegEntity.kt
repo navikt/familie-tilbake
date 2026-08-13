@@ -32,6 +32,7 @@ data class FaktastegEntity(
                     periode = it.periode.fraEntity(),
                     rettsligGrunnlag = it.rettsligGrunnlag,
                     rettsligGrunnlagUnderkategori = it.rettsligGrunnlagUnderkategori,
+                    endringIKravgrunnlag = it.endringIKravgrunnlag?.fraEntity(),
                 )
             },
             årsakTilFeilutbetaling = årsakTilFeilutbetaling,
@@ -59,6 +60,7 @@ data class FaktastegEntity(
         val periode: DatoperiodeEntity,
         val rettsligGrunnlag: Hendelsestype,
         val rettsligGrunnlagUnderkategori: Hendelsesundertype,
+        val endringIKravgrunnlag: ForskjellEntity?,
     )
 
     enum class OppdagetAv {

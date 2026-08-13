@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -122,6 +123,8 @@ class Foreldelsesteg(
     fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
 
     fun harTilleggsfrist(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.Tilleggsfrist }
+
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {}
 
     private fun finnIdFor(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode

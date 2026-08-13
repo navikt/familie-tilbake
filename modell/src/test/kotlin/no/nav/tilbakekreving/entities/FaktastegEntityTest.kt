@@ -45,6 +45,7 @@ class FaktastegEntityTest {
                         periode = periode,
                         rettsligGrunnlag = Hendelsestype.ANNET,
                         rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                        endringIKravgrunnlag = null,
                     ),
                 ),
                 årsakTilFeilutbetaling = årsak,
@@ -82,6 +83,7 @@ class FaktastegEntityTest {
                     periode = periode2,
                     rettsligGrunnlag = Hendelsestype.ANNET,
                     rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                    endringIKravgrunnlag = null,
                 ),
                 FaktastegEntity.FaktaPeriodeEntity(
                     id = UUID.randomUUID(),
@@ -89,6 +91,7 @@ class FaktastegEntityTest {
                     periode = periode1,
                     rettsligGrunnlag = Hendelsestype.ANNET,
                     rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                    endringIKravgrunnlag = null,
                 ),
             ),
             årsakTilFeilutbetaling = "Årsak",

@@ -201,6 +201,7 @@ fun faktastegVurdering(
                 periode = periode,
                 rettsligGrunnlag = Hendelsestype.ANNET,
                 rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                endringIKravgrunnlag = null,
             ),
         ),
         årsakTilFeilutbetaling = årsak,

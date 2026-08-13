@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity.FaktaPeriodeEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity.Uttalelse
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import java.sql.ResultSet
@@ -97,7 +98,10 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
             FieldConverter.EnumConverter.of<Hendelsesundertype>().required(),
         )
 
-        fun map(resultSet: ResultSet): FaktaPeriodeEntity {
+        fun map(
+            resultSet: ResultSet,
+            endringIKravgrunnlag: ForskjellEntity?,
+        ): FaktaPeriodeEntity {
             return FaktaPeriodeEntity(
                 id = resultSet[id],
                 faktavurderingRef = resultSet[faktavurderingRef],
@@ -107,6 +111,7 @@ object FaktavurderingEntityMapper : Entity<FaktastegEntity, UUID, UUID>(
                 ),
                 rettsligGrunnlag = resultSet[rettsligGrunnlag],
                 rettsligGrunnlagUnderkategori = resultSet[rettsligGrunnlagUnderkategori],
+                endringIKravgrunnlag = endringIKravgrunnlag,
             )
         }
     }

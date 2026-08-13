@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.util.UUID
 
 class ForeslåVedtakSteg(
@@ -39,6 +40,10 @@ class ForeslåVedtakSteg(
             vurdert = vurdert,
             tilbakeført = tilbakeført,
         )
+    }
+
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 
     override fun nullstill(

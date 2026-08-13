@@ -1,11 +1,15 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.entities.DatoperiodeEntity
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
+import java.util.UUID
 
 class KravgrunnlagSammenligning(
     originaltKravgrunnlag: KravgrunnlagHendelse,
@@ -14,9 +18,13 @@ class KravgrunnlagSammenligning(
 ) {
     private val forskjeller: List<Forskjell>
 
-    fun resultat() = forskjeller
+    internal fun resultat() = forskjeller
 
-    fun endringIBeløp() = forskjeller.sumOf { it.endringIBeløp }
+    internal fun oppdaterSteg(steg: List<Saksbehandlingsteg>) {
+        forskjeller.forEach { forskjell ->
+            steg.forEach { forskjell.oppdater(it) }
+        }
+    }
 
     init {
         val originalePerioder = originaltKravgrunnlag.perioder().map { it.periode() }
@@ -41,6 +49,30 @@ class KravgrunnlagSammenligning(
     sealed interface Forskjell {
         val endringIBeløp: BigDecimal
 
-        data class JustertBeløp(val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell
+        fun oppdater(steg: EndretKravgrunnlagObservatør)
+
+        fun tilEntity(
+            faktavurderingPeriodeRef: UUID?,
+            vilkårsvurderingPeriodeRef: UUID?,
+        ): ForskjellEntity
+
+        data class JustertBeløp(val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell {
+            override fun oppdater(steg: EndretKravgrunnlagObservatør) {
+                steg.perideEndretBeløp(this)
+            }
+
+            override fun tilEntity(
+                faktavurderingPeriodeRef: UUID?,
+                vilkårsvurderingPeriodeRef: UUID?,
+            ): ForskjellEntity {
+                return ForskjellEntity(
+                    id = UUID.randomUUID(),
+                    faktavurderingPeriodeRef = faktavurderingPeriodeRef,
+                    vilkårsvurderingPeriodeRef = vilkårsvurderingPeriodeRef,
+                    originalPeriode = DatoperiodeEntity(periode.fom, periode.tom),
+                    endringIBeløp = endringIBeløp,
+                )
+            }
+        }
     }
 }

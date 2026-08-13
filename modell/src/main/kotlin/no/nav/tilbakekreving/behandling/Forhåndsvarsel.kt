@@ -134,10 +134,9 @@ class Forhåndsvarsel(
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
     }
 
-    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
-        val endringIBeløp = sammenligning.endringIBeløp()
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         when {
-            endringIBeløp > BigDecimal.ZERO -> {
+            forskjell.endringIBeløp > BigDecimal.ZERO -> {
                 brukeruttalelse?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
                 forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
             }

@@ -102,8 +102,9 @@ class Vilkårsvurderingsteg(
         return vurderinger.single { it.id == id }
     }
 
-    override fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
     }
 
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
@@ -145,37 +146,24 @@ class Vilkårsvurderingsteg(
         revurdering: EksternFagsakRevurdering,
         foreldelsesteg: Foreldelsesteg,
     ): List<VurdertVilkårsvurderingsperiodeDto> {
-        val sammenslåttePerioder = vurderinger
+        return vurderinger
             .groupBy { it.vurdering.underliggendeVurdering() }
             .map { (_, gruppe) ->
                 val første = gruppe.minBy { it.periode.fom }
                 val siste = gruppe.maxBy { it.periode.tom }
-                lagSammenslåttPeriode(første, siste)
+                val totalPeriode = første.periode.fom til siste.periode.tom
+                VurdertVilkårsvurderingsperiodeDto(
+                    periode = totalPeriode,
+                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(totalPeriode, revurdering),
+                    hendelsestype = Hendelsestype.ANNET,
+                    reduserteBeløper = listOf(),
+                    aktiviteter = listOf(),
+                    begrunnelse = første.vurdering.begrunnelse,
+                    foreldet = foreldelsesteg.erSammenslåttPeriodeForeldet(totalPeriode),
+                    vilkårsvurderingsresultatInfo = første.vurdering.tilFrontendDto(),
+                )
             }
-
-        return sammenslåttePerioder.map { periode ->
-            VurdertVilkårsvurderingsperiodeDto(
-                periode = periode.periode,
-                feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode.periode, revurdering),
-                hendelsestype = Hendelsestype.ANNET,
-                reduserteBeløper = listOf(),
-                aktiviteter = listOf(),
-                begrunnelse = periode.vurdering.begrunnelse,
-                foreldet = foreldelsesteg.erSammenslåttPeriodeForeldet(periode.periode),
-                vilkårsvurderingsresultatInfo = periode.vurdering.tilFrontendDto(),
-            )
-        }
     }
-
-    private fun lagSammenslåttPeriode(
-        første: Vilkårsvurderingsperiode,
-        siste: Vilkårsvurderingsperiode,
-    ) = Vilkårsvurderingsperiode(
-        id = første.id,
-        periode = Datoperiode(første.periode.fom, siste.periode.tom),
-        begrunnelseForTilbakekreving = første.begrunnelseForTilbakekreving,
-        _vurdering = første.vurdering,
-    )
 
     fun splittVilkårsvurdering(vilkårsvurderingId: UUID) {
         vurder(vilkårsvurderingId, ForårsaketAvBruker.IkkeVurdert())
@@ -236,8 +224,9 @@ class Vilkårsvurderingsteg(
     class Vilkårsvurderingsperiode(
         val id: UUID,
         val periode: Datoperiode,
-        val begrunnelseForTilbakekreving: String? = null,
+        val begrunnelseForTilbakekreving: String?,
         private var _vurdering: ForårsaketAvBruker,
+        var endretAvKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
     ) : VilkårsvurdertPeriodeAdapter {
         val vurdering get() = _vurdering
 
@@ -267,7 +256,15 @@ class Vilkårsvurderingsteg(
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 vurdering = _vurdering.tilEntity(id),
+                endretAvKravgrunnlag = endretAvKravgrunnlag?.tilEntity(
+                    faktavurderingPeriodeRef = null,
+                    vilkårsvurderingPeriodeRef = id,
+                ),
             )
+        }
+
+        fun periodeEndretBeløp(endretBeløp: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+            endretAvKravgrunnlag = endretBeløp
         }
 
         companion object {
@@ -286,6 +283,8 @@ class Vilkårsvurderingsteg(
                             forrigePeriodeId = forrigePeriode.id,
                         )
                     },
+                    begrunnelseForTilbakekreving = null,
+                    endretAvKravgrunnlag = null,
                 )
             }
 

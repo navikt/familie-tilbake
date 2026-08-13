@@ -7,7 +7,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.EndretKravgrunnlagObservatør
 import java.util.UUID
 
 enum class ÅrsakTilTilbakeføring {
@@ -15,7 +15,7 @@ enum class ÅrsakTilTilbakeføring {
     Underkjent,
 }
 
-internal interface Saksbehandlingsteg {
+internal interface Saksbehandlingsteg : EndretKravgrunnlagObservatør {
     val type: Behandlingssteg
     val behandlingsstatus: BehandlingsstatusModell get() = BehandlingsstatusModell.TIL_BEHANDLING
 
@@ -46,8 +46,6 @@ internal interface Saksbehandlingsteg {
     ) {}
 
     fun venter(klokke: Klokke): Venter? = null
-
-    fun håndterNyttKravgrunnlag(sammenligning: KravgrunnlagSammenligning) {}
 
     companion object {
         fun Saksbehandlingsteg?.behandlingsstegstatus(

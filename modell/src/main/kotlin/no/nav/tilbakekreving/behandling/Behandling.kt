@@ -793,7 +793,7 @@ class Behandling internal constructor(
         fun brukNyesteKravgrunnlag() {
             val nyesteKravgrunnlag = nyttKravgrunnlag?.entry ?: return
             val sammenligning = kravgrunnlag.entry.sammenlign(nyesteKravgrunnlag, sporingsinformasjon())
-            steg().forEach { it.håndterNyttKravgrunnlag(sammenligning) }
+            sammenligning.oppdaterSteg(steg())
             kravgrunnlag = nyttKravgrunnlag!!
             nyttKravgrunnlag = null
         }

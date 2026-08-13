@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.repository
 
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
@@ -7,6 +8,7 @@ import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
+import no.nav.tilbakekreving.entity.ForskjellEntityMapper
 import no.nav.tilbakekreving.entity.VilkårsvurderingEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
@@ -43,6 +45,10 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.beløpIBehold != null) {
                 lagreGodTro(periode.vurdering.beløpIBehold!!)
             }
+            val endretAvKravgrunnlag = periode.endretAvKravgrunnlag
+            if (endretAvKravgrunnlag != null) {
+                ForskjellEntityMapper.upsertQuery(jdbcTemplate, endretAvKravgrunnlag)
+            }
         }
     }
 
@@ -55,8 +61,18 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
                 hentAktsomhetvurdering(periodeId),
                 hentSærligeGrunnerVurdering(periodeId),
                 hentMottakersForståelse(periodeId),
+                hentEndretAvKravgrunnlag(periodeId),
             )
         }
+    }
+
+    private fun hentEndretAvKravgrunnlag(vilkårsvurderingPeriodeId: UUID): ForskjellEntity? {
+        return jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_kravgrunnlag_forskjell WHERE vilkårsvurdering_periode_ref=?",
+            vilkårsvurderingPeriodeId,
+        ) { resultSet, _ ->
+            ForskjellEntityMapper.map(resultSet)
+        }.singleOrNull()
     }
 
     private fun lagreGodTro(godTro: GodTroEntity) {

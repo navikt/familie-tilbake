@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.util.UUID
 
@@ -72,6 +73,8 @@ class FatteVedtakSteg internal constructor(
     fun erVedtakUnderkjent(): Boolean {
         return vurderteSteg.any { it.erVurderingUnderkjent() }
     }
+
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {}
 
     class VurdertSteg(
         private val id: UUID,

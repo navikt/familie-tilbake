@@ -856,6 +856,7 @@ class BeregningTest {
         periode = this,
         begrunnelseForTilbakekreving = "",
         _vurdering = vurdering,
+        endretAvKravgrunnlag = null,
     )
 
     fun Delperiode<out Delperiode.Beløp>.shouldMatch(

@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.entities.AktsomhetsvurderingEntity
 import no.nav.tilbakekreving.entities.BeholdType
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
@@ -110,6 +111,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             aktsomhet: VurdertAktsomhetEntity?,
             særligeGrunner: SærligeGrunnerEntity?,
             mottakersForståelse: MottakersForståelseEntity?,
+            endretAvKravgrunnlag: ForskjellEntity?,
         ): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = resultSet[id],
@@ -128,6 +130,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     forrigePeriodeId = resultSet[forrigePeriodeId],
                     begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
                 ),
+                endretAvKravgrunnlag = endretAvKravgrunnlag,
             )
         }
     }
