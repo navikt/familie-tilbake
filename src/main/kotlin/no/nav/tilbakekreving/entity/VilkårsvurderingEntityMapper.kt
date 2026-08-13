@@ -98,6 +98,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.EnumConverter.of<KanUnnlatesEntity>(),
         )
 
+        val begrunnelseForUnnlatelse = field(
+            "begrunnelse_for_unnlatelse",
+            { it.vurdering.begrunnelseForUnnlatelse },
+            FieldConverter.StringConverter,
+        )
+
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
@@ -120,6 +126,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     særligGrunner = særligeGrunner,
                     feilaktigEllerMangelfull = resultSet[feilaktigEllerMangelfull],
                     forrigePeriodeId = resultSet[forrigePeriodeId],
+                    begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
                 ),
             )
         }

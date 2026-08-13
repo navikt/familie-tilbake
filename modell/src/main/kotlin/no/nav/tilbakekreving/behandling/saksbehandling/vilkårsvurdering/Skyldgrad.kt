@@ -92,6 +92,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     begrunnelse = begrunnelseAktsomhet,
                     skalIleggesRenter = null,
                 ),
+                begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
@@ -170,6 +171,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 kanUnnlates = null,
                 særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
+                begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = null,
             )
         }
@@ -243,6 +245,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 kanUnnlates = null,
                 særligGrunner = null,
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
+                begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = null,
             )
         }

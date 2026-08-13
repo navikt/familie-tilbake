@@ -48,8 +48,8 @@ enum class KanUnnlatesEntity {
     IKKE_VURDERT,
     ;
 
-    fun fraEntity(særligeGrunner: SærligeGrunnerEntity?): KanUnnlates4xRettsgebyr = when (this) {
-        UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates
+    fun fraEntity(særligeGrunner: SærligeGrunnerEntity?, begrunnelseForUnnlatelse: String?): KanUnnlates4xRettsgebyr = when (this) {
+        UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates(begrunnelseForUnnlatelse)
         SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
             requireNotNull(særligeGrunner) { "SærligGrunner kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
         )

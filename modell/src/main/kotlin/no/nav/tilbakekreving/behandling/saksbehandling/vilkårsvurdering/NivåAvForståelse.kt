@@ -93,6 +93,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
+                begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr?.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
                 særligGrunner = kanUnnlates4XRettsgebyr?.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
@@ -169,6 +170,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = null,
                 begrunnelse = begrunnelse,
                 aktsomhet = null,
+                begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
                 særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
@@ -226,6 +228,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 kanUnnlates = null,
                 særligGrunner = null,
+                begrunnelseForUnnlatelse = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )

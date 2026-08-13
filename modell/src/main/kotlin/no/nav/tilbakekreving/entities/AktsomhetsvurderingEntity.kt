@@ -11,6 +11,7 @@ data class AktsomhetsvurderingEntity(
     val vurderingType: VurderingType,
     val mottakersForståelse: MottakersForståelseEntity?,
     val begrunnelse: String?,
+    val begrunnelseForUnnlatelse: String?,
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
     val kanUnnlates: KanUnnlatesEntity?,
@@ -38,7 +39,7 @@ data class AktsomhetsvurderingEntity(
                     },
                     begrunnelseMottakersForståelse = mottakersForståelse.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
                 )
             }
 
@@ -46,7 +47,7 @@ data class AktsomhetsvurderingEntity(
                 NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i FORSTOD" }.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
                 )
             }
 
@@ -58,7 +59,7 @@ data class AktsomhetsvurderingEntity(
                             begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for uaktsomt" },
                             begrunnelseAktsomhet = aktsomhet.begrunnelse,
                             feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
-                            kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner),
+                            kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
                         )
                     }
                     AktsomhetType.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(

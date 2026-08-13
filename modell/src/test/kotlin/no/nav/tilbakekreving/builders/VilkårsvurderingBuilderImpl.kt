@@ -75,7 +75,7 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
 
     override fun build(unnlates: KanUnnlates4xRettsgebyrBuilder, reduksjon: ReduksjonSærligeGrunnerBuilder): KanUnnlates4xRettsgebyr {
         return when (unnlates.unnlates) {
-            Unnlates.Unnlates -> KanUnnlates4xRettsgebyr.Unnlates
+            Unnlates.Unnlates -> KanUnnlates4xRettsgebyr.Unnlates("Begrunnelse for unnlatelse")
             Unnlates.Tilbakekreves -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(reduksjon.build(this))
             Unnlates.Over4Rettsgebyr -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(reduksjon.build(this))
         }

@@ -44,7 +44,7 @@ object ForårsaketAvBrukerMapper {
             is ForstoEllerBurdeForstaattDto -> when (val forståelse = valg.forståelse) {
                 is ForstoDto -> NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
-                    begrunnelse = "TODO",
+                    begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseMottakersForståelse
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
                 )
 
@@ -52,26 +52,26 @@ object ForårsaketAvBrukerMapper {
                     grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
-                    begrunnelse = "TODO",
+                    begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseMottakersForståelse
                 )
             }
 
             is ForaarsaketAvMottakerDto -> when (val aktsomhet = valg.aktsomhet) {
                 is ForsettligDto -> Skyldgrad.Forsett(
-                    begrunnelse = "TODO",
+                    begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseAktsomhet
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
                 )
 
                 is GrovtUaktsomtDto -> Skyldgrad.GrovUaktsomhet(
-                    begrunnelse = "TODO",
+                    begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseAktsomhet
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     reduksjonSærligeGrunner = mapReduksjonSærligeGrunner(aktsomhet.erDetSærligeGrunner, logContext),
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
                 )
 
                 is UaktsomtDto -> Skyldgrad.Uaktsomt(
-                    begrunnelse = "TODO",
+                    begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseAktsomhet
                     begrunnelseAktsomhet = aktsomhet.begrunnelse,
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(aktsomhet.unnlatelse, logContext),
                     feilaktigeEllerMangelfulleOpplysninger = Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT,
@@ -88,7 +88,7 @@ object ForårsaketAvBrukerMapper {
                     is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei
                 },
                 begrunnelseForGodTro = valg.begrunnelse,
-                begrunnelse = "TODO",
+                begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
             )
 
             is VilkaarsvurderingIkkeVurdertDto ->
@@ -101,7 +101,7 @@ object ForårsaketAvBrukerMapper {
         logContext: SecureLog.Context,
     ): KanUnnlates4xRettsgebyr =
         when (unnlatelse) {
-            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates
+            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates(unnlatelse.begrunnelse)
             is IkkeAktueltDto -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
                 mapReduksjonSærligeGrunner(unnlatelse.erDetSærligeGrunner, logContext),
             )
