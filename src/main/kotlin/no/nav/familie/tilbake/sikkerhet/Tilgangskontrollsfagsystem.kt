@@ -12,7 +12,7 @@ enum class Tilgangskontrollsfagsystem(
     TILLEGGSSTØNAD("TS"),
     ARBEIDSAVKLARINGSPENGER("AAP"),
     TILTAKSPENGER("TP"),
-    DAGPENGER("DP"), // TODO: Bekreft fagsystem-kode for dagpenger
+    DAGPENGER("DP"),
     FORVALTER_TILGANG("FT"), // brukes internt bare for tilgangsskontroll
     SYSTEM_TILGANG(""), // brukes internt bare for tilgangsskontroll
     ;

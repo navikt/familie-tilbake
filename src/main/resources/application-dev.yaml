@@ -18,6 +18,7 @@ tilbakekreving:
     - Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
     - Q1_TILBAKEKREVING.KRAVGRUNNLAG
     - Q1_TILTAKSPENGER.KRAVGRUNNLAG
+    - Q1_TILBAKEKREVING.KRAVGRUNNLAG.DAGPENGER
   toggles:
     ny-modell:
       SendAutomatiskVarselbrev: false
