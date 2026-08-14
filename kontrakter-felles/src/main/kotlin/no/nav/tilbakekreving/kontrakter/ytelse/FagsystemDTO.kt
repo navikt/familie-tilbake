@@ -13,4 +13,5 @@ enum class FagsystemDTO {
     IT01,
     TS,
     TP,
+    DP,
 }
