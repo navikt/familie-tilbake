@@ -84,6 +84,7 @@ object KravgrunnlagMapper {
         "TILLST", "TILLSTDR", "TILLSTBO", "TILLSTFL", "TILLSTLM", "TILLSTPB", "TILLSTRA", "TILLSTRO", "TILLISTRS" -> Ytelse.Tilleggsstønad
         "AAP" -> Ytelse.Arbeidsavklaringspenger
         "TILTPENG" -> Ytelse.Tiltakspenger
+        "DP" -> Ytelse.Dagpenger
         else -> throw Feil(
             message = "Kan ikke håndtere saker for ${kravgrunnlag.kodeFagomraade} med ny modell",
             httpStatus = HttpStatus.BAD_REQUEST,
