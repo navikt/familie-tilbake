@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val springDocVersion = "3.1.0"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.11"
+val tokenValidationVersion = "6.0.12"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.5.2"
 ext["ktorVersion"] = ktorVersion
@@ -56,7 +56,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.2.3")
+        testImplementation("io.kotest:kotest-assertions-core:6.2.4")
     }
 
     tasks.test {
@@ -120,11 +120,11 @@ dependencies {
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20260713101404_6072da6") {
+    api("no.nav.familie:prosessering-core:2.20260812141109_3d10912") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
-    api("no.nav.familie:prosessering-web-nav-token-support:2.20260713101404_6072da6")
+    api("no.nav.familie:prosessering-web-nav-token-support:2.20260812141109_3d10912")
     api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
     api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
@@ -139,7 +139,7 @@ dependencies {
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
     api("io.getunleash:unleash-client-java:12.2.3")
-    api("org.messaginghub:pooled-jms:3.2.3")
+    api("org.messaginghub:pooled-jms:3.2.4")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -151,7 +151,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.11")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.3")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.4")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
