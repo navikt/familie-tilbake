@@ -183,7 +183,7 @@ sealed interface Ytelse {
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.DAGPENGER
 
-        override fun integrererMotFagsystem(): Boolean = true
+        override fun integrererMotFagsystem(): Boolean = false
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.DAGPENGER
 
