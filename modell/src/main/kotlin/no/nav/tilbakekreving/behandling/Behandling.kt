@@ -786,7 +786,7 @@ class Behandling internal constructor(
         }
 
         fun lagreVilkårsvurdering(periodeId: UUID, vurdering: ForårsaketAvBruker): VilkaarsvurderingDto {
-            vilkårsvurderingsteg.vurder(id, vurdering)
+            vilkårsvurderingsteg.vurder(periodeId, vurdering)
             return vilkårsvurderingsteg.tilFrontendDto().first { it.id == periodeId }
         }
 
