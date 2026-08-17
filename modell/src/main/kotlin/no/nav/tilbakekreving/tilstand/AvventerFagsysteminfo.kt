@@ -24,7 +24,9 @@ object AvventerFagsysteminfo : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
-        tilbakekreving.trengerFagsysteminfo(sideeffektContext)
+        if (!tilbakekreving.eksternFagsak.ytelse.integrererMotFagsystem()) {
+            tilbakekreving.opprettBehandlingUtenIntegrasjon(sideeffektContext)
+        }
     }
 
     override fun håndter(
