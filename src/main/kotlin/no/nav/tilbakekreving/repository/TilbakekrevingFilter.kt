@@ -93,7 +93,7 @@ sealed interface TilbakekrevingFilter {
 
         override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? FOR UPDATE;",
+                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? LIMIT 10 FOR UPDATE;",
                 mapper,
                 FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
             )

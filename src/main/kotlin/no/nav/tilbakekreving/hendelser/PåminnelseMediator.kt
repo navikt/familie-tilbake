@@ -28,7 +28,14 @@ class PåminnelseMediator(
 
     @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
     fun påminnSaker() {
-        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
+        val tilbakekrevinger = try {
+            tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
+        } catch (e: Exception) {
+            logger.medContext(SecureLog.Context.tom()) {
+                error("Feilet under henting av tilbakekrevinger for påminnelse", e)
+            }
+            return
+        }
         for (tilbakekrevingEntity in tilbakekrevinger) {
             var logContext = SecureLog.Context.utenBehandling(tilbakekrevingEntity.eksternFagsak.eksternId)
             try {
