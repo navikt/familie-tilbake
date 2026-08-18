@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
-import java.time.LocalDateTime
 import java.util.UUID
 
 sealed interface TilbakekrevingFilter {
@@ -82,33 +81,11 @@ sealed interface TilbakekrevingFilter {
         override fun logContext(): SecureLog.Context = SecureLog.Context.tom()
     }
 
-    private object TrengerPåminnelse : TilbakekrevingFilter {
-        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? ORDER BY RANDOM() LIMIT 500;",
-                mapper,
-                FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
-            )
-        }
-
-        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? ORDER BY RANDOM() LIMIT 500 FOR UPDATE;",
-                mapper,
-                FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
-            )
-        }
-
-        override fun logContext(): SecureLog.Context = SecureLog.Context.tom()
-    }
-
     companion object {
         fun behandling(id: UUID): TilbakekrevingFilter = BehandlingId(id)
 
         fun fagsak(fagsakId: String, fagsystem: FagsystemDTO): TilbakekrevingFilter = EksternFagsakId(fagsakId, fagsystem)
 
         fun tilbakekreving(id: String): TilbakekrevingFilter = TilbakekrevingId(id)
-
-        fun trengerPåminnelse(): TilbakekrevingFilter = TrengerPåminnelse
     }
 }
