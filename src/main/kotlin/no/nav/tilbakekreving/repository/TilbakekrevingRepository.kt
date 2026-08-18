@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
@@ -35,6 +36,8 @@ class TilbakekrevingRepository(
         .publishPercentiles(0.5, 0.9, 0.95, 0.99)
         .tag("readonly", "false")
         .register(Metrics.globalRegistry)
+
+    private val log = LoggerFactory.getLogger(TilbakekrevingRepository::class.java)
 
     fun nesteId(): String {
         return jdbcTemplate.query("SELECT nextval('tilbakekreving_id')") { rs, _ ->
@@ -64,6 +67,9 @@ class TilbakekrevingRepository(
 
     fun hentTilbakekrevinger(strategy: TilbakekrevingFilter): List<TilbakekrevingEntity> {
         return strategy.select(jdbcTemplate) { resultSet, index ->
+            if (strategy == TilbakekrevingFilter.trengerPåminnelse()) {
+                log.info("Henter tilbakekreving {} for påminnelse", resultSet[TilbakekrevingEntityMapper.id])
+            }
             hentTilbakekrevingEntity(resultSet)
         }
     }
