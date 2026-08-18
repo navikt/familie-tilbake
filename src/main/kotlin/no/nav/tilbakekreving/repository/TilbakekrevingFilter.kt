@@ -85,7 +85,7 @@ sealed interface TilbakekrevingFilter {
     private object TrengerPåminnelse : TilbakekrevingFilter {
         override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? LIMIT 500;",
+                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? ORDER BY RANDOM() LIMIT 500;",
                 mapper,
                 FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
             )
@@ -93,7 +93,7 @@ sealed interface TilbakekrevingFilter {
 
         override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? LIMIT 500 FOR UPDATE;",
+                "SELECT * FROM tilbakekreving WHERE neste_påminnelse IS NOT NULL AND neste_påminnelse < ? ORDER BY RANDOM() LIMIT 500 FOR UPDATE;",
                 mapper,
                 FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
             )
