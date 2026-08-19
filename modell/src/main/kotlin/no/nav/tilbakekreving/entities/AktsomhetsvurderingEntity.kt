@@ -132,6 +132,7 @@ data class MottakersForståelseEntity(
 enum class FeilaktigEllerMangelfullType(val fraEntity: Skyldgrad.FeilaktigEllerMangelfull) {
     FEILAKTIG(Skyldgrad.FeilaktigEllerMangelfull.FEILAKTIG),
     MANGELFULL(Skyldgrad.FeilaktigEllerMangelfull.MANGELFULL),
+    IKKE_VURDERT(Skyldgrad.FeilaktigEllerMangelfull.IKKE_VURDERT),
 }
 
 enum class BeholdType {
