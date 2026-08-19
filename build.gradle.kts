@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 val springDocVersion = "3.1.0"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.11"
+val tokenValidationVersion = "6.0.12"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.5.2"
 ext["ktorVersion"] = ktorVersion
@@ -56,7 +56,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.2.3")
+        testImplementation("io.kotest:kotest-assertions-core:6.2.4")
     }
 
     tasks.test {
@@ -139,7 +139,7 @@ dependencies {
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
     api("io.getunleash:unleash-client-java:12.2.3")
-    api("org.messaginghub:pooled-jms:3.2.3")
+    api("org.messaginghub:pooled-jms:3.2.4")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -151,7 +151,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.11")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.3")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.4")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
