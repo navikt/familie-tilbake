@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
+import no.nav.tilbakekreving.entities.RelevanteMomentGodTroEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
@@ -19,6 +20,7 @@ import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.sql.ResultSet
 import java.util.UUID
@@ -154,8 +156,26 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
 
         val beløp = field(
             "beløp",
-            GodTroEntity::beløp,
+            GodTroEntity::beløpIBehold,
             FieldConverter.BigDecimalConverter,
+        )
+
+        val prosentReduksjon = field(
+            "prosent_reduksjon",
+            GodTroEntity::prosentReduksjon,
+            FieldConverter.IntConverter,
+        )
+
+        val annetBegrunnelse = field(
+            "annet_begrunnelse",
+            GodTroEntity::annetBegrunnelse,
+            FieldConverter.StringConverter,
+        )
+
+        val relevanteMomenter = field(
+            "relevante_momenter",
+            { it.relevanteMomentGodTroEntity.map { grunn -> grunn.type } },
+            FieldConverter.EnumArrayConverter.of<RelevanteMomentType>(),
         )
 
         fun map(resultSet: ResultSet): GodTroEntity {
@@ -163,7 +183,15 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                 periodeRef = resultSet[id],
                 begrunnelse = resultSet[begrunnelse],
                 beholdType = resultSet[beløpIBehold],
-                beløp = resultSet[beløp],
+                beløpIBehold = resultSet[beløp],
+                prosentReduksjon = resultSet[prosentReduksjon],
+                annetBegrunnelse = resultSet[annetBegrunnelse],
+                relevanteMomentGodTroEntity = resultSet[relevanteMomenter].map {
+                    when (it) {
+                        RelevanteMomentType.ANNET -> RelevanteMomentGodTroEntity(it, resultSet[annetBegrunnelse!!])
+                        else -> RelevanteMomentGodTroEntity(it, null)
+                    }
+                },
             )
         }
     }
