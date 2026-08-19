@@ -90,19 +90,35 @@ data class GodTroEntity(
     val periodeRef: UUID,
     val begrunnelse: String,
     val beholdType: BeholdType,
-    val beløp: BigDecimal?,
+    val beløpIBehold: BigDecimal?,
+    val prosentReduksjon: Int?,
+    val annetBegrunnelse: String?,
+    val relevanteMomentGodTroEntity: List<RelevanteMomentGodTroEntity>,
 ) {
     fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
             BeholdType.HELE_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold()
+                NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
+                    prosentReduksjon = prosentReduksjon,
+                    relevanteMomenter = relevanteMomentGodTroEntity.map { it.fraEntity() },
+                    annetBegrunnelse = annetBegrunnelse,
+                    begrunnelse = begrunnelse,
+                )
             }
             BeholdType.JA, BeholdType.DELER_AV_BELØPET -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(requireNotNull(beløp) { "Beløp kreves i BeløpIBehold" })
+                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    requireNotNull(beløpIBehold) { "Beløp kreves i BeløpIBehold" },
+                    prosentReduksjon = prosentReduksjon,
+                    relevanteMomenter = relevanteMomentGodTroEntity.map { it.fraEntity() },
+                    annetBegrunnelse = annetBegrunnelse,
+                    begrunnelse = begrunnelse,
+                )
             }
 
             BeholdType.NEI -> {
-                NivåAvForståelse.GodTro.BeløpIBehold.Nei
+                NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                    begrunnelse = begrunnelse,
+                )
             }
         }
     }

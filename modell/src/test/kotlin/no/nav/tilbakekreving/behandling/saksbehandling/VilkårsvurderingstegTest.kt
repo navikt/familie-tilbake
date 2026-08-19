@@ -19,7 +19,11 @@ import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -289,20 +293,26 @@ class VilkårsvurderingstegTest {
     }
 
     @Test
-    fun `beløp i behold ny vilkårsvurdering`() {
+    fun `deler av beløpet i behold ny vilkårsvurdering uten reduksjon`() {
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
             eksternFagsakBehandling(),
             kravgrunnlag(
                 perioder = listOf(
-                    kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021)),
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
                 ),
             ),
         )
         vilkårsvurderingsteg.vurder(
             1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.GodTro(
-                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(1000.kroner),
-                begrunnelse = "Begrunnelse for beløp i behold",
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    beløp = 1000.kroner,
+                    prosentReduksjon = null,
+                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
+                    annetBegrunnelse = null,
+                    begrunnelse = "Begrunnelse for i behold",
+                ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
             ),
         )
@@ -313,9 +323,184 @@ class VilkårsvurderingstegTest {
             this[0].tom shouldBe 31.januar(2021)
             this[0].valg.shouldBeInstanceOf<GodTroDto> {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
-                it.beløpIBehold.shouldBeInstanceOf<DelerDto> {
-                    BigDecimal(it.beløp) shouldBe 1000.kroner
-                    it.begrunnelse shouldBe "Begrunnelse for beløp i behold"
+                it.beløpIBehold.shouldBeInstanceOf<DelerDto> { deler ->
+                    BigDecimal(deler.beløp) shouldBe 1000.kroner
+                    deler.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    deler.reduksjon.shouldBeInstanceOf<SkalIkkeReduseresDto> { reduksjon ->
+                        reduksjon.relevans.size shouldBe 1
+                        reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
+                        reduksjon.annetBegrunnelse shouldBe null
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `deler av beløpet i behold ny vilkårsvurdering med reduksjon`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            NivåAvForståelse.GodTro(
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    beløp = 1000.kroner,
+                    prosentReduksjon = 20,
+                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("annet begrunnelse")),
+                    annetBegrunnelse = "Annet begrunnelse",
+                    begrunnelse = "Begrunnelse for i behold",
+                ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
+            size shouldBe 1
+            this[0].fom shouldBe 1.januar(2021)
+            this[0].tom shouldBe 31.januar(2021)
+            this[0].valg.shouldBeInstanceOf<GodTroDto> {
+                it.begrunnelse shouldBe "Begrunnelse for god tro"
+                it.beløpIBehold.shouldBeInstanceOf<DelerDto> { deler ->
+                    BigDecimal(deler.beløp) shouldBe 1000.kroner
+                    deler.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    deler.reduksjon.shouldBeInstanceOf<SkalReduseresDto> { reduksjon ->
+                        reduksjon.relevans.size shouldBe 2
+                        reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
+                        reduksjon.relevans[1].moment shouldBe "ANNET"
+                        reduksjon.annetBegrunnelse shouldBe "Annet begrunnelse"
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                        reduksjon.prosentReduksjon shouldBe 20
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `hele beløpet i behold ny vilkårsvurdering uten reduksjon`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            NivåAvForståelse.GodTro(
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
+                    prosentReduksjon = null,
+                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
+                    annetBegrunnelse = null,
+                    begrunnelse = "Begrunnelse for i behold",
+                ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
+            size shouldBe 1
+            this[0].fom shouldBe 1.januar(2021)
+            this[0].tom shouldBe 31.januar(2021)
+            this[0].valg.shouldBeInstanceOf<GodTroDto> {
+                it.begrunnelse shouldBe "Begrunnelse for god tro"
+                it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
+                    hele.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    hele.reduksjon.shouldBeInstanceOf<SkalIkkeReduseresDto> { reduksjon ->
+                        reduksjon.relevans.size shouldBe 1
+                        reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
+                        reduksjon.annetBegrunnelse shouldBe null
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `hele beløpet i behold ny vilkårsvurdering med reduksjon`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            NivåAvForståelse.GodTro(
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
+                    prosentReduksjon = 20,
+                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("annet begrunnelse")),
+                    annetBegrunnelse = "Annet begrunnelse",
+                    begrunnelse = "Begrunnelse for i behold",
+                ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
+            size shouldBe 1
+            this[0].fom shouldBe 1.januar(2021)
+            this[0].tom shouldBe 31.januar(2021)
+            this[0].valg.shouldBeInstanceOf<GodTroDto> {
+                it.begrunnelse shouldBe "Begrunnelse for god tro"
+                it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
+                    hele.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    hele.reduksjon.shouldBeInstanceOf<SkalReduseresDto> { reduksjon ->
+                        reduksjon.relevans.size shouldBe 2
+                        reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
+                        reduksjon.relevans[1].moment shouldBe "ANNET"
+                        reduksjon.annetBegrunnelse shouldBe "Annet begrunnelse"
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                        reduksjon.prosentReduksjon shouldBe 20
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `beløp ikke  i behold ny vilkårsvurdering`() {
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                ),
+            ),
+        )
+        vilkårsvurderingsteg.vurder(
+            1.januar(2021) til 31.januar(2021),
+            NivåAvForståelse.GodTro(
+                beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                    begrunnelse = "Begrunnelse for i behold",
+                ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldNotBeNull {
+            size shouldBe 1
+            this[0].fom shouldBe 1.januar(2021)
+            this[0].tom shouldBe 31.januar(2021)
+            this[0].valg.shouldBeInstanceOf<GodTroDto> {
+                it.begrunnelse shouldBe "Begrunnelse for god tro"
+                it.beløpIBehold.shouldBeInstanceOf<IngentingDto> { ikkeIBehold ->
+                    ikkeIBehold.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
                 }
             }
         }
