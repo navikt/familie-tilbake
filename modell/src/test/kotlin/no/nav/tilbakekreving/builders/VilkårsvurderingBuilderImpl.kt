@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.builders
 
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
@@ -17,7 +18,15 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvide
 object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBruker.Ja, ForårsaketAvBruker.Nei>, VilkårsvurderingValgProvider<KanUnnlates4xRettsgebyr, ReduksjonSærligeGrunner, KanUnnlates4xRettsgebyr> {
     override fun build(vurdering: ForårsaketAvNavBuilder.GodTroBuilder<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.GodTro(
-            vurdering.beløpIBehold?.let(NivåAvForståelse.GodTro.BeløpIBehold::DelerIBehold) ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+            vurdering.beløpIBehold?.let {
+                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    beløp = it,
+                    prosentReduksjon = 0,
+                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
+                    annetBegrunnelse = null,
+                    begrunnelse = "begrunnelse for beløp i behold",
+                )
+            } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
             "",
             "",
         )
