@@ -28,11 +28,10 @@ class PåminnelseMediator(
 
     @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
     fun påminnSaker() {
-        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
-        for (tilbakekrevingEntity in tilbakekrevinger) {
-            var logContext = SecureLog.Context.utenBehandling(tilbakekrevingEntity.eksternFagsak.eksternId)
+        for ((tilbakekrevingId, fagsystemId, ytelse) in tilbakekrevingRepository.hentTilbakekrevingerForPåminnelse()) {
+            var logContext = SecureLog.Context.utenBehandling(fagsystemId)
             try {
-                tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingEntity.id)) { tilbakekreving, context ->
+                tilbakekrevinService.hentOgLagreTilbakekreving(TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)) { tilbakekreving, context ->
                     logContext = SecureLog.Context.fra(tilbakekreving)
                     logger.medContext(logContext) {
                         info("Sender påminnelse")
@@ -44,14 +43,19 @@ class PåminnelseMediator(
                     warn(
                         "Prøvde å påminne sak utenfor scope, {} {} og {}",
                         keyValue("grunn", e.utenforScope),
-                        keyValue("tilbakekrevingId", tilbakekrevingEntity.id),
-                        keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity),
+                        keyValue("tilbakekrevingId", tilbakekrevingId),
+                        keyValue("ytelse", ytelse),
                         e,
                     )
                 }
             } catch (e: Exception) {
                 logger.medContext(logContext) {
-                    error("Feilet under påminnelse av sak med {} og {}", keyValue("tilbakekrevingId", tilbakekrevingEntity.id), keyValue("ytelse", tilbakekrevingEntity.eksternFagsak.ytelseEntity), e)
+                    error(
+                        "Feilet under påminnelse av sak med {} og {}",
+                        keyValue("tilbakekrevingId", tilbakekrevingId),
+                        keyValue("ytelse", ytelse),
+                        e,
+                    )
                 }
             }
         }

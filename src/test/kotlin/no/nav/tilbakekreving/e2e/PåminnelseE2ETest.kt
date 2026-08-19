@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.vedHendel
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
@@ -135,9 +134,9 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
 
         val tilbakekreving = tilbakekreving(behandlingId)
         tilbakekreving.tilEntity().nåværendeTilstand shouldBe TilbakekrevingTilstand.AVSLUTTET
-        tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.trengerPåminnelse())
+        tilbakekrevingRepository.hentTilbakekrevingerForPåminnelse()
             .forNone {
-                it.id shouldBe tilbakekreving.id
+                it.tilbakekrevingId shouldBe tilbakekreving.id
             }
     }
 

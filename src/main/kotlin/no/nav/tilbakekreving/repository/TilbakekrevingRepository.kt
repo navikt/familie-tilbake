@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.entity.TilbakekrevingEntityMapper
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -143,6 +144,28 @@ class TilbakekrevingRepository(
             FieldConverter.EnumConverter.of<TilbakekrevingTilstand>().convert(tilstand),
         )
     }
+
+    fun hentTilbakekrevingerForPåminnelse(): List<TilbakekrevingForPåminnelse> {
+        return jdbcTemplate.query(
+            """SELECT tbk.id, ef.ekstern_id, ef.ytelse
+FROM tilbakekreving tbk
+         LEFT JOIN tilbakekreving_ekstern_fagsak ef ON tbk.id = ef.tilbakekreving_ref
+WHERE tbk.neste_påminnelse < ?;""",
+            FieldConverter.LocalDateTimeConverter.convert(LocalDateTime.now()),
+        ) { rs, _ ->
+            TilbakekrevingForPåminnelse(
+                rs.getString("id"),
+                rs.getString("ekstern_id"),
+                rs.getString("ytelse"),
+            )
+        }.toList()
+    }
+
+    data class TilbakekrevingForPåminnelse(
+        val tilbakekrevingId: String,
+        val fagsystemId: String,
+        val ytelse: String,
+    )
 
     data class ForenkletTilstandStatistikk(
         val tilstand: String,
