@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.GodTroEntity
+import no.nav.tilbakekreving.entities.GodTroRelevanteMomenterEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
 import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
@@ -39,6 +40,9 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.særligGrunner != null) {
                 lagreSærligeGrunner(periode.vurdering.særligGrunner!!)
             }
+            if (periode.vurdering.relevantMomenter != null) {
+                lagreRelevanteMomenter(periode.vurdering.relevantMomenter!!)
+            }
             if (periode.vurdering.mottakersForståelse != null) {
                 lagreMottakersForståelse(periode.vurdering.mottakersForståelse!!)
             }
@@ -60,6 +64,7 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
                 hentGodTroVurdering(periodeId),
                 hentAktsomhetvurdering(periodeId),
                 hentSærligeGrunnerVurdering(periodeId),
+                hentRelevanteMomenterVurdering(periodeId),
                 hentMottakersForståelse(periodeId),
                 hentEndretAvKravgrunnlag(periodeId),
             )
@@ -112,6 +117,16 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     private fun hentSærligeGrunnerVurdering(periodeId: UUID): SærligeGrunnerEntity? {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_særlige_grunner WHERE id=?;", periodeId) { resultSet, _ ->
             VilkårsvurderingEntityMapper.SærligeGrunnerMapper.map(resultSet)
+        }.singleOrNull()
+    }
+
+    private fun lagreRelevanteMomenter(relevanteMomenter: GodTroRelevanteMomenterEntity) {
+        VilkårsvurderingEntityMapper.RelevanteMomenterMapper.upsertQuery(jdbcTemplate, relevanteMomenter)
+    }
+
+    private fun hentRelevanteMomenterVurdering(periodeId: UUID): GodTroRelevanteMomenterEntity? {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_relevante_momenter WHERE id=?;", periodeId) { resultSet, _ ->
+            VilkårsvurderingEntityMapper.RelevanteMomenterMapper.map(resultSet)
         }.singleOrNull()
     }
 }

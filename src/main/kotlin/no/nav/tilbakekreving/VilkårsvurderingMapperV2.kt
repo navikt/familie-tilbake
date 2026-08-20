@@ -6,7 +6,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
@@ -26,10 +27,10 @@ object VilkårsvurderingMapperV2 {
                 }
             }.toSet(),
             when (aktsomhetDto!!.særligeGrunnerTilReduksjon) {
-                true -> ReduksjonSærligeGrunner.SkalReduseres.Ja(
+                true -> ReduksjonÅrsaker.SkalReduseres.Ja(
                     aktsomhetDto!!.andelTilbakekreves!!.toInt(),
                 )
-                false -> ReduksjonSærligeGrunner.SkalReduseres.Nei
+                false -> ReduksjonÅrsaker.SkalReduseres.Nei
             },
         )
     }
@@ -101,15 +102,16 @@ object VilkårsvurderingMapperV2 {
                     beløpIBehold = when (periode.godTroDto!!.beløpErIBehold) {
                         true -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                             periode.godTroDto!!.beløpTilbakekreves!!,
-                            prosentReduksjon = null,
-                            relevanteMomenter = null,
                             annetBegrunnelse = null,
                             begrunnelse = null,
                         )
-                        false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(null)
+                        false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                            begrunnelse = null,
+                        )
                     },
                     begrunnelse = periode.begrunnelse,
                     begrunnelseForGodTro = periode.godTroDto!!.begrunnelse,
+                    kanUnnlates4XRettsgebyr = null,
                 )
 
             Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert()

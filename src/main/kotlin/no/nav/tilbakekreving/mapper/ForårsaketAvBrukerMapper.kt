@@ -7,8 +7,20 @@ import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.SkalIkkeUnnlates
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.Unnlates
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.BurdeForstått
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.Forstod
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.Grad
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres.Ja
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres.JaAvBeløpIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.frontend.models.BurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
@@ -23,7 +35,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.JaSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.SaerligeGrunnerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ReduksjonArsakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
@@ -32,7 +44,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UaktsomtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnnlatelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentType
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 object ForårsaketAvBrukerMapper {
@@ -44,14 +56,14 @@ object ForårsaketAvBrukerMapper {
 
         return when (val valg = vilkaarsvurderingDto.valg) {
             is ForstoEllerBurdeForstaattDto -> when (val forståelse = valg.forståelse) {
-                is ForstoDto -> NivåAvForståelse.Forstod(
+                is ForstoDto -> Forstod(
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
                     begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseMottakersForståelse
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
                 )
 
-                is BurdeForstaattDto -> NivåAvForståelse.BurdeForstått(
-                    grad = NivåAvForståelse.Grad.BURDE_FORSTÅTT,
+                is BurdeForstaattDto -> BurdeForstått(
+                    grad = Grad.BURDE_FORSTÅTT,
                     begrunnelseMottakersForståelse = forståelse.begrunnelse,
                     kanUnnlates4XRettsgebyr = mapUnnlatelse(forståelse.unnlatelse, logContext),
                     begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseMottakersForståelse
@@ -80,43 +92,90 @@ object ForårsaketAvBrukerMapper {
                 )
             }
 
-            is GodTroDto -> NivåAvForståelse.GodTro(
-                beløpIBehold = when (val beløpIBehold = valg.beløpIBehold) {
+            is GodTroDto -> {
+                when (val beløpIBehold = valg.beløpIBehold) {
                     is HeleDto -> when (val reduksjon = beløpIBehold.reduksjon) {
-                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
-                            prosentReduksjon = null,
-                            relevanteMomenter = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) },
-                            annetBegrunnelse = reduksjon.annetBegrunnelse,
-                            begrunnelse = reduksjon.begrunnelse,
+                        is SkalIkkeReduseresDto -> GodTro(
+                            beløpIBehold = HeleIBehold(
+                                annetBegrunnelse = reduksjon.annetBegrunnelse,
+                                begrunnelse = reduksjon.begrunnelse,
+                            ),
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonÅrsaker = ReduksjonGodTro(
+                                    begrunnelse = reduksjon.begrunnelse,
+                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
+                                    skalReduseres = SkalReduseres.Nei,
+                                ),
+                            ),
+                            begrunnelseForGodTro = valg.begrunnelse,
+                            begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
                         )
-                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
-                            prosentReduksjon = reduksjon.prosentReduksjon,
-                            relevanteMomenter = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) },
-                            annetBegrunnelse = reduksjon.annetBegrunnelse,
-                            begrunnelse = reduksjon.begrunnelse,
+
+                        is SkalReduseresDto -> GodTro(
+                            beløpIBehold = HeleIBehold(
+                                annetBegrunnelse = reduksjon.annetBegrunnelse,
+                                begrunnelse = reduksjon.begrunnelse,
+                            ),
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonÅrsaker = ReduksjonGodTro(
+                                    begrunnelse = reduksjon.begrunnelse,
+                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
+                                    skalReduseres = Ja(
+                                        prosentdel = reduksjon.prosentReduksjon,
+                                    ),
+                                ),
+                            ),
+                            begrunnelseForGodTro = valg.begrunnelse,
+                            begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
                         )
+
+                        is JaSaerligeGrunnerDto, is NeiSaerligeGrunnerDto -> throw Feil("GodTro har ingen særlige grunner!", logContext = logContext)
                     }
+
                     is DelerDto -> when (val reduksjon = beløpIBehold.reduksjon) {
-                        is SkalIkkeReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
-                            beløp = beløpIBehold.beløp.toBigDecimal(),
-                            prosentReduksjon = null,
-                            relevanteMomenter = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) },
-                            annetBegrunnelse = reduksjon.annetBegrunnelse,
-                            begrunnelse = reduksjon.begrunnelse,
+                        is SkalIkkeReduseresDto -> GodTro(
+                            beløpIBehold = DelerIBehold(
+                                beløp = beløpIBehold.beløp.toBigDecimal(),
+                                annetBegrunnelse = reduksjon.annetBegrunnelse,
+                                begrunnelse = reduksjon.begrunnelse,
+                            ),
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonÅrsaker = ReduksjonGodTro(
+                                    begrunnelse = reduksjon.begrunnelse,
+                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
+                                    skalReduseres = SkalReduseres.Nei,
+                                ),
+                            ),
+                            begrunnelseForGodTro = valg.begrunnelse,
+                            begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
                         )
-                        is SkalReduseresDto -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
-                            beløp = beløpIBehold.beløp.toBigDecimal(),
-                            prosentReduksjon = reduksjon.prosentReduksjon,
-                            relevanteMomenter = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) },
-                            annetBegrunnelse = reduksjon.annetBegrunnelse,
-                            begrunnelse = reduksjon.begrunnelse,
+
+                        is SkalReduseresDto -> GodTro(
+                            beløpIBehold = DelerIBehold(
+                                beløp = beløpIBehold.beløp.toBigDecimal(),
+                                annetBegrunnelse = reduksjon.annetBegrunnelse,
+                                begrunnelse = reduksjon.begrunnelse,
+                            ),
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonÅrsaker = ReduksjonGodTro(
+                                    begrunnelse = reduksjon.begrunnelse,
+                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
+                                    skalReduseres = JaAvBeløpIBehold(prosentdel = reduksjon.prosentReduksjon, beløpIBehold = beløpIBehold.beløp.toBigDecimal()),
+                                ),
+                            ),
+                            begrunnelseForGodTro = valg.begrunnelse,
+                            begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
                         )
+                        is JaSaerligeGrunnerDto, is NeiSaerligeGrunnerDto -> throw Feil("GodTro har ingen særlige grunner!", logContext = logContext)
                     }
-                    is IngentingDto -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(beløpIBehold.begrunnelse)
-                },
-                begrunnelseForGodTro = valg.begrunnelse,
-                begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
-            )
+                    is IngentingDto -> GodTro(
+                        beløpIBehold = GodTro.BeløpIBehold.Nei(begrunnelse = beløpIBehold.begrunnelse),
+                        kanUnnlates4XRettsgebyr = Unnlates(beløpIBehold.begrunnelse),
+                        begrunnelseForGodTro = valg.begrunnelse,
+                        begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
+                    )
+                }
+            }
 
             is VilkaarsvurderingIkkeVurdertDto ->
                 throw Feil("Feil vilkaarsvurderingDto: $vilkaarsvurderingDto!", logContext = logContext)
@@ -128,31 +187,33 @@ object ForårsaketAvBrukerMapper {
         logContext: SecureLog.Context,
     ): KanUnnlates4xRettsgebyr =
         when (unnlatelse) {
-            is SkalUnnlatesDto -> KanUnnlates4xRettsgebyr.Unnlates(unnlatelse.begrunnelse)
-            is IkkeAktueltDto -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+            is SkalUnnlatesDto -> Unnlates(unnlatelse.begrunnelse)
+            is IkkeAktueltDto -> ErOver4xRettsgebyr(
                 mapReduksjonSærligeGrunner(unnlatelse.erDetSærligeGrunner, logContext),
             )
-            is SkalIkkeUnnlatesDto -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+            is SkalIkkeUnnlatesDto -> SkalIkkeUnnlates(
                 mapReduksjonSærligeGrunner(unnlatelse.erDetSærligeGrunner, logContext),
             )
         }
 
     private fun mapReduksjonSærligeGrunner(
-        dto: SaerligeGrunnerDto,
+        dto: ReduksjonArsakerDto,
         logContext: SecureLog.Context,
     ): ReduksjonSærligeGrunner =
         when (dto) {
             is JaSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
                 begrunnelse = dto.begrunnelse,
                 grunner = dto.særligeGrunnerFor.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Ja(dto.prosentReduksjon),
+                skalReduseres = Ja(dto.prosentReduksjon),
             )
 
             is NeiSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
                 begrunnelse = dto.begrunnelse,
                 grunner = dto.særligeGrunnerMot.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                skalReduseres = SkalReduseres.Nei,
             )
+
+            is SkalIkkeReduseresDto, is SkalReduseresDto -> throw Feil("Her kreves det SærligeGrunnerDto", logContext = logContext)
         }
 
     private fun mapSærligGrunn(
@@ -175,10 +236,10 @@ object ForårsaketAvBrukerMapper {
         logContext: SecureLog.Context,
     ): RelevanteMomentGodTro =
         when (moment) {
-            RelevanteMomentType.STØRRELSE_BELØP.name -> RelevanteMomentGodTro.StørrelseBeløp
-            RelevanteMomentType.TID_FRA_UTBETALING.name -> RelevanteMomentGodTro.TidFraUtbetaling
-            RelevanteMomentType.UTBETALING_TILLIT.name -> RelevanteMomentGodTro.UtbetalingTillit
-            RelevanteMomentType.ANNET.name -> RelevanteMomentGodTro.Annet(annetBegrunnelse!!)
+            RelevanteMomentTypeGodTro.STØRRELSE_BELØP.name -> RelevanteMomentGodTro.StørrelseBeløp
+            RelevanteMomentTypeGodTro.TID_FRA_UTBETALING.name -> RelevanteMomentGodTro.TidFraUtbetaling
+            RelevanteMomentTypeGodTro.UTBETALING_TILLIT.name -> RelevanteMomentGodTro.UtbetalingTillit
+            RelevanteMomentTypeGodTro.ANNET.name -> RelevanteMomentGodTro.Annet(annetBegrunnelse!!)
             else -> throw Feil("Ukjent relevant moment for godTro: $moment", logContext = logContext)
         }
 }

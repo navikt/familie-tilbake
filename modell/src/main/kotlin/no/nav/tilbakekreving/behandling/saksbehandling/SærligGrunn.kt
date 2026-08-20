@@ -2,12 +2,22 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.MomentEllerSærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
-sealed interface SærligGrunn {
-    val type: SærligGrunnType
+sealed interface MomentEllerSærligGrunn<T : MomentEllerSærligGrunnType> {
+    val type: T
 
     fun tilFrontendDto() = MomentDto(
+        moment = type.name,
+        beskrivelse = type.navn,
+    )
+}
+
+sealed interface SærligGrunn : MomentEllerSærligGrunn<SærligGrunnType> {
+    override val type: SærligGrunnType
+
+    override fun tilFrontendDto() = MomentDto(
         moment = type.name,
         beskrivelse = type.navn,
     )

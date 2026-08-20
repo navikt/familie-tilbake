@@ -1,9 +1,12 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -16,6 +19,7 @@ data class AktsomhetsvurderingEntity(
     val aktsomhet: VurdertAktsomhetEntity?,
     val kanUnnlates: KanUnnlatesEntity?,
     val særligGrunner: SærligeGrunnerEntity?,
+    val relevantMomenter: GodTroRelevanteMomenterEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
     val forrigePeriodeId: UUID?,
 ) {
@@ -26,6 +30,12 @@ data class AktsomhetsvurderingEntity(
                     beløpIBehold = requireNotNull(beløpIBehold) { "beløpIBehold kreves i GOD_TRO " }.fraEntity(),
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnelse kreves i GOD_TRO " },
                     begrunnelseForGodTro = requireNotNull(beløpIBehold) { "begrunnelse kreves i GOD_TRO " }.begrunnelse,
+                    kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(
+                        reduksjonType = ReduksjonType.REDUKSJON_GOD_TRO,
+                        særligeGrunner = null,
+                        godTroRelevanteMomenter = relevantMomenter,
+                        begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                    ),
                 )
             }
 
@@ -39,7 +49,12 @@ data class AktsomhetsvurderingEntity(
                     },
                     begrunnelseMottakersForståelse = mottakersForståelse.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
+                    kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(
+                        reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
+                        særligeGrunner = særligGrunner,
+                        godTroRelevanteMomenter = null,
+                        begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                    ),
                 )
             }
 
@@ -47,7 +62,12 @@ data class AktsomhetsvurderingEntity(
                 NivåAvForståelse.Forstod(
                     begrunnelseMottakersForståelse = requireNotNull(mottakersForståelse) { "mottakersForståelse kreves i FORSTOD" }.begrunnelse,
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
-                    kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
+                    kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(
+                        reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
+                        særligeGrunner = særligGrunner,
+                        godTroRelevanteMomenter = null,
+                        begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                    ),
                 )
             }
 
@@ -59,7 +79,12 @@ data class AktsomhetsvurderingEntity(
                             begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for uaktsomt" },
                             begrunnelseAktsomhet = aktsomhet.begrunnelse,
                             feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
-                            kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(særligGrunner, begrunnelseForUnnlatelse),
+                            kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(
+                                reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
+                                særligeGrunner = særligGrunner,
+                                godTroRelevanteMomenter = null,
+                                begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                            ),
                         )
                     }
                     AktsomhetType.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
@@ -91,26 +116,19 @@ data class GodTroEntity(
     val begrunnelse: String,
     val beholdType: BeholdType,
     val beløpIBehold: BigDecimal?,
-    val prosentReduksjon: Int?,
-    val annetBegrunnelse: String?,
-    val relevanteMomentGodTroEntity: List<RelevanteMomentGodTroEntity>,
 ) {
     fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
             BeholdType.HELE_BELØPET -> {
                 NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
-                    prosentReduksjon = prosentReduksjon,
-                    relevanteMomenter = relevanteMomentGodTroEntity.map { it.fraEntity() },
-                    annetBegrunnelse = annetBegrunnelse,
+                    annetBegrunnelse = null,
                     begrunnelse = begrunnelse,
                 )
             }
             BeholdType.JA, BeholdType.DELER_AV_BELØPET -> {
                 NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                     requireNotNull(beløpIBehold) { "Beløp kreves i BeløpIBehold" },
-                    prosentReduksjon = prosentReduksjon,
-                    relevanteMomenter = relevanteMomentGodTroEntity.map { it.fraEntity() },
-                    annetBegrunnelse = annetBegrunnelse,
+                    annetBegrunnelse = null,
                     begrunnelse = begrunnelse,
                 )
             }
@@ -120,6 +138,35 @@ data class GodTroEntity(
                     begrunnelse = begrunnelse,
                 )
             }
+        }
+    }
+}
+
+data class GodTroRelevanteMomenterEntity(
+    val periodeRef: UUID,
+    val begrunnelse: String,
+    val grunner: List<RelevantMomentEntity>,
+    val skalReduseres: SkalReduseresEntity,
+) {
+    fun fraEntity(): ReduksjonÅrsaker.ReduksjonGodTro {
+        return ReduksjonÅrsaker.ReduksjonGodTro(
+            begrunnelse = begrunnelse,
+            grunner = grunner.map { it.fraEntity() }.toSet(),
+            skalReduseres = skalReduseres.fraEntity(),
+        )
+    }
+}
+
+data class RelevantMomentEntity(
+    val type: RelevanteMomentTypeGodTro,
+    val annetBegrunnelse: String?,
+) {
+    fun fraEntity(): RelevanteMomentGodTro {
+        return when (type) {
+            RelevanteMomentTypeGodTro.STØRRELSE_BELØP -> RelevanteMomentGodTro.StørrelseBeløp
+            RelevanteMomentTypeGodTro.TID_FRA_UTBETALING -> RelevanteMomentGodTro.TidFraUtbetaling
+            RelevanteMomentTypeGodTro.UTBETALING_TILLIT -> RelevanteMomentGodTro.UtbetalingTillit
+            RelevanteMomentTypeGodTro.ANNET -> RelevanteMomentGodTro.Annet(requireNotNull(annetBegrunnelse))
         }
     }
 }

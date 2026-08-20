@@ -7,7 +7,8 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
@@ -108,6 +109,7 @@ class SlåSammenTest {
                 begrunnelse = "God tro",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
                 begrunnelseForGodTro = "begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates("Unnlatelse begrunnelse"),
             ),
         )
 
@@ -120,7 +122,7 @@ class SlåSammenTest {
                     ReduksjonSærligeGrunner(
                         begrunnelse = "",
                         grunner = emptySet(),
-                        skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
                     ),
                 ),
             ),

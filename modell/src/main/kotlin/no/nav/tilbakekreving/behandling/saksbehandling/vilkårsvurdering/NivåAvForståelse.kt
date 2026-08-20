@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertGodTroDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
@@ -22,8 +21,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaat
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ReduksjonArsakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingValgDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -97,7 +95,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr?.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
-                særligGrunner = kanUnnlates4XRettsgebyr?.særligeGrunner()?.tilEntity(periodeRef),
+                særligGrunner = (kanUnnlates4XRettsgebyr?.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef),
+                relevantMomenter = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -120,6 +119,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
@@ -129,11 +129,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseMottakersForståelse,
-                    særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonÅrsaker.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
-                    særligeGrunnerBegrunnelse = kanUnnlates4XRettsgebyr.særligeGrunner()?.begrunnelse,
+                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
                 ),
             )
         }
@@ -151,7 +151,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhetFørUtbetaling = null,
                 aktsomhetEtterUtbetaling = grad.aktsomhet,
                 forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
-                særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
+                særligeGrunner = (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }
@@ -159,6 +159,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            val særligeGrunnerEntity = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef)
+            }
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
                 mottakersForståelse = MottakersForståelseEntity(
@@ -174,7 +178,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
+                særligGrunner = særligeGrunnerEntity,
+                relevantMomenter = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -185,10 +190,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         private val beløpIBehold: BeløpIBehold,
         override val begrunnelse: String,
         val begrunnelseForGodTro: String,
+        private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?,
     ) : NivåAvForståelse {
         override fun vurderingstype(): Vurdering = AnnenVurdering.GOD_TRO
 
-        override fun reduksjon(): Reduksjon = beløpIBehold.reduksjon()
+        override fun reduksjon(): Reduksjon = beløpIBehold.reduksjon(kanUnnlates4XRettsgebyr)
 
         override fun renter(): Boolean = false
 
@@ -206,7 +212,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = GodTroDto(
             begrunnelse = begrunnelseForGodTro,
-            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse),
+            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse, reduksjonArsakerDto = kanUnnlates4XRettsgebyr?.reduksjonÅrsaker()?.tilFrontendDto()),
         )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
@@ -222,14 +228,23 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = beløpIBehold.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            val relevantMomentEntity = when (val unnlatelse = kanUnnlates4XRettsgebyr) {
+                null, is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> {
+                    val reduksjonGodTro = unnlatelse.reduksjonÅrsaker() as? ReduksjonÅrsaker.ReduksjonGodTro
+                        ?: error("Forventet ReduksjonGodTro for GodTro-vurdering")
+                    reduksjonGodTro.tilEntity(periodeRef)
+                }
+            }
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
                 mottakersForståelse = null,
                 begrunnelse = begrunnelse,
                 beløpIBehold = beløpIBehold.tilEntity(periodeRef),
                 aktsomhet = null,
-                kanUnnlates = null,
+                kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
                 særligGrunner = null,
+                relevantMomenter = relevantMomentEntity,
                 begrunnelseForUnnlatelse = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
@@ -237,43 +252,28 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         }
 
         sealed interface BeløpIBehold {
-            fun reduksjon(): Reduksjon
+            fun reduksjon(kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?): Reduksjon
 
             fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
             fun tilEntity(periodeRef: UUID): GodTroEntity
 
-            fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto
+            fun tilFrontendDto(begrunnelseForIBehold: String, reduksjonArsakerDto: ReduksjonArsakerDto?): BelopIBeholdDto
 
             class HeleIBehold(
-                val prosentReduksjon: Int?,
-                val relevanteMomenter: List<RelevanteMomentGodTro>,
                 val annetBegrunnelse: String?,
                 val begrunnelse: String,
             ) : BeløpIBehold {
-                override fun reduksjon(): Reduksjon =
-                    prosentReduksjon?.let { Reduksjon.Prosentdel(BigDecimal(it)) }
-                        ?: Reduksjon.FullstendigTilbakekreving()
+                override fun reduksjon(kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?): Reduksjon {
+                    return kanUnnlates4XRettsgebyr?.reduksjon() ?: Reduksjon.FullstendigTilbakekreving()
+                }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto {
-                    val relevans = relevanteMomenter.map { it.tilFrontendDto() }
-
+                override fun tilFrontendDto(begrunnelseForIBehold: String, reduksjonArsakerDto: ReduksjonArsakerDto?): BelopIBeholdDto {
                     return HeleDto(
                         begrunnelse = begrunnelseForIBehold,
-                        reduksjon = prosentReduksjon?.let {
-                            SkalReduseresDto(
-                                prosentReduksjon = it,
-                                relevans = relevans,
-                                annetBegrunnelse = annetBegrunnelse,
-                                begrunnelse = begrunnelse,
-                            )
-                        } ?: SkalIkkeReduseresDto(
-                            relevans = relevans,
-                            annetBegrunnelse = annetBegrunnelse,
-                            begrunnelse = begrunnelse,
-                        ),
+                        reduksjon = requireNotNull(reduksjonArsakerDto) { "Reduksjon årsaker må være satt for å kunne lage dto for beløp i behold" },
                     )
                 }
 
@@ -283,43 +283,27 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse,
                         beholdType = BeholdType.HELE_BELØPET,
                         beløpIBehold = null,
-                        prosentReduksjon = prosentReduksjon,
-                        annetBegrunnelse = annetBegrunnelse,
-                        relevanteMomentGodTroEntity = relevanteMomenter.map { it.tilEntity() },
                     )
                 }
             }
 
             class DelerIBehold(
                 val beløp: BigDecimal,
-                val prosentReduksjon: Int?,
-                val relevanteMomenter: List<RelevanteMomentGodTro>?,
                 val annetBegrunnelse: String?,
                 val begrunnelse: String?,
             ) : BeløpIBehold {
-                override fun reduksjon(): Reduksjon =
-                    prosentReduksjon?.let { Reduksjon.Prosentdel(BigDecimal(it)) }
-                        ?: Reduksjon.FullstendigTilbakekreving()
+                override fun reduksjon(kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?): Reduksjon {
+                    return kanUnnlates4XRettsgebyr?.reduksjon()
+                        ?: Reduksjon.ManueltBeløp(beløp)
+                }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
-                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto {
-                    val relevans = relevanteMomenter!!.map { it.tilFrontendDto() }
+                override fun tilFrontendDto(begrunnelseForIBehold: String, reduksjonArsakerDto: ReduksjonArsakerDto?): BelopIBeholdDto {
                     return DelerDto(
                         beløp = beløp.toInt(),
                         begrunnelse = begrunnelseForIBehold,
-                        reduksjon = prosentReduksjon?.let {
-                            SkalReduseresDto(
-                                prosentReduksjon = it,
-                                relevans = relevans,
-                                annetBegrunnelse = annetBegrunnelse,
-                                begrunnelse = begrunnelse!!,
-                            )
-                        } ?: SkalIkkeReduseresDto(
-                            relevans = relevans,
-                            annetBegrunnelse = annetBegrunnelse,
-                            begrunnelse = begrunnelse!!,
-                        ),
+                        reduksjon = requireNotNull(reduksjonArsakerDto) { "Reduksjon årsaker må være satt for å kunne lage dto for beløp i behold" },
                     )
                 }
 
@@ -329,21 +313,20 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse ?: "",
                         beholdType = BeholdType.DELER_AV_BELØPET,
                         beløpIBehold = beløp,
-                        prosentReduksjon = prosentReduksjon,
-                        annetBegrunnelse = annetBegrunnelse,
-                        relevanteMomentGodTroEntity = relevanteMomenter?.map { it.tilEntity() } ?: emptyList(),
                     )
                 }
             }
 
-            class Nei(val begrunnelse: String?) : BeløpIBehold {
-                override fun reduksjon(): Reduksjon {
-                    return Reduksjon.IngenTilbakekreving()
+            class Nei(
+                val begrunnelse: String?,
+            ) : BeløpIBehold {
+                override fun reduksjon(kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?): Reduksjon {
+                    return kanUnnlates4XRettsgebyr?.reduksjon() ?: Reduksjon.IngenTilbakekreving()
                 }
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD)
 
-                override fun tilFrontendDto(begrunnelseForIBehold: String): BelopIBeholdDto = IngentingDto(begrunnelseForIBehold)
+                override fun tilFrontendDto(begrunnelseForIBehold: String, reduksjonArsakerDto: ReduksjonArsakerDto?): BelopIBeholdDto = IngentingDto(begrunnelseForIBehold)
 
                 override fun tilEntity(periodeRef: UUID): GodTroEntity {
                     return GodTroEntity(
@@ -351,9 +334,6 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         begrunnelse = begrunnelse ?: "",
                         beholdType = BeholdType.NEI,
                         beløpIBehold = null,
-                        prosentReduksjon = null,
-                        annetBegrunnelse = null,
-                        relevanteMomentGodTroEntity = emptyList(),
                     )
                 }
             }
