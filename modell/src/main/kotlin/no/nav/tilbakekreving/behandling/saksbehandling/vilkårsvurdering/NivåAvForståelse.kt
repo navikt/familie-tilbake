@@ -298,8 +298,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 val begrunnelse: String?,
             ) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon =
-                    prosentReduksjon?.let { Reduksjon.Prosentdel(BigDecimal(it)) }
-                        ?: Reduksjon.FullstendigTilbakekreving()
+                    prosentReduksjon?.let { Reduksjon.ProsentdelAvBeløpIBehold(BigDecimal(it), beløp) }
+                        ?: Reduksjon.ManueltBeløp(beløp)
 
                 override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 

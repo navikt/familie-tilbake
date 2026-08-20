@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.builders
 
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
@@ -21,10 +20,10 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             vurdering.beløpIBehold?.let {
                 NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                     beløp = it,
-                    prosentReduksjon = 0,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
+                    prosentReduksjon = null,
+                    relevanteMomenter = null,
                     annetBegrunnelse = null,
-                    begrunnelse = "begrunnelse for beløp i behold",
+                    begrunnelse = null,
                 )
             } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
             "",
