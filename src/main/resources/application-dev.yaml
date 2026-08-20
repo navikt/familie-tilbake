@@ -24,7 +24,7 @@ tilbakekreving:
       SendAutomatiskVarselbrev: false
       Arkivering: false
       FjernUttalelsesfrist: true
-      OppdragRestClient: true
+      OppdragRestClient: false
       ForhandsvarselTypst: false
       EndretKravgrunnlagVisning: true
   tilgangsstyring:
