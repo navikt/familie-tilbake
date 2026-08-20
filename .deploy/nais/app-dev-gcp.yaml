@@ -151,6 +151,9 @@ spec:
         - application: sokos-os-ekstern-api
           namespace: okonomi
         - application: tilbakekreving-pdf
+        - application: familie-oppdrag-backend
+          namespace: teamfamilie
+          cluster: dev-gcp
       external:
         - host: tilbake-unleash-api.nav.cloud.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
