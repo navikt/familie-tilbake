@@ -2,7 +2,11 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.IkkeVurdert
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.SkalIkkeUnnlates
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.Unnlates
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.util.UUID
 
@@ -48,15 +52,38 @@ enum class KanUnnlatesEntity {
     IKKE_VURDERT,
     ;
 
-    fun fraEntity(særligeGrunner: SærligeGrunnerEntity?, begrunnelseForUnnlatelse: String?): KanUnnlates4xRettsgebyr = when (this) {
-        UNNLATES -> KanUnnlates4xRettsgebyr.Unnlates(begrunnelseForUnnlatelse)
-        SKAL_IKKE_UNNLATES -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+    fun fraEntity(
+        reduksjonType: ReduksjonType,
+        særligeGrunner: SærligeGrunnerEntity?,
+        godTroRelevanteMomenter: GodTroRelevanteMomenterEntity?,
+        begrunnelseForUnnlatelse: String?,
+    ): KanUnnlates4xRettsgebyr = when (reduksjonType) {
+        ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER -> fraEntitySærligeGrunner(særligeGrunner, begrunnelseForUnnlatelse)
+        ReduksjonType.REDUKSJON_GOD_TRO -> fraEntityRelevanteMomenter(godTroRelevanteMomenter, begrunnelseForUnnlatelse)
+    }
+
+    fun fraEntitySærligeGrunner(særligeGrunner: SærligeGrunnerEntity?, begrunnelseForUnnlatelse: String?): KanUnnlates4xRettsgebyr = when (this) {
+        UNNLATES -> Unnlates(begrunnelseForUnnlatelse)
+        SKAL_IKKE_UNNLATES -> SkalIkkeUnnlates(
             requireNotNull(særligeGrunner) { "SærligGrunner kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
         )
-        OVER_4_RETTSGEBYR -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(
+        OVER_4_RETTSGEBYR -> ErOver4xRettsgebyr(
             requireNotNull(særligeGrunner) { "SærligGrunner kreves for OVER_4_RETTSGEBYR" }.fraEntity(),
         )
-        IKKE_VURDERT -> KanUnnlates4xRettsgebyr.IkkeVurdert
+        IKKE_VURDERT -> IkkeVurdert
+    }
+
+    fun fraEntityRelevanteMomenter(
+        godTroRelevanteMomenterEntity: GodTroRelevanteMomenterEntity?,
+        begrunnelseForUnnlatelse: String?,
+    ): KanUnnlates4xRettsgebyr = when (this) {
+        UNNLATES -> Unnlates(begrunnelseForUnnlatelse)
+        SKAL_IKKE_UNNLATES -> SkalIkkeUnnlates(
+            requireNotNull(godTroRelevanteMomenterEntity) { "GodTroRelevanteMomenter kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
+        )
+
+        IKKE_VURDERT -> IkkeVurdert
+        OVER_4_RETTSGEBYR -> TODO()
     }
 }
 
@@ -65,4 +92,9 @@ enum class AktsomhetType {
     GROV_UAKTSOMHET,
     FORSETT,
     IKKE_UTVIST_SKYLD,
+}
+
+enum class ReduksjonType {
+    REDUKSJON_SÆRLIGE_GRUNNER,
+    REDUKSJON_GOD_TRO,
 }

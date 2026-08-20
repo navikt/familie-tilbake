@@ -228,7 +228,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
-        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp"
+        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe ""
     }
 
     @Test
@@ -289,7 +289,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
-        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe ""
     }
 
     @Test
@@ -357,7 +357,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
         vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
-        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe ""
         vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.0.kroner
     }
 

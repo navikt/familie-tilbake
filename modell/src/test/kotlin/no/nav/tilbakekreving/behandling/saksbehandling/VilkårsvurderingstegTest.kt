@@ -12,7 +12,9 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VurdertAktsomhetDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
@@ -314,13 +316,18 @@ class VilkårsvurderingstegTest {
             NivåAvForståelse.GodTro(
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                     beløp = 1000.kroner,
-                    prosentReduksjon = null,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
                     annetBegrunnelse = null,
                     begrunnelse = "Begrunnelse for i behold",
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                        begrunnelse = "Begrunnelse for i behold",
+                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
+                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                    ),
+                ),
             ),
         )
 
@@ -359,13 +366,21 @@ class VilkårsvurderingstegTest {
             NivåAvForståelse.GodTro(
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                     beløp = 1000.kroner,
-                    prosentReduksjon = 20,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("annet begrunnelse")),
                     annetBegrunnelse = "Annet begrunnelse",
                     begrunnelse = "Begrunnelse for i behold",
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                        begrunnelse = "Begrunnelse for i behold",
+                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
+                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.JaAvBeløpIBehold(
+                            prosentdel = 20,
+                            beløpIBehold = 1000.kroner,
+                        ),
+                    ),
+                ),
             ),
         )
 
@@ -405,13 +420,18 @@ class VilkårsvurderingstegTest {
             1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.GodTro(
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
-                    prosentReduksjon = null,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
                     annetBegrunnelse = null,
                     begrunnelse = "Begrunnelse for i behold",
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                        begrunnelse = "Begrunnelse for i behold",
+                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
+                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                    ),
+                ),
             ),
         )
 
@@ -448,13 +468,18 @@ class VilkårsvurderingstegTest {
             1.januar(2021) til 31.januar(2021),
             NivåAvForståelse.GodTro(
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
-                    prosentReduksjon = 20,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("annet begrunnelse")),
                     annetBegrunnelse = "Annet begrunnelse",
                     begrunnelse = "Begrunnelse for i behold",
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                        begrunnelse = "Begrunnelse for i behold",
+                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
+                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Ja(20),
+                    ),
+                ),
             ),
         )
 
@@ -497,6 +522,7 @@ class VilkårsvurderingstegTest {
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
+                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates("Begrunnelse for unnlatelse"),
             ),
         )
 

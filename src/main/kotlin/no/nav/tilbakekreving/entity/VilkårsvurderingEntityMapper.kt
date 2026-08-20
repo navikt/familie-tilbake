@@ -9,9 +9,10 @@ import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
+import no.nav.tilbakekreving.entities.GodTroRelevanteMomenterEntity
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
-import no.nav.tilbakekreving.entities.RelevanteMomentGodTroEntity
+import no.nav.tilbakekreving.entities.RelevantMomentEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
 import no.nav.tilbakekreving.entities.SærligGrunnEntity
@@ -20,7 +21,7 @@ import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurderingType
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentType
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.sql.ResultSet
 import java.util.UUID
@@ -112,6 +113,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             godTro: GodTroEntity?,
             aktsomhet: VurdertAktsomhetEntity?,
             særligeGrunner: SærligeGrunnerEntity?,
+            relevanteMomenter: GodTroRelevanteMomenterEntity?,
             mottakersForståelse: MottakersForståelseEntity?,
             endringIKravgrunnnlag: ForskjellEntity?,
         ): VilkårsvurderingsperiodeEntity {
@@ -128,6 +130,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     aktsomhet = aktsomhet,
                     kanUnnlates = resultSet[unnlates],
                     særligGrunner = særligeGrunner,
+                    relevantMomenter = relevanteMomenter,
                     feilaktigEllerMangelfull = resultSet[feilaktigEllerMangelfull],
                     forrigePeriodeId = resultSet[forrigePeriodeId],
                     begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
@@ -160,38 +163,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.BigDecimalConverter,
         )
 
-        val prosentReduksjon = field(
-            "prosent_reduksjon",
-            GodTroEntity::prosentReduksjon,
-            FieldConverter.IntConverter,
-        )
-
-        val annetBegrunnelse = field(
-            "annet_begrunnelse",
-            GodTroEntity::annetBegrunnelse,
-            FieldConverter.StringConverter,
-        )
-
-        val relevanteMomenter = field(
-            "relevante_momenter",
-            { it.relevanteMomentGodTroEntity.map { grunn -> grunn.type } },
-            FieldConverter.EnumArrayConverter.of<RelevanteMomentType>(),
-        )
-
         fun map(resultSet: ResultSet): GodTroEntity {
             return GodTroEntity(
                 periodeRef = resultSet[id],
                 begrunnelse = resultSet[begrunnelse],
                 beholdType = resultSet[beløpIBehold],
                 beløpIBehold = resultSet[beløp],
-                prosentReduksjon = resultSet[prosentReduksjon],
-                annetBegrunnelse = resultSet[annetBegrunnelse],
-                relevanteMomentGodTroEntity = resultSet[relevanteMomenter].map {
-                    when (it) {
-                        RelevanteMomentType.ANNET -> RelevanteMomentGodTroEntity(it, resultSet[annetBegrunnelse!!])
-                        else -> RelevanteMomentGodTroEntity(it, null)
-                    }
-                },
             )
         }
     }
@@ -294,6 +271,61 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     when (it) {
                         SærligGrunnType.ANNET -> SærligGrunnEntity(it, resultSet[særligGrunnAnnetBegrunnelse!!])
                         else -> SærligGrunnEntity(it, null)
+                    }
+                },
+                skalReduseres = SkalReduseresEntity(
+                    type = resultSet[skalReduseres],
+                    prosentdel = resultSet[reduksjonProsent],
+                ),
+            )
+        }
+    }
+
+    object RelevanteMomenterMapper : Entity<GodTroRelevanteMomenterEntity, UUID, UUID>(
+        "tilbakekreving_vilkårsvurdering_periode_relevante_momenter",
+        { it.periodeRef!! },
+        FieldConverter.UUIDConverter.required(),
+    ) {
+        val begrunnelse = field(
+            "begrunnelse",
+            GodTroRelevanteMomenterEntity::begrunnelse,
+            FieldConverter.StringConverter.required(),
+        )
+
+        val relevantMomentAnnetBegrunnelse = field(
+            "annet_relevant_moment_begrunnelse",
+            { it.grunner.firstOrNull { moment -> moment.type == RelevanteMomentTypeGodTro.ANNET }?.annetBegrunnelse },
+            FieldConverter.StringConverter,
+        )
+
+        val skalReduseres = SærligeGrunnerMapper.field(
+            "skal_reduseres",
+            { it.skalReduseres.type },
+            FieldConverter.EnumConverter.of<SkalReduseresType>().required(),
+        )
+
+        val reduksjonProsent = SærligeGrunnerMapper.field(
+            "reduksjon_prosent",
+            { it.skalReduseres.prosentdel },
+            FieldConverter.IntConverter,
+        )
+
+        val relevanteMomenter = field(
+            "relevante_momenter",
+            { it.grunner.map { moment -> moment.type } },
+            FieldConverter.EnumArrayConverter.of<RelevanteMomentTypeGodTro>(),
+        )
+
+        fun map(
+            resultSet: ResultSet,
+        ): GodTroRelevanteMomenterEntity {
+            return GodTroRelevanteMomenterEntity(
+                periodeRef = resultSet[id],
+                begrunnelse = resultSet[begrunnelse],
+                grunner = resultSet[relevanteMomenter].map {
+                    when (it) {
+                        RelevanteMomentTypeGodTro.ANNET -> RelevantMomentEntity(it, resultSet[relevantMomentAnnetBegrunnelse!!])
+                        else -> RelevantMomentEntity(it, null)
                     }
                 },
                 skalReduseres = SkalReduseresEntity(

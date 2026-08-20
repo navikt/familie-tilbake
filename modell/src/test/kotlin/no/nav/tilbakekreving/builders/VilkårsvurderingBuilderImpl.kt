@@ -1,10 +1,10 @@
 package no.nav.tilbakekreving.builders
 
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
@@ -21,14 +21,15 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             vurdering.beløpIBehold?.let {
                 NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
                     beløp = it,
-                    prosentReduksjon = 0,
-                    relevanteMomenter = listOf(RelevanteMomentGodTro.StørrelseBeløp),
                     annetBegrunnelse = null,
-                    begrunnelse = "begrunnelse for beløp i behold",
+                    begrunnelse = null,
                 )
-            } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
+            } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                begrunnelse = "Begrunnelse for beløp i behold",
+            ),
             "",
             "",
+            kanUnnlates4XRettsgebyr = null,
         )
     }
 
@@ -76,8 +77,8 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             begrunnelse = "",
             grunner = emptySet(),
             skalReduseres = when (reduksjon.skalReduseres) {
-                true -> ReduksjonSærligeGrunner.SkalReduseres.Ja(reduksjon.reduksjon)
-                false -> ReduksjonSærligeGrunner.SkalReduseres.Nei
+                true -> ReduksjonÅrsaker.SkalReduseres.Ja(reduksjon.reduksjon)
+                false -> ReduksjonÅrsaker.SkalReduseres.Nei
             },
         )
     }
@@ -103,7 +104,7 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
             ),
         )
     }
