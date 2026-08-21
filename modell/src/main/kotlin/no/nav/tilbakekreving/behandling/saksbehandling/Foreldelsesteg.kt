@@ -37,7 +37,7 @@ class Foreldelsesteg(
         it.vurdering !is Vurdering.IkkeVurdert && it.vurdering !is Vurdering.AutomatiskIkkeForeldet
     }
 
-    private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
+    private fun erAutomatiskVurdert(): Boolean = vurdertePerioder.all { it.vurdering is Vurdering.AutomatiskIkkeForeldet }
 
     override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
         return tilbakeført
@@ -76,6 +76,9 @@ class Foreldelsesteg(
                     )
                 }
             }
+        if (erAutomatiskVurdert()) {
+            tilbakeført = null
+        }
         behandlingslogg.lagre(
             LoggInnslag.opprett(
                 behandlingId = behandlingId,
@@ -124,7 +127,22 @@ class Foreldelsesteg(
 
     fun harTilleggsfrist(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.Tilleggsfrist }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {}
+    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurdertePerioder
+            .single { finnIdFor(forskjell.periode) == it.id }
+            .periodeEndretBeløp(forskjell)
+    }
+
+    override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurdertePerioder = (
+            vurdertePerioder + Foreldelseperiode.opprett(
+                periode = periode.periode,
+                endringIKravgrunnlag = periode,
+            )
+        ).sortedBy { it.periode }
+    }
 
     private fun finnIdFor(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
@@ -173,6 +191,7 @@ class Foreldelsesteg(
         val id: UUID,
         val periode: Datoperiode,
         private var _vurdering: Vurdering,
+        var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
     ) {
         val vurdering get() = _vurdering
 
@@ -186,15 +205,28 @@ class Foreldelsesteg(
                 foreldelsesvurderingRef = foreldelsesvurderingRef,
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 foreldelsesvurdering = _vurdering.tilEntity(),
+                endringIKravgrunnlag = endringIKravgrunnlag?.tilEntity(
+                    faktavurderingPeriodeRef = null,
+                    vilkårsvurderingPeriodeRef = null,
+                    foreldelsesvurderingPeriodeRef = id,
+                ),
             )
         }
 
+        fun periodeEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+            endringIKravgrunnlag = forskjell
+        }
+
         companion object {
-            fun opprett(periode: Datoperiode) =
+            fun opprett(
+                periode: Datoperiode,
+                endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell? = null,
+            ) =
                 Foreldelseperiode(
                     id = UUID.randomUUID(),
                     periode = periode,
                     _vurdering = Vurdering.IkkeVurdert,
+                    endringIKravgrunnlag = endringIKravgrunnlag,
                 )
         }
     }

@@ -5,6 +5,9 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.test.februar
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -85,5 +88,19 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
         forhåndsvarsel.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `ny periode i kravgrunnlag krever ny vurdering av forhåndsvarselunntak`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "",
+        )
+
+        forhåndsvarsel.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(1.februar(2021) til 28.februar(2021)))
+
+        val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
+        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 }

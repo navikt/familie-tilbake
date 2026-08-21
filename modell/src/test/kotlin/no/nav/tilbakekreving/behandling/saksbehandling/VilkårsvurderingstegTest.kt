@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
@@ -318,6 +320,30 @@ class VilkårsvurderingstegTest {
                     it.begrunnelse shouldBe "Begrunnelse for beløp i behold"
                 }
             }
+        }
+    }
+
+    @Test
+    fun `ny periode i kravgrunnlag legges til i vilkårsvurderingen`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+        vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe null
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode))
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it[0].fom shouldBe periode.fom
+            it[0].tom shouldBe periode.tom
+            it[1].fom shouldBe nyPeriode.fom
+            it[1].tom shouldBe nyPeriode.tom
         }
     }
 }

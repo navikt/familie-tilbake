@@ -9,7 +9,7 @@ data class VilkårsvurderingsperiodeEntity(
     val periode: DatoperiodeEntity,
     val begrunnelseForTilbakekreving: String?,
     val vurdering: AktsomhetsvurderingEntity,
-    val endretAvKravgrunnlag: ForskjellEntity?,
+    val endringIKravgrunnlag: ForskjellEntity?,
 ) {
     fun fraEntity(vurderinger: Map<UUID, Vilkårsvurderingsperiode>): Vilkårsvurderingsperiode {
         return Vilkårsvurderingsperiode(
@@ -17,7 +17,7 @@ data class VilkårsvurderingsperiodeEntity(
             periode = periode.fraEntity(),
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
             _vurdering = vurdering.fraEntity(vurderinger),
-            endretAvKravgrunnlag = endretAvKravgrunnlag?.fraEntity(),
+            endringIKravgrunnnlag = endringIKravgrunnlag?.fraEntity(),
         )
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.inspectors.forOne
+import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -11,7 +13,9 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
+import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
@@ -49,7 +53,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             .single { it.id == context.behandlingId }
 
         behandlingEntity.faktastegEntity.perioder.single().endringIKravgrunnlag.shouldNotBeNull {
-            originalPeriode.fraEntity() shouldBe periode
+            originalPeriode?.fraEntity() shouldBe periode
             endringIBeløp shouldBe (-2000.00).kroner
         }
     }
@@ -76,8 +80,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val behandlingEntity = behandlingRepository.hentBehandlinger(tilbakekreving(context.behandlingId).id)
             .single { it.id == context.behandlingId }
 
-        behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endretAvKravgrunnlag.shouldNotBeNull {
-            originalPeriode.fraEntity() shouldBe periode
+        behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldNotBeNull {
+            originalPeriode?.fraEntity() shouldBe periode
             endringIBeløp shouldBe (-2000.00).kroner
         }
     }
@@ -119,7 +123,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             .single { it.id == context.behandlingId }
 
         behandlingEntity.faktastegEntity.perioder.single().endringIKravgrunnlag.shouldNotBeNull {
-            originalPeriode.fraEntity() shouldBe periode
+            originalPeriode?.fraEntity() shouldBe periode
             endringIBeløp shouldBe (1500.00).kroner
         }
     }
@@ -160,8 +164,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val behandlingEntity = behandlingRepository.hentBehandlinger(tilbakekreving(context.behandlingId).id)
             .single { it.id == context.behandlingId }
 
-        behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endretAvKravgrunnlag.shouldNotBeNull {
-            originalPeriode.fraEntity() shouldBe periode
+        behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldNotBeNull {
+            originalPeriode?.fraEntity() shouldBe periode
             endringIBeløp shouldBe (1500.00).kroner
         }
     }
@@ -239,7 +243,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
                     vilkårsvurderingstegEntity = behandlingEntity.vilkårsvurderingstegEntity.copy(
                         vurderinger = listOf(
                             vurderingsperiode.copy(
-                                endretAvKravgrunnlag = null,
+                                endringIKravgrunnlag = null,
                             ),
                         ),
                     ),
@@ -250,7 +254,51 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val lagretBehandling = behandlingRepository.hentBehandlinger(tilbakekreving(context.behandlingId).id)
             .single { it.id == context.behandlingId }
 
-        lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single().endretAvKravgrunnlag.shouldBeNull()
+        lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldBeNull()
+    }
+
+    @Test
+    fun `ny periode i kravgrunnlag lagres i faktasteg, foreldelse og vilkårsvurdering`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val context = opprettBehandling(periode)
+        sendKravgrunnlagOgAvventLesing(
+            QUEUE_NAME,
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = context.fagsystemId,
+                vedtakId = context.vedtakId,
+                kravgrunnlagId = context.kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.234567",
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(periode, feilutbetaltBeløp = 3000.kroner),
+                    KravgrunnlagGenerator.standardPeriode(nyPeriode, feilutbetaltBeløp = 3000.kroner),
+                ),
+            ),
+        )
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
+        }
+
+        val lagretBehandling = behandlingRepository.hentBehandlinger(tilbakekreving(context.behandlingId).id)
+            .shouldBeSingle()
+
+        lagretBehandling.faktastegEntity.perioder.forOne {
+            it.endringIKravgrunnlag?.nyPeriode?.fraEntity() shouldBe nyPeriode
+            it.endringIKravgrunnlag?.type shouldBe KravgrunnlagSammenligning.ForskjellType.NyPeriode
+        }
+
+        val foreldelsesperioder = lagretBehandling.foreldelsestegEntity.vurdertePerioder
+        foreldelsesperioder.forOne {
+            it.endringIKravgrunnlag?.nyPeriode?.fraEntity() shouldBe nyPeriode
+            it.endringIKravgrunnlag?.type shouldBe KravgrunnlagSammenligning.ForskjellType.NyPeriode
+        }
+
+        lagretBehandling.vilkårsvurderingstegEntity.vurderinger.forOne {
+            it.endringIKravgrunnlag?.nyPeriode?.fraEntity() shouldBe nyPeriode
+            it.endringIKravgrunnlag?.type shouldBe KravgrunnlagSammenligning.ForskjellType.NyPeriode
+        }
     }
 
     private fun opprettBehandling(periode: Datoperiode): KravgrunnlagContext {

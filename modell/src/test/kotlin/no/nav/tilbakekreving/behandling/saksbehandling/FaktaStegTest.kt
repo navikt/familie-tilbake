@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
@@ -18,8 +19,10 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.desember
+import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.ytelsesbeløp
@@ -509,5 +512,38 @@ class FaktaStegTest {
         faktasteg.vurder(OppdagetDto(1.januar(2021), OppdagetDto.Av.NAV, "tekst"))
 
         faktasteg.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `ny periode i kravgrunnlag legges til i faktavurderingen`() {
+        val revurdering = eksternFagsakBehandling()
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(kravgrunnlagPeriode(periode)),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.vurder("årsak")
+
+        faktasteg.trengerNyVurdering() shouldBe null
+        faktasteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode))
+
+        faktasteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).should {
+            it.perioder[0].fom shouldBe periode.fom
+            it.perioder[0].tom shouldBe periode.tom
+            it.perioder[1].fom shouldBe nyPeriode.fom
+            it.perioder[1].tom shouldBe nyPeriode.tom
+        }
     }
 }

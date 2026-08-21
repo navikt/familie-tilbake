@@ -111,7 +111,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             aktsomhet: VurdertAktsomhetEntity?,
             særligeGrunner: SærligeGrunnerEntity?,
             mottakersForståelse: MottakersForståelseEntity?,
-            endretAvKravgrunnlag: ForskjellEntity?,
+            endringIKravgrunnnlag: ForskjellEntity?,
         ): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(
                 id = resultSet[id],
@@ -130,7 +130,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     forrigePeriodeId = resultSet[forrigePeriodeId],
                     begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
                 ),
-                endretAvKravgrunnlag = endretAvKravgrunnlag,
+                endringIKravgrunnlag = endringIKravgrunnnlag,
             )
         }
     }

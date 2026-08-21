@@ -107,6 +107,17 @@ class Vilkårsvurderingsteg(
         finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
     }
 
+    override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurderinger = (
+            vurderinger + Vilkårsvurderingsperiode.opprett(
+                periode = periode.periode,
+                forrigePeriode = null,
+                endringIKravgrunnnlag = periode,
+            )
+        ).sortedBy { it.periode }
+    }
+
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
 
     fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = if (vurderinger.any { it.renter() }) {
@@ -226,7 +237,7 @@ class Vilkårsvurderingsteg(
         val periode: Datoperiode,
         val begrunnelseForTilbakekreving: String?,
         private var _vurdering: ForårsaketAvBruker,
-        var endretAvKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
+        var endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell?,
     ) : VilkårsvurdertPeriodeAdapter {
         val vurdering get() = _vurdering
 
@@ -256,21 +267,23 @@ class Vilkårsvurderingsteg(
                 periode = DatoperiodeEntity(periode.fom, periode.tom),
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 vurdering = _vurdering.tilEntity(id),
-                endretAvKravgrunnlag = endretAvKravgrunnlag?.tilEntity(
+                endringIKravgrunnlag = endringIKravgrunnnlag?.tilEntity(
                     faktavurderingPeriodeRef = null,
                     vilkårsvurderingPeriodeRef = id,
+                    foreldelsesvurderingPeriodeRef = null,
                 ),
             )
         }
 
         fun periodeEndretBeløp(endretBeløp: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
-            endretAvKravgrunnlag = endretBeløp
+            endringIKravgrunnnlag = endretBeløp
         }
 
         companion object {
             fun opprett(
                 periode: Datoperiode,
                 forrigePeriode: Vilkårsvurderingsperiode?,
+                endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell? = null,
             ): Vilkårsvurderingsperiode {
                 val id = UUID.randomUUID()
                 return Vilkårsvurderingsperiode(
@@ -284,7 +297,7 @@ class Vilkårsvurderingsteg(
                         )
                     },
                     begrunnelseForTilbakekreving = null,
-                    endretAvKravgrunnlag = null,
+                    endringIKravgrunnnlag = endringIKravgrunnnlag,
                 )
             }
 

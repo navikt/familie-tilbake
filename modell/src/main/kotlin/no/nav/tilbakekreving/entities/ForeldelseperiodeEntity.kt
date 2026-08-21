@@ -8,11 +8,13 @@ data class ForeldelseperiodeEntity(
     val foreldelsesvurderingRef: UUID,
     val periode: DatoperiodeEntity,
     val foreldelsesvurdering: ForeldelsesvurderingEntity,
+    val endringIKravgrunnlag: ForskjellEntity?,
 ) {
     fun fraEntity(): Foreldelseperiode =
         Foreldelseperiode(
             id = id,
             periode = periode.fraEntity(),
             _vurdering = foreldelsesvurdering.fraEntity(),
+            endringIKravgrunnlag = endringIKravgrunnlag?.fraEntity(),
         )
 }

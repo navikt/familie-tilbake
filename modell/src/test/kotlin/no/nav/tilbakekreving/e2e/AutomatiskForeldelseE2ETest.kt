@@ -36,7 +36,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -55,7 +55,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(klokke = klokke)) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -74,7 +74,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -102,7 +102,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -127,7 +127,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -153,7 +153,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -182,7 +182,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -202,7 +202,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -223,7 +223,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",
@@ -246,7 +246,7 @@ class AutomatiskForeldelseE2ETest {
 
         val tilbakekreving = opprettTilbakekrevingMedKravgrunnlag(periode, klokke)
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             lagreForhåndsvarselUnntak(
                 begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
                 beskrivelse = "Ikke praktisk mulig",

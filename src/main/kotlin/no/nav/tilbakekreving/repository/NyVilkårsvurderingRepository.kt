@@ -45,9 +45,9 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.beløpIBehold != null) {
                 lagreGodTro(periode.vurdering.beløpIBehold!!)
             }
-            val endretAvKravgrunnlag = periode.endretAvKravgrunnlag
-            if (endretAvKravgrunnlag != null) {
-                ForskjellEntityMapper.upsertQuery(jdbcTemplate, endretAvKravgrunnlag)
+            val endringIKravgrunnnlag = periode.endringIKravgrunnlag
+            if (endringIKravgrunnnlag != null) {
+                ForskjellEntityMapper.upsertQuery(jdbcTemplate, endringIKravgrunnnlag)
             }
         }
     }
