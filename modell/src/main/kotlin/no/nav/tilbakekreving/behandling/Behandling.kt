@@ -796,6 +796,7 @@ class Behandling internal constructor(
             sammenligning.oppdaterSteg(steg())
             kravgrunnlag = nyttKravgrunnlag!!
             nyttKravgrunnlag = null
+            oppdaterAutomatiskeBehandlinger(context)
         }
     }
 

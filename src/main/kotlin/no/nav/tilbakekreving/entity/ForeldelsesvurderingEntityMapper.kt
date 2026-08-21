@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.entities.ForeldelseperiodeEntity
 import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingEntity
 import no.nav.tilbakekreving.entities.ForeldelsesvurderingType
+import no.nav.tilbakekreving.entities.ForskjellEntity
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -85,7 +86,10 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
             FieldConverter.LocalDateConverter,
         )
 
-        fun map(resultSet: ResultSet): ForeldelseperiodeEntity {
+        fun map(
+            resultSet: ResultSet,
+            endringIKravgrunnlag: ForskjellEntity?,
+        ): ForeldelseperiodeEntity {
             return ForeldelseperiodeEntity(
                 id = resultSet[id],
                 foreldelsesvurderingRef = resultSet[foreldelsesvurderingRef],
@@ -99,6 +103,7 @@ object ForeldelsesvurderingEntityMapper : Entity<ForeldelsesstegEntity, UUID, UU
                     frist = resultSet[frist],
                     oppdaget = resultSet[oppdaget],
                 ),
+                endringIKravgrunnlag = endringIKravgrunnlag,
             )
         }
     }

@@ -25,6 +25,7 @@ class ForeldelsesstegEntityTest {
                         frist = null,
                         oppdaget = null,
                     ),
+                    endringIKravgrunnlag = null,
                 ),
                 ForeldelseperiodeEntity(
                     id = UUID.randomUUID(),
@@ -36,6 +37,7 @@ class ForeldelsesstegEntityTest {
                         frist = null,
                         oppdaget = null,
                     ),
+                    endringIKravgrunnlag = null,
                 ),
             ),
             tilbakeført = null,

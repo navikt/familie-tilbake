@@ -190,20 +190,20 @@ fun behandling(
 }
 
 fun faktastegVurdering(
-    periode: Datoperiode = 1.januar(2021) til 31.januar(2021),
+    perioder: List<Datoperiode> = listOf(1.januar(2021) til 31.januar(2021)),
     årsak: String = "Årsak",
     uttalelse: Faktasteg.Uttalelse = Faktasteg.Uttalelse.Nei,
 ): Faktasteg.Vurdering {
     return Faktasteg.Vurdering(
-        perioder = listOf(
+        perioder = perioder.map { periode ->
             Faktasteg.FaktaPeriode(
                 id = UUID.randomUUID(),
                 periode = periode,
                 rettsligGrunnlag = Hendelsestype.ANNET,
                 rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                 endringIKravgrunnlag = null,
-            ),
-        ),
+            )
+        },
         årsakTilFeilutbetaling = årsak,
         uttalelse = uttalelse,
         oppdaget = Faktasteg.Vurdering.Oppdaget.Vurdering(

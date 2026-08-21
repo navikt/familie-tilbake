@@ -184,6 +184,11 @@ class Faktasteg(
         )
     }
 
+    override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurdering.nyPeriode(periode)
+    }
+
     override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         vurdering.finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
@@ -227,7 +232,7 @@ class Faktasteg(
     }
 
     class Vurdering(
-        val perioder: List<FaktaPeriode>,
+        var perioder: List<FaktaPeriode>,
         var årsakTilFeilutbetaling: String,
         val uttalelse: Uttalelse,
         private var oppdaget: Oppdaget,
@@ -293,6 +298,18 @@ class Faktasteg(
                 tilbakeført = tilbakeført,
                 rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
             )
+        }
+
+        fun nyPeriode(forskjell: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+            perioder = (
+                perioder + FaktaPeriode(
+                    id = UUID.randomUUID(),
+                    periode = forskjell.periode,
+                    rettsligGrunnlag = Hendelsestype.ANNET,
+                    rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
+                    endringIKravgrunnlag = forskjell,
+                )
+            ).sortedBy { it.periode }
         }
 
         internal fun finnPeriode(periode: Datoperiode): FaktaPeriode {
@@ -379,6 +396,7 @@ class Faktasteg(
                 endringIKravgrunnlag = endringIKravgrunnlag?.tilEntity(
                     faktavurderingPeriodeRef = id,
                     vilkårsvurderingPeriodeRef = null,
+                    foreldelsesvurderingPeriodeRef = null,
                 ),
             )
         }

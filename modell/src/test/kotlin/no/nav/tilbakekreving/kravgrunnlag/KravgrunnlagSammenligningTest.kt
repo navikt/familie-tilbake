@@ -29,19 +29,19 @@ class KravgrunnlagSammenligningTest {
     }
 
     @Test
-    fun `flere perioder fører til utenfor scope exception`() {
-        shouldThrow<ModellFeil.UtenforScopeException> {
-            KravgrunnlagSammenligning(
-                originaltKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)))),
-                nyttKravgrunnlag = kravgrunnlag(
-                    perioder = listOf(
-                        kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
-                        kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
-                    ),
+    fun `flere perioder fører til ny periode forskjell`() {
+        val forskjeller = KravgrunnlagSammenligning(
+            originaltKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)))),
+            nyttKravgrunnlag = kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                    kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
                 ),
-                sporing = Sporing("", ""),
-            )
-        }
+            ),
+            sporing = Sporing("", ""),
+        ).resultat()
+
+        forskjeller.shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.NyPeriode>()
     }
 
     @Test

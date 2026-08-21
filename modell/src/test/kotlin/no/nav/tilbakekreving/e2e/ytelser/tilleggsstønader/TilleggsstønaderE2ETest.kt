@@ -82,8 +82,7 @@ class TilleggsstønaderE2ETest {
                 ),
             )
             faktastegDto.totalFeilutbetaltPeriode shouldBe (1.januar(2021) til 28.februar(2021))
-            vurderFakta(faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-            vurderFakta(faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021), 1.februar(2021) til 28.februar(2021))))
             val foreldelsesstegDto = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsestegDto.tilFrontendDto(saksbehandlerContext())
             foreldelsesstegDto.foreldetPerioder shouldBe listOf(
                 VurdertForeldelsesperiodeDto(

@@ -137,10 +137,13 @@ class Forhåndsvarsel(
     override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         when {
             forskjell.endringIBeløp > BigDecimal.ZERO -> {
-                brukeruttalelse?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
                 forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
             }
         }
+    }
+
+    override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+        forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
     }
 
     fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto = when {

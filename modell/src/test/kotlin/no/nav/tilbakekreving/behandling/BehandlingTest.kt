@@ -45,7 +45,7 @@ class BehandlingTest {
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
         behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
 
-        val faktasteg = faktastegVurdering(periode)
+        val faktasteg = faktastegVurdering(perioder = listOf(periode))
         behandling.medSaksbehandling(saksbehandlerContext()) {
             vurderFakta(faktasteg)
             behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
@@ -68,7 +68,7 @@ class BehandlingTest {
         val behandling = behandling(kravgrunnlag, revurdering)
         behandling.medSaksbehandling(saksbehandlerContext()) {
             lagreUttalelse(UttalelseVurdering.JA, null, null)
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
             behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
             flyttTilbakeTilFakta()
@@ -82,7 +82,7 @@ class BehandlingTest {
         val behandling = behandling()
         behandling.medSaksbehandling(saksbehandlerContext()) {
             lagreUttalelse(UttalelseVurdering.JA, null, null)
-            vurderFakta(faktastegVurdering(periode))
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
             vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
             vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
             behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse.shouldNotBeNull()

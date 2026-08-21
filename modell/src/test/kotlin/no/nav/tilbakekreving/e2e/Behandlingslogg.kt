@@ -85,8 +85,7 @@ class Behandlingslogg {
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
             lagreFristUtsettelse(LocalDate.of(2027, 1, 1), "Begrunnelse")
             lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "ingen uttalelse")
-            vurderFakta(faktastegVurdering(1.januar(2021) til 31.januar(2021)))
-            vurderFakta(faktastegVurdering(1.februar(2021) til 28.februar(2021)))
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021), 1.februar(2021) til 28.februar(2021))))
             vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
             vurderForeldelse(1.februar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
