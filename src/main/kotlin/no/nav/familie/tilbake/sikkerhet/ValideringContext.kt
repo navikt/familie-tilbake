@@ -115,6 +115,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.NONE,
         handling = "Henter forvaltningsinformasjon",
     ),
+    ForvaltningFlyttTilFakta(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Flytter behandling tilbake til Fakta",
+    ),
     ForvaltningOppdaterFagsysteminfo(
         minimumBehandlerrolle = Behandlerrolle.FORVALTER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,

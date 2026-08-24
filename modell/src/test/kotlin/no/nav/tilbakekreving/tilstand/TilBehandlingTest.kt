@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.SideeffektContext
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -42,7 +43,28 @@ import org.junit.jupiter.api.Test
 
 class TilBehandlingTest {
     @Test
-    fun `behandling kan ikke saksbehandles når den ikke er i TilBehandling tilstand`() {
+    fun `behandling kan nullstilles når den er i TilBehandling tilstand`() {
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext()) {
+            fatteVedtak(
+                listOf(
+                    Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
+                    Behandlingssteg.FORELDELSE to FatteVedtakSteg.Vurdering.Godkjent,
+                ),
+            )
+        }
+
+        tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            flyttTilbakeTilFakta()
+        }
+        tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId()).foreldelsesteg.erFullstendig(SystemKlokke) shouldBe false
+    }
+
+    @Test
+    fun `behandling kan ikke nullstilles når den ikke er i TilBehandling tilstand`() {
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = tilbakekrevingTilGodkjenning(opprettTilbakekrevingHendelse, saksbehandlerContext())
 
@@ -62,7 +84,7 @@ class TilBehandlingTest {
 
         val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
-                trekkTilbakeFraGodkjenning()
+                flyttTilbakeTilFakta()
             }
         }
         exception.message shouldBe "Kan ikke utføre saksbehandling i ${tilbakekreving.tilstand.tilbakekrevingTilstand}"

@@ -153,7 +153,7 @@ class Behandling internal constructor(
         } else if (steg().none { it.erPåbegynt() }) {
             kravgrunnlag = oppdatertKravgrunnlag
             nyttKravgrunnlag = null
-            nullstillTilFakta(context)
+            medSaksbehandling(context, Saksbehandling::flyttTilbakeTilFakta)
         } else {
             nyttKravgrunnlag = oppdatertKravgrunnlag
         }
@@ -458,7 +458,7 @@ class Behandling internal constructor(
     ) {
         if (sistEndret == opprettet) {
             this.eksternFagsakRevurdering = eksternFagsakRevurdering
-            nullstillTilFakta(sideeffektContext)
+            medSaksbehandling(sideeffektContext) { flyttTilbakeTilFakta() }
         }
     }
 
@@ -510,15 +510,6 @@ class Behandling internal constructor(
         ansvarligBeslutterIdent = fatteVedtakSteg.ansvarligBeslutter?.ident,
         ansvarligEnhet = enhet!!.navn,
     )
-
-    private fun nullstillTilFakta(sideeffektContext: SideeffektContext) {
-        steg().forEach {
-            it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
-        }
-        oppdaterBehandler(sideeffektContext)
-
-        sideeffektContext.logg(Behandlingsloggstype.BEHANDLING_NULLSTILLT)
-    }
 
     private fun oppdaterBehandler(sideeffektContext: SideeffektContext) {
         this.sistEndret = sideeffektContext.klokke.nå()
@@ -776,6 +767,15 @@ class Behandling internal constructor(
             )
 
             context.logg(Behandlingsloggstype.UNNTAK_FOR_UTTALELSE)
+        }
+
+        fun flyttTilbakeTilFakta() {
+            steg().forEach {
+                it.nullstill(kravgrunnlag.entry, eksternFagsakRevurdering.entry)
+            }
+            oppdaterBehandler(context)
+
+            context.logg(Behandlingsloggstype.BEHANDLING_NULLSTILLT)
         }
 
         fun trekkTilbakeFraGodkjenning() {
