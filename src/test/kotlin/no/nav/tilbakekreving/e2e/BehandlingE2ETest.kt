@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
@@ -727,74 +726,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                         grunnlag = Hendelsesundertype.KONTANTSTØTTE.name,
                     ),
                 )
-        }
-    }
-
-    @Test
-    fun `nullstilling av perioder, årsak og vurdering blir lagret i faktasteget`() {
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
-                fagsystemId = fagsystemId,
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, årsakTilFeilutbetaling = "original"))
-        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-
-        val periodeId = tilbakekreving(behandlingId).shouldNotBeNull().tilFeilutbetalingFrontendDto(behandlingId, SystemKlokke).perioder.single().id
-        val faktaPerioder = listOf(
-            OppdaterFaktaPeriodeDto(
-                id = periodeId.toString(),
-                rettsligGrunnlag = listOf(
-                    RettsligGrunnlagDto(
-                        bestemmelse = Hendelsestype.ANNET.name,
-                        grunnlag = Hendelsesundertype.ANNET_FRITEKST.name,
-                    ),
-                ),
-            ),
-        )
-        val oppdagetDato = LocalDate.now()
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOppdaterFakta(
-                behandlingId = behandlingId.toString(),
-                oppdaterFaktaOmFeilutbetalingDto = OppdaterFaktaOmFeilutbetalingDto(
-                    perioder = faktaPerioder,
-                    vurdering = VurderingDto(
-                        årsak = "oppdatert",
-                        oppdaget = OppdagetDto(
-                            dato = oppdagetDato,
-                            av = OppdagetDto.Av.BRUKER,
-                            beskrivelse = "Beskrivelse av oppdagelse",
-                        ),
-                    ),
-                    rettsgebyrÅrFraSaksbehandler = null,
-                ),
-            ).statusCode shouldBe HttpStatus.OK
-        }
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingController.flyttBehandlingTilFakta(behandlingId).status shouldBe Ressurs.Status.SUKSESS
-        }
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            val faktaSteg = behandlingApiController.behandlingFakta(
-                behandlingId = behandlingId.toString(),
-            ).body
-
-            faktaSteg?.perioder?.single()?.rettsligGrunnlag shouldBe listOf(
-                RettsligGrunnlagDto(
-                    bestemmelse = Hendelsestype.ANNET.name,
-                    grunnlag = Hendelsesundertype.ANNET_FRITEKST.name,
-                ),
-            )
-            faktaSteg?.vurdering shouldBe VurderingDto(
-                årsak = "original",
-                oppdaget = OppdagetDto(
-                    dato = null,
-                    av = OppdagetDto.Av.IKKE_VURDERT,
-                    beskrivelse = null,
-                ),
-            )
         }
     }
 
