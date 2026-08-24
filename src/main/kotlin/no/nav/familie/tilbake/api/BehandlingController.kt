@@ -327,15 +327,6 @@ class BehandlingController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(behandling(behandlingId), ValideringContext.FlyttBehandlingTilFakta) { tilbakekreving, context ->
-            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                flyttTilbakeTilFakta()
-            }
-            Ressurs.success("OK")
-        }
-        if (response != null) {
-            return response
-        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

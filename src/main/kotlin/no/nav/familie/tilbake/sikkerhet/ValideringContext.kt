@@ -115,11 +115,6 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.NONE,
         handling = "Henter forvaltningsinformasjon",
     ),
-    ForvaltningFlyttTilFakta(
-        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-        auditLoggerEvent = AuditLoggerEvent.UPDATE,
-        handling = "Flytter behandling tilbake til Fakta",
-    ),
     ForvaltningOppdaterFagsysteminfo(
         minimumBehandlerrolle = Behandlerrolle.FORVALTER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -169,11 +164,6 @@ enum class ValideringContext(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter fakta om feilutbetalingen",
-    ),
-    FlyttBehandlingTilFakta(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        auditLoggerEvent = AuditLoggerEvent.UPDATE,
-        handling = "Flytter behandling tilbake til Fakta",
     ),
     HentForhåndsvarselinformasjon(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,

@@ -8,89 +8,28 @@ import no.nav.tilbakekreving.LesContext
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.Totrinnsstegsinfo
-import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandlerContext
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
-import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.beslutterContext
-import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtakVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
-import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 class BehandlingTest {
     val periode = 1.januar(2021) til 31.januar(2021)
-
-    @Test
-    fun `flytt behandling tilbake til fakta - nullstiller fakta`() {
-        val behandling = behandling()
-
-        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
-
-        val faktasteg = faktastegVurdering(perioder = listOf(periode))
-        behandling.medSaksbehandling(saksbehandlerContext()) {
-            vurderFakta(faktasteg)
-            behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-            behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
-                .behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
-                .shouldNotBeNull()
-                .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
-            flyttTilbakeTilFakta()
-        }
-
-        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
-        behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.IKKE_VURDERT
-    }
-
-    @Test
-    fun `flytt behandling tilbake til fakta - nullstiller foreldelse`() {
-        val kravgrunnlag = kravgrunnlag()
-        val revurdering = eksternFagsakBehandling()
-        val behandling = behandling(kravgrunnlag, revurdering)
-        behandling.medSaksbehandling(saksbehandlerContext()) {
-            lagreUttalelse(UttalelseVurdering.JA, null, null)
-            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
-            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
-            behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
-            flyttTilbakeTilFakta()
-        }
-
-        behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe null
-    }
-
-    @Test
-    fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
-        val behandling = behandling()
-        behandling.medSaksbehandling(saksbehandlerContext()) {
-            lagreUttalelse(UttalelseVurdering.JA, null, null)
-            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
-            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
-            vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
-            behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse.shouldNotBeNull()
-            flyttTilbakeTilFakta()
-        }
-
-        behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse shouldBe null
-    }
 
     @Test
     fun `vedtak kan endres etter alle tilbakeførte vurderinger er gjennomgått`() {
