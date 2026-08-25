@@ -505,7 +505,7 @@ class VilkårsvurderingstegTest {
     }
 
     @Test
-    fun `beløp ikke  i behold ny vilkårsvurdering`() {
+    fun `beløp ikke i behold ny vilkårsvurdering`() {
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
             eksternFagsakBehandling(),
             kravgrunnlag(

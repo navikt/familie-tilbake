@@ -83,7 +83,7 @@ enum class KanUnnlatesEntity {
         )
 
         IKKE_VURDERT -> IkkeVurdert
-        OVER_4_RETTSGEBYR -> TODO()
+        OVER_4_RETTSGEBYR -> error("OVER_4_RETTSGEBYR er ikke en gyldig kombinasjon for god tro-vurdering")
     }
 }
 
