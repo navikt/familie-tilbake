@@ -83,6 +83,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            val særligeGrunnerEntity = when (kanUnnlates4XRettsgebyr) {
+                null, is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef)
+            }
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
                 mottakersForståelse = MottakersForståelseEntity(
@@ -95,7 +99,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr?.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
-                særligGrunner = (kanUnnlates4XRettsgebyr?.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef),
+                særligGrunner = særligeGrunnerEntity,
                 relevantMomenter = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
@@ -119,7 +123,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
-            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner
+            val reduksjonSærligeGrunner = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner
+            }
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
@@ -129,11 +136,11 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseMottakersForståelse,
-                    særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonÅrsaker.SkalReduseres.Ja,
+                    særligeGrunner = reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner?.skalReduseres is ReduksjonÅrsaker.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
-                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
+                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner?.begrunnelse,
                 ),
             )
         }
@@ -147,11 +154,15 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            val særligeGrunnerOppsummering = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering()
+            }
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
                 aktsomhetEtterUtbetaling = grad.aktsomhet,
                 forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
-                særligeGrunner = (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering(),
+                særligeGrunner = særligeGrunnerOppsummering,
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }

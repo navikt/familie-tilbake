@@ -19,10 +19,16 @@ import java.math.BigDecimal
 import java.util.UUID
 
 sealed interface ReduksjonÅrsaker {
+    val begrunnelse: String
+
     fun tilFrontendDto(): ReduksjonArsakerDto
 
+    fun reduksjon(): Reduksjon
+
+    fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
+
     class ReduksjonGodTro(
-        val begrunnelse: String,
+        override val begrunnelse: String,
         val grunner: Set<RelevanteMomentGodTro>,
         val skalReduseres: SkalReduseres,
     ) : ReduksjonÅrsaker {
@@ -38,11 +44,15 @@ sealed interface ReduksjonÅrsaker {
                 skalReduseres = skalReduseres.tilEntity(),
             )
         }
+
+        override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderinger()
     }
 
     // §22-15 4. ledd
     class ReduksjonSærligeGrunner(
-        val begrunnelse: String,
+        override val begrunnelse: String,
         val grunner: Set<SærligGrunn>,
         val skalReduseres: SkalReduseres,
     ) : ReduksjonÅrsaker {
@@ -74,6 +84,10 @@ sealed interface ReduksjonÅrsaker {
         override fun tilFrontendDto(): ReduksjonArsakerDto {
             return skalReduseres.tilFrontendDtoForSærligeGrunner(grunner, begrunnelse)
         }
+
+        override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderinger()
     }
 
     sealed interface SkalReduseres {
@@ -136,7 +150,7 @@ sealed interface ReduksjonÅrsaker {
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
 
             override fun tilEntity(): SkalReduseresEntity {
-                return SkalReduseresEntity(SkalReduseresType.Ja, prosentdel)
+                return SkalReduseresEntity(SkalReduseresType.JaAvBeløpIBehold, prosentdel)
             }
 
             override fun tilFrontendDtoForSærligeGrunner(

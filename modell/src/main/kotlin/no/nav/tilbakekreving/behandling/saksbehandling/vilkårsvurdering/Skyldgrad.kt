@@ -40,6 +40,10 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            val særligeGrunnerOppsummering = when (kanUnnlates4XRettsgebyr) {
+                is KanUnnlates4xRettsgebyr.Unnlates -> null
+                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering()
+            }
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = vurderingstype(),
                 aktsomhetEtterUtbetaling = null,
@@ -48,7 +52,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
-                særligeGrunner = (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering(),
+                særligeGrunner = særligeGrunnerOppsummering,
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }

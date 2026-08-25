@@ -63,23 +63,15 @@ sealed interface KanUnnlates4xRettsgebyr {
     class SkalIkkeUnnlates(
         private val reduksjonÅrsaker: ReduksjonÅrsaker,
     ) : KanUnnlates4xRettsgebyr {
-        override fun reduksjon(): Reduksjon {
-            return when (reduksjonÅrsaker) {
-                is ReduksjonÅrsaker.ReduksjonSærligeGrunner -> reduksjonÅrsaker.skalReduseres.reduksjon()
-                is ReduksjonÅrsaker.ReduksjonGodTro -> reduksjonÅrsaker.skalReduseres.reduksjon()
-            }
-        }
+        override fun reduksjon(): Reduksjon = reduksjonÅrsaker.reduksjon()
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return when (reduksjonÅrsaker) {
-                is ReduksjonÅrsaker.ReduksjonSærligeGrunner -> setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) +
-                    reduksjonÅrsaker.skalReduseres.påkrevdeVurderinger()
-                is ReduksjonÅrsaker.ReduksjonGodTro -> reduksjonÅrsaker.skalReduseres.påkrevdeVurderinger()
-            }
+            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) +
+                reduksjonÅrsaker.påkrevdeVurderinger()
         }
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.SKAL_IKKE_UNNLATES
@@ -89,16 +81,10 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.TILBAKEKREVES
 
         override fun tilFrontendDto(): UnnlatelseDto {
-            return when (reduksjonÅrsaker) {
-                is ReduksjonÅrsaker.ReduksjonSærligeGrunner -> SkalIkkeUnnlatesDto(
-                    begrunnelse = reduksjonÅrsaker.begrunnelse,
-                    erDetSærligeGrunner = reduksjonÅrsaker.tilFrontendDto(),
-                )
-                is ReduksjonÅrsaker.ReduksjonGodTro -> SkalIkkeUnnlatesDto(
-                    begrunnelse = reduksjonÅrsaker.begrunnelse,
-                    erDetSærligeGrunner = reduksjonÅrsaker.tilFrontendDto(),
-                )
-            }
+            return SkalIkkeUnnlatesDto(
+                begrunnelse = reduksjonÅrsaker.begrunnelse,
+                erDetSærligeGrunner = reduksjonÅrsaker.tilFrontendDto(),
+            )
         }
 
         override fun reduksjonÅrsaker(): ReduksjonÅrsaker {

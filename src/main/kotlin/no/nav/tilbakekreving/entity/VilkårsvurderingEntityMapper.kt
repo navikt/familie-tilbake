@@ -298,13 +298,13 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.StringConverter,
         )
 
-        val skalReduseres = SærligeGrunnerMapper.field(
+        val skalReduseres = field(
             "skal_reduseres",
             { it.skalReduseres.type },
             FieldConverter.EnumConverter.of<SkalReduseresType>().required(),
         )
 
-        val reduksjonProsent = SærligeGrunnerMapper.field(
+        val reduksjonProsent = field(
             "reduksjon_prosent",
             { it.skalReduseres.prosentdel },
             FieldConverter.IntConverter,
