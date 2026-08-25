@@ -5,6 +5,8 @@ import java.time.LocalDate
 object Rettsgebyr {
     private val rettsgebyrForDato =
         listOf(
+            Datobeløp(LocalDate.of(2017, 1, 1), 1049),
+            Datobeløp(LocalDate.of(2018, 1, 1), 1130),
             Datobeløp(LocalDate.of(2019, 1, 1), 1150),
             Datobeløp(LocalDate.of(2020, 1, 1), 1172),
             Datobeløp(LocalDate.of(2021, 1, 1), 1199),
