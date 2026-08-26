@@ -6,10 +6,9 @@ import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
-import no.nav.tilbakekreving.entities.GodTroRelevanteMomenterEntity
+import no.nav.tilbakekreving.entities.ReduksjonMomenterEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
-import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.JaSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ReduksjonArsakerDto
@@ -18,7 +17,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
 import java.math.BigDecimal
 import java.util.UUID
 
-sealed interface ReduksjonÅrsaker {
+sealed interface ReduksjonMomenter {
     val begrunnelse: String
 
     fun tilFrontendDto(): ReduksjonArsakerDto
@@ -27,17 +26,19 @@ sealed interface ReduksjonÅrsaker {
 
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
+    fun tilEntity(periodeRef: UUID): ReduksjonMomenterEntity
+
     class ReduksjonGodTro(
         override val begrunnelse: String,
         val grunner: Set<RelevanteMomentGodTro>,
         val skalReduseres: SkalReduseres,
-    ) : ReduksjonÅrsaker {
+    ) : ReduksjonMomenter {
         override fun tilFrontendDto(): ReduksjonArsakerDto {
             return skalReduseres.tilFrontendDtoForGodTro(grunner, begrunnelse)
         }
 
-        fun tilEntity(periodeRef: UUID): GodTroRelevanteMomenterEntity {
-            return GodTroRelevanteMomenterEntity(
+        override fun tilEntity(periodeRef: UUID): ReduksjonMomenterEntity {
+            return ReduksjonMomenterEntity(
                 periodeRef = periodeRef,
                 begrunnelse = begrunnelse,
                 grunner = grunner.map { it.tilEntity() },
@@ -55,9 +56,9 @@ sealed interface ReduksjonÅrsaker {
         override val begrunnelse: String,
         val grunner: Set<SærligGrunn>,
         val skalReduseres: SkalReduseres,
-    ) : ReduksjonÅrsaker {
-        fun tilEntity(periodeRef: UUID): SærligeGrunnerEntity {
-            return SærligeGrunnerEntity(
+    ) : ReduksjonMomenter {
+        override fun tilEntity(periodeRef: UUID): ReduksjonMomenterEntity {
+            return ReduksjonMomenterEntity(
                 periodeRef = periodeRef,
                 begrunnelse = begrunnelse,
                 grunner = grunner.map { it.tilEntity() },

@@ -9,14 +9,12 @@ import no.nav.tilbakekreving.entities.FeilaktigEllerMangelfullType
 import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.Forståelsesgrad
 import no.nav.tilbakekreving.entities.GodTroEntity
-import no.nav.tilbakekreving.entities.GodTroRelevanteMomenterEntity
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
-import no.nav.tilbakekreving.entities.RelevantMomentEntity
+import no.nav.tilbakekreving.entities.ReduksjonMomentEntity
+import no.nav.tilbakekreving.entities.ReduksjonMomenterEntity
 import no.nav.tilbakekreving.entities.SkalReduseresEntity
 import no.nav.tilbakekreving.entities.SkalReduseresType
-import no.nav.tilbakekreving.entities.SærligGrunnEntity
-import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurderingType
@@ -112,8 +110,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             resultSet: ResultSet,
             godTro: GodTroEntity?,
             aktsomhet: VurdertAktsomhetEntity?,
-            særligeGrunner: SærligeGrunnerEntity?,
-            relevanteMomenter: GodTroRelevanteMomenterEntity?,
+            reduksjonMomenter: ReduksjonMomenterEntity?,
             mottakersForståelse: MottakersForståelseEntity?,
             endringIKravgrunnnlag: ForskjellEntity?,
         ): VilkårsvurderingsperiodeEntity {
@@ -129,8 +126,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     beløpIBehold = godTro,
                     aktsomhet = aktsomhet,
                     kanUnnlates = resultSet[unnlates],
-                    særligGrunner = særligeGrunner,
-                    relevantMomenter = relevanteMomenter,
+                    reduksjonMomenterEntity = reduksjonMomenter,
                     feilaktigEllerMangelfull = resultSet[feilaktigEllerMangelfull],
                     forrigePeriodeId = resultSet[forrigePeriodeId],
                     begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
@@ -230,19 +226,19 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
         }
     }
 
-    object SærligeGrunnerMapper : Entity<SærligeGrunnerEntity, UUID, UUID>(
+    object ReduksjonMomenterMapper : Entity<ReduksjonMomenterEntity, UUID, UUID>(
         "tilbakekreving_vilkårsvurdering_periode_særlige_grunner",
         { it.periodeRef!! },
         FieldConverter.UUIDConverter.required(),
     ) {
         val begrunnelse = field(
             "begrunnelse",
-            SærligeGrunnerEntity::begrunnelse,
+            ReduksjonMomenterEntity::begrunnelse,
             FieldConverter.StringConverter.required(),
         )
-        val særligGrunnAnnetBegrunnelse = field(
-            "annet_særlig_grunn_begrunnelse",
-            { it.grunner.firstOrNull { grunn -> grunn.type == SærligGrunnType.ANNET }?.annetBegrunnelse },
+        val annetBegrunnelse = field(
+            "annet_begrunnelse",
+            { it.grunner.firstOrNull { grunn -> grunn.type == SærligGrunnType.ANNET || grunn.type == RelevanteMomentTypeGodTro.ANNET }?.annetBegrunnelse },
             FieldConverter.StringConverter,
         )
         val skalReduseres = field(
@@ -257,77 +253,37 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
         )
         val særligeGrunner = field(
             "særlige_grunner",
-            { it.grunner.map { grunn -> grunn.type } },
+            { it.grunner.map { grunn -> grunn.type }.filterIsInstance<SærligGrunnType>() },
             FieldConverter.EnumArrayConverter.of<SærligGrunnType>(),
         )
-
-        fun map(
-            resultSet: ResultSet,
-        ): SærligeGrunnerEntity {
-            return SærligeGrunnerEntity(
-                periodeRef = resultSet[id],
-                begrunnelse = resultSet[begrunnelse],
-                grunner = resultSet[særligeGrunner].map {
-                    when (it) {
-                        SærligGrunnType.ANNET -> SærligGrunnEntity(it, resultSet[særligGrunnAnnetBegrunnelse!!])
-                        else -> SærligGrunnEntity(it, null)
-                    }
-                },
-                skalReduseres = SkalReduseresEntity(
-                    type = resultSet[skalReduseres],
-                    prosentdel = resultSet[reduksjonProsent],
-                ),
-            )
-        }
-    }
-
-    object RelevanteMomenterMapper : Entity<GodTroRelevanteMomenterEntity, UUID, UUID>(
-        "tilbakekreving_vilkårsvurdering_periode_relevante_momenter",
-        { it.periodeRef!! },
-        FieldConverter.UUIDConverter.required(),
-    ) {
-        val begrunnelse = field(
-            "begrunnelse",
-            GodTroRelevanteMomenterEntity::begrunnelse,
-            FieldConverter.StringConverter.required(),
-        )
-
-        val relevantMomentAnnetBegrunnelse = field(
-            "annet_relevant_moment_begrunnelse",
-            { it.grunner.firstOrNull { moment -> moment.type == RelevanteMomentTypeGodTro.ANNET }?.annetBegrunnelse },
-            FieldConverter.StringConverter,
-        )
-
-        val skalReduseres = field(
-            "skal_reduseres",
-            { it.skalReduseres.type },
-            FieldConverter.EnumConverter.of<SkalReduseresType>().required(),
-        )
-
-        val reduksjonProsent = field(
-            "reduksjon_prosent",
-            { it.skalReduseres.prosentdel },
-            FieldConverter.IntConverter,
-        )
-
-        val relevanteMomenter = field(
+        val relevante_momenter = field(
             "relevante_momenter",
-            { it.grunner.map { moment -> moment.type } },
+            { it.grunner.map { grunn -> grunn.type }.filterIsInstance<RelevanteMomentTypeGodTro>() },
             FieldConverter.EnumArrayConverter.of<RelevanteMomentTypeGodTro>(),
         )
 
         fun map(
             resultSet: ResultSet,
-        ): GodTroRelevanteMomenterEntity {
-            return GodTroRelevanteMomenterEntity(
+        ): ReduksjonMomenterEntity {
+            val grunner = if (resultSet[relevante_momenter].isNotEmpty()) {
+                resultSet[relevante_momenter].map { type ->
+                    ReduksjonMomentEntity(
+                        type = type,
+                        annetBegrunnelse = resultSet[annetBegrunnelse].takeIf { type == RelevanteMomentTypeGodTro.ANNET },
+                    )
+                }
+            } else {
+                resultSet[særligeGrunner].map { type ->
+                    ReduksjonMomentEntity(
+                        type = type,
+                        annetBegrunnelse = resultSet[annetBegrunnelse].takeIf { type == SærligGrunnType.ANNET },
+                    )
+                }
+            }
+            return ReduksjonMomenterEntity(
                 periodeRef = resultSet[id],
                 begrunnelse = resultSet[begrunnelse],
-                grunner = resultSet[relevanteMomenter].map {
-                    when (it) {
-                        RelevanteMomentTypeGodTro.ANNET -> RelevantMomentEntity(it, resultSet[relevantMomentAnnetBegrunnelse!!])
-                        else -> RelevantMomentEntity(it, null)
-                    }
-                },
+                grunner = grunner,
                 skalReduseres = SkalReduseresEntity(
                     type = resultSet[skalReduseres],
                     prosentdel = resultSet[reduksjonProsent],

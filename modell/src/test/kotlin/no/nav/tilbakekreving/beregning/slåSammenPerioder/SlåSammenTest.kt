@@ -7,8 +7,8 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
@@ -122,7 +122,7 @@ class SlåSammenTest {
                     ReduksjonSærligeGrunner(
                         begrunnelse = "",
                         grunner = emptySet(),
-                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
                     ),
                 ),
             ),

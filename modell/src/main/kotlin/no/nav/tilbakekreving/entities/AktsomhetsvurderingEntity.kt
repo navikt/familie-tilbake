@@ -1,12 +1,9 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -18,8 +15,7 @@ data class AktsomhetsvurderingEntity(
     val beløpIBehold: GodTroEntity?,
     val aktsomhet: VurdertAktsomhetEntity?,
     val kanUnnlates: KanUnnlatesEntity?,
-    val særligGrunner: SærligeGrunnerEntity?,
-    val relevantMomenter: GodTroRelevanteMomenterEntity?,
+    val reduksjonMomenterEntity: ReduksjonMomenterEntity?,
     val feilaktigEllerMangelfull: FeilaktigEllerMangelfullType?,
     val forrigePeriodeId: UUID?,
 ) {
@@ -32,8 +28,7 @@ data class AktsomhetsvurderingEntity(
                     begrunnelseForGodTro = requireNotNull(beløpIBehold) { "begrunnelse kreves i GOD_TRO " }.begrunnelse,
                     kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_GOD_TRO,
-                        særligeGrunner = null,
-                        godTroRelevanteMomenter = relevantMomenter,
+                        reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
                     ),
                 )
@@ -51,8 +46,7 @@ data class AktsomhetsvurderingEntity(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
                     kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
-                        særligeGrunner = særligGrunner,
-                        godTroRelevanteMomenter = null,
+                        reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
                     ),
                 )
@@ -64,8 +58,7 @@ data class AktsomhetsvurderingEntity(
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnesle kreves i FORSTOD_ELLER_BURDE_FORSTÅTT " },
                     kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
-                        særligeGrunner = særligGrunner,
-                        godTroRelevanteMomenter = null,
+                        reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
                     ),
                 )
@@ -81,8 +74,7 @@ data class AktsomhetsvurderingEntity(
                             feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for uaktsomt" }.fraEntity,
                             kanUnnlates4XRettsgebyr = requireNotNull(kanUnnlates) { "forårsaket av bruker trenger vurdering om beløp kan unnlates" }.fraEntity(
                                 reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
-                                særligeGrunner = særligGrunner,
-                                godTroRelevanteMomenter = null,
+                                reduksjonMomenter = reduksjonMomenterEntity,
                                 begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
                             ),
                         )
@@ -90,7 +82,7 @@ data class AktsomhetsvurderingEntity(
                     AktsomhetType.GROV_UAKTSOMHET -> Skyldgrad.GrovUaktsomhet(
                         begrunnelse = requireNotNull(begrunnelse) { "Særlige grunner kreves for grov uaktsomhet" },
                         begrunnelseAktsomhet = aktsomhet.begrunnelse,
-                        reduksjonSærligeGrunner = requireNotNull(særligGrunner) { "Særlige grunner kreves for grov uaktsomhet" }.fraEntity(),
+                        reduksjonSærligeGrunner = requireNotNull(reduksjonMomenterEntity) { "Særlige grunner kreves for grov uaktsomhet" }.fraEntitySærligGrunn(),
                         feilaktigeEllerMangelfulleOpplysninger = requireNotNull(feilaktigEllerMangelfull) { "Feilaktige eller mangelfulle opplysninger kreves for grov uaktsomhet" }.fraEntity,
                     )
                     AktsomhetType.FORSETT -> Skyldgrad.Forsett(
@@ -138,35 +130,6 @@ data class GodTroEntity(
                     begrunnelse = begrunnelse,
                 )
             }
-        }
-    }
-}
-
-data class GodTroRelevanteMomenterEntity(
-    val periodeRef: UUID,
-    val begrunnelse: String,
-    val grunner: List<RelevantMomentEntity>,
-    val skalReduseres: SkalReduseresEntity,
-) {
-    fun fraEntity(): ReduksjonÅrsaker.ReduksjonGodTro {
-        return ReduksjonÅrsaker.ReduksjonGodTro(
-            begrunnelse = begrunnelse,
-            grunner = grunner.map { it.fraEntity() }.toSet(),
-            skalReduseres = skalReduseres.fraEntity(),
-        )
-    }
-}
-
-data class RelevantMomentEntity(
-    val type: RelevanteMomentTypeGodTro,
-    val annetBegrunnelse: String?,
-) {
-    fun fraEntity(): RelevanteMomentGodTro {
-        return when (type) {
-            RelevanteMomentTypeGodTro.STØRRELSE_BELØP -> RelevanteMomentGodTro.StørrelseBeløp
-            RelevanteMomentTypeGodTro.TID_FRA_UTBETALING -> RelevanteMomentGodTro.TidFraUtbetaling
-            RelevanteMomentTypeGodTro.UTBETALING_TILLIT -> RelevanteMomentGodTro.UtbetalingTillit
-            RelevanteMomentTypeGodTro.ANNET -> RelevanteMomentGodTro.Annet(requireNotNull(annetBegrunnelse))
         }
     }
 }

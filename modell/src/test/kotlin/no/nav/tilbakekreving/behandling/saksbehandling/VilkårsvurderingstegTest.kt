@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsresultatDto
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
@@ -322,10 +322,10 @@ class VilkårsvurderingstegTest {
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
                 kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
                         begrunnelse = "Begrunnelse for i behold",
                         grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
-                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
                     ),
                 ),
             ),
@@ -372,10 +372,10 @@ class VilkårsvurderingstegTest {
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
                 kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
                         begrunnelse = "Begrunnelse for i behold",
                         grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
-                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.JaAvBeløpIBehold(
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold(
                             prosentdel = 20,
                             beløpIBehold = 1000.kroner,
                         ),
@@ -426,10 +426,10 @@ class VilkårsvurderingstegTest {
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
                 kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
                         begrunnelse = "Begrunnelse for i behold",
                         grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
-                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
                     ),
                 ),
             ),
@@ -474,10 +474,10 @@ class VilkårsvurderingstegTest {
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
                 kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonÅrsaker = ReduksjonÅrsaker.ReduksjonGodTro(
+                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
                         begrunnelse = "Begrunnelse for i behold",
                         grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
-                        skalReduseres = ReduksjonÅrsaker.SkalReduseres.Ja(20),
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.Ja(20),
                     ),
                 ),
             ),

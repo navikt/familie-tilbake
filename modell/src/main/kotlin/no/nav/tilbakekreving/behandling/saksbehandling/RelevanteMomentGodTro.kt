@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
-import no.nav.tilbakekreving.entities.RelevantMomentEntity
+import no.nav.tilbakekreving.entities.ReduksjonMomentEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 
@@ -12,13 +12,13 @@ sealed interface RelevanteMomentGodTro : MomentEllerSærligGrunn<RelevanteMoment
         beskrivelse = type.navn,
     )
 
-    fun tilEntity(): RelevantMomentEntity
+    fun tilEntity(): ReduksjonMomentEntity
 
     object StørrelseBeløp : RelevanteMomentGodTro {
         override val type: RelevanteMomentTypeGodTro = RelevanteMomentTypeGodTro.STØRRELSE_BELØP
 
-        override fun tilEntity(): RelevantMomentEntity {
-            return RelevantMomentEntity(
+        override fun tilEntity(): ReduksjonMomentEntity {
+            return ReduksjonMomentEntity(
                 type = type,
                 annetBegrunnelse = null,
             )
@@ -28,8 +28,8 @@ sealed interface RelevanteMomentGodTro : MomentEllerSærligGrunn<RelevanteMoment
     object TidFraUtbetaling : RelevanteMomentGodTro {
         override val type: RelevanteMomentTypeGodTro = RelevanteMomentTypeGodTro.TID_FRA_UTBETALING
 
-        override fun tilEntity(): RelevantMomentEntity {
-            return RelevantMomentEntity(
+        override fun tilEntity(): ReduksjonMomentEntity {
+            return ReduksjonMomentEntity(
                 type = type,
                 annetBegrunnelse = null,
             )
@@ -39,8 +39,8 @@ sealed interface RelevanteMomentGodTro : MomentEllerSærligGrunn<RelevanteMoment
     object UtbetalingTillit : RelevanteMomentGodTro {
         override val type: RelevanteMomentTypeGodTro = RelevanteMomentTypeGodTro.UTBETALING_TILLIT
 
-        override fun tilEntity(): RelevantMomentEntity {
-            return RelevantMomentEntity(
+        override fun tilEntity(): ReduksjonMomentEntity {
+            return ReduksjonMomentEntity(
                 type = type,
                 annetBegrunnelse = null,
             )
@@ -50,8 +50,8 @@ sealed interface RelevanteMomentGodTro : MomentEllerSærligGrunn<RelevanteMoment
     data class Annet(val begrunnelse: String) : RelevanteMomentGodTro {
         override val type: RelevanteMomentTypeGodTro = RelevanteMomentTypeGodTro.ANNET
 
-        override fun tilEntity(): RelevantMomentEntity {
-            return RelevantMomentEntity(
+        override fun tilEntity(): ReduksjonMomentEntity {
+            return ReduksjonMomentEntity(
                 type = type,
                 annetBegrunnelse = begrunnelse,
             )

@@ -2,9 +2,8 @@ package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.entities.GodTroEntity
-import no.nav.tilbakekreving.entities.GodTroRelevanteMomenterEntity
 import no.nav.tilbakekreving.entities.MottakersForståelseEntity
-import no.nav.tilbakekreving.entities.SærligeGrunnerEntity
+import no.nav.tilbakekreving.entities.ReduksjonMomenterEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingsperiodeEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.entities.VurdertAktsomhetEntity
@@ -37,11 +36,8 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
             if (periode.vurdering.aktsomhet != null) {
                 lagreAktsomhet(periode.vurdering.aktsomhet!!)
             }
-            if (periode.vurdering.særligGrunner != null) {
-                lagreSærligeGrunner(periode.vurdering.særligGrunner!!)
-            }
-            if (periode.vurdering.relevantMomenter != null) {
-                lagreRelevanteMomenter(periode.vurdering.relevantMomenter!!)
+            if (periode.vurdering.reduksjonMomenterEntity != null) {
+                lagreSærligeGrunner(periode.vurdering.reduksjonMomenterEntity!!)
             }
             if (periode.vurdering.mottakersForståelse != null) {
                 lagreMottakersForståelse(periode.vurdering.mottakersForståelse!!)
@@ -64,7 +60,6 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
                 hentGodTroVurdering(periodeId),
                 hentAktsomhetvurdering(periodeId),
                 hentSærligeGrunnerVurdering(periodeId),
-                hentRelevanteMomenterVurdering(periodeId),
                 hentMottakersForståelse(periodeId),
                 hentEndretAvKravgrunnlag(periodeId),
             )
@@ -100,8 +95,8 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
         VilkårsvurderingEntityMapper.AktsomhetMapper.upsertQuery(jdbcTemplate, aktsomhet)
     }
 
-    private fun lagreSærligeGrunner(særligGrunner: SærligeGrunnerEntity) {
-        VilkårsvurderingEntityMapper.SærligeGrunnerMapper.upsertQuery(jdbcTemplate, særligGrunner)
+    private fun lagreSærligeGrunner(særligGrunner: ReduksjonMomenterEntity) {
+        VilkårsvurderingEntityMapper.ReduksjonMomenterMapper.upsertQuery(jdbcTemplate, særligGrunner)
     }
 
     private fun lagreMottakersForståelse(mottakersForståelse: MottakersForståelseEntity) {
@@ -114,19 +109,9 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
         }.singleOrNull()
     }
 
-    private fun hentSærligeGrunnerVurdering(periodeId: UUID): SærligeGrunnerEntity? {
+    private fun hentSærligeGrunnerVurdering(periodeId: UUID): ReduksjonMomenterEntity? {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_særlige_grunner WHERE id=?;", periodeId) { resultSet, _ ->
-            VilkårsvurderingEntityMapper.SærligeGrunnerMapper.map(resultSet)
-        }.singleOrNull()
-    }
-
-    private fun lagreRelevanteMomenter(relevanteMomenter: GodTroRelevanteMomenterEntity) {
-        VilkårsvurderingEntityMapper.RelevanteMomenterMapper.upsertQuery(jdbcTemplate, relevanteMomenter)
-    }
-
-    private fun hentRelevanteMomenterVurdering(periodeId: UUID): GodTroRelevanteMomenterEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_relevante_momenter WHERE id=?;", periodeId) { resultSet, _ ->
-            VilkårsvurderingEntityMapper.RelevanteMomenterMapper.map(resultSet)
+            VilkårsvurderingEntityMapper.ReduksjonMomenterMapper.map(resultSet)
         }.singleOrNull()
     }
 }
