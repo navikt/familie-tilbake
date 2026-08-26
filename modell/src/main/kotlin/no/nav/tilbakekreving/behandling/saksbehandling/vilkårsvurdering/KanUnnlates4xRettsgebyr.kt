@@ -28,7 +28,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun tilFrontendDTO(): SkalUnnlates
 
-    fun reduksjonÅrsaker(): ReduksjonÅrsaker? = null
+    fun reduksjonMomenter(): ReduksjonMomenter? = null
 
     fun tilFrontendDto(): UnnlatelseDto
 
@@ -61,9 +61,9 @@ sealed interface KanUnnlates4xRettsgebyr {
     }
 
     class SkalIkkeUnnlates(
-        private val reduksjonÅrsaker: ReduksjonÅrsaker,
+        private val reduksjonMomenter: ReduksjonMomenter,
     ) : KanUnnlates4xRettsgebyr {
-        override fun reduksjon(): Reduksjon = reduksjonÅrsaker.reduksjon()
+        override fun reduksjon(): Reduksjon = reduksjonMomenter.reduksjon()
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
             return VurdertUtbetaling.JaNeiVurdering.Nei
@@ -71,7 +71,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
             return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) +
-                reduksjonÅrsaker.påkrevdeVurderinger()
+                reduksjonMomenter.påkrevdeVurderinger()
         }
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.SKAL_IKKE_UNNLATES
@@ -82,18 +82,18 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun tilFrontendDto(): UnnlatelseDto {
             return SkalIkkeUnnlatesDto(
-                begrunnelse = reduksjonÅrsaker.begrunnelse,
-                erDetSærligeGrunner = reduksjonÅrsaker.tilFrontendDto(),
+                begrunnelse = reduksjonMomenter.begrunnelse,
+                erDetSærligeGrunner = reduksjonMomenter.tilFrontendDto(),
             )
         }
 
-        override fun reduksjonÅrsaker(): ReduksjonÅrsaker {
-            return reduksjonÅrsaker
+        override fun reduksjonMomenter(): ReduksjonMomenter {
+            return reduksjonMomenter
         }
     }
 
     class ErOver4xRettsgebyr(
-        private val reduksjonSærligeGrunner: ReduksjonÅrsaker.ReduksjonSærligeGrunner,
+        private val reduksjonSærligeGrunner: ReduksjonMomenter.ReduksjonSærligeGrunner,
     ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon {
             return reduksjonSærligeGrunner.skalReduseres.reduksjon()
@@ -115,7 +115,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return IkkeAktueltDto(reduksjonSærligeGrunner.tilFrontendDto())
         }
 
-        override fun reduksjonÅrsaker(): ReduksjonÅrsaker.ReduksjonSærligeGrunner {
+        override fun reduksjonMomenter(): ReduksjonMomenter.ReduksjonSærligeGrunner {
             return reduksjonSærligeGrunner
         }
     }

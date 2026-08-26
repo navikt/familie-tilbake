@@ -3,8 +3,8 @@ package no.nav.tilbakekreving.builders
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
@@ -77,8 +77,8 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             begrunnelse = "",
             grunner = emptySet(),
             skalReduseres = when (reduksjon.skalReduseres) {
-                true -> ReduksjonÅrsaker.SkalReduseres.Ja(reduksjon.reduksjon)
-                false -> ReduksjonÅrsaker.SkalReduseres.Nei
+                true -> ReduksjonMomenter.SkalReduseres.Ja(reduksjon.reduksjon)
+                false -> ReduksjonMomenter.SkalReduseres.Nei
             },
         )
     }
@@ -104,7 +104,7 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
             ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),
-                skalReduseres = ReduksjonÅrsaker.SkalReduseres.Nei,
+                skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
             ),
         )
     }

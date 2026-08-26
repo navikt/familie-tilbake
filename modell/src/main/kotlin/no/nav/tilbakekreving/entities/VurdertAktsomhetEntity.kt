@@ -1,12 +1,16 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.IkkeVurdert
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.SkalIkkeUnnlates
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.Unnlates
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.MomentEllerSærligGrunnType
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import java.util.UUID
 
@@ -17,30 +21,49 @@ data class VurdertAktsomhetEntity(
     val skalIleggesRenter: Boolean?,
 )
 
-data class SærligeGrunnerEntity(
+data class ReduksjonMomenterEntity(
     val periodeRef: UUID,
     val begrunnelse: String,
-    val grunner: List<SærligGrunnEntity>,
+    val grunner: List<ReduksjonMomentEntity>,
     val skalReduseres: SkalReduseresEntity,
 ) {
-    fun fraEntity(): ReduksjonSærligeGrunner = ReduksjonSærligeGrunner(
+    fun fraEntitySærligGrunn(): ReduksjonSærligeGrunner = ReduksjonSærligeGrunner(
         begrunnelse = begrunnelse,
-        grunner = grunner.map { it.fraEntity() }.toSet(),
+        grunner = grunner.map { it.fraEntitySærligGrunn() }.toSet(),
         skalReduseres = skalReduseres.fraEntity(),
     )
+
+    fun fraEntityRelevanteMomentGodTro(): ReduksjonGodTro {
+        return ReduksjonGodTro(
+            begrunnelse = begrunnelse,
+            grunner = grunner.map { it.fraEntityRelevanteMomentGodTro() }.toSet(),
+            skalReduseres = skalReduseres.fraEntity(),
+        )
+    }
 }
 
-data class SærligGrunnEntity(
-    val type: SærligGrunnType,
+data class ReduksjonMomentEntity(
+    val type: MomentEllerSærligGrunnType,
     val annetBegrunnelse: String?,
 ) {
-    fun fraEntity(): SærligGrunn {
+    fun fraEntitySærligGrunn(): SærligGrunn {
         return when (type) {
             SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
             SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
             SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
             SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
             SærligGrunnType.ANNET -> SærligGrunn.Annet(requireNotNull(annetBegrunnelse))
+            else -> error("Det kreves særlig grunn type. Men type var $type")
+        }
+    }
+
+    fun fraEntityRelevanteMomentGodTro(): RelevanteMomentGodTro {
+        return when (type) {
+            RelevanteMomentTypeGodTro.STØRRELSE_BELØP -> RelevanteMomentGodTro.StørrelseBeløp
+            RelevanteMomentTypeGodTro.TID_FRA_UTBETALING -> RelevanteMomentGodTro.TidFraUtbetaling
+            RelevanteMomentTypeGodTro.UTBETALING_TILLIT -> RelevanteMomentGodTro.UtbetalingTillit
+            RelevanteMomentTypeGodTro.ANNET -> RelevanteMomentGodTro.Annet(requireNotNull(annetBegrunnelse))
+            else -> error("Det kreves relevant moment type. Men type var $type")
         }
     }
 }
@@ -54,36 +77,24 @@ enum class KanUnnlatesEntity {
 
     fun fraEntity(
         reduksjonType: ReduksjonType,
-        særligeGrunner: SærligeGrunnerEntity?,
-        godTroRelevanteMomenter: GodTroRelevanteMomenterEntity?,
-        begrunnelseForUnnlatelse: String?,
-    ): KanUnnlates4xRettsgebyr = when (reduksjonType) {
-        ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER -> fraEntitySærligeGrunner(særligeGrunner, begrunnelseForUnnlatelse)
-        ReduksjonType.REDUKSJON_GOD_TRO -> fraEntityRelevanteMomenter(godTroRelevanteMomenter, begrunnelseForUnnlatelse)
-    }
-
-    fun fraEntitySærligeGrunner(særligeGrunner: SærligeGrunnerEntity?, begrunnelseForUnnlatelse: String?): KanUnnlates4xRettsgebyr = when (this) {
-        UNNLATES -> Unnlates(begrunnelseForUnnlatelse)
-        SKAL_IKKE_UNNLATES -> SkalIkkeUnnlates(
-            requireNotNull(særligeGrunner) { "SærligGrunner kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
-        )
-        OVER_4_RETTSGEBYR -> ErOver4xRettsgebyr(
-            requireNotNull(særligeGrunner) { "SærligGrunner kreves for OVER_4_RETTSGEBYR" }.fraEntity(),
-        )
-        IKKE_VURDERT -> IkkeVurdert
-    }
-
-    fun fraEntityRelevanteMomenter(
-        godTroRelevanteMomenterEntity: GodTroRelevanteMomenterEntity?,
+        reduksjonMomenter: ReduksjonMomenterEntity?,
         begrunnelseForUnnlatelse: String?,
     ): KanUnnlates4xRettsgebyr = when (this) {
         UNNLATES -> Unnlates(begrunnelseForUnnlatelse)
-        SKAL_IKKE_UNNLATES -> SkalIkkeUnnlates(
-            requireNotNull(godTroRelevanteMomenterEntity) { "GodTroRelevanteMomenter kreves for SKAL_IKKE_UNNLATES" }.fraEntity(),
+        SKAL_IKKE_UNNLATES -> {
+            when (reduksjonType) {
+                ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER -> SkalIkkeUnnlates(
+                    requireNotNull(reduksjonMomenter) { "SærligGrunner kreves for Særlig grunn reduksjon" }.fraEntitySærligGrunn(),
+                )
+                ReduksjonType.REDUKSJON_GOD_TRO -> SkalIkkeUnnlates(
+                    requireNotNull(reduksjonMomenter) { "RelevanteMomenter kreves for God tro reduksjon" }.fraEntityRelevanteMomentGodTro(),
+                )
+            }
+        }
+        OVER_4_RETTSGEBYR -> ErOver4xRettsgebyr(
+            requireNotNull(reduksjonMomenter) { "SærligGrunner kreves for OVER_4_RETTSGEBYR" }.fraEntitySærligGrunn(),
         )
-
         IKKE_VURDERT -> IkkeVurdert
-        OVER_4_RETTSGEBYR -> error("OVER_4_RETTSGEBYR er ikke en gyldig kombinasjon for god tro-vurdering")
     }
 }
 

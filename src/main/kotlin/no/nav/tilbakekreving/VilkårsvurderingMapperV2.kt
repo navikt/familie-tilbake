@@ -6,8 +6,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
@@ -27,10 +27,10 @@ object VilkårsvurderingMapperV2 {
                 }
             }.toSet(),
             when (aktsomhetDto!!.særligeGrunnerTilReduksjon) {
-                true -> ReduksjonÅrsaker.SkalReduseres.Ja(
+                true -> ReduksjonMomenter.SkalReduseres.Ja(
                     aktsomhetDto!!.andelTilbakekreves!!.toInt(),
                 )
-                false -> ReduksjonÅrsaker.SkalReduseres.Nei
+                false -> ReduksjonMomenter.SkalReduseres.Nei
             },
         )
     }

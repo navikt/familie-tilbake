@@ -83,10 +83,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
-            val særligeGrunnerEntity = when (kanUnnlates4XRettsgebyr) {
-                null, is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef)
-            }
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr?.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_FORSTOD,
                 mottakersForståelse = MottakersForståelseEntity(
@@ -99,8 +96,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr?.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
-                særligGrunner = særligeGrunnerEntity,
-                relevantMomenter = null,
+                reduksjonMomenterEntity = reduksjonSærligeGrunner?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -123,10 +119,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun renter(): Boolean = false
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto {
-            val reduksjonSærligeGrunner = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner
-            }
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
                 godTro = null,
@@ -137,7 +130,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseMottakersForståelse,
                     særligeGrunner = reduksjonSærligeGrunner?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner?.skalReduseres is ReduksjonÅrsaker.SkalReduseres.Ja,
+                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner?.skalReduseres is ReduksjonMomenter.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner?.begrunnelse,
@@ -156,7 +149,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             val særligeGrunnerOppsummering = when (kanUnnlates4XRettsgebyr) {
                 is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).oppsummerVurdering()
+                else -> (kanUnnlates4XRettsgebyr.reduksjonMomenter() as ReduksjonMomenter.ReduksjonSærligeGrunner).oppsummerVurdering()
             }
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
@@ -170,10 +163,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
-            val særligeGrunnerEntity = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> (kanUnnlates4XRettsgebyr.reduksjonÅrsaker() as ReduksjonÅrsaker.ReduksjonSærligeGrunner).tilEntity(periodeRef)
-            }
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_BURDE_FORSTÅTT,
                 mottakersForståelse = MottakersForståelseEntity(
@@ -189,8 +179,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = null,
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                særligGrunner = særligeGrunnerEntity,
-                relevantMomenter = null,
+                reduksjonMomenterEntity = reduksjonSærligeGrunner?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,
             )
@@ -223,7 +212,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun tilNyFrontendDto(): VilkaarsvurderingValgDto = GodTroDto(
             begrunnelse = begrunnelseForGodTro,
-            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse, reduksjonArsakerDto = kanUnnlates4XRettsgebyr?.reduksjonÅrsaker()?.tilFrontendDto()),
+            beløpIBehold = beløpIBehold.tilFrontendDto(begrunnelseForIBehold = begrunnelse, reduksjonArsakerDto = kanUnnlates4XRettsgebyr?.reduksjonMomenter()?.tilFrontendDto()),
         )
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
@@ -239,14 +228,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = beløpIBehold.påkrevdeVurderinger()
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
-            val relevantMomentEntity = when (val unnlatelse = kanUnnlates4XRettsgebyr) {
-                null, is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> {
-                    val reduksjonGodTro = unnlatelse.reduksjonÅrsaker() as? ReduksjonÅrsaker.ReduksjonGodTro
-                        ?: error("Forventet ReduksjonGodTro for GodTro-vurdering")
-                    reduksjonGodTro.tilEntity(periodeRef)
-                }
-            }
+            val reduksjonGodTro = kanUnnlates4XRettsgebyr?.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonGodTro
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO,
                 mottakersForståelse = null,
@@ -254,8 +236,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 beløpIBehold = beløpIBehold.tilEntity(periodeRef),
                 aktsomhet = null,
                 kanUnnlates = kanUnnlates4XRettsgebyr?.tilEntity(),
-                særligGrunner = null,
-                relevantMomenter = relevantMomentEntity,
+                reduksjonMomenterEntity = reduksjonGodTro?.tilEntity(periodeRef),
                 begrunnelseForUnnlatelse = null,
                 feilaktigEllerMangelfull = null,
                 forrigePeriodeId = null,

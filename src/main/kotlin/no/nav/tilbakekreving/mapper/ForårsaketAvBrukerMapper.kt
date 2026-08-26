@@ -16,11 +16,11 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.Grad
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonGodTro
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.ReduksjonSærligeGrunner
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres.Ja
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonÅrsaker.SkalReduseres.JaAvBeløpIBehold
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres.Ja
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.frontend.models.BurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
@@ -101,7 +101,7 @@ object ForårsaketAvBrukerMapper {
                                 begrunnelse = reduksjon.begrunnelse,
                             ),
                             kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonÅrsaker = ReduksjonGodTro(
+                                reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = reduksjon.begrunnelse,
                                     grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
                                     skalReduseres = SkalReduseres.Nei,
@@ -117,7 +117,7 @@ object ForårsaketAvBrukerMapper {
                                 begrunnelse = reduksjon.begrunnelse,
                             ),
                             kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonÅrsaker = ReduksjonGodTro(
+                                reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = reduksjon.begrunnelse,
                                     grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
                                     skalReduseres = Ja(
@@ -140,7 +140,7 @@ object ForårsaketAvBrukerMapper {
                                 begrunnelse = reduksjon.begrunnelse,
                             ),
                             kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonÅrsaker = ReduksjonGodTro(
+                                reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = reduksjon.begrunnelse,
                                     grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
                                     skalReduseres = SkalReduseres.Nei,
@@ -157,7 +157,7 @@ object ForårsaketAvBrukerMapper {
                                 begrunnelse = reduksjon.begrunnelse,
                             ),
                             kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonÅrsaker = ReduksjonGodTro(
+                                reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = reduksjon.begrunnelse,
                                     grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
                                     skalReduseres = JaAvBeløpIBehold(prosentdel = reduksjon.prosentReduksjon, beløpIBehold = beløpIBehold.beløp.toBigDecimal()),
