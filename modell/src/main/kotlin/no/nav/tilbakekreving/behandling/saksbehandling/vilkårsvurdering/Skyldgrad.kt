@@ -40,10 +40,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
-            val særligeGrunnerOppsummering = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> (kanUnnlates4XRettsgebyr.reduksjonMomenter() as ReduksjonMomenter.ReduksjonSærligeGrunner).oppsummerVurdering()
-            }
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = vurderingstype(),
                 aktsomhetEtterUtbetaling = null,
@@ -52,7 +49,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
-                særligeGrunner = særligeGrunnerOppsummering,
+                særligeGrunner = reduksjonSærligeGrunner?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }
@@ -67,11 +64,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
-            val reduksjonSærligeGrunner = when (kanUnnlates4XRettsgebyr) {
-                is KanUnnlates4xRettsgebyr.Unnlates -> null
-                else -> kanUnnlates4XRettsgebyr.reduksjonMomenter() as ReduksjonMomenter.ReduksjonSærligeGrunner
-            }
-
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
                 aktsomhet = VurdertAktsomhetDto(
@@ -90,7 +83,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
-            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr?.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 mottakersForståelse = null,

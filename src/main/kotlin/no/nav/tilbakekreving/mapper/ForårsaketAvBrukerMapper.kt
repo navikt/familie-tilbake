@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.mapper
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevantMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
@@ -44,7 +44,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UaktsomtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnnlatelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevantMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 
 object ForårsaketAvBrukerMapper {
@@ -98,13 +98,13 @@ object ForårsaketAvBrukerMapper {
                         is SkalIkkeReduseresDto -> GodTro(
                             beløpIBehold = HeleIBehold(
                                 annetBegrunnelse = reduksjon.annetBegrunnelse,
-                                begrunnelse = reduksjon.begrunnelse,
-                            ),
-                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonMomenter = ReduksjonGodTro(
-                                    begrunnelse = reduksjon.begrunnelse,
-                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
-                                    skalReduseres = SkalReduseres.Nei,
+                                begrunnelse = beløpIBehold.begrunnelse,
+                                kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                    reduksjonMomenter = ReduksjonGodTro(
+                                        begrunnelse = reduksjon.begrunnelse,
+                                        grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
+                                        skalReduseres = SkalReduseres.Nei,
+                                    ),
                                 ),
                             ),
                             begrunnelseForGodTro = valg.begrunnelse,
@@ -114,14 +114,14 @@ object ForårsaketAvBrukerMapper {
                         is SkalReduseresDto -> GodTro(
                             beløpIBehold = HeleIBehold(
                                 annetBegrunnelse = reduksjon.annetBegrunnelse,
-                                begrunnelse = reduksjon.begrunnelse,
-                            ),
-                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonMomenter = ReduksjonGodTro(
-                                    begrunnelse = reduksjon.begrunnelse,
-                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
-                                    skalReduseres = Ja(
-                                        prosentdel = reduksjon.prosentReduksjon,
+                                begrunnelse = beløpIBehold.begrunnelse,
+                                kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                    reduksjonMomenter = ReduksjonGodTro(
+                                        begrunnelse = reduksjon.begrunnelse,
+                                        grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
+                                        skalReduseres = Ja(
+                                            prosentdel = reduksjon.prosentReduksjon,
+                                        ),
                                     ),
                                 ),
                             ),
@@ -137,13 +137,13 @@ object ForårsaketAvBrukerMapper {
                             beløpIBehold = DelerIBehold(
                                 beløp = beløpIBehold.beløp.toBigDecimal(),
                                 annetBegrunnelse = reduksjon.annetBegrunnelse,
-                                begrunnelse = reduksjon.begrunnelse,
-                            ),
-                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonMomenter = ReduksjonGodTro(
-                                    begrunnelse = reduksjon.begrunnelse,
-                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
-                                    skalReduseres = SkalReduseres.Nei,
+                                begrunnelse = beløpIBehold.begrunnelse,
+                                kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                    reduksjonMomenter = ReduksjonGodTro(
+                                        begrunnelse = reduksjon.begrunnelse,
+                                        grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
+                                        skalReduseres = SkalReduseres.Nei,
+                                    ),
                                 ),
                             ),
                             begrunnelseForGodTro = valg.begrunnelse,
@@ -154,13 +154,13 @@ object ForårsaketAvBrukerMapper {
                             beløpIBehold = DelerIBehold(
                                 beløp = beløpIBehold.beløp.toBigDecimal(),
                                 annetBegrunnelse = reduksjon.annetBegrunnelse,
-                                begrunnelse = reduksjon.begrunnelse,
-                            ),
-                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
-                                reduksjonMomenter = ReduksjonGodTro(
-                                    begrunnelse = reduksjon.begrunnelse,
-                                    grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse, logContext) }.toSet(),
-                                    skalReduseres = JaAvBeløpIBehold(prosentdel = reduksjon.prosentReduksjon, beløpIBehold = beløpIBehold.beløp.toBigDecimal()),
+                                begrunnelse = beløpIBehold.begrunnelse,
+                                kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                    reduksjonMomenter = ReduksjonGodTro(
+                                        begrunnelse = reduksjon.begrunnelse,
+                                        grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
+                                        skalReduseres = JaAvBeløpIBehold(prosentdel = reduksjon.prosentReduksjon, beløpIBehold = beløpIBehold.beløp.toBigDecimal()),
+                                    ),
                                 ),
                             ),
                             begrunnelseForGodTro = valg.begrunnelse,
@@ -170,7 +170,6 @@ object ForårsaketAvBrukerMapper {
                     }
                     is IngentingDto -> GodTro(
                         beløpIBehold = GodTro.BeløpIBehold.Nei(begrunnelse = beløpIBehold.begrunnelse),
-                        kanUnnlates4XRettsgebyr = Unnlates(beløpIBehold.begrunnelse),
                         begrunnelseForGodTro = valg.begrunnelse,
                         begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
                     )
@@ -203,13 +202,13 @@ object ForårsaketAvBrukerMapper {
         when (dto) {
             is JaSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
                 begrunnelse = dto.begrunnelse,
-                grunner = dto.særligeGrunnerFor.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
+                grunner = dto.særligeGrunnerFor.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse) }.toSet(),
                 skalReduseres = Ja(dto.prosentReduksjon),
             )
 
             is NeiSaerligeGrunnerDto -> ReduksjonSærligeGrunner(
                 begrunnelse = dto.begrunnelse,
-                grunner = dto.særligeGrunnerMot.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse, logContext) }.toSet(),
+                grunner = dto.særligeGrunnerMot.map { mapSærligGrunn(it.moment, dto.annetBegrunnelse) }.toSet(),
                 skalReduseres = SkalReduseres.Nei,
             )
 
@@ -219,27 +218,23 @@ object ForårsaketAvBrukerMapper {
     private fun mapSærligGrunn(
         moment: String,
         annetBegrunnelse: String?,
-        logContext: SecureLog.Context,
     ): SærligGrunn =
-        when (moment) {
-            SærligGrunnType.GRAD_AV_UAKTSOMHET.name -> SærligGrunn.GradAvUaktsomhet
-            SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL.name -> SærligGrunn.HeltEllerDelvisNavsFeil
-            SærligGrunnType.STØRRELSE_BELØP.name -> SærligGrunn.StørrelseBeløp
-            SærligGrunnType.TID_FRA_UTBETALING.name -> SærligGrunn.TidFraUtbetaling
-            SærligGrunnType.ANNET.name -> SærligGrunn.Annet(annetBegrunnelse!!)
-            else -> throw Feil("Ukjent særlig grunn: $moment", logContext = logContext)
+        when (enumValueOf<SærligGrunnType>(moment)) {
+            SærligGrunnType.GRAD_AV_UAKTSOMHET -> SærligGrunn.GradAvUaktsomhet
+            SærligGrunnType.HELT_ELLER_DELVIS_NAVS_FEIL -> SærligGrunn.HeltEllerDelvisNavsFeil
+            SærligGrunnType.STØRRELSE_BELØP -> SærligGrunn.StørrelseBeløp
+            SærligGrunnType.TID_FRA_UTBETALING -> SærligGrunn.TidFraUtbetaling
+            SærligGrunnType.ANNET -> SærligGrunn.Annet(annetBegrunnelse!!)
         }
 
     private fun mapRelevanteMomenterGodTro(
         moment: String,
         annetBegrunnelse: String?,
-        logContext: SecureLog.Context,
-    ): RelevanteMomentGodTro =
-        when (moment) {
-            RelevanteMomentTypeGodTro.STØRRELSE_BELØP.name -> RelevanteMomentGodTro.StørrelseBeløp
-            RelevanteMomentTypeGodTro.TID_FRA_UTBETALING.name -> RelevanteMomentGodTro.TidFraUtbetaling
-            RelevanteMomentTypeGodTro.UTBETALING_TILLIT.name -> RelevanteMomentGodTro.UtbetalingTillit
-            RelevanteMomentTypeGodTro.ANNET.name -> RelevanteMomentGodTro.Annet(annetBegrunnelse!!)
-            else -> throw Feil("Ukjent relevant moment for godTro: $moment", logContext = logContext)
+    ): RelevantMomentGodTro =
+        when (enumValueOf<RelevantMomentTypeGodTro>(moment)) {
+            RelevantMomentTypeGodTro.STØRRELSE_BELØP -> RelevantMomentGodTro.StørrelseBeløp
+            RelevantMomentTypeGodTro.TID_FRA_UTBETALING -> RelevantMomentGodTro.TidFraUtbetaling
+            RelevantMomentTypeGodTro.UTBETALING_TILLIT -> RelevantMomentGodTro.UtbetalingTillit
+            RelevantMomentTypeGodTro.ANNET -> RelevantMomentGodTro.Annet(annetBegrunnelse!!)
         }
 }

@@ -88,7 +88,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevanteMomentTypeGodTro
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevantMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
@@ -907,7 +907,7 @@ class Behandling internal constructor(
             ferdigvurdert = vilkårsvurderingsteg.erFullstendig(lesecontext.klokke),
             tilbakeført = vilkårsvurderingsteg.trengerNyVurdering()?.frontendDto,
             momenterSærligeGrunner = SærligGrunnType.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
-            momenterReduksjonGodTro = RelevanteMomentTypeGodTro.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
+            momenterReduksjonGodTro = RelevantMomentTypeGodTro.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
             erUnder4xRettsgebyr = when (faktasteg.erUnder4xRettsgebyr(kravgrunnlag.entry)) {
                 KanUnnlates4xRettsgebyr.KanUnnlates.Ja -> true
                 KanUnnlates4xRettsgebyr.KanUnnlates.Nei -> false

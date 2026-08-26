@@ -6,9 +6,8 @@ import java.math.BigDecimal
 data class SkalReduseresEntity(
     val type: SkalReduseresType,
     val prosentdel: Int?,
-    val beløpIBehold: BigDecimal? = null,
 ) {
-    fun fraEntity(): ReduksjonMomenter.SkalReduseres = when (type) {
+    fun fraEntity(beløpIBehold: BigDecimal?): ReduksjonMomenter.SkalReduseres = when (type) {
         SkalReduseresType.Ja -> ReduksjonMomenter.SkalReduseres.Ja(requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres" })
         SkalReduseresType.JaAvBeløpIBehold -> ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold(
             requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres av det som er i behold." },
