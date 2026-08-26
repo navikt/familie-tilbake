@@ -45,7 +45,12 @@ internal class OppdragRestClientImpl(
                 setBody(request)
             }
             if (!response.status.isSuccess()) {
-                throw UnexpectedResponseException("Fikk uventet statuskode fra oppdrag", response.status, response.body())
+                throw UnexpectedResponseException(
+                    message = "Fikk uventet statuskode fra oppdrag",
+                    endpoint = "${config.baseUrl}/api/v1/tilbakekreving/vedtak",
+                    statusCode = response.status,
+                    response = response.body(),
+                )
             }
 
             response.body()

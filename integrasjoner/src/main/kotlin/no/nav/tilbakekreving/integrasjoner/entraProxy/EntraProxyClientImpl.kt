@@ -42,6 +42,7 @@ class EntraProxyClientImpl(
             else -> {
                 throw UnexpectedResponseException(
                     message = "Feil ved henting av saksbehandler med id: $navIdent",
+                    endpoint = "$baseUrl/api/v1/ansatt/{navIdent}",
                     statusCode = response.status,
                     response = response.bodyAsText(),
                 )

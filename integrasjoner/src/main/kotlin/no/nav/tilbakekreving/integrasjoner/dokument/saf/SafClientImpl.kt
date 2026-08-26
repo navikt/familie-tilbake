@@ -63,6 +63,7 @@ class SafClientImpl(
             }
             else -> throw UnexpectedResponseException(
                 message = "Henting av dokument for behandling: $behandlingId feilet.",
+                endpoint = "$baseUrl/rest/hentdokument/{journalpostId}/{dokumentInfoId}/ARKIV",
                 statusCode = response.status,
                 response = response.bodyAsText(),
             )
@@ -114,6 +115,7 @@ class SafClientImpl(
             }
             else -> throw UnexpectedResponseException(
                 message = "Henting av journalposter feilet.",
+                endpoint = "$baseUrl/graphql",
                 statusCode = response.status,
                 response = response.bodyAsText(),
             )

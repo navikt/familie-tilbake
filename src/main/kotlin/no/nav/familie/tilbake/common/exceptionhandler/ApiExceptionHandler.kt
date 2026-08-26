@@ -4,6 +4,7 @@ import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.frontend.models.ErrorDto
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
@@ -61,6 +62,24 @@ class ApiExceptionHandler {
             is ModellFeil.IngenTilgangException -> HttpStatus.FORBIDDEN
         }
         return ResponseEntity.status(status).body(ErrorDto(feil.tittel, feil.melding))
+    }
+
+    @ExceptionHandler(UnexpectedResponseException::class)
+    fun håndterThrowable(exception: UnexpectedResponseException): ResponseEntity<ErrorDto> {
+        val logContext = SecureLog.Context.springContext()
+        SecureLog.medContext(logContext) {
+            error("Fikk ugyldig svar fra {}, status {}, svar {}", exception.endpoint, exception.statusCode, exception.response, exception)
+        }
+        logger.medContext(logContext) {
+            error("Fikk ugyldig svar fra {}, status {}", exception.endpoint, exception.statusCode, exception)
+        }
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+            .body(
+                ErrorDto(
+                    tittel = "Feilet under kall til ${exception.endpoint}",
+                    melding = exception.message ?: "Ukjent feil",
+                ),
+            )
     }
 
     @ExceptionHandler(ForbiddenError::class)

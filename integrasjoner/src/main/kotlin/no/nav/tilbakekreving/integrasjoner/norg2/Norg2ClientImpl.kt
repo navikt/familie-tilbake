@@ -38,6 +38,7 @@ class Norg2ClientImpl(
             }
             else -> throw UnexpectedResponseException(
                 message = "Henting av navkontorEnhet for enhetId: $enhetId feilet.",
+                endpoint = "$baseUrl/api/v1/enhet/{enhetId}",
                 statusCode = response.status,
                 response = response.bodyAsText(),
             )

@@ -37,6 +37,7 @@ internal class TilgangsmaskinenClient internal constructor(
             HttpStatusCode.Forbidden -> response.body()
             else -> throw UnexpectedResponseException(
                 message = "Uventet svar fra tilgangsmaskinen",
+                endpoint = "${config.baseUrl}/api/v1/kjerne",
                 statusCode = response.status,
                 response = response.body(),
             )

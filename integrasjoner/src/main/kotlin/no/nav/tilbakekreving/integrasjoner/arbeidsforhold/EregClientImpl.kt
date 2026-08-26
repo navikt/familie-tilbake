@@ -49,6 +49,7 @@ class EregClientImpl(
                 val body = response.bodyAsText()
                 throw UnexpectedResponseException(
                     message = "Henting av organisasjoninfo for orgnr $orgnr feilet med status ${response.status} og melding: $body",
+                    endpoint = "$baseUrl/v2/{orgnummer}/noekkelinfo",
                     statusCode = response.status,
                     response = body,
                 )
