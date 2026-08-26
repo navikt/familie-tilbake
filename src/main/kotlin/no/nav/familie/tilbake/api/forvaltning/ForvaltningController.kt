@@ -1,12 +1,8 @@
 package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
-import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
-import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
-import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.Ytelsestype
-import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -28,6 +24,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
@@ -61,9 +59,8 @@ class ForvaltningController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val hentFagsystemsbehandlingRequestSendtRepository: HentFagsystemsbehandlingRequestSendtRepository,
-    private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val kravgrunnlagMediator: KravgrunnlagMediator,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -393,43 +390,6 @@ class ForvaltningController(
             ),
         )
     }
-
-    @GetMapping("/frakoblede-instutisjoner")
-    fun hentFrakobledeInstutisjoner(): List<FagsakMedInstutisjon> {
-        return hentFagsystemsbehandlingRequestSendtRepository.findAll()
-            .mapNotNull { it.respons }
-            .mapNotNull { hentFagsystemsbehandlingService.lesRespons(it).hentFagsystemsbehandling }
-            .mapNotNull {
-                FagsakMedInstutisjon(
-                    fagsystem = FagsystemUtil.hentFagsystemFraYtelsestype(it.ytelsestype),
-                    fagsystemId = it.eksternFagsakId,
-                    orgnummer = it.institusjon?.organisasjonsnummer ?: return@mapNotNull null,
-                )
-            }
-            .filter {
-                fagsakRepository.findByFagsystemAndEksternFagsakId(
-                    fagsystem = Fagsystem.forDTO(it.fagsystem),
-                    eksternFagsakId = it.fagsystemId,
-                )?.institusjon?.organisasjonsnummer == null
-            }
-    }
-
-    @PostMapping("/bytt-instutisjon/{behandlingId}")
-    fun oppdaterInstutisjon(
-        @PathVariable behandlingId: UUID,
-        @RequestBody orgnummer: String,
-    ) {
-        tilgangskontrollService.validerTilgangBehandlingID(
-            behandlingId = behandlingId,
-            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-            auditLoggerEvent = AuditLoggerEvent.UPDATE,
-            handling = "Manuell oppdatering av instutisjon",
-        )
-        fagsakRepository.update(
-            fagsakRepository.finnFagsakForBehandlingId(behandlingId)
-                .copy(institusjon = Institusjon(orgnummer)),
-        )
-    }
 }
 
 data class Behandlingsinfo(
@@ -448,10 +408,4 @@ data class Kravgrunnlagsinfo(
     val mottattXmlId: UUID?,
     val eksternId: String,
     val opprettetTid: LocalDateTime,
-)
-
-data class FagsakMedInstutisjon(
-    val fagsystem: FagsystemDTO,
-    val fagsystemId: String,
-    val orgnummer: String,
 )
