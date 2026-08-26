@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
@@ -22,15 +23,16 @@ data class AktsomhetsvurderingEntity(
     fun fraEntity(vurderinger: Map<UUID, Vilkårsvurderingsperiode>): ForårsaketAvBruker {
         return when (vurderingType) {
             VurderingType.IKKE_FORÅRSAKET_AV_BRUKER_GOD_TRO -> {
+                val kanUnnlates = kanUnnlates?.fraEntity(
+                    reduksjonType = ReduksjonType.REDUKSJON_GOD_TRO,
+                    reduksjonMomenter = reduksjonMomenterEntity,
+                    begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                    beløpIBehold = beløpIBehold?.beløpIBehold,
+                )
                 NivåAvForståelse.GodTro(
-                    beløpIBehold = requireNotNull(beløpIBehold) { "beløpIBehold kreves i GOD_TRO " }.fraEntity(),
+                    beløpIBehold = requireNotNull(beløpIBehold) { "beløpIBehold kreves i GOD_TRO " }.fraEntity(kanUnnlates),
                     begrunnelse = requireNotNull(begrunnelse) { "begrunnelse kreves i GOD_TRO " },
-                    begrunnelseForGodTro = requireNotNull(beløpIBehold) { "begrunnelse kreves i GOD_TRO " }.begrunnelse,
-                    kanUnnlates4XRettsgebyr = kanUnnlates?.fraEntity(
-                        reduksjonType = ReduksjonType.REDUKSJON_GOD_TRO,
-                        reduksjonMomenter = reduksjonMomenterEntity,
-                        begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
-                    ),
+                    begrunnelseForGodTro = begrunnelse,
                 )
             }
 
@@ -48,6 +50,7 @@ data class AktsomhetsvurderingEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                         reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                        beløpIBehold = null,
                     ),
                 )
             }
@@ -60,6 +63,7 @@ data class AktsomhetsvurderingEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                         reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                        beløpIBehold = null,
                     ),
                 )
             }
@@ -76,6 +80,7 @@ data class AktsomhetsvurderingEntity(
                                 reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                                 reduksjonMomenter = reduksjonMomenterEntity,
                                 begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
+                                beløpIBehold = null,
                             ),
                         )
                     }
@@ -109,12 +114,13 @@ data class GodTroEntity(
     val beholdType: BeholdType,
     val beløpIBehold: BigDecimal?,
 ) {
-    fun fraEntity(): NivåAvForståelse.GodTro.BeløpIBehold {
+    fun fraEntity(kanUnnlates: KanUnnlates4xRettsgebyr?): NivåAvForståelse.GodTro.BeløpIBehold {
         return when (beholdType) {
             BeholdType.HELE_BELØPET -> {
                 NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
                     annetBegrunnelse = null,
                     begrunnelse = begrunnelse,
+                    kanUnnlates4XRettsgebyr = kanUnnlates,
                 )
             }
             BeholdType.JA, BeholdType.DELER_AV_BELØPET -> {
@@ -122,6 +128,7 @@ data class GodTroEntity(
                     requireNotNull(beløpIBehold) { "Beløp kreves i BeløpIBehold" },
                     annetBegrunnelse = null,
                     begrunnelse = begrunnelse,
+                    kanUnnlates4XRettsgebyr = kanUnnlates,
                 )
             }
 

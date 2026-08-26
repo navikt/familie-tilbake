@@ -23,13 +23,13 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
                     beløp = it,
                     annetBegrunnelse = null,
                     begrunnelse = null,
+                    kanUnnlates4XRettsgebyr = null,
                 )
             } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei(
-                begrunnelse = "Begrunnelse for beløp i behold",
+                begrunnelse = null,
             ),
             "",
             "",
-            kanUnnlates4XRettsgebyr = null,
         )
     }
 
@@ -72,8 +72,8 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
         )
     }
 
-    override fun build(reduksjon: ReduksjonSærligeGrunnerBuilder): ReduksjonSærligeGrunner {
-        return ReduksjonSærligeGrunner(
+    override fun build(reduksjon: ReduksjonSærligeGrunnerBuilder): ReduksjonMomenter.ReduksjonSærligeGrunner {
+        return ReduksjonMomenter.ReduksjonSærligeGrunner(
             begrunnelse = "",
             grunner = emptySet(),
             skalReduseres = when (reduksjon.skalReduseres) {
@@ -101,7 +101,7 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
 
     override fun build(aktsomhet: AktsomhetBuilder.Forsettelig): KanUnnlates4xRettsgebyr {
         return KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-            ReduksjonSærligeGrunner(
+            ReduksjonMomenter.ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),
                 skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,

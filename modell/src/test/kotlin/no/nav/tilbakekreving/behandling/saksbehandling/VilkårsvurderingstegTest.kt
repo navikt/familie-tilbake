@@ -24,13 +24,13 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -318,16 +318,16 @@ class VilkårsvurderingstegTest {
                     beløp = 1000.kroner,
                     annetBegrunnelse = null,
                     begrunnelse = "Begrunnelse for i behold",
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                        reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
+                            begrunnelse = "Begrunnelse for i behold",
+                            grunner = setOf(RelevantMomentGodTro.StørrelseBeløp),
+                            skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
+                        ),
+                    ),
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
-                        begrunnelse = "Begrunnelse for i behold",
-                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
-                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
-                    ),
-                ),
             ),
         )
 
@@ -339,7 +339,7 @@ class VilkårsvurderingstegTest {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<DelerDto> { deler ->
                     BigDecimal(deler.beløp) shouldBe 1000.kroner
-                    deler.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    deler.begrunnelse shouldBe "Begrunnelse for i behold"
                     deler.reduksjon.shouldBeInstanceOf<SkalIkkeReduseresDto> { reduksjon ->
                         reduksjon.relevans.size shouldBe 1
                         reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
@@ -368,19 +368,19 @@ class VilkårsvurderingstegTest {
                     beløp = 1000.kroner,
                     annetBegrunnelse = "Annet begrunnelse",
                     begrunnelse = "Begrunnelse for i behold",
-                ),
-                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
-                begrunnelseForGodTro = "Begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
-                        begrunnelse = "Begrunnelse for i behold",
-                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
-                        skalReduseres = ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold(
-                            prosentdel = 20,
-                            beløpIBehold = 1000.kroner,
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                        reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
+                            begrunnelse = "Begrunnelse for i behold",
+                            grunner = setOf(RelevantMomentGodTro.StørrelseBeløp, RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                            skalReduseres = ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold(
+                                prosentdel = 20,
+                                beløpIBehold = 1000.kroner,
+                            ),
                         ),
                     ),
                 ),
+                begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
+                begrunnelseForGodTro = "Begrunnelse for god tro",
             ),
         )
 
@@ -392,7 +392,7 @@ class VilkårsvurderingstegTest {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<DelerDto> { deler ->
                     BigDecimal(deler.beløp) shouldBe 1000.kroner
-                    deler.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    deler.begrunnelse shouldBe "Begrunnelse for i behold"
                     deler.reduksjon.shouldBeInstanceOf<SkalReduseresDto> { reduksjon ->
                         reduksjon.relevans.size shouldBe 2
                         reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
@@ -422,16 +422,16 @@ class VilkårsvurderingstegTest {
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
                     annetBegrunnelse = null,
                     begrunnelse = "Begrunnelse for i behold",
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                        reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
+                            begrunnelse = "Begrunnelse for Reduksjon",
+                            grunner = setOf(RelevantMomentGodTro.StørrelseBeløp),
+                            skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
+                        ),
+                    ),
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
-                        begrunnelse = "Begrunnelse for i behold",
-                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp),
-                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
-                    ),
-                ),
             ),
         )
 
@@ -442,12 +442,12 @@ class VilkårsvurderingstegTest {
             this[0].valg.shouldBeInstanceOf<GodTroDto> {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
-                    hele.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    hele.begrunnelse shouldBe "Begrunnelse for i behold"
                     hele.reduksjon.shouldBeInstanceOf<SkalIkkeReduseresDto> { reduksjon ->
                         reduksjon.relevans.size shouldBe 1
                         reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
                         reduksjon.annetBegrunnelse shouldBe null
-                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for Reduksjon"
                     }
                 }
             }
@@ -470,16 +470,16 @@ class VilkårsvurderingstegTest {
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
                     annetBegrunnelse = "Annet begrunnelse",
                     begrunnelse = "Begrunnelse for i behold",
+                    kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
+                        reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
+                            begrunnelse = "Begrunnelse for Reduksjon",
+                            grunner = setOf(RelevantMomentGodTro.StørrelseBeløp, RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                            skalReduseres = ReduksjonMomenter.SkalReduseres.Ja(20),
+                        ),
+                    ),
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-                    reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
-                        begrunnelse = "Begrunnelse for i behold",
-                        grunner = setOf(RelevanteMomentGodTro.StørrelseBeløp, RelevanteMomentGodTro.Annet("Annet begrunnelse")),
-                        skalReduseres = ReduksjonMomenter.SkalReduseres.Ja(20),
-                    ),
-                ),
             ),
         )
 
@@ -490,13 +490,13 @@ class VilkårsvurderingstegTest {
             this[0].valg.shouldBeInstanceOf<GodTroDto> {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
-                    hele.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    hele.begrunnelse shouldBe "Begrunnelse for i behold"
                     hele.reduksjon.shouldBeInstanceOf<SkalReduseresDto> { reduksjon ->
                         reduksjon.relevans.size shouldBe 2
                         reduksjon.relevans.first().moment shouldBe "STØRRELSE_BELØP"
                         reduksjon.relevans[1].moment shouldBe "ANNET"
                         reduksjon.annetBegrunnelse shouldBe "Annet begrunnelse"
-                        reduksjon.begrunnelse shouldBe "Begrunnelse for i behold"
+                        reduksjon.begrunnelse shouldBe "Begrunnelse for Reduksjon"
                         reduksjon.prosentReduksjon shouldBe 20
                     }
                 }
@@ -522,7 +522,6 @@ class VilkårsvurderingstegTest {
                 ),
                 begrunnelse = "Begrunnelse for beløp i behold (deprecated)",
                 begrunnelseForGodTro = "Begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates("Begrunnelse for unnlatelse"),
             ),
         )
 
@@ -533,7 +532,7 @@ class VilkårsvurderingstegTest {
             this[0].valg.shouldBeInstanceOf<GodTroDto> {
                 it.begrunnelse shouldBe "Begrunnelse for god tro"
                 it.beløpIBehold.shouldBeInstanceOf<IngentingDto> { ikkeIBehold ->
-                    ikkeIBehold.begrunnelse shouldBe "Begrunnelse for beløp i behold (deprecated)"
+                    ikkeIBehold.begrunnelse shouldBe "Begrunnelse for i behold"
                 }
             }
         }

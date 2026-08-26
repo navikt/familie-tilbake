@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.api.v1.dto.VurdertSærligGrunnDto
-import no.nav.tilbakekreving.behandling.saksbehandling.RelevanteMomentGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevantMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -30,7 +30,7 @@ sealed interface ReduksjonMomenter {
 
     class ReduksjonGodTro(
         override val begrunnelse: String,
-        val grunner: Set<RelevanteMomentGodTro>,
+        val grunner: Set<RelevantMomentGodTro>,
         val skalReduseres: SkalReduseres,
     ) : ReduksjonMomenter {
         override fun tilFrontendDto(): ReduksjonArsakerDto {
@@ -41,8 +41,9 @@ sealed interface ReduksjonMomenter {
             return ReduksjonMomenterEntity(
                 periodeRef = periodeRef,
                 begrunnelse = begrunnelse,
-                grunner = grunner.map { it.tilEntity() },
+                grunner = grunner.map { it.type.name },
                 skalReduseres = skalReduseres.tilEntity(),
+                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
             )
         }
 
@@ -61,8 +62,9 @@ sealed interface ReduksjonMomenter {
             return ReduksjonMomenterEntity(
                 periodeRef = periodeRef,
                 begrunnelse = begrunnelse,
-                grunner = grunner.map { it.tilEntity() },
+                grunner = grunner.map { it.type.name },
                 skalReduseres = skalReduseres.tilEntity(),
+                annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
             )
         }
 
@@ -106,7 +108,7 @@ sealed interface ReduksjonMomenter {
         ): ReduksjonArsakerDto
 
         fun tilFrontendDtoForGodTro(
-            grunner: Set<RelevanteMomentGodTro>,
+            grunner: Set<RelevantMomentGodTro>,
             begrunnelse: String,
         ): ReduksjonArsakerDto
 
@@ -115,6 +117,7 @@ sealed interface ReduksjonMomenter {
                 return Reduksjon.Prosentdel(prosentdel.toBigDecimal())
             }
 
+            // Todo: Her må vi ha en egen begrunnelse for GodTro reduksjon. Det må gjøres når jurister har avklart teksten
             override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
@@ -133,10 +136,10 @@ sealed interface ReduksjonMomenter {
                 annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
             )
 
-            override fun tilFrontendDtoForGodTro(grunner: Set<RelevanteMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
+            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
                 prosentReduksjon = prosentdel,
                 relevans = grunner.map { it.tilFrontendDto() },
-                annetBegrunnelse = (grunner.firstOrNull { it is RelevanteMomentGodTro.Annet } as? RelevanteMomentGodTro.Annet)?.begrunnelse,
+                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
                 begrunnelse = begrunnelse,
             )
         }
@@ -146,6 +149,7 @@ sealed interface ReduksjonMomenter {
                 return Reduksjon.ProsentdelAvBeløpIBehold(prosentdel.toBigDecimal(), beløpIBehold)
             }
 
+            // Todo: Her må vi ha en egen begrunnelse for GodTro reduksjon. Det må gjøres når jurister har avklart teksten
             override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
@@ -164,10 +168,10 @@ sealed interface ReduksjonMomenter {
                 annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
             )
 
-            override fun tilFrontendDtoForGodTro(grunner: Set<RelevanteMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
+            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
                 prosentReduksjon = prosentdel,
                 relevans = grunner.map { it.tilFrontendDto() },
-                annetBegrunnelse = (grunner.firstOrNull { it is RelevanteMomentGodTro.Annet } as? RelevanteMomentGodTro.Annet)?.begrunnelse,
+                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
                 begrunnelse = begrunnelse,
             )
         }
@@ -194,10 +198,10 @@ sealed interface ReduksjonMomenter {
                 annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
             )
 
-            override fun tilFrontendDtoForGodTro(grunner: Set<RelevanteMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalIkkeReduseresDto(
+            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalIkkeReduseresDto(
                 relevans = grunner.map { it.tilFrontendDto() },
                 begrunnelse = begrunnelse,
-                annetBegrunnelse = (grunner.firstOrNull { it is RelevanteMomentGodTro.Annet } as? RelevanteMomentGodTro.Annet)?.begrunnelse,
+                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
             )
         }
     }

@@ -104,6 +104,7 @@ object VilkårsvurderingMapperV2 {
                             periode.godTroDto!!.beløpTilbakekreves!!,
                             annetBegrunnelse = null,
                             begrunnelse = null,
+                            kanUnnlates4XRettsgebyr = null,
                         )
                         false -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(
                             begrunnelse = null,
@@ -111,7 +112,6 @@ object VilkårsvurderingMapperV2 {
                     },
                     begrunnelse = periode.begrunnelse,
                     begrunnelseForGodTro = periode.godTroDto!!.begrunnelse,
-                    kanUnnlates4XRettsgebyr = null,
                 )
 
             Vilkårsvurderingsresultat.UDEFINERT -> ForårsaketAvBruker.IkkeVurdert()

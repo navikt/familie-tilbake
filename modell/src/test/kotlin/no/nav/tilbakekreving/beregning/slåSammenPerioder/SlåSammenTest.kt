@@ -109,7 +109,6 @@ class SlåSammenTest {
                 begrunnelse = "God tro",
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
                 begrunnelseForGodTro = "begrunnelse for god tro",
-                kanUnnlates4XRettsgebyr = KanUnnlates4xRettsgebyr.Unnlates("Unnlatelse begrunnelse"),
             ),
         )
 

@@ -15,11 +15,11 @@ enum class SærligGrunnType(
     ANNET("Annet"),
 }
 
-enum class RelevanteMomentTypeGodTro(
+enum class RelevantMomentTypeGodTro(
     override val navn: String,
 ) : MomentEllerSærligGrunnType {
     STØRRELSE_BELØP("Størrelsen på det feilutbetalte beløpet"),
-    TID_FRA_UTBETALING("Hvor lang tid det har gått siden utbetalingen fant sted"),
+    TID_FRA_UTBETALING("Hvor lang tid det har gått siden feilutbetalingen skjedde"),
     UTBETALING_TILLIT("Om mottakeren har innrettet seg i tillit til utbetalingen"),
     ANNET("Annet"),
 }
