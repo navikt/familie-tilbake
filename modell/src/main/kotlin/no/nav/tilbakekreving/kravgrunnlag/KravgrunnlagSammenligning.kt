@@ -7,6 +7,9 @@ import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.KravgrunnlagForskjellDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
@@ -19,7 +22,22 @@ class KravgrunnlagSammenligning(
 ) {
     private val forskjeller: MutableList<Forskjell> = mutableListOf()
 
-    internal fun resultat() = forskjeller
+    internal fun resultat() = forskjeller.filterNot { it is Forskjell.UendretPeriode }
+
+    fun sammendrag() = forskjeller
+        .asSequence()
+        .sortedBy { it.periode }
+        .fold(listOf<Forskjell>()) { acc, forskjell ->
+            when (val sammenslått = acc.lastOrNull()?.slåSammen(forskjell)) {
+                null -> acc + forskjell
+                else -> {
+                    acc.dropLast(1) + sammenslått
+                }
+            }
+        }
+        .mapNotNull(Forskjell::tilDto)
+        .filter { it !is EndretPeriodeDto || it.endringIBeløp != 0 }
+        .toList()
 
     internal fun oppdaterSteg(steg: List<Saksbehandlingsteg>) {
         forskjeller.forEach { forskjell ->
@@ -42,17 +60,25 @@ class KravgrunnlagSammenligning(
             throw ModellFeil.UtenforScopeException(feil, sporing)
         }
 
-        forskjeller += ukjentePerioder.map { Forskjell.NyPeriode(it.fom til it.tom) }
-
-        forskjeller += originaltKravgrunnlag.perioder().zip(nyttKravgrunnlag.perioder())
-            .map { (a, b) -> Forskjell.JustertBeløp(a.periode(), b.feilutbetaltYtelsesbeløp() - a.feilutbetaltYtelsesbeløp()) }
-            .filter { it.endringIBeløp != BigDecimal.ZERO }
+        forskjeller += nyttKravgrunnlag.perioder().map { nyPeriode ->
+            val endringIBeløp = originaltKravgrunnlag.perioder()
+                .firstOrNull { it.periode() == nyPeriode.periode() }
+                ?.let { nyPeriode.feilutbetaltYtelsesbeløp() - it.feilutbetaltYtelsesbeløp() }
+            when {
+                endringIBeløp == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
+                endringIBeløp.signum() == 0 -> Forskjell.UendretPeriode(nyPeriode.periode())
+                else -> Forskjell.JustertBeløp(nyPeriode.periode(), endringIBeløp)
+            }
+        }
     }
 
     sealed interface Forskjell {
+        val periode: Datoperiode
         val endringIBeløp: BigDecimal
 
         fun oppdater(steg: EndretKravgrunnlagObservatør)
+
+        fun slåSammen(other: Forskjell): Forskjell?
 
         fun tilEntity(
             faktavurderingPeriodeRef: UUID?,
@@ -60,7 +86,9 @@ class KravgrunnlagSammenligning(
             foreldelsesvurderingPeriodeRef: UUID?,
         ): ForskjellEntity
 
-        data class JustertBeløp(val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell {
+        fun tilDto(): KravgrunnlagForskjellDto?
+
+        data class JustertBeløp(override val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.perideEndretBeløp(this)
             }
@@ -81,9 +109,22 @@ class KravgrunnlagSammenligning(
                     endringIBeløp = endringIBeløp,
                 )
             }
+
+            override fun slåSammen(other: Forskjell): Forskjell? {
+                return when (other) {
+                    is UendretPeriode -> this
+                    is JustertBeløp -> JustertBeløp(
+                        periode = this.periode.fom til other.periode.tom,
+                        endringIBeløp = this.endringIBeløp + other.endringIBeløp,
+                    )
+                    else -> null
+                }
+            }
+
+            override fun tilDto(): KravgrunnlagForskjellDto = EndretPeriodeDto(periode.fom, periode.tom, endringIBeløp.toInt())
         }
 
-        data class NyPeriode(val periode: Datoperiode) : Forskjell {
+        data class NyPeriode(override val periode: Datoperiode, val beløp: BigDecimal) : Forskjell {
             override val endringIBeløp: BigDecimal = BigDecimal.ZERO
 
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
@@ -103,9 +144,34 @@ class KravgrunnlagSammenligning(
                     type = ForskjellType.NyPeriode,
                     originalPeriode = null,
                     nyPeriode = DatoperiodeEntity(periode.fom, periode.tom),
-                    endringIBeløp = null,
+                    endringIBeløp = beløp,
                 )
             }
+
+            override fun slåSammen(other: Forskjell): Forskjell? {
+                return when (other) {
+                    is NyPeriode -> NyPeriode(periode.fom til other.periode.tom, beløp + other.beløp)
+                    else -> null
+                }
+            }
+
+            override fun tilDto(): KravgrunnlagForskjellDto = NyPeriodeDto(periode.fom, periode.tom, beløp.toInt())
+        }
+
+        data class UendretPeriode(override val periode: Datoperiode) : Forskjell {
+            override val endringIBeløp: BigDecimal = BigDecimal.ZERO
+
+            override fun oppdater(steg: EndretKravgrunnlagObservatør) {}
+
+            override fun tilEntity(
+                faktavurderingPeriodeRef: UUID?,
+                vilkårsvurderingPeriodeRef: UUID?,
+                foreldelsesvurderingPeriodeRef: UUID?,
+            ): ForskjellEntity = throw IllegalStateException("UendretPeriode skal ikke persisteres")
+
+            override fun slåSammen(other: Forskjell) = other
+
+            override fun tilDto(): KravgrunnlagForskjellDto? = null
         }
     }
 

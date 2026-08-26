@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.test.februar
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -98,7 +99,7 @@ class ForhåndsvarselTest {
             beskrivelse = "",
         )
 
-        forhåndsvarsel.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(1.februar(2021) til 28.februar(2021)))
+        forhåndsvarsel.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(1.februar(2021) til 28.februar(2021), BigDecimal("2000")))
 
         val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
         forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag

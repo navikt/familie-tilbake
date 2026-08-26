@@ -19,7 +19,8 @@ data class ForskjellEntity(
     fun fraEntity(): KravgrunnlagSammenligning.Forskjell {
         return when (type) {
             ForskjellType.NyPeriode -> KravgrunnlagSammenligning.Forskjell.NyPeriode(
-                nyPeriode!!.fom til nyPeriode.tom,
+                periode = nyPeriode!!.fom til nyPeriode.tom,
+                beløp = endringIBeløp!!,
             )
             ForskjellType.JustertBeløp -> KravgrunnlagSammenligning.Forskjell.JustertBeløp(
                 periode = originalPeriode!!.fom til originalPeriode.tom,

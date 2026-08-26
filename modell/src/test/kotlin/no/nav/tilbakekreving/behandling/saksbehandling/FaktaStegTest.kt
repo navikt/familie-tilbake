@@ -531,7 +531,7 @@ class FaktaStegTest {
         faktasteg.vurder("årsak")
 
         faktasteg.trengerNyVurdering() shouldBe null
-        faktasteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode))
+        faktasteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
 
         faktasteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
         faktasteg.nyTilFrontendDto(

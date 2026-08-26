@@ -243,7 +243,7 @@ class ForeldelsestegTest {
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
 
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
-        val forskjell = KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode)
+        val forskjell = KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner)
 
         foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.IkkeForeldet("begrunnelse"))
         foreldelsesteg.trengerNyVurdering() shouldBe null

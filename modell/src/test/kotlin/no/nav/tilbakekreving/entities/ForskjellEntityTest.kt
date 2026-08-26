@@ -26,7 +26,7 @@ class ForskjellEntityTest {
     @Test
     fun `mapper NyPeriode til og fra entity`() {
         val periode = 1.februar(2021) til 28.februar(2021)
-        val forskjell = KravgrunnlagSammenligning.Forskjell.NyPeriode(periode)
+        val forskjell = KravgrunnlagSammenligning.Forskjell.NyPeriode(periode, 2000.kroner)
 
         val entity = forskjell.tilEntity(null, UUID.randomUUID(), null)
 

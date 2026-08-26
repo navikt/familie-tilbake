@@ -336,7 +336,7 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro(beløpIBehold = null))
 
         vilkårsvurderingsteg.trengerNyVurdering() shouldBe null
-        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode))
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
 
         vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
         vilkårsvurderingsteg.tilFrontendDto().should {

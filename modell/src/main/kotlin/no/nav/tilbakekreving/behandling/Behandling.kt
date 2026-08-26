@@ -390,11 +390,13 @@ class Behandling internal constructor(
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
             erBehandlingPåVent = false,
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
+                val sammenligning = kravgrunnlag.entry.sammenlign(nyttKravgrunnlag.entry, sporingsinformasjon())
                 EndretKravgrunnlag(
                     gammeltBeløp = kravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
                     nyttBeløp = nyttKravgrunnlag.entry.feilutbetaltBeløpForAllePerioder().toInt(),
                     gammelPeriode = kravgrunnlag.entry.perioder().map { it.periode() }.overordnet(),
                     nyPeriode = nyttKravgrunnlag.entry.perioder().map { it.periode() }.overordnet(),
+                    endringer = sammenligning.sammendrag(),
                 )
             },
             kanHenleggeBehandling = false,
