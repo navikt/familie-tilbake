@@ -252,6 +252,7 @@ class GammelKravgrunnlagService(
             verge = fagsystemsbehandlingData.verge,
             varsel = null,
             begrunnelseForTilbakekreving = null,
+            institusjon = fagsystemsbehandlingData.institusjon,
         )
 
     private fun sperKravgrunnlag(
