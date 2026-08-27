@@ -25,7 +25,7 @@ data class ForhåndsvarselUnntak(
         beskrivelse = beskrivelse,
     )
 
-    internal fun nyTilFrontendDto(): ForhaandsvarselUnntakDto {
+    internal fun nyTilFrontendDto(ferdigvurdert: Boolean): ForhaandsvarselUnntakDto {
         return ForhaandsvarselUnntakDto(
             begrunnelseForUnntak = when (begrunnelseForUnntak) {
                 BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG -> VarslingsunntakDto.IKKE_PRAKTISK_MULIG
@@ -34,6 +34,8 @@ data class ForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG -> VarslingsunntakDto.ALLEREDE_UTTALET_SEG
             },
             beskrivelse = beskrivelse,
+            ferdigvurdert = ferdigvurdert,
+            tilbakeført = tilbakeført?.frontendDto,
         )
     }
 

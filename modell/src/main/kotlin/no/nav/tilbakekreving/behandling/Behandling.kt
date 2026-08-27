@@ -894,8 +894,8 @@ class Behandling internal constructor(
         )
     }
 
-    internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto {
-        return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev)
+    internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto {
+        return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev, klokke)
     }
 
     fun vilkårsvurderingDto(lesecontext: LesContext): VilkaarDto {
@@ -905,6 +905,7 @@ class Behandling internal constructor(
                 tilVilkaarsperiodeDto(vurdering, beregning)
             },
             ferdigvurdert = vilkårsvurderingsteg.erFullstendig(lesecontext.klokke),
+            tilbakeført = vilkårsvurderingsteg.trengerNyVurdering()?.frontendDto,
             momenterSærligeGrunner = SærligGrunnType.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
             momenterReduksjonGodTro = GodTroReduksjonType.entries.map { MomentDto(moment = it.name, beskrivelse = it.navn) },
             erUnder4xRettsgebyr = when (faktasteg.erUnder4xRettsgebyr(kravgrunnlag.entry)) {

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -19,6 +20,7 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -321,6 +323,84 @@ class VilkårsvurderingstegTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - flere perioder`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(periode2),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.perideEndretBeløp(
+            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+                periode = periode1,
+                endringIBeløp = 500.kroner,
+            ),
+        )
+        vilkårsvurderingsteg.perideEndretBeløp(
+            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+                periode = periode2,
+                endringIBeløp = 300.kroner,
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            fom = periode1.fom,
+            tom = periode2.tom,
+            endringIBeløp = 800,
+        )
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - enkel periode`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.perideEndretBeløp(
+            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+                periode = periode,
+                endringIBeløp = 500.kroner,
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            fom = periode.fom,
+            tom = periode.tom,
+            endringIBeløp = 500,
+        )
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - har ikke mottatt nytt kravgrunnlag`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe null
     }
 
     @Test

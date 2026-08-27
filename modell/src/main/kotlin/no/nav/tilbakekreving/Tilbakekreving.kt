@@ -478,8 +478,8 @@ class Tilbakekreving internal constructor(
         return hentBehandling(behandlingId).forhåndsvarselFrontendDto(brevHistorikk.sisteVarselbrev())
     }
 
-    fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID): ForhaandsvarselResponseDto {
-        return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev())
+    fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID, klokke: Klokke): ForhaandsvarselResponseDto {
+        return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev(), klokke)
     }
 
     fun tilFeilutbetalingFrontendDto(behandlingId: UUID, klokke: Klokke): FaktaOmFeilutbetalingDto {

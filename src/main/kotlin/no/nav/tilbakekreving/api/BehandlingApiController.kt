@@ -148,7 +148,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.HentForhåndsvarsel,
         ) ?: return ResponseEntity.notFound().build()
 
-        return ResponseEntity.ok(tilbakekreving.nyHentForhåndsvarselFrontendDto(behandlingId))
+        return ResponseEntity.ok(tilbakekreving.nyHentForhåndsvarselFrontendDto(behandlingId, SystemKlokke))
     }
 
     override fun behandlingSendVarselbrev(behandlingId: UUID, sendForhaandsvarselDto: SendForhaandsvarselDto): ResponseEntity<Unit> {

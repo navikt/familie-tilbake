@@ -7,12 +7,13 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kravgrunnlag.EndretKravgrunnlagObservatør
 import java.util.UUID
 
-enum class ÅrsakTilTilbakeføring {
-    NyttKravgrunnlag,
-    Underkjent,
+enum class ÅrsakTilTilbakeføring(val frontendDto: ArsakTilTilbakeforingDto) {
+    NyttKravgrunnlag(ArsakTilTilbakeforingDto.NyttKravgrunnlag),
+    Underkjent(ArsakTilTilbakeforingDto.TilbakemeldingFraSaksbehandler),
 }
 
 internal interface Saksbehandlingsteg : EndretKravgrunnlagObservatør {

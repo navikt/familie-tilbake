@@ -303,6 +303,9 @@ class Vilkårsvurderingsteg(
 
             fun Iterable<Vilkårsvurderingsperiode>.tilFrontendDto(): List<VilkaarsvurderingDto> = groupBy { it.vurdering.underliggendeVurdering() }
                 .map { (underliggendeVurdering, perioder) ->
+                    val endringIKravgrunnnlag = perioder
+                        .mapNotNull { it.endringIKravgrunnnlag }
+                        .reduceOrNull { acc, forskjell -> acc.slåSammen(forskjell)!! }
                     VilkaarsvurderingDto(
                         id = perioder.first().id,
                         fom = perioder.minOf { it.periode.fom },
@@ -314,6 +317,7 @@ class Vilkårsvurderingsteg(
                             )
                         },
                         valg = underliggendeVurdering.tilNyFrontendDto(),
+                        endringIKravgrunnlag = endringIKravgrunnnlag?.tilDto(),
                     )
                 }
         }

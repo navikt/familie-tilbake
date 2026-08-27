@@ -146,18 +146,20 @@ class Forhåndsvarsel(
         forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
     }
 
-    fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto = when {
+    fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto = when {
         uttalelsesfrist != null -> ForhaandsvarselResponseDto(
             forhaandsvarselSteg = ForhaandsvarselErSendtDto(
                 forhåndsvarselInfo = varselbrev!!.tilForhåndsvarselDto(),
                 uttalelsesfrist = uttalelsesfrist!!.nyTilFrontendDto(),
+                ferdigvurdert = erFullstendig(klokke),
+                tilbakeført = trengerNyVurdering()?.frontendDto,
             ),
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
                 ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
         )
 
         forhåndsvarselUnntak != null -> ForhaandsvarselResponseDto(
-            forhaandsvarselSteg = forhåndsvarselUnntak!!.nyTilFrontendDto(),
+            forhaandsvarselSteg = forhåndsvarselUnntak!!.nyTilFrontendDto(erFullstendig(klokke)),
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
         )
 
