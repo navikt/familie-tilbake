@@ -14,7 +14,7 @@ java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
     kotlin("jvm") version "2.4.10"
-    id("org.springframework.boot") version "4.1.0"
+    id("org.springframework.boot") version "4.1.1"
     id("org.jetbrains.kotlin.plugin.spring") version "2.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
@@ -120,11 +120,11 @@ dependencies {
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20260713101404_6072da6") {
+    api("no.nav.familie:prosessering-core:2.20260817115650_f13f507") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
-    api("no.nav.familie:prosessering-web-nav-token-support:2.20260713101404_6072da6")
+    api("no.nav.familie:prosessering-web-nav-token-support:2.20260817115650_f13f507")
     api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
     api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
