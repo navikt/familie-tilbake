@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
@@ -44,7 +45,7 @@ import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
+import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -60,7 +61,7 @@ class TilbakekrevingService(
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
     private val kafkaProducer: KafkaProducer,
-    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
     private val dokdistService: DokdistClient,
     private val featureService: FeatureService,
     private val forhåndsvarselService: ForhåndsvarselService,
@@ -127,6 +128,9 @@ class TilbakekrevingService(
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
         if (validerScope) {
+            if (statusmeldingBufferRepository.erAnnullert(tilbakekreving.eksternFagsak.eksternId)) {
+                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagAnnullert, tilbakekreving.sporingsinformasjon())
+            }
             tilbakekreving.validerInnenforScope(featureService.modellFeatures)
         }
         return tilbakekreving
