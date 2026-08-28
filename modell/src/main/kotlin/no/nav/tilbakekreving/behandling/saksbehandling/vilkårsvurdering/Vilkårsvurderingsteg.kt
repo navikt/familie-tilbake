@@ -108,14 +108,27 @@ class Vilkårsvurderingsteg(
     }
 
     override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
+        val forrigePeriode = vurderinger
+            .lastOrNull { it.periode < periode.periode }
+            ?.takeIf { it.vurdering.underliggendeVurdering() is ForårsaketAvBruker.IkkeVurdert }
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
-        vurderinger = (
-            vurderinger + Vilkårsvurderingsperiode.opprett(
-                periode = periode.periode,
-                forrigePeriode = null,
-                endringIKravgrunnnlag = periode,
-            )
-        ).sortedBy { it.periode }
+        val nåværendeVurdering = Vilkårsvurderingsperiode.opprett(
+            periode = periode.periode,
+            forrigePeriode = forrigePeriode,
+            endringIKravgrunnnlag = periode,
+        )
+
+        val nestePeriode = vurderinger.firstOrNull { it.periode > periode.periode }
+        when {
+            nestePeriode == null -> Unit
+            nestePeriode.vurdering.underliggendeVurdering() is ForårsaketAvBruker.IkkeVurdert -> {
+                nestePeriode.kopierVurdering(nåværendeVurdering)
+            }
+            nestePeriode.vurdering is ForårsaketAvBruker.KopiertVurdering -> {
+                nestePeriode.vurder(ForårsaketAvBruker.IkkeVurdert())
+            }
+        }
+        vurderinger = (vurderinger + nåværendeVurdering).sortedBy { it.periode }
     }
 
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()

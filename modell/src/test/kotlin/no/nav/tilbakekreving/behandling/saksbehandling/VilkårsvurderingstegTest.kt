@@ -22,7 +22,9 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
@@ -31,6 +33,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.prosentReduksjon
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
@@ -401,6 +404,199 @@ class VilkårsvurderingstegTest {
         )
 
         vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe null
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - to nye perioder før eksisterende periode`() {
+        val eksisterendePeriode = 1.mars(2021) til 31.mars(2021)
+        val nyPeriode1 = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode2 = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(eksisterendePeriode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+        vilkårsvurderingsteg.vurder(eksisterendePeriode, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode1, 1000.kroner))
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode2, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 2
+            it[0].fom shouldBe nyPeriode1.fom
+            it[0].tom shouldBe nyPeriode2.tom
+            it[0].endringIKravgrunnlag shouldBe NyPeriodeDto(nyPeriode1.fom, nyPeriode2.tom, 3000)
+            it[1].fom shouldBe eksisterendePeriode.fom
+            it[1].tom shouldBe eksisterendePeriode.tom
+        }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - ny periode etter eksisterende periode`() {
+        val eksisterendePeriode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(eksisterendePeriode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].fom shouldBe eksisterendePeriode.fom
+            it[0].tom shouldBe nyPeriode.tom
+        }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - ny periode før eksisterende periode`() {
+        val eksisterendePeriode = 1.februar(2021) til 28.februar(2021)
+        val nyPeriode = 1.januar(2021) til 31.januar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(eksisterendePeriode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].fom shouldBe nyPeriode.fom
+            it[0].tom shouldBe eksisterendePeriode.tom
+        }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - to nye perioder før eksisterende ikke vurdert periode`() {
+        val eksisterendePeriode = 1.mars(2021) til 31.mars(2021)
+        val nyPeriode1 = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode2 = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(eksisterendePeriode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode1, 1000.kroner))
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode2, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].fom shouldBe nyPeriode1.fom
+            it[0].tom shouldBe eksisterendePeriode.tom
+        }
+
+        val entity = vilkårsvurderingsteg.tilEntity(UUID.randomUUID())
+        entity.vurderinger[1].vurdering.forrigePeriodeId shouldBe entity.vurderinger[0].id
+        entity.vurderinger[2].vurdering.forrigePeriodeId shouldBe entity.vurderinger[1].id
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - ny periode mellom to eksisterende perioder`() {
+        val eksisterendePeriode1 = 1.januar(2021) til 31.januar(2021)
+        val eksisterendePeriode2 = 1.mars(2021) til 31.mars(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(eksisterendePeriode1),
+                kravgrunnlagPeriode(eksisterendePeriode2),
+            ),
+        )
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].fom shouldBe eksisterendePeriode1.fom
+            it[0].tom shouldBe eksisterendePeriode2.tom
+            it[0].endringIKravgrunnlag shouldBe NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 2000)
+        }
+
+        val entity = vilkårsvurderingsteg.tilEntity(UUID.randomUUID())
+        entity.vurderinger[2].vurdering.forrigePeriodeId shouldBe entity.vurderinger[1].id
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - ny periode etter ikke vurdert og vurdert periode`() {
+        val ikkeVurdertPeriode = 1.januar(2021) til 31.januar(2021)
+        val vurdertPeriode = 1.februar(2021) til 28.februar(2021)
+        val nyPeriode = 1.mars(2021) til 31.mars(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(ikkeVurdertPeriode),
+                kravgrunnlagPeriode(vurdertPeriode),
+            ),
+        )
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+        val vurdertPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(vurdertPeriode.fom, vurdertPeriode.tom) }
+            .periodeId
+        vilkårsvurderingsteg.vurder(vurdertPeriodeId, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 3
+            it[0].fom shouldBe ikkeVurdertPeriode.fom
+            it[0].tom shouldBe ikkeVurdertPeriode.tom
+            it[1].fom shouldBe vurdertPeriode.fom
+            it[1].tom shouldBe vurdertPeriode.tom
+            it[2].fom shouldBe nyPeriode.fom
+            it[2].tom shouldBe nyPeriode.tom
+        }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - ny periode mellom kopiert vurdering`() {
+        val vurdertPeriode = 1.januar(2021) til 31.januar(2021)
+        val kopiertPeriode = 1.mars(2021) til 31.mars(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(vurdertPeriode),
+                kravgrunnlagPeriode(kopiertPeriode),
+            ),
+        )
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+        vilkårsvurderingsteg.vurder(vurdertPeriode, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 3
+            it[0].fom shouldBe vurdertPeriode.fom
+            it[0].tom shouldBe vurdertPeriode.tom
+            it[0].endringIKravgrunnlag shouldBe null
+            it[0].valg.shouldBeInstanceOf<GodTroDto>()
+            it[1].fom shouldBe nyPeriode.fom
+            it[1].tom shouldBe nyPeriode.tom
+            it[1].endringIKravgrunnlag shouldBe NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 2000)
+            it[1].valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+            it[2].fom shouldBe kopiertPeriode.fom
+            it[2].tom shouldBe kopiertPeriode.tom
+            it[2].endringIKravgrunnlag shouldBe null
+            it[2].valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+        }
     }
 
     @Test
