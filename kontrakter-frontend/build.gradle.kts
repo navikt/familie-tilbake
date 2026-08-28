@@ -4,7 +4,7 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     kotlin("jvm")
-    id("org.openapi.generator") version "7.24.0" apply false
+    id("org.openapi.generator") version "7.25.0" apply false
 }
 
 group = "no.nav"
@@ -52,7 +52,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("io.swagger.core.v3:swagger-annotations:2.2.53")
+        compileOnly("io.swagger.core.v3:swagger-annotations:2.2.54")
         compileOnly("jakarta.validation:jakarta.validation-api:3.1.1")
     }
 }
