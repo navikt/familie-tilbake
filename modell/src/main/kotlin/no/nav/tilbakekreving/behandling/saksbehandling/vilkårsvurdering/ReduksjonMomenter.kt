@@ -49,7 +49,7 @@ sealed interface ReduksjonMomenter {
 
         override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderingerGodTro()
     }
 
     // §22-15 4. ledd
@@ -90,7 +90,7 @@ sealed interface ReduksjonMomenter {
 
         override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderingerSærligeGrunner()
     }
 
     sealed interface SkalReduseres {
@@ -100,7 +100,9 @@ sealed interface ReduksjonMomenter {
 
         fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering
 
-        fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
+        fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse>
+
+        fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse>
 
         fun tilFrontendDtoForSærligeGrunner(
             grunner: Set<SærligGrunn>,
@@ -117,8 +119,9 @@ sealed interface ReduksjonMomenter {
                 return Reduksjon.Prosentdel(prosentdel.toBigDecimal())
             }
 
-            // Todo: Her må vi ha en egen begrunnelse for GodTro reduksjon. Det må gjøres når jurister har avklart teksten
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+
+            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
 
@@ -149,8 +152,9 @@ sealed interface ReduksjonMomenter {
                 return Reduksjon.ProsentdelAvBeløpIBehold(prosentdel.toBigDecimal(), beløpIBehold)
             }
 
-            // Todo: Her må vi ha en egen begrunnelse for GodTro reduksjon. Det må gjøres når jurister har avklart teksten
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+
+            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
 
@@ -181,7 +185,9 @@ sealed interface ReduksjonMomenter {
                 return Reduksjon.FullstendigTilbakekreving()
             }
 
-            override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+
+            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_GOD_TRO)
 
             override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Nei
 
