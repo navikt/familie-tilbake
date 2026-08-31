@@ -115,6 +115,7 @@ class EndringObservatørService(
                         )
                     },
                     varselSendt = behandlingEndret.varselSendt,
+                    vedtaksdato = behandlingEndret.vedtaksdato,
                     behandlingsstatus = behandlingEndret.behandlingsstatus.tilEventDto(),
                     forrigeBehandlingsstatus = behandlingEndret.forrigeBehandlingsstatus?.tilEventDto(),
                     totaltFeilutbetaltBeløp = behandlingEndret.totaltFeilutbetaltBeløp,

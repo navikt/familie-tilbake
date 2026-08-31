@@ -55,6 +55,7 @@ interface EndringObservatør {
         val eksternBehandlingId: String?,
         val sakOpprettet: LocalDateTime,
         val varselSendt: LocalDate?,
+        val vedtaksdato: LocalDate?,
         val venter: Venter?,
         val behandlingsstatus: ForenkletBehandlingsstatus,
         val forrigeBehandlingsstatus: ForenkletBehandlingsstatus?,

@@ -592,6 +592,7 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         event.tilbakekreving.behandlingId shouldBe behandlingId
         event.tilbakekreving.sakOpprettet.toLocalDate() shouldBe LocalDate.now()
         event.tilbakekreving.varselSendt shouldBe null
+        event.tilbakekreving.vedtaksdato shouldBe LocalDate.now()
         event.tilbakekreving.behandlingsstatus shouldBe BehandlingsstatusEventDto.AVSLUTTET
         event.tilbakekreving.totaltFeilutbetaltBeløp shouldBe 2000.0.kroner
         event.tilbakekreving.fullstendigPeriode shouldBe PeriodeEventDto(1.januar(2021), 31.januar(2021))
