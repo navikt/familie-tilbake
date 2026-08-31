@@ -11,6 +11,7 @@ data class TilbakekrevingEventDto(
     val sakOpprettet: OffsetDateTime,
     val venter: VenterEventDto?,
     val varselSendt: LocalDate?,
+    val vedtaksdato: LocalDate?,
     val behandlingsstatus: BehandlingsstatusEventDto,
     val forrigeBehandlingsstatus: BehandlingsstatusEventDto?,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING)

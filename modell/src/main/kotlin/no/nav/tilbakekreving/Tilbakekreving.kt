@@ -457,6 +457,7 @@ class Tilbakekreving internal constructor(
                     eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
                     sakOpprettet = opprettet,
                     varselSendt = brevHistorikk.sisteVarselbrev()?.sendtTid,
+                    vedtaksdato = brevHistorikk.sisteVedtaksbrev()?.sendtTid,
                     venter = venter,
                     behandlingsstatus = behandlingsstatus.forenkletStatus(eksternFagsak.ytelse, sideeffektContext.features),
                     forrigeBehandlingsstatus = forrigeBehandlingsstatus?.forenkletStatus(eksternFagsak.ytelse, sideeffektContext.features),
