@@ -35,6 +35,7 @@ class BigQueryMigrering(
             .dataSource(
                 DataSource.fromUrl(props.jdbcUrl).apply {
                     enableSession = true
+                    location = "europe-north1"
                 },
             )
             .schemas(props.dataset)
