@@ -372,9 +372,8 @@ class VilkårsvurderingstegTest {
                         reduksjonMomenter = ReduksjonMomenter.ReduksjonGodTro(
                             begrunnelse = "Begrunnelse for i behold",
                             grunner = setOf(RelevantMomentGodTro.StørrelseBeløp, RelevantMomentGodTro.Annet("Annet begrunnelse")),
-                            skalReduseres = ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold(
+                            skalReduseres = ReduksjonMomenter.SkalReduseres.Ja(
                                 prosentdel = 20,
-                                beløpIBehold = 1000.kroner,
                             ),
                         ),
                     ),

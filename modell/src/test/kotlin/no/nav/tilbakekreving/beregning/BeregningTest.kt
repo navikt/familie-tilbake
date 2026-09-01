@@ -13,7 +13,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
@@ -34,7 +33,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.test.februar
-import no.nav.tilbakekreving.test.grovtUaktsomt
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.prosentReduksjon
@@ -459,7 +457,7 @@ class BeregningTest {
                                 reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = "reduksjon begrunnelse",
                                     grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
-                                    skalReduseres = SkalReduseres.NeiAvBeløpIBehold(beløpIBehold),
+                                    skalReduseres = SkalReduseres.Nei,
                                 ),
                             ),
                         ),
@@ -481,10 +479,10 @@ class BeregningTest {
         delperioder[0].shouldMatch(
             periode = 1.januar(2021) til 31.januar(2021),
             renter = 0.kroner,
-            tilbakekrevesBruttoMedRenter = 1000.kroner,
+            tilbakekrevesBruttoMedRenter = 500.kroner,
             feilutbetaltBeløp = 1500.kroner,
             BeregnetBeløp(
-                tilbakekrevesBrutto = 1000.kroner,
+                tilbakekrevesBrutto = 500.kroner,
                 skatt = 0.kroner,
                 utbetaltYtelsesbeløp = 20000.kroner,
                 klassekode = "BATR",
@@ -493,10 +491,10 @@ class BeregningTest {
         delperioder[1].shouldMatch(
             periode = 1.februar(2021) til 28.februar(2021),
             renter = 0.kroner,
-            tilbakekrevesBruttoMedRenter = 1000.kroner,
+            tilbakekrevesBruttoMedRenter = 500.kroner,
             feilutbetaltBeløp = 1500.kroner,
             BeregnetBeløp(
-                tilbakekrevesBrutto = 1000.kroner,
+                tilbakekrevesBrutto = 500.kroner,
                 skatt = 0.kroner,
                 utbetaltYtelsesbeløp = 20000.kroner,
                 klassekode = "BATR",
@@ -508,14 +506,14 @@ class BeregningTest {
                     periode = 1.januar(2021) til 28.februar(2021),
                     vurdering = AnnenVurdering.GOD_TRO,
                     feilutbetaltBeløp = 3000.kroner,
-                    andelAvBeløp = 100.prosent,
+                    andelAvBeløp = null,
                     renteprosent = null,
-                    manueltSattTilbakekrevingsbeløp = null,
-                    tilbakekrevingsbeløpUtenRenter = 2000.kroner,
+                    manueltSattTilbakekrevingsbeløp = 1000.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 1000.kroner,
                     rentebeløp = 0.kroner,
-                    tilbakekrevingsbeløp = 2000.kroner,
+                    tilbakekrevingsbeløp = 1000.kroner,
                     skattebeløp = 0.kroner,
-                    tilbakekrevingsbeløpEtterSkatt = 2000.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1000.kroner,
                     utbetaltYtelsesbeløp = 40000.kroner,
                     riktigYtelsesbeløp = 37000.kroner,
                 ),
@@ -541,9 +539,8 @@ class BeregningTest {
                                 reduksjonMomenter = ReduksjonGodTro(
                                     begrunnelse = "reduksjon begrunnelse",
                                     grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
-                                    skalReduseres = JaAvBeløpIBehold(
+                                    skalReduseres = SkalReduseres.Ja(
                                         prosentdel = 50,
-                                        beløpIBehold = beløpIBehold,
                                     ),
                                 ),
                             ),

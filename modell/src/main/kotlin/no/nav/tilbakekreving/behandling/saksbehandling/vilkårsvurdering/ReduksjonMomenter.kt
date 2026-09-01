@@ -24,6 +24,8 @@ sealed interface ReduksjonMomenter {
 
     fun reduksjon(): Reduksjon
 
+    fun reduksjon(beløpIBehold: BigDecimal): Reduksjon
+
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
     fun tilEntity(periodeRef: UUID): ReduksjonMomenterEntity
@@ -48,6 +50,8 @@ sealed interface ReduksjonMomenter {
         }
 
         override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
+
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon = skalReduseres.reduksjon(beløpIBehold)
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderingerGodTro()
     }
@@ -90,6 +94,8 @@ sealed interface ReduksjonMomenter {
 
         override fun reduksjon(): Reduksjon = skalReduseres.reduksjon()
 
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon = skalReduseres.reduksjon(beløpIBehold)
+
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = skalReduseres.påkrevdeVurderingerSærligeGrunner()
     }
 
@@ -114,9 +120,15 @@ sealed interface ReduksjonMomenter {
             begrunnelse: String,
         ): ReduksjonArsakerDto
 
+        fun reduksjon(beløpIBehold: BigDecimal): Reduksjon
+
         class Ja(val prosentdel: Int) : SkalReduseres {
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.Prosentdel(prosentdel.toBigDecimal())
+            }
+
+            override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon {
+                return Reduksjon.ProsentdelAvBeløpIBehold(prosentdel.toBigDecimal(), beløpIBehold)
             }
 
             override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
@@ -147,75 +159,13 @@ sealed interface ReduksjonMomenter {
             )
         }
 
-        class JaAvBeløpIBehold(val prosentdel: Int, val beløpIBehold: BigDecimal) : SkalReduseres {
-            override fun reduksjon(): Reduksjon {
-                return Reduksjon.ProsentdelAvBeløpIBehold(prosentdel.toBigDecimal(), beløpIBehold)
-            }
-
-            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-
-            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO)
-
-            override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
-
-            override fun tilEntity(): SkalReduseresEntity {
-                return SkalReduseresEntity(SkalReduseresType.JaAvBeløpIBehold, prosentdel)
-            }
-
-            override fun tilFrontendDtoForSærligeGrunner(
-                grunner: Set<SærligGrunn>,
-                begrunnelse: String,
-            ): ReduksjonArsakerDto = JaSaerligeGrunnerDto(
-                særligeGrunnerFor = grunner.map { it.tilFrontendDto() },
-                prosentReduksjon = prosentdel,
-                begrunnelse = begrunnelse,
-                annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
-            )
-
-            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
-                prosentReduksjon = prosentdel,
-                relevans = grunner.map { it.tilFrontendDto() },
-                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
-                begrunnelse = begrunnelse,
-            )
-        }
-
-        class NeiAvBeløpIBehold(val beløpIBehold: BigDecimal) : SkalReduseres {
-            override fun reduksjon(): Reduksjon {
-                return Reduksjon.FullTilbakekrevingAvBeløpIBehold(beløpIBehold)
-            }
-
-            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-
-            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO)
-
-            override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
-
-            override fun tilEntity(): SkalReduseresEntity {
-                return SkalReduseresEntity(SkalReduseresType.NeiAvBeløpIBehold, null)
-            }
-
-            override fun tilFrontendDtoForSærligeGrunner(
-                grunner: Set<SærligGrunn>,
-                begrunnelse: String,
-            ): ReduksjonArsakerDto = JaSaerligeGrunnerDto(
-                særligeGrunnerFor = grunner.map { it.tilFrontendDto() },
-                prosentReduksjon = BigDecimal.ZERO.toInt(),
-                begrunnelse = begrunnelse,
-                annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
-            )
-
-            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
-                prosentReduksjon = BigDecimal.ZERO.toInt(),
-                relevans = grunner.map { it.tilFrontendDto() },
-                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
-                begrunnelse = begrunnelse,
-            )
-        }
-
         data object Nei : SkalReduseres {
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.FullstendigTilbakekreving()
+            }
+
+            override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon {
+                return Reduksjon.ManueltBeløp(beløpIBehold)
             }
 
             override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)

@@ -26,19 +26,11 @@ sealed interface Reduksjon {
             kravgrunnlagBeløp: BigDecimal,
             andelAvBeløp: BigDecimal,
         ): BigDecimal {
+            val test = andelAvBeløp
             return beløp.multiply(andelAvBeløp)
                 .multiply(andel)
                 .divide(HUNDRE_PROSENT)
         }
-    }
-
-    class FullTilbakekrevingAvBeløpIBehold(val beløp: BigDecimal) : Reduksjon {
-        override val andel = HUNDRE_PROSENT
-
-        override fun beregn(
-            kravgrunnlagBeløp: BigDecimal,
-            andelAvBeløp: BigDecimal,
-        ): BigDecimal = beløp
     }
 
     class ManueltBeløp(val beløp: BigDecimal) : Reduksjon {

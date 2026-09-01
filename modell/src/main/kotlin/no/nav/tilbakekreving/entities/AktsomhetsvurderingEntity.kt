@@ -27,7 +27,6 @@ data class AktsomhetsvurderingEntity(
                     reduksjonType = ReduksjonType.REDUKSJON_GOD_TRO,
                     reduksjonMomenter = reduksjonMomenterEntity,
                     begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
-                    beløpIBehold = beløpIBehold?.beløpIBehold,
                 )
                 NivåAvForståelse.GodTro(
                     beløpIBehold = requireNotNull(beløpIBehold) { "beløpIBehold kreves i GOD_TRO " }.fraEntity(kanUnnlates),
@@ -50,7 +49,6 @@ data class AktsomhetsvurderingEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                         reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
-                        beløpIBehold = null,
                     ),
                 )
             }
@@ -63,7 +61,6 @@ data class AktsomhetsvurderingEntity(
                         reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                         reduksjonMomenter = reduksjonMomenterEntity,
                         begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
-                        beløpIBehold = null,
                     ),
                 )
             }
@@ -80,7 +77,6 @@ data class AktsomhetsvurderingEntity(
                                 reduksjonType = ReduksjonType.REDUKSJON_SÆRLIGE_GRUNNER,
                                 reduksjonMomenter = reduksjonMomenterEntity,
                                 begrunnelseForUnnlatelse = begrunnelseForUnnlatelse,
-                                beløpIBehold = null,
                             ),
                         )
                     }
