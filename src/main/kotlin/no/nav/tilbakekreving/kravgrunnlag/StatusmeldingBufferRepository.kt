@@ -20,10 +20,19 @@ class StatusmeldingBufferRepository(
 
     fun erAnnullert(fagsystemId: String): Boolean {
         return jdbcTemplate.query(
-            "SELECT COUNT(1) as count FROM statusmelding_buffer WHERE fagsystem_id=? AND status IN ('ANNU', 'ANOM');",
+            "SELECT COUNT(1) as count FROM statusmelding_buffer WHERE fagsystem_id=? AND status='AVSL';",
             fagsystemId,
         ) { rs, _ ->
             rs.getInt("count") > 0
+        }.singleOrNull() ?: false
+    }
+
+    fun erSperret(fagsystemId: String): Boolean {
+        return jdbcTemplate.query(
+            "SELECT status FROM statusmelding_buffer WHERE fagsystem_id=? ORDER BY mottatt DESC LIMIT 1;",
+            fagsystemId,
+        ) { rs, _ ->
+            rs.getString("status") == "SPER"
         }.singleOrNull() ?: false
     }
 

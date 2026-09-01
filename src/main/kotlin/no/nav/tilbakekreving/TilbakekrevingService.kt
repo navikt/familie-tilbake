@@ -131,6 +131,9 @@ class TilbakekrevingService(
             if (statusmeldingBufferRepository.erAnnullert(tilbakekreving.eksternFagsak.eksternId)) {
                 throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagAnnullert, tilbakekreving.sporingsinformasjon())
             }
+            if (statusmeldingBufferRepository.erSperret(tilbakekreving.eksternFagsak.eksternId)) {
+                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagSperret, tilbakekreving.sporingsinformasjon())
+            }
             tilbakekreving.validerInnenforScope(featureService.modellFeatures)
         }
         return tilbakekreving

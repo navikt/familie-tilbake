@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -13,6 +14,7 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.test.FellesTestdata
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,7 +54,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         sendStatusmelding(
-            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "ANNU"),
+            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"),
             fagsystemId = fagsystemId,
         )
 
@@ -62,12 +64,63 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         exception.utenforScope shouldBe UtenforScope.KravgrunnlagAnnullert
     }
 
+    @Test
+    fun `sperret kravgrunnlag blokkerer behandling`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendStatusmelding(
+            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "SPER"),
+            fagsystemId = fagsystemId,
+        )
+
+        val exception = shouldThrow<ModellFeil.UtenforScopeException> {
+            behandlingController.hentBehandling(behandlingId)
+        }
+        exception.utenforScope shouldBe UtenforScope.KravgrunnlagSperret
+    }
+
+    @Test
+    fun `endret kravgrunnlag opphever sperret kravgrunnlag`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendStatusmelding(
+            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "SPER"),
+            fagsystemId = fagsystemId,
+        )
+        sendStatusmelding(
+            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "ENDR"),
+            fagsystemId = fagsystemId,
+            forventetAntallUleste = 2,
+        )
+
+        shouldNotThrowAny {
+            somSaksbehandler(FellesTestdata.SAKSBEHANDLER_IDENT) {
+                behandlingController.hentBehandling(behandlingId)
+            }
+        }
+    }
+
     private fun sendStatusmelding(
         statusmelding: String,
         fagsystemId: String,
+        forventetAntallUleste: Int = 1,
     ) {
         sendMessage(TILLEGGSSTØNADER_KØ_NAVN, statusmelding)
-        avventAntallUlesteStatusmeldinger(1, fagsystemId)
+        avventAntallUlesteStatusmeldinger(forventetAntallUleste, fagsystemId)
     }
 
     private fun avventAntallUlesteStatusmeldinger(antall: Int, fagsystemId: String) {
