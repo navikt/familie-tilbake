@@ -9,4 +9,6 @@ object Forklaringstekster {
     const val TILBAKEKREVES_UNDER_4_RETTSGEBYR = "Begrunn hvorfor brukeren må betale, selv om kravet er mindre enn/under 4G."
     const val GOD_TRO_BELØP_I_BEHOLD = "Her viser du til vedtaksbrevet om revurdering, det feilutbetalte beløpet og hva brukeren skal betale tilbake"
     const val GOD_TRO_BELØP_IKKE_I_BEHOLD = "Her viser du til vedtaksbrevet om revurdering, det feilutbetalte beløpet og hvorfor brukeren ikke skal betale tilbake"
+    const val GOD_TRO_REDUKSJON = "Her viser du til vedtaksbrevet om revurdering, det feilutbetalte beløpet og hvorfor vi har redusert beløpet" // Todo Det her skal oppdateres når jurist har en tekst for det.
+    const val GOD_TRO_INGEN_REDUKSJON = "Her viser du til vedtaksbrevet om revurdering, det feilutbetalte beløpet og hvorfor vi ikke har redusert beløpet" // Todo Det her skal oppdateres når jurist har en tekst for det.
 }

@@ -18,6 +18,8 @@ import java.math.BigDecimal
 sealed interface KanUnnlates4xRettsgebyr {
     fun reduksjon(): Reduksjon
 
+    fun reduksjon(beløpIBehold: BigDecimal): Reduksjon
+
     fun oppsummering(): VurdertUtbetaling.JaNeiVurdering
 
     fun tilEntity(): KanUnnlatesEntity
@@ -28,7 +30,7 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun tilFrontendDTO(): SkalUnnlates
 
-    fun særligeGrunner(): ReduksjonSærligeGrunner? = null
+    fun reduksjonMomenter(): ReduksjonMomenter? = null
 
     fun tilFrontendDto(): UnnlatelseDto
 
@@ -38,6 +40,8 @@ sealed interface KanUnnlates4xRettsgebyr {
         private val begrunnelseForUnnlatelse: String?,
     ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon = Reduksjon.IngenTilbakekreving()
+
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon = Reduksjon.IngenTilbakekreving()
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
             return VurdertUtbetaling.JaNeiVurdering.Ja
@@ -61,16 +65,19 @@ sealed interface KanUnnlates4xRettsgebyr {
     }
 
     class SkalIkkeUnnlates(
-        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val reduksjonMomenter: ReduksjonMomenter,
     ) : KanUnnlates4xRettsgebyr {
-        override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
+        override fun reduksjon(): Reduksjon = reduksjonMomenter.reduksjon()
+
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon = reduksjonMomenter.reduksjon(beløpIBehold)
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) +
+                reduksjonMomenter.påkrevdeVurderinger()
         }
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.SKAL_IKKE_UNNLATES
@@ -81,28 +88,30 @@ sealed interface KanUnnlates4xRettsgebyr {
 
         override fun tilFrontendDto(): UnnlatelseDto {
             return SkalIkkeUnnlatesDto(
-                begrunnelse = reduksjonSærligeGrunner.begrunnelse,
-                erDetSærligeGrunner = reduksjonSærligeGrunner.tilFrontendDto(),
+                begrunnelse = reduksjonMomenter.begrunnelse,
+                erDetSærligeGrunner = reduksjonMomenter.tilFrontendDto(),
             )
         }
 
-        override fun særligeGrunner(): ReduksjonSærligeGrunner {
-            return reduksjonSærligeGrunner
+        override fun reduksjonMomenter(): ReduksjonMomenter {
+            return reduksjonMomenter
         }
     }
 
     class ErOver4xRettsgebyr(
-        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val reduksjon: ReduksjonMomenter,
     ) : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon {
-            return reduksjonSærligeGrunner.skalReduseres.reduksjon()
+            return reduksjon.reduksjon()
         }
+
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon = reduksjon.reduksjon()
 
         override fun oppsummering(): VurdertUtbetaling.JaNeiVurdering {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjon.påkrevdeVurderinger()
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.OVER_4_RETTSGEBYR
 
@@ -111,16 +120,20 @@ sealed interface KanUnnlates4xRettsgebyr {
         override fun tilFrontendDTO(): SkalUnnlates = SkalUnnlates.OVER_4_RETTSGEBYR
 
         override fun tilFrontendDto(): UnnlatelseDto {
-            return IkkeAktueltDto(reduksjonSærligeGrunner.tilFrontendDto())
+            return IkkeAktueltDto(reduksjon.tilFrontendDto())
         }
 
-        override fun særligeGrunner(): ReduksjonSærligeGrunner {
-            return reduksjonSærligeGrunner
+        override fun reduksjonMomenter(): ReduksjonMomenter {
+            return reduksjon
         }
     }
 
     object IkkeVurdert : KanUnnlates4xRettsgebyr {
         override fun reduksjon(): Reduksjon {
+            return Reduksjon.FullstendigTilbakekreving()
+        }
+
+        override fun reduksjon(beløpIBehold: BigDecimal): Reduksjon {
             return Reduksjon.FullstendigTilbakekreving()
         }
 

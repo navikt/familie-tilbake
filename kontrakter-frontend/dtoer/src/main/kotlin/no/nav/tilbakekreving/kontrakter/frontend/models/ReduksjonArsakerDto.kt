@@ -12,5 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonSubTypes(
     JsonSubTypes.Type(value = JaSaerligeGrunnerDto::class, name = "ja"),
     JsonSubTypes.Type(value = NeiSaerligeGrunnerDto::class, name = "nei"),
+    JsonSubTypes.Type(value = SkalReduseresDto::class, name = "SkalReduseresGodTro"),
+    JsonSubTypes.Type(value = SkalIkkeReduseresDto::class, name = "SkalIkkeReduseresGodTro"),
 )
-sealed interface SaerligeGrunnerDto
+sealed interface ReduksjonArsakerDto

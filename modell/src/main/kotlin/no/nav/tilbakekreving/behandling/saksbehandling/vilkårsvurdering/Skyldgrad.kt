@@ -40,6 +40,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = vurderingstype(),
                 aktsomhetEtterUtbetaling = null,
@@ -48,7 +49,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
                 },
-                særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.oppsummerVurdering(),
+                særligeGrunner = reduksjonSærligeGrunner?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
         }
@@ -63,6 +64,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         }
 
         override fun tilFrontendDto(): VurdertVilkårsvurderingsresultatDto? {
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertVilkårsvurderingsresultatDto(
                 vilkårsvurderingsresultat = feilaktigeEllerMangelfulleOpplysninger.vilkårsvurderingsresultat,
                 aktsomhet = VurdertAktsomhetDto(
@@ -71,16 +73,17 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     andelTilbakekreves = reduksjon().andel,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseAktsomhet,
-                    særligeGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = kanUnnlates4XRettsgebyr.særligeGrunner()?.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    særligeGrunner = reduksjonSærligeGrunner?.vurderteGrunner(),
+                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner?.skalReduseres is ReduksjonMomenter.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = kanUnnlates4XRettsgebyr.skalTilbakekreves(),
                     unnlates4Rettsgebyr = kanUnnlates4XRettsgebyr.tilFrontendDTO(),
-                    særligeGrunnerBegrunnelse = kanUnnlates4XRettsgebyr.særligeGrunner()?.begrunnelse,
+                    særligeGrunnerBegrunnelse = reduksjonSærligeGrunner?.begrunnelse,
                 ),
             )
         }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
+            val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
                 vurderingType = VurderingType.FORÅRSAKET_AV_BRUKER,
                 mottakersForståelse = null,
@@ -94,7 +97,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 ),
                 begrunnelseForUnnlatelse = kanUnnlates4XRettsgebyr.begrunnelseForUnnlatelse(),
                 kanUnnlates = kanUnnlates4XRettsgebyr.tilEntity(),
-                særligGrunner = kanUnnlates4XRettsgebyr.særligeGrunner()?.tilEntity(periodeRef),
+                reduksjonMomenterEntity = reduksjonSærligeGrunner?.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 forrigePeriodeId = null,
             )
@@ -104,7 +107,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
     class GrovUaktsomhet(
         override val begrunnelse: String,
         override val begrunnelseAktsomhet: String,
-        private val reduksjonSærligeGrunner: ReduksjonSærligeGrunner,
+        private val reduksjonSærligeGrunner: ReduksjonMomenter.ReduksjonSærligeGrunner,
         override val feilaktigeEllerMangelfulleOpplysninger: FeilaktigEllerMangelfull,
     ) : Skyldgrad {
         override fun vurderingstype(): Aktsomhet = Aktsomhet.GROV_UAKTSOMHET
@@ -113,7 +116,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun reduksjon(): Reduksjon = reduksjonSærligeGrunner.skalReduseres.reduksjon()
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderingerSærligeGrunner()
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
@@ -148,7 +151,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
-                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonSærligeGrunner.SkalReduseres.Ja,
+                    særligeGrunnerTilReduksjon = reduksjonSærligeGrunner.skalReduseres is ReduksjonMomenter.SkalReduseres.Ja,
                     tilbakekrevSmåbeløp = true,
                     unnlates4Rettsgebyr = SkalUnnlates.TILBAKEKREVES,
                     særligeGrunnerBegrunnelse = reduksjonSærligeGrunner.begrunnelse,
@@ -169,7 +172,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     skalIleggesRenter = null,
                 ),
                 kanUnnlates = null,
-                særligGrunner = reduksjonSærligeGrunner.tilEntity(periodeRef),
+                reduksjonMomenterEntity = reduksjonSærligeGrunner.tilEntity(periodeRef),
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = null,
@@ -243,7 +246,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                     skalIleggesRenter = null,
                 ),
                 kanUnnlates = null,
-                særligGrunner = null,
+                reduksjonMomenterEntity = null,
                 feilaktigEllerMangelfull = feilaktigeEllerMangelfulleOpplysninger.tilEntity(),
                 begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = null,

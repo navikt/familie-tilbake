@@ -1,14 +1,14 @@
 package no.nav.tilbakekreving.entities
 
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
 
 data class SkalReduseresEntity(
     val type: SkalReduseresType,
     val prosentdel: Int?,
 ) {
-    fun fraEntity(): ReduksjonSærligeGrunner.SkalReduseres = when (type) {
-        SkalReduseresType.Ja -> ReduksjonSærligeGrunner.SkalReduseres.Ja(requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres" })
-        SkalReduseresType.Nei -> ReduksjonSærligeGrunner.SkalReduseres.Nei
+    fun fraEntity(): ReduksjonMomenter.SkalReduseres = when (type) {
+        SkalReduseresType.Ja -> ReduksjonMomenter.SkalReduseres.Ja(requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres" })
+        SkalReduseresType.Nei -> ReduksjonMomenter.SkalReduseres.Nei
     }
 }
 

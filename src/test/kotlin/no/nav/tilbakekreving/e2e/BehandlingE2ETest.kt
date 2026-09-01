@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.assertions.fail
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.SærligeGrunner
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.UtvidetVilkårsresultat
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.VedtakPeriode
@@ -29,12 +30,17 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeReduseresDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SkalReduseresDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -44,6 +50,7 @@ import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.juli
 import no.nav.tilbakekreving.test.mai
@@ -213,11 +220,11 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                     VilkårsvurderingsperiodeDto(
                         periode = 1.januar(2021) til 1.januar(2021),
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Jepp",
+                        begrunnelse = "Begrunnelse for perioden",
                         godTroDto = GodTroDto(
                             beløpErIBehold = false,
                             beløpTilbakekreves = null,
-                            begrunnelse = "Japp",
+                            begrunnelse = "Begrunnelse for godTro",
                         ),
                     ),
                 ),
@@ -227,8 +234,8 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(behandlingId)
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
-        vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Jepp"
-        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp"
+        vilkårsvurderingFrontendDto.perioder.single().begrunnelse shouldBe "Begrunnelse for godTro"
+        vilkårsvurderingFrontendDto.perioder.single().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Begrunnelse for godTro"
     }
 
     @Test
@@ -274,11 +281,11 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                     VilkårsvurderingsperiodeDto(
                         periode = 1.januar(2021) til 1.februar(2021),
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Jepp1",
+                        begrunnelse = "Begrunnelse for perioden",
                         godTroDto = GodTroDto(
                             beløpErIBehold = false,
                             beløpTilbakekreves = null,
-                            begrunnelse = "Japp1",
+                            begrunnelse = "Begrunnelse for godTro",
                         ),
                     ),
                 ),
@@ -288,8 +295,8 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(behandlingId)
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
-        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
-        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Begrunnelse for godTro"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Begrunnelse for godTro"
     }
 
     @Test
@@ -342,11 +349,11 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
                     VilkårsvurderingsperiodeDto(
                         periode = 1.januar(2021) til 14.juli(2021),
                         vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
-                        begrunnelse = "Jepp1",
+                        begrunnelse = "Begrunnelse for perioden",
                         godTroDto = GodTroDto(
                             beløpErIBehold = false,
                             beløpTilbakekreves = null,
-                            begrunnelse = "Japp1",
+                            begrunnelse = "Begrunnelse for godTro",
                         ),
                     ),
                 ),
@@ -356,8 +363,8 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(behandlingId)
         val vilkårsvurderingFrontendDto = tilbakekreving.hentBehandling(behandlingId).vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext())
         vilkårsvurderingFrontendDto.perioder.size shouldBe 1
-        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Jepp1"
-        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Japp1"
+        vilkårsvurderingFrontendDto.perioder.first().begrunnelse shouldBe "Begrunnelse for godTro"
+        vilkårsvurderingFrontendDto.perioder.first().vilkårsvurderingsresultatInfo?.godTro?.begrunnelse shouldBe "Begrunnelse for godTro"
         vilkårsvurderingFrontendDto.perioder.first().feilutbetaltBeløp shouldBe 8000.0.kroner
     }
 
@@ -790,5 +797,175 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
 
     private fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {
         return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
+    }
+
+    @Test
+    fun `godTro, hele beløpet i behold ny vilkårsvurdering, ingen reduksjon`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val perioder = listOf(
+            KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+            KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 1.februar(2021)),
+        )
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = perioder,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        utførSteg(
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 1.januar(2021),
+                1.februar(2021) til 1.februar(2021),
+            ),
+        )
+
+        val vilkårvsurderingPerioder = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body!!.vilkårsperioder
+        }
+
+        vilkårvsurderingPerioder.size shouldBe 1
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingLagreVilkaarsvurdering(
+                periodeId = vilkårvsurderingPerioder.first().vilkårsvurdering.id,
+                vilkaarsvurderingDto = VilkaarsvurderingDto(
+                    id = vilkårvsurderingPerioder.first().vilkårsvurdering.id,
+                    fom = 1.januar(2021),
+                    tom = 1.januar(2021),
+                    delbarePerioder = vilkårvsurderingPerioder.first().vilkårsvurdering.delbarePerioder,
+                    valg = no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto(
+                        beløpIBehold = HeleDto(
+                            begrunnelse = "Begrunnelse for hele beløpet er i behold",
+                            reduksjon = SkalIkkeReduseresDto(
+                                relevans = listOf(
+                                    MomentDto(
+                                        moment = "ANNET",
+                                        beskrivelse = "Annet",
+                                    ),
+                                ),
+                                annetBegrunnelse = "Annet begrunnelse for relevante moment",
+                                begrunnelse = "Begrunnelse i Reduksjon",
+                            ),
+                        ),
+                        begrunnelse = "Begrunnelse i GodTro",
+                    ),
+                ),
+                behandlingId = behandlingId,
+            )
+        }
+        val vilkårvsurderingPerioderEtter = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body!!.vilkårsperioder
+        }
+
+        vilkårvsurderingPerioderEtter.size shouldBe 1
+        vilkårvsurderingPerioderEtter.first().vilkårsvurdering.id shouldBe vilkårvsurderingPerioder.first().vilkårsvurdering.id
+        vilkårvsurderingPerioderEtter.first().vilkårsvurdering.valg.shouldBeInstanceOf<no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto> {
+            it.begrunnelse shouldBe "Begrunnelse i GodTro"
+            it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
+                hele.begrunnelse shouldBe "Begrunnelse for hele beløpet er i behold"
+                hele.reduksjon.shouldBeInstanceOf<SkalIkkeReduseresDto> { ingenReduksjon ->
+                    ingenReduksjon.relevans.first().moment shouldBe "ANNET"
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `godTro, hele beløpet i behold ny vilkårsvurdering, med reduksjon`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val perioder = listOf(
+            KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 1.januar(2021)),
+            KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 1.februar(2021)),
+        )
+        sendKravgrunnlagOgAvventLesing(
+            queueName = TILLEGGSSTØNADER_KØ_NAVN,
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = perioder,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+
+        utførSteg(
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 1.januar(2021),
+                1.februar(2021) til 1.februar(2021),
+            ),
+        )
+
+        val vilkårvsurderingPerioder = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body!!.vilkårsperioder
+        }
+
+        vilkårvsurderingPerioder.size shouldBe 1
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingLagreVilkaarsvurdering(
+                periodeId = vilkårvsurderingPerioder.first().vilkårsvurdering.id,
+                vilkaarsvurderingDto = VilkaarsvurderingDto(
+                    id = vilkårvsurderingPerioder.first().vilkårsvurdering.id,
+                    fom = 1.januar(2021),
+                    tom = 1.januar(2021),
+                    delbarePerioder = vilkårvsurderingPerioder.first().vilkårsvurdering.delbarePerioder,
+                    valg = no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto(
+                        beløpIBehold = HeleDto(
+                            begrunnelse = "Begrunnelse for hele beløpet er i behold",
+                            reduksjon = SkalReduseresDto(
+                                relevans = listOf(
+                                    MomentDto(
+                                        moment = "ANNET",
+                                        beskrivelse = "Annet beskrivelse",
+                                    ),
+                                ),
+                                prosentReduksjon = 20,
+                                annetBegrunnelse = "Annet begrunnelse for relevante moment",
+                                begrunnelse = "Begrunnelse i Reduksjon",
+                            ),
+                        ),
+                        begrunnelse = "Begrunnelse i GodTro",
+                    ),
+                ),
+                behandlingId = behandlingId,
+            )
+        }
+        val vilkårvsurderingPerioderEtter = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body!!.vilkårsperioder
+        }
+
+        vilkårvsurderingPerioderEtter.size shouldBe 1
+        vilkårvsurderingPerioderEtter.first().vilkårsvurdering.id shouldBe vilkårvsurderingPerioder.first().vilkårsvurdering.id
+        vilkårvsurderingPerioderEtter.first().vilkårsvurdering.valg.shouldBeInstanceOf<no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto> {
+            it.begrunnelse shouldBe "Begrunnelse i GodTro"
+            it.beløpIBehold.shouldBeInstanceOf<HeleDto> { hele ->
+                hele.begrunnelse shouldBe "Begrunnelse for hele beløpet er i behold"
+                hele.reduksjon.shouldBeInstanceOf<SkalReduseresDto> { reduksjon ->
+                    reduksjon.prosentReduksjon shouldBe 20
+                    reduksjon.relevans.first().moment shouldBe "ANNET"
+                }
+            }
+        }
     }
 }

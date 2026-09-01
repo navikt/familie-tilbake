@@ -6,7 +6,8 @@ import io.kotest.matchers.types.instanceOf
 import no.nav.tilbakekreving.behandling.saksbehandling.SærligGrunn
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
@@ -66,7 +67,7 @@ class VilkårsvurderingstegEntityTest {
                     ReduksjonSærligeGrunner(
                         begrunnelse = "Begrunnelse",
                         grunner = setOf(SærligGrunn.Annet("Annet begrunnelse")),
-                        skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                        skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
                     ),
                 ),
             ),

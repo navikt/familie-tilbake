@@ -3,7 +3,8 @@ package no.nav.tilbakekreving.builders
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonSærligeGrunner
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
@@ -17,7 +18,16 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvide
 object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBruker.Ja, ForårsaketAvBruker.Nei>, VilkårsvurderingValgProvider<KanUnnlates4xRettsgebyr, ReduksjonSærligeGrunner, KanUnnlates4xRettsgebyr> {
     override fun build(vurdering: ForårsaketAvNavBuilder.GodTroBuilder<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.GodTro(
-            vurdering.beløpIBehold?.let(NivåAvForståelse.GodTro.BeløpIBehold::DelerIBehold) ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei,
+            vurdering.beløpIBehold?.let {
+                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    beløp = it,
+                    annetBegrunnelse = null,
+                    begrunnelse = null,
+                    kanUnnlates4XRettsgebyr = null,
+                )
+            } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                begrunnelse = null,
+            ),
             "",
             "",
         )
@@ -62,13 +72,13 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
         )
     }
 
-    override fun build(reduksjon: ReduksjonSærligeGrunnerBuilder): ReduksjonSærligeGrunner {
-        return ReduksjonSærligeGrunner(
+    override fun build(reduksjon: ReduksjonSærligeGrunnerBuilder): ReduksjonMomenter.ReduksjonSærligeGrunner {
+        return ReduksjonMomenter.ReduksjonSærligeGrunner(
             begrunnelse = "",
             grunner = emptySet(),
             skalReduseres = when (reduksjon.skalReduseres) {
-                true -> ReduksjonSærligeGrunner.SkalReduseres.Ja(reduksjon.reduksjon)
-                false -> ReduksjonSærligeGrunner.SkalReduseres.Nei
+                true -> ReduksjonMomenter.SkalReduseres.Ja(reduksjon.reduksjon)
+                false -> ReduksjonMomenter.SkalReduseres.Nei
             },
         )
     }
@@ -91,10 +101,10 @@ object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBru
 
     override fun build(aktsomhet: AktsomhetBuilder.Forsettelig): KanUnnlates4xRettsgebyr {
         return KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(
-            ReduksjonSærligeGrunner(
+            ReduksjonMomenter.ReduksjonSærligeGrunner(
                 begrunnelse = "",
                 grunner = emptySet(),
-                skalReduseres = ReduksjonSærligeGrunner.SkalReduseres.Nei,
+                skalReduseres = ReduksjonMomenter.SkalReduseres.Nei,
             ),
         )
     }

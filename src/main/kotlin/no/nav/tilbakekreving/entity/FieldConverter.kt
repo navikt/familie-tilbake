@@ -54,6 +54,23 @@ interface FieldConverter<T, DbPrimitive> {
         fun required() = Required(this)
     }
 
+    object StringArrayConverter : FieldConverter<List<String>, SqlArray> {
+        override fun convert(value: List<String>): SqlArray {
+            throw NotImplementedError("Har ikke støtte for konvertering fra array til SQL array uten prepared statement")
+        }
+
+        override fun convert(resultSet: ResultSet, column: String): List<String> {
+            return (resultSet.getArray(column)?.array as? Array<*>)
+                ?.map { it.toString() }
+                .orEmpty()
+        }
+
+        override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: List<String>) {
+            val array = preparedStatement.connection.createArrayOf("VARCHAR", value.toTypedArray())
+            preparedStatement.setArray(index, array)
+        }
+    }
+
     object LocalDateTimeConverter : FieldConverter<LocalDateTime?, Timestamp?> {
         override fun convert(value: LocalDateTime?): Timestamp? {
             return value?.toInstant(ZoneOffset.UTC)?.let(Timestamp::from)

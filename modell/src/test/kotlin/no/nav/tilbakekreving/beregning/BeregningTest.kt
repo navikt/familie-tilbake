@@ -4,8 +4,15 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
+import no.nav.tilbakekreving.behandling.saksbehandling.RelevantMomentGodTro
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr.SkalIkkeUnnlates
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonGodTro
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.medBeløp
@@ -26,7 +33,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.test.februar
-import no.nav.tilbakekreving.test.grovtUaktsomt
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.prosentReduksjon
@@ -271,6 +277,332 @@ class BeregningTest {
                 ),
             ),
             Vedtaksresultat.INGEN_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `ny vilkårsvurdering, hele beløpet i behold, ingen reduksjon`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = HeleIBehold(
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Nei,
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 1500.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 1500.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar(2021) til 28.februar(2021),
+                    vurdering = AnnenVurdering.GOD_TRO,
+                    feilutbetaltBeløp = 3000.kroner,
+                    andelAvBeløp = 100.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 3000.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 3000.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 3000.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
+                ),
+            ),
+            Vedtaksresultat.FULL_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `ny vilkårsvurdering, hele beløpet i behold, med reduksjon`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = HeleIBehold(
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Ja(40),
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "", // TODO Denne må fjernes. krever migrering slik at eksisterende vilkårForTilbakekreving slås sammen med begrunnelseForGodTro
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 600.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 600.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 600.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 600.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar(2021) til 28.februar(2021),
+                    vurdering = AnnenVurdering.GOD_TRO,
+                    feilutbetaltBeløp = 3000.kroner,
+                    andelAvBeløp = 40.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 1200.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 1200.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1200.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
+                ),
+            ),
+            Vedtaksresultat.DELVIS_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `ny vilkårsvurdering, deler av beløpet i behold, ingen reduksjon`() {
+        val beløpIBehold = 1000.kroner
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = DelerIBehold(
+                            beløp = beløpIBehold,
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Nei,
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "begrunnelse",
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 500.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 500.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar(2021) til 28.februar(2021),
+                    vurdering = AnnenVurdering.GOD_TRO,
+                    feilutbetaltBeløp = 3000.kroner,
+                    andelAvBeløp = null,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = 1000.kroner,
+                    tilbakekrevingsbeløpUtenRenter = 1000.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 1000.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 1000.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
+                ),
+            ),
+            Vedtaksresultat.DELVIS_TILBAKEBETALING,
+        )
+    }
+
+    @Test
+    fun `ny vilkårsvurdering, deler av beløpet i behold, med reduksjon`() {
+        val beløpIBehold = 1000.kroner
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 28.februar(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = DelerIBehold(
+                            beløp = beløpIBehold,
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Ja(
+                                        prosentdel = 50,
+                                    ),
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "begrunnelse",
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1500.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1500.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val delperioder = beregning.beregn()
+        delperioder shouldHaveSize 2
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 250.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 250.kroner,
+            feilutbetaltBeløp = 1500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        beregning.oppsummer() shouldBe Beregningsresultat(
+            listOf(
+                Beregningsresultatsperiode(
+                    periode = 1.januar(2021) til 28.februar(2021),
+                    vurdering = AnnenVurdering.GOD_TRO,
+                    feilutbetaltBeløp = 3000.kroner,
+                    andelAvBeløp = 50.prosent,
+                    renteprosent = null,
+                    manueltSattTilbakekrevingsbeløp = null,
+                    tilbakekrevingsbeløpUtenRenter = 500.kroner,
+                    rentebeløp = 0.kroner,
+                    tilbakekrevingsbeløp = 500.kroner,
+                    skattebeløp = 0.kroner,
+                    tilbakekrevingsbeløpEtterSkatt = 500.kroner,
+                    utbetaltYtelsesbeløp = 40000.kroner,
+                    riktigYtelsesbeløp = 37000.kroner,
+                ),
+            ),
+            Vedtaksresultat.DELVIS_TILBAKEBETALING,
         )
     }
 
