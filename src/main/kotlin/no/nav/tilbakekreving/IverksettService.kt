@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.behov.IverksettelseBehov
@@ -44,6 +45,8 @@ class IverksettService(
     private val oppdragRestClient: OppdragRestClient,
     private val featureService: FeatureService,
 ) {
+    private val log = TracedLogger.getLogger<IverksettService>()
+
     fun iverksett(
         iverksettelseBehov: IverksettelseBehov,
         logContext: SecureLog.Context,
@@ -62,6 +65,9 @@ class IverksettService(
                 kravgrunnlag = kravgrunnlag,
                 beregnetPerioder = iverksettelseBehov.delperioder,
             )
+            log.medContext(logContext) {
+                info("Iverksetter vedtak med REST-endepunkt")
+            }
             val kvittering = oppdragRestClient.iverksettVedtak(request)
             lagreNyIverksattVedtak(iverksettelseBehov, request, kvittering)
         } else {

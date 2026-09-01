@@ -80,6 +80,9 @@ class IverksettelseService(
                     beregnetPerioder = beregnetPerioder,
                     logContext = logContext,
                 )
+                log.medContext(logContext) {
+                    info("Iverksetter vedtak med REST-endepunkt (gammel modell)")
+                }
                 val kvittering = oppdragRestClient.iverksettVedtak(request)
                 iverksettRepository.lagreIverksattVedtak(
                     IverksattVedtak(

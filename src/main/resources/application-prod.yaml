@@ -55,6 +55,9 @@ kafka:
     requestTopic: ${KAFKA_HENTFAGSYSTEM_REQUEST_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling}
     responseTopic: ${KAFKA_HENTFAGSYSTEM_RESPONSE_TOPIC:tilbake.privat-tbk-hentfagsystemsbehandling-svar}
 tilbakekreving:
+  toggles:
+    ny-modell:
+      OppdragRestClient: true
   kravgrunnlag:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
