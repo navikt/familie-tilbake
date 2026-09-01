@@ -291,7 +291,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 private val kanUnnlates4XRettsgebyr: KanUnnlates4xRettsgebyr?,
             ) : BeløpIBehold {
                 override fun reduksjon(): Reduksjon {
-                    return kanUnnlates4XRettsgebyr?.reduksjon()
+                    return kanUnnlates4XRettsgebyr?.reduksjon(beløp)
                         ?: Reduksjon.ManueltBeløp(beløp)
                 }
 

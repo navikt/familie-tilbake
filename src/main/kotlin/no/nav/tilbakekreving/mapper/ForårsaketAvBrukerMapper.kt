@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres.Ja
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.SkalReduseres.JaAvBeløpIBehold
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.kontrakter.frontend.models.BurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
@@ -142,9 +141,7 @@ object ForårsaketAvBrukerMapper {
                                     reduksjonMomenter = ReduksjonGodTro(
                                         begrunnelse = reduksjon.begrunnelse,
                                         grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
-                                        skalReduseres = SkalReduseres.NeiAvBeløpIBehold(
-                                            beløpIBehold = beløpIBehold.beløp.toBigDecimal(),
-                                        ),
+                                        skalReduseres = SkalReduseres.Nei,
                                     ),
                                 ),
                             ),
@@ -161,7 +158,7 @@ object ForårsaketAvBrukerMapper {
                                     reduksjonMomenter = ReduksjonGodTro(
                                         begrunnelse = reduksjon.begrunnelse,
                                         grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
-                                        skalReduseres = JaAvBeløpIBehold(prosentdel = reduksjon.prosentReduksjon, beløpIBehold = beløpIBehold.beløp.toBigDecimal()),
+                                        skalReduseres = SkalReduseres.Ja(prosentdel = reduksjon.prosentReduksjon),
                                     ),
                                 ),
                             ),

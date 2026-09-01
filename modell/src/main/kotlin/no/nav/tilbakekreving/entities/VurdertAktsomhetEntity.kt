@@ -11,7 +11,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevantMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
-import java.math.BigDecimal
 import java.util.UUID
 
 data class VurdertAktsomhetEntity(
@@ -31,7 +30,7 @@ data class ReduksjonMomenterEntity(
     fun fraEntitySærligGrunn(): ReduksjonSærligeGrunner = ReduksjonSærligeGrunner(
         begrunnelse = begrunnelse,
         grunner = grunner.map { mapTilSærligGrunn(it, annetBegrunnelse) }.toSet(),
-        skalReduseres = skalReduseres.fraEntity(null),
+        skalReduseres = skalReduseres.fraEntity(),
     )
 
     private fun mapTilSærligGrunn(type: String, annetBegrunnelse: String?): SærligGrunn {
@@ -44,11 +43,11 @@ data class ReduksjonMomenterEntity(
         }
     }
 
-    fun fraEntityRelevantMomentGodTro(beløpIBehold: BigDecimal?): ReduksjonGodTro {
+    fun fraEntityRelevantMomentGodTro(): ReduksjonGodTro {
         return ReduksjonGodTro(
             begrunnelse = begrunnelse,
             grunner = grunner.map { mapTilReduksjonGodTro(it, annetBegrunnelse) }.toSet(),
-            skalReduseres = skalReduseres.fraEntity(beløpIBehold),
+            skalReduseres = skalReduseres.fraEntity(),
         )
     }
 
@@ -73,7 +72,6 @@ enum class KanUnnlatesEntity {
         reduksjonType: ReduksjonType,
         reduksjonMomenter: ReduksjonMomenterEntity?,
         begrunnelseForUnnlatelse: String?,
-        beløpIBehold: BigDecimal?,
     ): KanUnnlates4xRettsgebyr = when (this) {
         UNNLATES -> Unnlates(begrunnelseForUnnlatelse)
         SKAL_IKKE_UNNLATES -> {
@@ -82,7 +80,7 @@ enum class KanUnnlatesEntity {
                     requireNotNull(reduksjonMomenter) { "SærligGrunner kreves for Særlig grunn reduksjon" }.fraEntitySærligGrunn(),
                 )
                 ReduksjonType.REDUKSJON_GOD_TRO -> SkalIkkeUnnlates(
-                    requireNotNull(reduksjonMomenter) { "RelevanteMomenter kreves for God tro reduksjon" }.fraEntityRelevantMomentGodTro(beløpIBehold),
+                    requireNotNull(reduksjonMomenter) { "RelevanteMomenter kreves for God tro reduksjon" }.fraEntityRelevantMomentGodTro(),
                 )
             }
         }
