@@ -180,6 +180,39 @@ sealed interface ReduksjonMomenter {
             )
         }
 
+        class NeiAvBeløpIBehold(val beløpIBehold: BigDecimal) : SkalReduseres {
+            override fun reduksjon(): Reduksjon {
+                return Reduksjon.FullTilbakekrevingAvBeløpIBehold(beløpIBehold)
+            }
+
+            override fun påkrevdeVurderingerSærligeGrunner(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
+
+            override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO)
+
+            override fun lagStatistikk(): VurdertUtbetaling.JaNeiVurdering = VurdertUtbetaling.JaNeiVurdering.Ja
+
+            override fun tilEntity(): SkalReduseresEntity {
+                return SkalReduseresEntity(SkalReduseresType.NeiAvBeløpIBehold, null)
+            }
+
+            override fun tilFrontendDtoForSærligeGrunner(
+                grunner: Set<SærligGrunn>,
+                begrunnelse: String,
+            ): ReduksjonArsakerDto = JaSaerligeGrunnerDto(
+                særligeGrunnerFor = grunner.map { it.tilFrontendDto() },
+                prosentReduksjon = BigDecimal.ZERO.toInt(),
+                begrunnelse = begrunnelse,
+                annetBegrunnelse = (grunner.firstOrNull { it is SærligGrunn.Annet } as? SærligGrunn.Annet)?.begrunnelse,
+            )
+
+            override fun tilFrontendDtoForGodTro(grunner: Set<RelevantMomentGodTro>, begrunnelse: String): ReduksjonArsakerDto = SkalReduseresDto(
+                prosentReduksjon = BigDecimal.ZERO.toInt(),
+                relevans = grunner.map { it.tilFrontendDto() },
+                annetBegrunnelse = (grunner.firstOrNull { it is RelevantMomentGodTro.Annet } as? RelevantMomentGodTro.Annet)?.begrunnelse,
+                begrunnelse = begrunnelse,
+            )
+        }
+
         data object Nei : SkalReduseres {
             override fun reduksjon(): Reduksjon {
                 return Reduksjon.FullstendigTilbakekreving()

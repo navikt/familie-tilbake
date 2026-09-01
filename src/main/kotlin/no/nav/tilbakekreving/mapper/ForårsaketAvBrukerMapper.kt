@@ -142,7 +142,9 @@ object ForårsaketAvBrukerMapper {
                                     reduksjonMomenter = ReduksjonGodTro(
                                         begrunnelse = reduksjon.begrunnelse,
                                         grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
-                                        skalReduseres = SkalReduseres.Nei,
+                                        skalReduseres = SkalReduseres.NeiAvBeløpIBehold(
+                                            beløpIBehold = beløpIBehold.beløp.toBigDecimal(),
+                                        ),
                                     ),
                                 ),
                             ),

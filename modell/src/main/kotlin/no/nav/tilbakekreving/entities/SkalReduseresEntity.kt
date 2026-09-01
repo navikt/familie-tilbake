@@ -13,6 +13,9 @@ data class SkalReduseresEntity(
             requireNotNull(prosentdel) { "prosentdel kreves for SkalReduseres av det som er i behold." },
             requireNotNull(beløpIBehold) { "beløpIBehold kreves for SkalReduseres av det som er i behold." },
         )
+        SkalReduseresType.NeiAvBeløpIBehold -> ReduksjonMomenter.SkalReduseres.NeiAvBeløpIBehold(
+            requireNotNull(beløpIBehold) { "beløpIBehold kreves for SkalReduseres av det som er i behold." },
+        )
         SkalReduseresType.Nei -> ReduksjonMomenter.SkalReduseres.Nei
     }
 }
@@ -20,5 +23,6 @@ data class SkalReduseresEntity(
 enum class SkalReduseresType {
     Ja,
     JaAvBeløpIBehold,
+    NeiAvBeløpIBehold,
     Nei,
 }
