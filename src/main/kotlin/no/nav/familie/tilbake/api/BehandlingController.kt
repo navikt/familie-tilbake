@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.api
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import no.nav.familie.tilbake.behandling.BehandlingService
+import no.nav.familie.tilbake.behandling.Henleggelseskilde
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingskontrollService
@@ -267,7 +268,7 @@ class BehandlingController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Saksbehandler henlegger behandling",
         )
-        behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto)
+        behandlingService.henleggBehandling(behandlingId, henleggelsesbrevFritekstDto, Henleggelseskilde.BEHANDLING_ENDEPUNKT)
         return Ressurs.success("OK")
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.kravgrunnlag
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Henleggelseskilde
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.steg.StegService
@@ -167,6 +168,7 @@ class KravvedtakstatusService(
                                     .HENLAGT_KRAVGRUNNLAG_NULLSTILT,
                             begrunnelse = "",
                         ),
+                        kilde = Henleggelseskilde.OPPDATERT_KRAVGRUNNLAG,
                     )
             }
             else -> throw IllegalArgumentException("Ukjent statuskode $kravstatuskode i statusmelding")

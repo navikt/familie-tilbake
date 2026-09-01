@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Henleggelseskilde
 import no.nav.familie.tilbake.common.fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
@@ -75,6 +76,7 @@ class RyddBehandlingUtenKravgrunnlagTask(
                     behandlingsresultatstype = Behandlingsresultatstype.HENLAGT_MANGLENDE_KRAVGRUNNLAG,
                     begrunnelse = "",
                 ),
+                Henleggelseskilde.AUTOMATISK_RYDDING,
             )
         }
     }

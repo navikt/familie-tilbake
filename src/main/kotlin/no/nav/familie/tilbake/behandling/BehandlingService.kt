@@ -356,12 +356,22 @@ class BehandlingService(
     fun henleggBehandling(
         behandlingId: UUID,
         henleggelsesbrevFritekstDto: HenleggelsesbrevFritekstDto,
+        kilde: Henleggelseskilde,
     ) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
         sjekkOmBehandlingAlleredeErAvsluttet(behandling, logContext)
 
         val behandlingsresultatstype = henleggelsesbrevFritekstDto.behandlingsresultatstype
+
+        log.medContext(logContext) {
+            info(
+                "Henlegger behandling behandlingId={} kilde={} resultat={}",
+                behandlingId,
+                kilde,
+                behandlingsresultatstype,
+            )
+        }
 
         if (!kanHenleggeBehandling(behandling, behandlingsresultatstype)) {
             throw Feil(

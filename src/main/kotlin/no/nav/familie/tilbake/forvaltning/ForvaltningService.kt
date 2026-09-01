@@ -6,6 +6,7 @@ import no.nav.familie.tilbake.api.forvaltning.Behandlingsinfo
 import no.nav.familie.tilbake.api.forvaltning.Kravgrunnlagsinfo
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
+import no.nav.familie.tilbake.behandling.Henleggelseskilde
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsresultat
@@ -178,6 +179,15 @@ class ForvaltningService(
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)
         sjekkOmBehandlingErAvsluttet(behandling, logContext)
+
+        log.medContext(logContext) {
+            info(
+                "Henlegger behandling behandlingId={} kilde={} resultat={}",
+                behandlingId,
+                Henleggelseskilde.FORVALTER_ENDEPUNKT,
+                Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            )
+        }
 
         // oppdaterer behandlingsstegstilstand
         behandlingskontrollService.henleggBehandlingssteg(behandlingId)

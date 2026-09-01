@@ -1206,6 +1206,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     Behandlingsresultatstype.HENLAGT_FEILOPPRETTET,
                     "testverdi",
                 ),
+                Henleggelseskilde.BEHANDLING_ENDEPUNKT,
             )
         }
 
@@ -1262,6 +1263,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                 Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                 "testverdi",
             ),
+            Henleggelseskilde.BEHANDLING_ENDEPUNKT,
         )
 
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
@@ -1311,6 +1313,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                     "testverdi",
                 ),
+                Henleggelseskilde.BEHANDLING_ENDEPUNKT,
             )
         }
         exception.message shouldBe "Behandling med behandlingId=${behandling.id} kan ikke henlegges."
@@ -1337,6 +1340,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                     "testverdi",
                 ),
+                Henleggelseskilde.BEHANDLING_ENDEPUNKT,
             )
         }
         exception.message shouldBe "Behandling med behandlingId=${behandling.id} kan ikke henlegges."
@@ -1363,6 +1367,7 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
                     Behandlingsresultatstype.HENLAGT_TEKNISK_VEDLIKEHOLD,
                     "testverdi",
                 ),
+                Henleggelseskilde.BEHANDLING_ENDEPUNKT,
             )
         }
         exception.message shouldBe "Behandling med id=${behandling.id} er allerede ferdig behandlet."
