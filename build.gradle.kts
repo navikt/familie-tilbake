@@ -143,7 +143,7 @@ dependencies {
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.2.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.3.0")
 
     testImplementation(project(":testdata"))
 
