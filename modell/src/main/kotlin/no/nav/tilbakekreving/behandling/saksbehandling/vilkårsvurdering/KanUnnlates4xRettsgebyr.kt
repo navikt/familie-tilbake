@@ -103,7 +103,7 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderinger()
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderingerSærligeGrunner()
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.OVER_4_RETTSGEBYR
 
