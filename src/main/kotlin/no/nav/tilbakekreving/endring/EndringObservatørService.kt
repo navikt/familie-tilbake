@@ -180,6 +180,7 @@ class EndringObservatørService(
                             VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER -> UtvidetVilkårsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER
                             VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER -> UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT
                             VurdertUtbetaling.ForårsaketAvBruker.GOD_TRO -> UtvidetVilkårsresultat.GOD_TRO
+                            VurdertUtbetaling.ForårsaketAvBruker.FORÅRSAKET_AV_BRUKER -> UtvidetVilkårsresultat.FORÅRSAKET_AV_BRUKER
                         },
                         feilutbetaltBeløp = it.beregning.feilutbetaltBeløp,
                         bruttoTilbakekrevingsbeløp = it.beregning.tilbakekrevesBeløp,

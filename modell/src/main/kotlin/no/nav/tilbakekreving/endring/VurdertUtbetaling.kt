@@ -36,6 +36,7 @@ data class VurdertUtbetaling(
     )
 
     enum class ForårsaketAvBruker {
+        FORÅRSAKET_AV_BRUKER,
         IKKE_FORÅRSAKET_AV_BRUKER,
         MANGELFULLE_OPPLYSNINGER,
         FEILAKTIGE_OPPLYSNINGER,
