@@ -45,6 +45,6 @@ enum class VilkårsvurderingBegrunnelse(
     ),
     IKKE_REDUSERT_GOD_TRO(
         tittel = "Hvorfor har vi ikke redusert beløpet?",
-        forklaring = Forklaringstekster.GOD_TRO_INGEN_REDUKSJON,
+        forklaring = Forklaringstekster.GOD_TRO_REDUKSJON,
     ),
 }
