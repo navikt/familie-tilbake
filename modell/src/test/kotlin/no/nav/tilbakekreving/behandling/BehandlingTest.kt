@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.behandlerContext
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.faktastegVurdering
@@ -23,14 +24,17 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
+import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -298,6 +302,79 @@ class BehandlingTest {
             vilkårsperioder.first().fakta.rettsligGrunnlag.size shouldBe 0
             vilkårsperioder.first().simulertBeløp shouldBe 2000
             vilkårsperioder.first().vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+        }
+    }
+
+    @Test
+    fun `ny vilkårsvurdering, henter riktig delresultat`() {
+        val behandling = behandling(kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(), kravgrunnlagPeriode(periode = 1.mars(2022) til 31.mars(2022)))))
+        val saksbehandlerContext = saksbehandlerContext()
+        behandling.medSaksbehandling(saksbehandlerContext) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Trenger ikke forhåndsvarsel i test lol",
+            )
+            vurderForeldelse(periode, foreldelseVurdering())
+        }
+
+        val vilkårsvurderingDto = behandling.vilkårsvurderingDto(
+            LesContext(
+                behandler = saksbehandlerContext.behandler,
+                features = saksbehandlerContext.features,
+                klokke = saksbehandlerContext.klokke,
+            ),
+        )
+
+        val delbarPerioder = vilkårsvurderingDto?.vilkårsperioder?.first()?.vilkårsvurdering?.delbarePerioder
+        delbarPerioder?.size shouldBe 2
+
+        behandling.medSaksbehandling(saksbehandlerContext) { splittVilkårsvurdering(delbarPerioder!!.last().periodeId) }
+
+        val vurdertFørstePeriode = behandling.medSaksbehandling(
+            saksbehandlerContext,
+        ) {
+            lagreVilkårsvurdering(
+                periodeId = delbarPerioder!!.last().periodeId,
+                vurdering = NivåAvForståelse.GodTro(
+                    beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei(
+                        begrunnelse = "Begrunnelse for beløp ikke er i behold",
+                    ),
+                    begrunnelse = "Begrunnelse for god tro",
+                    begrunnelseForGodTro = "Begrunnelse for god tro, ny",
+                ),
+            )
+        }
+
+        val test = vurdertFørstePeriode
+
+        val deltVilkårsPeriode = behandling.vilkårsvurderingDto(
+            LesContext(
+                behandler = saksbehandlerContext.behandler,
+                features = saksbehandlerContext.features,
+                klokke = saksbehandlerContext.klokke,
+            ),
+        )
+
+        deltVilkårsPeriode.vilkårsperioder.size shouldBe 2
+
+        deltVilkårsPeriode.shouldNotBeNull {
+            ferdigvurdert shouldBe false
+            erUnder4xRettsgebyr shouldBe true
+            vilkårsperioder.size shouldBe 2
+            vilkårsperioder.first().vilkårsvurdering.delbarePerioder.size shouldBe 1
+            vilkårsperioder.first().feilutbetaltBeløp shouldBe 2000
+            vilkårsperioder.first().delresultat shouldBe VilkaarsperiodeDto.Delresultat.FULL_TILBAKEKREVING
+            vilkårsperioder.first().fakta.rettsligGrunnlag.size shouldBe 0
+            vilkårsperioder.first().simulertBeløp shouldBe 2000
+            vilkårsperioder.first().vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+
+            vilkårsperioder.last().vilkårsvurdering.delbarePerioder.size shouldBe 1
+            vilkårsperioder.last().feilutbetaltBeløp shouldBe 2000
+            vilkårsperioder.last().delresultat shouldBe VilkaarsperiodeDto.Delresultat.INGEN_TILBAKEKREVING
+            vilkårsperioder.last().fakta.rettsligGrunnlag.size shouldBe 0
+            vilkårsperioder.last().simulertBeløp shouldBe 0
+            vilkårsperioder.last().vilkårsvurdering.valg.shouldBeInstanceOf<GodTroDto>()
         }
     }
 }

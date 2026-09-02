@@ -921,12 +921,13 @@ class Behandling internal constructor(
         beregning: List<Delperiode<out Delperiode.Beløp>>,
     ): VilkaarsperiodeDto {
         val sammenslåttPeriode = vurdering.fom til vurdering.tom
-        val simulertBeløp = beregning.filter { it.periode in sammenslåttPeriode }.sumOf { it.tilbakekrevesBruttoMedRenter() }
+        val delperiodeBeregning = beregning.filter { it.periode in sammenslåttPeriode }
+        val simulertBeløp = delperiodeBeregning.sumOf { it.tilbakekrevesBruttoMedRenter() }
         val totaltBeløpForPerioden = kravgrunnlag.entry.totaltBeløpFor(sammenslåttPeriode, eksternFagsakRevurdering.entry)
         val fakta = FaktaDto(rettsligGrunnlag = emptyList())
         return VilkaarsperiodeDto(
             feilutbetaltBeløp = totaltBeløpForPerioden.toInt(),
-            delresultat = when (Beregning.bestemVedtaksresultat(beregning)) {
+            delresultat = when (Beregning.bestemVedtaksresultat(delperiodeBeregning)) {
                 Vedtaksresultat.FULL_TILBAKEBETALING -> VilkaarsperiodeDto.Delresultat.FULL_TILBAKEKREVING
                 Vedtaksresultat.DELVIS_TILBAKEBETALING -> VilkaarsperiodeDto.Delresultat.DELVIS_TILBAKEKREVING
                 Vedtaksresultat.INGEN_TILBAKEBETALING -> VilkaarsperiodeDto.Delresultat.INGEN_TILBAKEKREVING
