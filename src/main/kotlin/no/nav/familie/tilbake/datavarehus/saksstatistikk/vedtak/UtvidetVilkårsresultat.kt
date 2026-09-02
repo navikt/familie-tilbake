@@ -6,4 +6,5 @@ enum class UtvidetVilkårsresultat {
     MANGELFULLE_OPPLYSNINGER_FRA_BRUKER,
     FEIL_OPPLYSNINGER_FRA_BRUKER,
     GOD_TRO,
+    FORÅRSAKET_AV_BRUKER,
 }

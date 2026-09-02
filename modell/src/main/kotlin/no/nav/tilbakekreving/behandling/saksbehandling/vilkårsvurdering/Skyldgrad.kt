@@ -47,7 +47,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
-                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> VurdertUtbetaling.ForårsaketAvBruker.FORÅRSAKET_AV_BRUKER
                 },
                 særligeGrunner = reduksjonSærligeGrunner?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
@@ -125,7 +125,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
-                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> VurdertUtbetaling.ForårsaketAvBruker.FORÅRSAKET_AV_BRUKER
                 },
                 særligeGrunner = reduksjonSærligeGrunner.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
@@ -200,7 +200,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 forårsaketAvBruker = when (feilaktigeEllerMangelfulleOpplysninger) {
                     FeilaktigEllerMangelfull.FEILAKTIG -> VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER
                     FeilaktigEllerMangelfull.MANGELFULL -> VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER
-                    FeilaktigEllerMangelfull.IKKE_VURDERT -> throw IllegalArgumentException("Ikke_Vurdert er kun til ny vilkårsvurdering")
+                    FeilaktigEllerMangelfull.IKKE_VURDERT -> VurdertUtbetaling.ForårsaketAvBruker.FORÅRSAKET_AV_BRUKER
                 },
                 særligeGrunner = null,
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
