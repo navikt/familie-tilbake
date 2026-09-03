@@ -15,7 +15,7 @@ data class KravgrunnlagDetaljerDto(
     val kodeStatusKrav: String,
     val kodeFagomraade: String,
     val fagsystemId: String,
-    val datoVedtakFagsystem: LocalDate,
+    val datoVedtakFagsystem: LocalDate?,
     val vedtakIdOmgjort: Long,
     val gjelderId: String,
     val typeGjelder: String,
