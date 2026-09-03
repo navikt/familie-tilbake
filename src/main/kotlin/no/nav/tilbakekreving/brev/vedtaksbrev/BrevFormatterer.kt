@@ -92,6 +92,7 @@ object BrevFormatterer {
             BeregningsresultatVurderingDto.Forsett -> "Forsett"
             BeregningsresultatVurderingDto.BurdeForstått -> "Burde forstått"
             BeregningsresultatVurderingDto.Forstod -> "Forstod"
+            BeregningsresultatVurderingDto.Foreldet -> "Foreldet"
         }
 
     fun lagForhåndsvarselOverskrift(ytelse: Ytelse): String {
