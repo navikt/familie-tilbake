@@ -36,10 +36,8 @@ class Forhåndsvarsel(
     }
 
     override fun erFullstendig(klokke: Klokke): Boolean {
-        val gjeldendeFrist = uttalelsesfrist?.hentFrist()
         return brukeruttalelse != null ||
-            forhåndsvarselUnntak != null ||
-            gjeldendeFrist?.isBefore(klokke.dagensDato()) == true
+            forhåndsvarselUnntak != null
     }
 
     override fun erPåbegynt(): Boolean {
