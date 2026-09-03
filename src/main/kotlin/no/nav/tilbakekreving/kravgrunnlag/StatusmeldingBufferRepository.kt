@@ -27,15 +27,6 @@ class StatusmeldingBufferRepository(
         }.singleOrNull() ?: false
     }
 
-    fun erSperret(fagsystemId: String): Boolean {
-        return jdbcTemplate.query(
-            "SELECT status FROM statusmelding_buffer WHERE fagsystem_id=? ORDER BY mottatt DESC LIMIT 1;",
-            fagsystemId,
-        ) { rs, _ ->
-            rs.getString("status") == "SPER"
-        }.singleOrNull() ?: false
-    }
-
     data class Entity(
         val statusmelding: String,
         val fagsystemId: String,
