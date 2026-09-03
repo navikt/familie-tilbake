@@ -1,4 +1,4 @@
-val openHtmlToPdfVersion = "1.1.81"
+val openHtmlToPdfVersion = "1.1.83"
 val veraPdfVersion = "1.30.2"
 
 dependencies {
