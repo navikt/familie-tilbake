@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonIgnoreProperties(
-    value = ["erDetSaerligeGrunner"],
+    value = ["erDetReduksjonÅrsaker"],
     allowSetters = true,
 )
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "erDetSaerligeGrunner", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "erDetReduksjonÅrsaker", visible = true)
 @JsonSubTypes(
     JsonSubTypes.Type(value = JaSaerligeGrunnerDto::class, name = "ja"),
     JsonSubTypes.Type(value = NeiSaerligeGrunnerDto::class, name = "nei"),
