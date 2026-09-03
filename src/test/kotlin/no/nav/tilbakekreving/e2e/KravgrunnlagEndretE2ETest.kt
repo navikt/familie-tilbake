@@ -54,7 +54,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
 
         behandlingEntity.faktastegEntity.perioder.single().endringIKravgrunnlag.shouldNotBeNull {
             originalPeriode?.fraEntity() shouldBe periode
-            endringIBeløp shouldBe (-2000.00).kroner
+            gammeltBeløp shouldBe 3000.00.kroner
+            nyttBeløp shouldBe 1000.00.kroner
         }
     }
 
@@ -82,7 +83,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
 
         behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldNotBeNull {
             originalPeriode?.fraEntity() shouldBe periode
-            endringIBeløp shouldBe (-2000.00).kroner
+            gammeltBeløp shouldBe 3000.00.kroner
+            nyttBeløp shouldBe 1000.00.kroner
         }
     }
 
@@ -124,7 +126,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
 
         behandlingEntity.faktastegEntity.perioder.single().endringIKravgrunnlag.shouldNotBeNull {
             originalPeriode?.fraEntity() shouldBe periode
-            endringIBeløp shouldBe (1500.00).kroner
+            gammeltBeløp shouldBe 1000.00.kroner
+            nyttBeløp shouldBe 2500.00.kroner
         }
     }
 
@@ -166,7 +169,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
 
         behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldNotBeNull {
             originalPeriode?.fraEntity() shouldBe periode
-            endringIBeløp shouldBe (1500.00).kroner
+            gammeltBeløp shouldBe 1000.00.kroner
+            nyttBeløp shouldBe 2500.00.kroner
         }
     }
 

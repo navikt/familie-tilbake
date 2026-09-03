@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.KravgrunnlagForskjellDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
@@ -30,13 +31,11 @@ class KravgrunnlagSammenligning(
         .fold(listOf<Forskjell>()) { acc, forskjell ->
             when (val sammenslått = acc.lastOrNull()?.slåSammen(forskjell)) {
                 null -> acc + forskjell
-                else -> {
-                    acc.dropLast(1) + sammenslått
-                }
+                else -> acc.dropLast(1) + sammenslått
             }
         }
         .mapNotNull(Forskjell::tilDto)
-        .filter { it !is EndretPeriodeDto || it.endringIBeløp != 0 }
+        .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
         .toList()
 
     internal fun oppdaterSteg(steg: List<Saksbehandlingsteg>) {
@@ -61,20 +60,28 @@ class KravgrunnlagSammenligning(
         }
 
         forskjeller += nyttKravgrunnlag.perioder().map { nyPeriode ->
-            val endringIBeløp = originaltKravgrunnlag.perioder()
+            val gammelPeriode = originaltKravgrunnlag.perioder()
                 .firstOrNull { it.periode() == nyPeriode.periode() }
-                ?.let { nyPeriode.feilutbetaltYtelsesbeløp() - it.feilutbetaltYtelsesbeløp() }
             when {
-                endringIBeløp == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
-                endringIBeløp.signum() == 0 -> Forskjell.UendretPeriode(nyPeriode.periode())
-                else -> Forskjell.JustertBeløp(nyPeriode.periode(), endringIBeløp)
+                gammelPeriode == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
+                nyPeriode.feilutbetaltYtelsesbeløp().toInt() == gammelPeriode.feilutbetaltYtelsesbeløp().toInt() -> Forskjell.UendretPeriode(
+                    periode = nyPeriode.periode(),
+                    gammeltBeløp = gammelPeriode.feilutbetaltYtelsesbeløp(),
+                    nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
+                )
+                else -> Forskjell.JustertBeløp(
+                    periode = nyPeriode.periode(),
+                    gammeltBeløp = gammelPeriode.feilutbetaltYtelsesbeløp(),
+                    nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
+                    etterfølgende = null,
+                )
             }
         }
     }
 
     sealed interface Forskjell {
         val periode: Datoperiode
-        val endringIBeløp: BigDecimal
+        val nyttBeløp: BigDecimal
 
         fun oppdater(steg: EndretKravgrunnlagObservatør)
 
@@ -88,7 +95,12 @@ class KravgrunnlagSammenligning(
 
         fun tilDto(): KravgrunnlagForskjellDto?
 
-        data class JustertBeløp(override val periode: Datoperiode, override val endringIBeløp: BigDecimal) : Forskjell {
+        data class JustertBeløp(
+            override val periode: Datoperiode,
+            val gammeltBeløp: BigDecimal,
+            override val nyttBeløp: BigDecimal,
+            private val etterfølgende: UendretPeriode?,
+        ) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.perideEndretBeløp(this)
             }
@@ -106,27 +118,39 @@ class KravgrunnlagSammenligning(
                     type = ForskjellType.JustertBeløp,
                     originalPeriode = DatoperiodeEntity(periode.fom, periode.tom),
                     nyPeriode = null,
-                    endringIBeløp = endringIBeløp,
+                    gammeltBeløp = gammeltBeløp,
+                    nyttBeløp = nyttBeløp,
                 )
             }
 
             override fun slåSammen(other: Forskjell): Forskjell? {
                 return when (other) {
-                    is UendretPeriode -> this
+                    is UendretPeriode -> JustertBeløp(
+                        periode = periode,
+                        gammeltBeløp = gammeltBeløp,
+                        nyttBeløp = nyttBeløp,
+                        etterfølgende = etterfølgende?.slåSammen(other) ?: other,
+                    )
                     is JustertBeløp -> JustertBeløp(
                         periode = this.periode.fom til other.periode.tom,
-                        endringIBeløp = this.endringIBeløp + other.endringIBeløp,
+                        gammeltBeløp = this.gammeltBeløp + other.gammeltBeløp + (etterfølgende?.gammeltBeløp ?: BigDecimal.ZERO),
+                        nyttBeløp = this.nyttBeløp + other.nyttBeløp + (etterfølgende?.nyttBeløp ?: BigDecimal.ZERO),
+                        etterfølgende = null,
                     )
                     else -> null
                 }
             }
 
-            override fun tilDto(): KravgrunnlagForskjellDto = EndretPeriodeDto(periode.fom, periode.tom, endringIBeløp.toInt())
+            override fun tilDto(): KravgrunnlagForskjellDto = EndretPeriodeDto(
+                fom = periode.fom,
+                tom = periode.tom,
+                gammelPeriode = PeriodeDto(periode.fom, periode.tom),
+                gammeltBeløp = gammeltBeløp.toInt(),
+                nyttBeløp = nyttBeløp.toInt(),
+            )
         }
 
-        data class NyPeriode(override val periode: Datoperiode, val beløp: BigDecimal) : Forskjell {
-            override val endringIBeløp: BigDecimal = BigDecimal.ZERO
-
+        data class NyPeriode(override val periode: Datoperiode, override val nyttBeløp: BigDecimal) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.nyPeriode(this)
             }
@@ -144,23 +168,26 @@ class KravgrunnlagSammenligning(
                     type = ForskjellType.NyPeriode,
                     originalPeriode = null,
                     nyPeriode = DatoperiodeEntity(periode.fom, periode.tom),
-                    endringIBeløp = beløp,
+                    gammeltBeløp = null,
+                    nyttBeløp = nyttBeløp,
                 )
             }
 
             override fun slåSammen(other: Forskjell): Forskjell? {
                 return when (other) {
-                    is NyPeriode -> NyPeriode(periode.fom til other.periode.tom, beløp + other.beløp)
+                    is NyPeriode -> NyPeriode(periode.fom til other.periode.tom, nyttBeløp + other.nyttBeløp)
                     else -> null
                 }
             }
 
-            override fun tilDto(): KravgrunnlagForskjellDto = NyPeriodeDto(periode.fom, periode.tom, beløp.toInt())
+            override fun tilDto(): KravgrunnlagForskjellDto = NyPeriodeDto(periode.fom, periode.tom, nyttBeløp.toInt())
         }
 
-        data class UendretPeriode(override val periode: Datoperiode) : Forskjell {
-            override val endringIBeløp: BigDecimal = BigDecimal.ZERO
-
+        data class UendretPeriode(
+            override val periode: Datoperiode,
+            override val nyttBeløp: BigDecimal,
+            val gammeltBeløp: BigDecimal,
+        ) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {}
 
             override fun tilEntity(
@@ -169,7 +196,15 @@ class KravgrunnlagSammenligning(
                 foreldelsesvurderingPeriodeRef: UUID?,
             ): ForskjellEntity = throw IllegalStateException("UendretPeriode skal ikke persisteres")
 
-            override fun slåSammen(other: Forskjell) = other
+            override fun slåSammen(other: Forskjell) = when (other) {
+                is UendretPeriode -> UendretPeriode(
+                    periode.fom til other.periode.tom,
+                    nyttBeløp + other.nyttBeløp,
+                    gammeltBeløp + other.gammeltBeløp,
+                )
+
+                else -> null
+            }
 
             override fun tilDto(): KravgrunnlagForskjellDto? = null
         }

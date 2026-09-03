@@ -19,7 +19,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -136,7 +135,7 @@ class Forhåndsvarsel(
 
     override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
         when {
-            forskjell.endringIBeløp > BigDecimal.ZERO -> {
+            forskjell.gammeltBeløp.toInt() < forskjell.nyttBeløp.toInt() -> {
                 forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
             }
         }

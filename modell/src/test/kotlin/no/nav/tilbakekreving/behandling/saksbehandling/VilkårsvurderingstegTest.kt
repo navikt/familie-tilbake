@@ -555,20 +555,26 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.perideEndretBeløp(
             KravgrunnlagSammenligning.Forskjell.JustertBeløp(
                 periode = periode1,
-                endringIBeløp = 500.kroner,
+                gammeltBeløp = 250.kroner,
+                nyttBeløp = 500.kroner,
+                etterfølgende = null,
             ),
         )
         vilkårsvurderingsteg.perideEndretBeløp(
             KravgrunnlagSammenligning.Forskjell.JustertBeløp(
                 periode = periode2,
-                endringIBeløp = 300.kroner,
+                gammeltBeløp = 100.kroner,
+                nyttBeløp = 300.kroner,
+                etterfølgende = null,
             ),
         )
 
         vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            gammelPeriode = PeriodeDto(periode1.fom, periode2.tom),
             fom = periode1.fom,
             tom = periode2.tom,
-            endringIBeløp = 800,
+            gammeltBeløp = 350,
+            nyttBeløp = 800,
         )
     }
 
@@ -588,14 +594,18 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.perideEndretBeløp(
             KravgrunnlagSammenligning.Forskjell.JustertBeløp(
                 periode = periode,
-                endringIBeløp = 500.kroner,
+                gammeltBeløp = 100.kroner,
+                nyttBeløp = 500.kroner,
+                etterfølgende = null,
             ),
         )
 
         vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe EndretPeriodeDto(
             fom = periode.fom,
             tom = periode.tom,
-            endringIBeløp = 500,
+            gammelPeriode = PeriodeDto(periode.fom, periode.tom),
+            gammeltBeløp = 100,
+            nyttBeløp = 500,
         )
     }
 

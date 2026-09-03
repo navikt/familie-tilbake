@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.feilutbetalteBeløp
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -100,7 +101,8 @@ class KravgrunnlagSammenligningTest {
             sporing = Sporing("", ""),
         ).resultat().shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.JustertBeløp>()
 
-        forskjell.endringIBeløp shouldBe 1000.kroner
+        forskjell.gammeltBeløp shouldBe 1000.kroner
+        forskjell.nyttBeløp shouldBe 2000.kroner
     }
 
     @Test
@@ -152,7 +154,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = 1.januar(2021),
                 tom = 31.mars(2021),
-                endringIBeløp = 1000,
+                gammelPeriode = PeriodeDto(1.januar(2021), 31.mars(2021)),
+                gammeltBeløp = 3000,
+                nyttBeløp = 4000,
             ),
         )
     }
@@ -177,7 +181,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = 1.januar(2021),
                 tom = 28.februar(2021),
-                endringIBeløp = 1000,
+                gammelPeriode = PeriodeDto(1.januar(2021), 28.februar(2021)),
+                gammeltBeløp = 2000,
+                nyttBeløp = 3000,
             ),
         )
     }
@@ -203,7 +209,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = eksisterendePeriode.fom,
                 tom = eksisterendePeriode.tom,
-                endringIBeløp = 500,
+                gammelPeriode = PeriodeDto(eksisterendePeriode.fom, eksisterendePeriode.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
             ),
             NyPeriodeDto(
                 fom = 1.februar(2021),
@@ -216,16 +224,16 @@ class KravgrunnlagSammenligningTest {
     @Test
     fun `sammendrag - endring av beløp med gap mellom periodene slås sammen`() {
         val periode1 = 1.januar(2021) til 31.januar(2021)
-        val periode3 = 1.mars(2021) til 31.mars(2021)
+        val periode2 = 1.mars(2021) til 31.mars(2021)
 
         val sammendrag = sammenlign(
             nåværende = listOf(
                 kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner)),
-                kravgrunnlagPeriode(periode = periode3, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = beløp(1000.kroner)),
             ),
             oppdatert = listOf(
                 kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1500.kroner)),
-                kravgrunnlagPeriode(periode = periode3, ytelsesbeløp = beløp(1500.kroner)),
+                kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = beløp(1500.kroner)),
             ),
         )
 
@@ -233,7 +241,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = 1.januar(2021),
                 tom = 31.mars(2021),
-                endringIBeløp = 1000,
+                gammelPeriode = PeriodeDto(1.januar(2021), 31.mars(2021)),
+                gammeltBeløp = 2000,
+                nyttBeløp = 3000,
             ),
         )
     }
@@ -255,7 +265,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = periode.fom,
                 tom = periode.tom,
-                endringIBeløp = (-1000),
+                gammelPeriode = PeriodeDto(periode.fom, periode.tom),
+                gammeltBeløp = 2000,
+                nyttBeløp = 1000,
             ),
         )
     }
@@ -299,7 +311,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = periode1.fom,
                 tom = periode1.tom,
-                endringIBeløp = 500,
+                gammelPeriode = PeriodeDto(periode1.fom, periode1.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
             ),
         )
     }
@@ -349,13 +363,17 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = eksisterendePeriode1.fom,
                 tom = eksisterendePeriode1.tom,
-                endringIBeløp = 500,
+                gammelPeriode = PeriodeDto(eksisterendePeriode1.fom, eksisterendePeriode1.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
             ),
             NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 1000),
             EndretPeriodeDto(
                 fom = eksisterendePeriode2.fom,
                 tom = eksisterendePeriode2.tom,
-                endringIBeløp = 500,
+                gammelPeriode = PeriodeDto(eksisterendePeriode2.fom, eksisterendePeriode2.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
             ),
         )
     }
@@ -405,7 +423,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = eksisterendePeriode.fom,
                 tom = eksisterendePeriode.tom,
-                endringIBeløp = 500,
+                gammelPeriode = PeriodeDto(eksisterendePeriode.fom, eksisterendePeriode.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
             ),
             NyPeriodeDto(
                 fom = nyPeriode.fom,
@@ -437,7 +457,9 @@ class KravgrunnlagSammenligningTest {
             EndretPeriodeDto(
                 fom = 1.januar(2021),
                 tom = 28.februar(2021),
-                endringIBeløp = 1000,
+                gammelPeriode = PeriodeDto(1.januar(2021), 28.februar(2021)),
+                gammeltBeløp = 2000,
+                nyttBeløp = 3000,
             ),
             NyPeriodeDto(
                 fom = nyPeriode.fom,

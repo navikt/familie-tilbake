@@ -51,9 +51,14 @@ object ForskjellEntityMapper : Entity<ForskjellEntity, UUID, UUID>(
         { it.nyPeriode?.tom },
         FieldConverter.LocalDateConverter,
     )
-    val endringIBeløp = field(
-        "endring_i_beløp",
-        ForskjellEntity::endringIBeløp,
+    val gammeltBeløp = field(
+        "gammelt_beløp",
+        ForskjellEntity::gammeltBeløp,
+        FieldConverter.BigDecimalConverter,
+    )
+    val nyttBeløp = field(
+        "nytt_beløp",
+        ForskjellEntity::nyttBeløp,
         FieldConverter.BigDecimalConverter,
     )
 
@@ -76,7 +81,8 @@ object ForskjellEntityMapper : Entity<ForskjellEntity, UUID, UUID>(
                     tom = resultSet[nyPeriodeTom]!!,
                 )
             },
-            endringIBeløp = resultSet[endringIBeløp],
+            gammeltBeløp = resultSet[gammeltBeløp],
+            nyttBeløp = resultSet[nyttBeløp],
         )
     }
 }

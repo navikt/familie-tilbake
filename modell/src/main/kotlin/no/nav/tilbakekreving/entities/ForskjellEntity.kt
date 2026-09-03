@@ -13,18 +13,21 @@ data class ForskjellEntity(
     val foreldelsesvurderingPeriodeRef: UUID?,
     val type: ForskjellType,
     val originalPeriode: DatoperiodeEntity?,
-    val endringIBeløp: BigDecimal?,
+    val gammeltBeløp: BigDecimal?,
+    val nyttBeløp: BigDecimal?,
     val nyPeriode: DatoperiodeEntity?,
 ) {
     fun fraEntity(): KravgrunnlagSammenligning.Forskjell {
         return when (type) {
             ForskjellType.NyPeriode -> KravgrunnlagSammenligning.Forskjell.NyPeriode(
                 periode = nyPeriode!!.fom til nyPeriode.tom,
-                beløp = endringIBeløp!!,
+                nyttBeløp = nyttBeløp!!,
             )
             ForskjellType.JustertBeløp -> KravgrunnlagSammenligning.Forskjell.JustertBeløp(
                 periode = originalPeriode!!.fom til originalPeriode.tom,
-                endringIBeløp = endringIBeløp!!,
+                gammeltBeløp = gammeltBeløp!!,
+                nyttBeløp = nyttBeløp!!,
+                etterfølgende = null,
             )
         }
     }

@@ -268,7 +268,12 @@ class ForeldelsestegTest {
         val periode = 1.januar(2021) til 31.januar(2021)
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
-        val forskjell = KravgrunnlagSammenligning.Forskjell.JustertBeløp(periode, 500.kroner)
+        val forskjell = KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+            periode = periode,
+            gammeltBeløp = 250.kroner,
+            nyttBeløp = 500.kroner,
+            etterfølgende = null,
+        )
 
         foreldelsesteg.perideEndretBeløp(forskjell)
 
