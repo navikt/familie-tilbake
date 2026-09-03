@@ -61,7 +61,8 @@ private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBere
         AnnenVurdering.GOD_TRO -> BeregningsresultatVurderingDto.GodTro
         NivåAvForståelse.Type.BurdeForstått, NivåAvForståelse.Type.MåForstått -> BeregningsresultatVurderingDto.BurdeForstått
         NivåAvForståelse.Type.Forstod -> BeregningsresultatVurderingDto.Forstod
-        else -> error("Har ingen mapping fra vurdering til beregningsresultat for $this")
+        AnnenVurdering.FORELDET -> BeregningsresultatVurderingDto.Foreldet
+        else -> error("Det er enten IkkeVurdert eller ukjent vurdering type for $this")
     }
 }
 
