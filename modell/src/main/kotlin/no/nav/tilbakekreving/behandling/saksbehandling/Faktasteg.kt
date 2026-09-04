@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg.FaktaPeriode.Companion.finn
+import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg.FaktaPeriode.Companion.fullstendigPeriode
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.KanUnnlates4xRettsgebyr
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
@@ -98,6 +100,7 @@ class Faktasteg(
 
     fun nyTilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering, varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto {
         val beløpTilbakekreves = kravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt()
+        val fullstendigPeriode = vurdering.perioder.fullstendigPeriode()
         return FaktaOmFeilutbetalingDto(
             perioder = vurdering.perioder.map {
                 it.tilFrontendDto(
@@ -107,8 +110,8 @@ class Faktasteg(
             },
             feilutbetaling = FeilutbetalingDto(
                 beløp = beløpTilbakekreves,
-                fom = vurdering.perioder.minOf { it.periode.fom },
-                tom = vurdering.perioder.minOf { it.periode.tom },
+                fom = fullstendigPeriode.fom,
+                tom = fullstendigPeriode.tom,
                 revurdering = revurdering.tilFrontendDto(),
             ),
             muligeRettsligGrunnlag = listOf(
@@ -147,15 +150,10 @@ class Faktasteg(
     ): FaktaFeilutbetalingDto {
         return FaktaFeilutbetalingDto(
             varsletBeløp = brevHistorikk.sisteVarselbrev()?.hentVarsletBeløp(),
-            totalFeilutbetaltPeriode = vurdering.perioder.minOf { it.periode.fom } til vurdering.perioder.maxOf { it.periode.tom },
+            totalFeilutbetaltPeriode = vurdering.perioder.fullstendigPeriode(),
             totaltFeilutbetaltBeløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
             feilutbetaltePerioder = vurdering.perioder.map {
-                FeilutbetalingsperiodeDto(
-                    periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode, eksternFagsakRevurdering),
-                    hendelsestype = it.rettsligGrunnlag,
-                    hendelsesundertype = it.rettsligGrunnlagUnderkategori,
-                )
+                it.nyTilFrontendDto(kravgrunnlag, eksternFagsakRevurdering)
             },
             revurderingsvedtaksdato = eksternFagsakRevurdering.vedtaksdato,
             begrunnelse = vurdering.årsakTilFeilutbetaling,
@@ -190,9 +188,9 @@ class Faktasteg(
         vurdering.nyPeriode(periode)
     }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
-        vurdering.finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
+        vurdering.perioder.finn(forskjell.periode).periodeEndret(forskjell)
     }
 
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
@@ -310,11 +308,7 @@ class Faktasteg(
                     rettsligGrunnlagUnderkategori = Hendelsesundertype.ANNET_FRITEKST,
                     endringIKravgrunnlag = forskjell,
                 )
-            ).sortedBy { it.periode }
-        }
-
-        internal fun finnPeriode(periode: Datoperiode): FaktaPeriode {
-            return perioder.single { it.periode == periode }
+            ).sorted()
         }
 
         sealed interface Oppdaget {
@@ -382,11 +376,11 @@ class Faktasteg(
 
     class FaktaPeriode(
         val id: UUID,
-        val periode: Datoperiode,
+        private var periode: Datoperiode,
         var rettsligGrunnlag: Hendelsestype,
         var rettsligGrunnlagUnderkategori: Hendelsesundertype,
         var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
-    ) {
+    ) : Comparable<FaktaPeriode> {
         fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
                 id = id,
@@ -419,13 +413,34 @@ class Faktasteg(
             )
         }
 
+        internal fun nyTilFrontendDto(
+            kravgrunnlag: KravgrunnlagHendelse,
+            eksternFagsakRevurdering: EksternFagsakRevurdering,
+        ) = FeilutbetalingsperiodeDto(
+            periode = periode,
+            feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode, eksternFagsakRevurdering),
+            hendelsestype = rettsligGrunnlag,
+            hendelsesundertype = rettsligGrunnlagUnderkategori,
+        )
+
         fun vurder(oppdatering: OppdaterFaktaPeriodeDto) {
             rettsligGrunnlag = enumValueOf(oppdatering.rettsligGrunnlag.single().bestemmelse)
             rettsligGrunnlagUnderkategori = enumValueOf(oppdatering.rettsligGrunnlag.single().grunnlag)
         }
 
-        fun periodeEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+        fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
             endringIKravgrunnlag = forskjell
+            if (forskjell.nyPeriode != null) {
+                periode = forskjell.nyPeriode
+            }
+        }
+
+        override fun compareTo(other: FaktaPeriode): Int = periode.compareTo(other.periode)
+
+        companion object {
+            fun Collection<FaktaPeriode>.fullstendigPeriode() = minOf { it.periode.fom } til maxOf { it.periode.tom }
+
+            fun Collection<FaktaPeriode>.finn(periode: Datoperiode) = single { it.periode == periode }
         }
     }
 

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
@@ -552,17 +553,19 @@ class VilkårsvurderingstegTest {
             kravgrunnlagHendelse = kravgrunnlag,
         )
 
-        vilkårsvurderingsteg.perideEndretBeløp(
-            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
+                nyPeriode = null,
                 gammeltBeløp = 250.kroner,
                 nyttBeløp = 500.kroner,
                 etterfølgende = null,
             ),
         )
-        vilkårsvurderingsteg.perideEndretBeløp(
-            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode2,
+                nyPeriode = null,
                 gammeltBeløp = 100.kroner,
                 nyttBeløp = 300.kroner,
                 etterfølgende = null,
@@ -591,9 +594,10 @@ class VilkårsvurderingstegTest {
             kravgrunnlagHendelse = kravgrunnlag,
         )
 
-        vilkårsvurderingsteg.perideEndretBeløp(
-            KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode,
+                nyPeriode = null,
                 gammeltBeløp = 100.kroner,
                 nyttBeløp = 500.kroner,
                 etterfølgende = null,
@@ -607,6 +611,43 @@ class VilkårsvurderingstegTest {
             gammeltBeløp = 100,
             nyttBeløp = 500,
         )
+    }
+
+    @Test
+    fun `endret periode i kravgrunnlag`() {
+        val originalPeriode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.januar(2021) til 20.januar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(originalPeriode),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = originalPeriode,
+                nyPeriode = nyPeriode,
+                gammeltBeløp = 1500.kroner,
+                nyttBeløp = 1000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().forOne {
+            it.fom shouldBe nyPeriode.fom
+            it.tom shouldBe nyPeriode.tom
+            it.endringIKravgrunnlag shouldBe EndretPeriodeDto(
+                fom = nyPeriode.fom,
+                tom = nyPeriode.tom,
+                gammelPeriode = PeriodeDto(originalPeriode.fom, originalPeriode.tom),
+                gammeltBeløp = 1500,
+                nyttBeløp = 1000,
+            )
+        }
     }
 
     @Test

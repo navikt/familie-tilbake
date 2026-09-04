@@ -3,11 +3,16 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.godkjenning
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -220,5 +225,26 @@ class FatteVedtakStegTest {
         val fatteVedtakSteg = FatteVedtakSteg.opprett()
 
         fatteVedtakSteg.erPåbegynt() shouldBe false
+    }
+
+    @Test
+    fun `endret periode i kravgrunnlag`() {
+        val fatteVedtakSteg = FatteVedtakSteg.opprett()
+
+        godkjenning().forEach { (steg, vurdering) ->
+            fatteVedtakSteg.håndter(ANSVARLIG_BESLUTTER, ANSVARLIG_SAKSBEHANDLER, steg, vurdering, Sporing("", ""))
+        }
+
+        fatteVedtakSteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = 1.januar(2021) til 31.januar(2021),
+                nyPeriode = 1.januar(2021) til 20.januar(2021),
+                gammeltBeløp = 1500.kroner,
+                nyttBeløp = 1000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        fatteVedtakSteg.trengerNyVurdering() shouldBe null
     }
 }

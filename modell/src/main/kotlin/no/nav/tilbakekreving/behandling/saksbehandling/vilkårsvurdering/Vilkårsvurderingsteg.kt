@@ -75,7 +75,7 @@ class Vilkårsvurderingsteg(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
     ) {
-        val funnetVurdering = vurderinger.single { it.vurdering !is ForårsaketAvBruker.KopiertVurdering && it.periode.overlapper(periode) }.id
+        val funnetVurdering = vurderinger.single { it.vurdering !is ForårsaketAvBruker.KopiertVurdering && it.periode().overlapper(periode) }.id
         vurder(funnetVurdering, vurdering)
     }
 
@@ -90,7 +90,7 @@ class Vilkårsvurderingsteg(
 
     private fun finnIdForPeriode(periode: Datoperiode): UUID {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
-        return vurderinger.single { it.periode == periode }.id
+        return vurderinger.single { it.periode() == periode }.id
     }
 
     private fun finnPeriode(periode: Datoperiode): Vilkårsvurderingsperiode {
@@ -102,14 +102,14 @@ class Vilkårsvurderingsteg(
         return vurderinger.single { it.id == id }
     }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
-        finnPeriode(forskjell.periode).periodeEndretBeløp(forskjell)
+        finnPeriode(forskjell.periode).periodeEndret(forskjell)
     }
 
     override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
         val forrigePeriode = vurderinger
-            .lastOrNull { it.periode < periode.periode }
+            .lastOrNull { it.periode() < periode.periode }
             ?.takeIf { it.vurdering.underliggendeVurdering() is ForårsaketAvBruker.IkkeVurdert }
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         val nåværendeVurdering = Vilkårsvurderingsperiode.opprett(
@@ -118,7 +118,7 @@ class Vilkårsvurderingsteg(
             endringIKravgrunnnlag = periode,
         )
 
-        val nestePeriode = vurderinger.firstOrNull { it.periode > periode.periode }
+        val nestePeriode = vurderinger.firstOrNull { it.periode() > periode.periode }
         when {
             nestePeriode == null -> Unit
             nestePeriode.vurdering.underliggendeVurdering() is ForårsaketAvBruker.IkkeVurdert -> {
@@ -128,7 +128,7 @@ class Vilkårsvurderingsteg(
                 nestePeriode.vurder(ForårsaketAvBruker.IkkeVurdert())
             }
         }
-        vurderinger = (vurderinger + nåværendeVurdering).sortedBy { it.periode }
+        vurderinger = (vurderinger + nåværendeVurdering).sorted()
     }
 
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
@@ -173,9 +173,9 @@ class Vilkårsvurderingsteg(
         return vurderinger
             .groupBy { it.vurdering.underliggendeVurdering() }
             .map { (_, gruppe) ->
-                val første = gruppe.minBy { it.periode.fom }
-                val siste = gruppe.maxBy { it.periode.tom }
-                val totalPeriode = første.periode.fom til siste.periode.tom
+                val første = gruppe.minBy { it.periode().fom }
+                val siste = gruppe.maxBy { it.periode().tom }
+                val totalPeriode = første.periode().fom til siste.periode().tom
                 VurdertVilkårsvurderingsperiodeDto(
                     periode = totalPeriode,
                     feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(totalPeriode, revurdering),
@@ -183,7 +183,7 @@ class Vilkårsvurderingsteg(
                     reduserteBeløper = listOf(),
                     aktiviteter = listOf(),
                     begrunnelse = første.vurdering.begrunnelse,
-                    foreldet = foreldelsesteg.erSammenslåttPeriodeForeldet(totalPeriode),
+                    foreldet = foreldelsesteg.erForeldet(totalPeriode),
                     vilkårsvurderingsresultatInfo = første.vurdering.tilFrontendDto(),
                 )
             }
@@ -194,12 +194,7 @@ class Vilkårsvurderingsteg(
     }
 
     internal fun hentVilkårsvurderingsperioder(): List<PeriodeInfoDto> {
-        return vurderinger.map {
-            PeriodeInfoDto(
-                periodeId = it.id,
-                periode = PeriodeDto(it.periode.fom, it.periode.tom),
-            )
-        }
+        return vurderinger.map { it.periodeInfo() }
     }
 
     fun kopierVurderingerForSammenslåing(sammenslaaingDto: SammenslaaingDto, sporing: Sporing) {
@@ -231,8 +226,8 @@ class Vilkårsvurderingsteg(
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
     ): List<BegrunnetPeriode> {
-        val samletPeriode = vurderinger.minOf { it.periode.fom } til vurderinger.maxOf { it.periode.tom }
-        LoggerFactory.getLogger("vilkårsvurdering").info("Tilgjengelige periode id-er {}", vurderinger.map { "${it.id}=${it.periode.fom}-${it.periode.tom}" })
+        val samletPeriode = vurderinger.minOf { it.periode().fom } til vurderinger.maxOf { it.periode().tom }
+        LoggerFactory.getLogger("vilkårsvurdering").info("Tilgjengelige periode id-er {}", vurderinger.map { "${it.id}=${it.periode().fom}-${it.periode().tom}" })
         return vurderinger.firstOrNull()?.let {
             listOf(
                 BegrunnetPeriode(
@@ -247,11 +242,11 @@ class Vilkårsvurderingsteg(
 
     class Vilkårsvurderingsperiode(
         val id: UUID,
-        val periode: Datoperiode,
+        private var periode: Datoperiode,
         val begrunnelseForTilbakekreving: String?,
         private var _vurdering: ForårsaketAvBruker,
         var endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell?,
-    ) : VilkårsvurdertPeriodeAdapter {
+    ) : VilkårsvurdertPeriodeAdapter, Comparable<Vilkårsvurderingsperiode> {
         val vurdering get() = _vurdering
 
         fun vurder(vurdering: ForårsaketAvBruker) {
@@ -288,9 +283,19 @@ class Vilkårsvurderingsteg(
             )
         }
 
-        fun periodeEndretBeløp(endretBeløp: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
-            endringIKravgrunnnlag = endretBeløp
+        fun periodeEndret(endring: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
+            endringIKravgrunnnlag = endring
+            if (endring.nyPeriode != null) {
+                periode = endring.nyPeriode
+            }
         }
+
+        override fun compareTo(other: Vilkårsvurderingsperiode): Int = periode.compareTo(other.periode)
+
+        fun periodeInfo(): PeriodeInfoDto = PeriodeInfoDto(
+            periodeId = id,
+            periode = PeriodeDto(periode.fom, periode.tom),
+        )
 
         companion object {
             fun opprett(

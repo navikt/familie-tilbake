@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.inspectors.forNone
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -544,6 +546,43 @@ class FaktaStegTest {
             it.perioder[0].tom shouldBe periode.tom
             it.perioder[1].fom shouldBe nyPeriode.fom
             it.perioder[1].tom shouldBe nyPeriode.tom
+        }
+    }
+
+    @Test
+    fun `endret periode i kravgrunnlag`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021))))
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.vurder("årsak")
+
+        val forskjell = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+            periode = 1.januar(2021) til 31.januar(2021),
+            nyPeriode = 1.januar(2021) til 20.januar(2021),
+            gammeltBeløp = 1500.kroner,
+            nyttBeløp = 1000.kroner,
+            etterfølgende = null,
+        )
+        faktasteg.periodeEndret(forskjell)
+
+        faktasteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        val frontendDto = faktasteg.tilFrontendDto(
+            kravgrunnlag,
+            revurdering,
+            Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
+            LocalDateTime.now(),
+        )
+
+        frontendDto.feilutbetaltePerioder.forOne {
+            it.periode shouldBe (1.januar(2021) til 20.januar(2021))
+        }
+        frontendDto.feilutbetaltePerioder.forNone {
+            it.periode shouldBe (1.januar(2021) til 31.januar(2021))
         }
     }
 }

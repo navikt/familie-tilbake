@@ -1,13 +1,18 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.test.februar
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -103,5 +108,28 @@ class ForhåndsvarselTest {
 
         val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
         forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+    }
+
+    @Test
+    fun `endret periode i kravgrunnlag fører til tilbakeføring`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "",
+        )
+
+        forhåndsvarsel.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = 1.januar(2021) til 31.januar(2021),
+                nyPeriode = 1.januar(2021) til 20.januar(2021),
+                gammeltBeløp = 1000.kroner,
+                nyttBeløp = 1500.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke)
+            .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            .tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
     }
 }

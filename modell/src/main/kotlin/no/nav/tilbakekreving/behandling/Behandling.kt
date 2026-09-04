@@ -226,7 +226,7 @@ class Behandling internal constructor(
             beregnRenter = true,
             tilbakekrevLavtBeløp = true,
             vilkårsvurderingsteg,
-            foreldelsesteg.perioder(),
+            foreldelsesteg.foreldetPerioder(),
             kravgrunnlag.entry,
             sporingsinformasjon(),
         )
