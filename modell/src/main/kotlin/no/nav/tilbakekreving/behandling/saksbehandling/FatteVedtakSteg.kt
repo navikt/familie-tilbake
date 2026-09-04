@@ -74,7 +74,7 @@ class FatteVedtakSteg internal constructor(
         return vurderteSteg.any { it.erVurderingUnderkjent() }
     }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {}
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {}
 
     class VurdertSteg(
         private val id: UUID,

@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
@@ -36,17 +37,6 @@ private fun sammenlign(
 private fun beløp(tilbakekrevesBeløp: BigDecimal) = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp) + feilutbetalteBeløp(ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp))
 
 class KravgrunnlagSammenligningTest {
-    @Test
-    fun `ulike perioder fører til utenfor scope exception`() {
-        shouldThrow<ModellFeil.UtenforScopeException> {
-            KravgrunnlagSammenligning(
-                originaltKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)))),
-                nyttKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 20.januar(2021)))),
-                sporing = Sporing("", ""),
-            )
-        }
-    }
-
     @Test
     fun `flere perioder fører til ny periode forskjell`() {
         val forskjeller = KravgrunnlagSammenligning(
@@ -99,7 +89,7 @@ class KravgrunnlagSammenligningTest {
                 ),
             ),
             sporing = Sporing("", ""),
-        ).resultat().shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.JustertBeløp>()
+        ).resultat().shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.EndretPeriode>()
 
         forskjell.gammeltBeløp shouldBe 1000.kroner
         forskjell.nyttBeløp shouldBe 2000.kroner
@@ -467,5 +457,39 @@ class KravgrunnlagSammenligningTest {
                 beløp = 1000,
             ),
         )
+    }
+
+    @Test
+    fun `endring av datoer i eksisterende periode`() {
+        val forskjell = KravgrunnlagSammenligning(
+            originaltKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)))),
+            nyttKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 20.januar(2021)))),
+            sporing = Sporing("", ""),
+        ).resultat().shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.EndretPeriode>()
+
+        forskjell.periode shouldBe (1.januar(2021) til 31.januar(2021))
+        forskjell.nyPeriode shouldBe (1.januar(2021) til 20.januar(2021))
+    }
+
+    @Test
+    fun `nytt kravgrunnlag slår sammen perioder`() {
+        val exception = shouldThrow<ModellFeil.UtenforScopeException> {
+            KravgrunnlagSammenligning(
+                originaltKravgrunnlag = kravgrunnlag(
+                    perioder = listOf(
+                        kravgrunnlagPeriode(periode = 1.januar(2021) til 10.januar(2021)),
+                        kravgrunnlagPeriode(periode = 20.januar(2021) til 31.januar(2021)),
+                    ),
+                ),
+                nyttKravgrunnlag = kravgrunnlag(
+                    perioder = listOf(
+                        kravgrunnlagPeriode(periode = 1.januar(2021) til 31.januar(2021)),
+                    ),
+                ),
+                sporing = Sporing("", ""),
+            )
+        }
+
+        exception.utenforScope shouldBe UtenforScope.KravgrunnlagMedSammenslåttPerioder
     }
 }

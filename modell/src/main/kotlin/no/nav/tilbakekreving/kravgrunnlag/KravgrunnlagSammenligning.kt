@@ -50,7 +50,7 @@ class KravgrunnlagSammenligning(
         val ukjentePerioder = perioderFraNyttKravgrunnlag.filter { it !in originalePerioder }
 
         val feil = when {
-            ukjentePerioder.any { ny -> originalePerioder.any { ny.overlapper(it) } } -> UtenforScope.KravgrunnlagMedUlikePerioder
+            ukjentePerioder.any { ny -> originalePerioder.count { ny.overlapper(it) } > 1 } -> UtenforScope.KravgrunnlagMedSammenslåttPerioder
             originalePerioder.size > perioderFraNyttKravgrunnlag.size -> UtenforScope.KravgrunnlagMedFærrePerioder
             !originaltKravgrunnlag.harNokOverlapp(nyttKravgrunnlag) -> UtenforScope.KravgrunnlagMedUlikeVerdier
             else -> null
@@ -60,20 +60,23 @@ class KravgrunnlagSammenligning(
         }
 
         forskjeller += nyttKravgrunnlag.perioder().map { nyPeriode ->
-            val gammelPeriode = originaltKravgrunnlag.perioder()
-                .firstOrNull { it.periode() == nyPeriode.periode() }
+            val eksisterendePeriode = originaltKravgrunnlag.perioder()
+                .firstOrNull { nyPeriode.periode().overlapper(it.periode()) }
             when {
-                gammelPeriode == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
-                nyPeriode.feilutbetaltYtelsesbeløp().toInt() == gammelPeriode.feilutbetaltYtelsesbeløp().toInt() -> Forskjell.UendretPeriode(
-                    periode = nyPeriode.periode(),
-                    gammeltBeløp = gammelPeriode.feilutbetaltYtelsesbeløp(),
-                    nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
-                )
-                else -> Forskjell.JustertBeløp(
-                    periode = nyPeriode.periode(),
-                    gammeltBeløp = gammelPeriode.feilutbetaltYtelsesbeløp(),
+                eksisterendePeriode == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
+                nyPeriode.feilutbetaltYtelsesbeløp().toInt() != eksisterendePeriode.feilutbetaltYtelsesbeløp().toInt() ||
+                    nyPeriode.periode() != eksisterendePeriode.periode() -> Forskjell.EndretPeriode(
+                    periode = eksisterendePeriode.periode(),
+                    nyPeriode = nyPeriode.periode().takeIf { it != eksisterendePeriode.periode() },
+                    gammeltBeløp = eksisterendePeriode.feilutbetaltYtelsesbeløp(),
                     nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
                     etterfølgende = null,
+                )
+
+                else -> Forskjell.UendretPeriode(
+                    periode = nyPeriode.periode(),
+                    gammeltBeløp = eksisterendePeriode.feilutbetaltYtelsesbeløp(),
+                    nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
                 )
             }
         }
@@ -95,14 +98,15 @@ class KravgrunnlagSammenligning(
 
         fun tilDto(): KravgrunnlagForskjellDto?
 
-        data class JustertBeløp(
+        data class EndretPeriode(
             override val periode: Datoperiode,
+            val nyPeriode: Datoperiode?,
             val gammeltBeløp: BigDecimal,
             override val nyttBeløp: BigDecimal,
             private val etterfølgende: UendretPeriode?,
         ) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
-                steg.perideEndretBeløp(this)
+                steg.periodeEndret(this)
             }
 
             override fun tilEntity(
@@ -117,7 +121,7 @@ class KravgrunnlagSammenligning(
                     foreldelsesvurderingPeriodeRef = foreldelsesvurderingPeriodeRef,
                     type = ForskjellType.JustertBeløp,
                     originalPeriode = DatoperiodeEntity(periode.fom, periode.tom),
-                    nyPeriode = null,
+                    nyPeriode = nyPeriode?.let { DatoperiodeEntity(it.fom, it.tom) },
                     gammeltBeløp = gammeltBeløp,
                     nyttBeløp = nyttBeløp,
                 )
@@ -125,25 +129,33 @@ class KravgrunnlagSammenligning(
 
             override fun slåSammen(other: Forskjell): Forskjell? {
                 return when (other) {
-                    is UendretPeriode -> JustertBeløp(
+                    is UendretPeriode -> EndretPeriode(
                         periode = periode,
+                        nyPeriode = nyPeriode,
                         gammeltBeløp = gammeltBeløp,
                         nyttBeløp = nyttBeløp,
                         etterfølgende = etterfølgende?.slåSammen(other) ?: other,
                     )
-                    is JustertBeløp -> JustertBeløp(
+
+                    is EndretPeriode -> EndretPeriode(
                         periode = this.periode.fom til other.periode.tom,
+                        nyPeriode = when {
+                            nyPeriode != null -> nyPeriode.fom til (other.nyPeriode?.tom ?: other.periode.tom)
+                            other.nyPeriode != null -> periode.fom til other.nyPeriode.tom
+                            else -> null
+                        },
                         gammeltBeløp = this.gammeltBeløp + other.gammeltBeløp + (etterfølgende?.gammeltBeløp ?: BigDecimal.ZERO),
                         nyttBeløp = this.nyttBeløp + other.nyttBeløp + (etterfølgende?.nyttBeløp ?: BigDecimal.ZERO),
                         etterfølgende = null,
                     )
+
                     else -> null
                 }
             }
 
             override fun tilDto(): KravgrunnlagForskjellDto = EndretPeriodeDto(
-                fom = periode.fom,
-                tom = periode.tom,
+                fom = nyPeriode?.fom ?: periode.fom,
+                tom = nyPeriode?.tom ?: periode.tom,
                 gammelPeriode = PeriodeDto(periode.fom, periode.tom),
                 gammeltBeløp = gammeltBeløp.toInt(),
                 nyttBeløp = nyttBeløp.toInt(),

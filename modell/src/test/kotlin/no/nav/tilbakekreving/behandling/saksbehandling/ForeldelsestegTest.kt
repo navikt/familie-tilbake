@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling
 
+import io.kotest.inspectors.forNone
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
@@ -82,7 +84,7 @@ class ForeldelsestegTest {
 
         foreldelsesteg.vurderForeldelse(1.januar(2021) til 28.februar(2021), Foreldelsesteg.Vurdering.IkkeForeldet(""))
 
-        foreldelsesteg.erPeriodeForeldet(1.januar(2021) til 31.januar(2021)) shouldBe false
+        foreldelsesteg.erForeldet(1.januar(2021) til 31.januar(2021)) shouldBe false
     }
 
     @Test
@@ -111,8 +113,8 @@ class ForeldelsestegTest {
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = KlokkeStub(fom.plusMonths(30)), Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
         foreldelsesteg.erFullstendig(SystemKlokke) shouldBe true
-        foreldelsesteg.erPeriodeForeldet(fom til 31.januar(2024)) shouldBe false
-        foreldelsesteg.erPeriodeForeldet(1.februar(2024) til 28.februar(2024)) shouldBe false
+        foreldelsesteg.erForeldet(fom til 31.januar(2024)) shouldBe false
+        foreldelsesteg.erForeldet(1.februar(2024) til 28.februar(2024)) shouldBe false
     }
 
     @Test
@@ -141,7 +143,7 @@ class ForeldelsestegTest {
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
-        foreldelsesteg.erPeriodeForeldet(periode) shouldBe true
+        foreldelsesteg.erForeldet(periode) shouldBe true
     }
 
     @Test
@@ -268,18 +270,46 @@ class ForeldelsestegTest {
         val periode = 1.januar(2021) til 31.januar(2021)
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
-        val forskjell = KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+        val forskjell = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
             periode = periode,
+            nyPeriode = null,
             gammeltBeløp = 250.kroner,
             nyttBeløp = 500.kroner,
             etterfølgende = null,
         )
 
-        foreldelsesteg.perideEndretBeløp(forskjell)
+        foreldelsesteg.periodeEndret(forskjell)
 
         foreldelsesteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
         val entity = foreldelsesteg.tilEntity(UUID.randomUUID())
         entity.vurdertePerioder.single { it.periode.fraEntity() == periode }
             .endringIKravgrunnlag?.fraEntity() shouldBe forskjell
+    }
+
+    @Test
+    fun `endret periode i kravgrunnlag oppdaterer foreldelsesperioden`() {
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021))))
+        val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
+        val forskjell = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+            periode = 1.januar(2021) til 31.januar(2021),
+            nyPeriode = 1.januar(2021) til 20.januar(2021),
+            gammeltBeløp = 1500.kroner,
+            nyttBeløp = 1000.kroner,
+            etterfølgende = null,
+        )
+
+        foreldelsesteg.vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet("begrunnelse"))
+        foreldelsesteg.periodeEndret(forskjell)
+
+        foreldelsesteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).should { frontendDto ->
+            frontendDto.foreldetPerioder.forSingle {
+                it.periode shouldBe (1.januar(2021) til 20.januar(2021))
+            }
+            frontendDto.foreldetPerioder.forNone {
+                it.periode shouldBe (1.januar(2021) til 31.januar(2021))
+            }
+        }
     }
 }

@@ -3,6 +3,9 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelsesperiodeDto
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg.Foreldelseperiode.Companion.erForeldet
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg.Foreldelseperiode.Companion.finnForeldetPerioder
+import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg.Foreldelseperiode.Companion.finnIdFor
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
@@ -99,7 +102,7 @@ class Foreldelsesteg(
         periode: Datoperiode,
         vurdering: Vurdering,
     ) {
-        val periodeId = finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
+        val periodeId = vurdertePerioder.finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
         vurderForeldelse(periodeId, vurdering)
         tilbakeført = null
     }
@@ -112,26 +115,19 @@ class Foreldelsesteg(
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
     }
 
-    fun erPeriodeForeldet(periode: Datoperiode): Boolean {
-        return vurdertePerioder.single { it.periode.inneholder(periode) }.vurdering.erForeldet()
-    }
-
-    fun erSammenslåttPeriodeForeldet(periode: Datoperiode): Boolean {
-        val overlappendePerioder = vurdertePerioder.filter {
-            it.periode.overlapper(periode)
-        }
-        return overlappendePerioder.all { erPeriodeForeldet(it.periode) }
+    fun erForeldet(periode: Datoperiode): Boolean {
+        return vurdertePerioder.erForeldet(periode)
     }
 
     fun hjemlerForTilbakekreving() = vurdertePerioder.flatMap { it.vurdering.hjemlerForTilbakekreving() }.distinct()
 
     fun harTilleggsfrist(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.Tilleggsfrist }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         vurdertePerioder
-            .single { finnIdFor(forskjell.periode) == it.id }
-            .periodeEndretBeløp(forskjell)
+            .single { it.id == vurdertePerioder.finnIdFor(forskjell.periode) }
+            .periodeEndret(forskjell)
     }
 
     override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
@@ -141,40 +137,17 @@ class Foreldelsesteg(
                 periode = periode.periode,
                 endringIKravgrunnlag = periode,
             )
-        ).sortedBy { it.periode }
+        ).sorted()
     }
 
-    private fun finnIdFor(periode: Datoperiode): UUID {
-        // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
-        return vurdertePerioder.single { it.periode == periode }.id
-    }
-
-    fun perioder(): List<Datoperiode> = vurdertePerioder
-        .filter { it.vurdering is Vurdering.Foreldet }
-        .map(Foreldelseperiode::periode)
+    fun foreldetPerioder(): List<Datoperiode> = vurdertePerioder.finnForeldetPerioder()
 
     fun tilFrontendDto(
         kravgrunnlag: KravgrunnlagHendelse,
         revurdering: EksternFagsakRevurdering,
     ): VurdertForeldelseDto {
         return VurdertForeldelseDto(
-            foreldetPerioder = vurdertePerioder.map {
-                VurdertForeldelsesperiodeDto(
-                    periode = it.periode,
-                    feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(it.periode, revurdering),
-                    begrunnelse = it.vurdering.begrunnelse,
-                    foreldelsesvurderingstype =
-                        when (it.vurdering) {
-                            is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
-                            is Vurdering.AutomatiskIkkeForeldet -> Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET
-                            is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
-                            is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
-                            is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
-                        },
-                    foreldelsesfrist = it.vurdering.frist,
-                    oppdagelsesdato = (it.vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
-                )
-            },
+            foreldetPerioder = vurdertePerioder.map { it.tilFrontendDto(kravgrunnlag, revurdering) },
         )
     }
 
@@ -189,10 +162,10 @@ class Foreldelsesteg(
 
     class Foreldelseperiode internal constructor(
         val id: UUID,
-        val periode: Datoperiode,
+        private var periode: Datoperiode,
         private var _vurdering: Vurdering,
         var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
-    ) {
+    ) : Comparable<Foreldelseperiode> {
         val vurdering get() = _vurdering
 
         fun vurderForeldelse(vurdering: Vurdering) {
@@ -213,9 +186,30 @@ class Foreldelsesteg(
             )
         }
 
-        fun periodeEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+        fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
             endringIKravgrunnlag = forskjell
+            if (forskjell.nyPeriode != null) {
+                periode = forskjell.nyPeriode
+            }
         }
+
+        override fun compareTo(other: Foreldelseperiode): Int = periode.compareTo(other.periode)
+
+        fun tilFrontendDto(kravgrunnlag: KravgrunnlagHendelse, revurdering: EksternFagsakRevurdering) = VurdertForeldelsesperiodeDto(
+            periode = periode,
+            feilutbetaltBeløp = kravgrunnlag.totaltBeløpFor(periode, revurdering),
+            begrunnelse = vurdering.begrunnelse,
+            foreldelsesvurderingstype =
+                when (vurdering) {
+                    is Vurdering.IkkeForeldet -> Foreldelsesvurderingstype.IKKE_FORELDET
+                    is Vurdering.AutomatiskIkkeForeldet -> Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET
+                    is Vurdering.Foreldet -> Foreldelsesvurderingstype.FORELDET
+                    is Vurdering.IkkeVurdert -> Foreldelsesvurderingstype.IKKE_VURDERT
+                    is Vurdering.Tilleggsfrist -> Foreldelsesvurderingstype.TILLEGGSFRIST
+                },
+            foreldelsesfrist = vurdering.frist,
+            oppdagelsesdato = (vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
+        )
 
         companion object {
             fun opprett(
@@ -228,6 +222,12 @@ class Foreldelsesteg(
                     _vurdering = Vurdering.IkkeVurdert,
                     endringIKravgrunnlag = endringIKravgrunnlag,
                 )
+
+            fun List<Foreldelseperiode>.erForeldet(periode: Datoperiode) = filter { it.periode overlapper periode }.all { it.vurdering is Vurdering.Foreldet }
+
+            fun List<Foreldelseperiode>.finnIdFor(periode: Datoperiode) = single { it.periode overlapper periode }.id
+
+            fun List<Foreldelseperiode>.finnForeldetPerioder() = filter { it.vurdering is Vurdering.Foreldet }.map(Foreldelseperiode::periode)
         }
     }
 

@@ -133,11 +133,9 @@ class Forhåndsvarsel(
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
     }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
-        when {
-            forskjell.gammeltBeløp.toInt() < forskjell.nyttBeløp.toInt() -> {
-                forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
-            }
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
+        if (forskjell.gammeltBeløp.toInt() < forskjell.nyttBeløp.toInt()) {
+            forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
         }
     }
 

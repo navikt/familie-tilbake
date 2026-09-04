@@ -42,7 +42,7 @@ class ForeslåVedtakSteg(
         )
     }
 
-    override fun perideEndretBeløp(forskjell: KravgrunnlagSammenligning.Forskjell.JustertBeløp) {
+    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 

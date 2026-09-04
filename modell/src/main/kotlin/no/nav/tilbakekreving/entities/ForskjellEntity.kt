@@ -23,8 +23,9 @@ data class ForskjellEntity(
                 periode = nyPeriode!!.fom til nyPeriode.tom,
                 nyttBeløp = nyttBeløp!!,
             )
-            ForskjellType.JustertBeløp -> KravgrunnlagSammenligning.Forskjell.JustertBeløp(
+            ForskjellType.JustertBeløp -> KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = originalPeriode!!.fom til originalPeriode.tom,
+                nyPeriode = nyPeriode?.let { it.fom til it.tom },
                 gammeltBeløp = gammeltBeløp!!,
                 nyttBeløp = nyttBeløp!!,
                 etterfølgende = null,
