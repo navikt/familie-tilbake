@@ -1,20 +1,20 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
+import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.integration.økonomi.OppdragClient
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper.tilDetaljertKravgrunnlagDto
-import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
-import no.nav.tilbakekreving.Toggle
-import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.HentKravgrunnlagDetaljDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
@@ -24,32 +24,63 @@ import java.util.UUID
 @Service
 class HentKravgrunnlagService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val oppdragClient: OppdragClient,
     private val historikkService: HistorikkService,
-    private val featureService: FeatureService,
     private val oppdragRestClient: OppdragRestClient,
 ) {
     private val log = TracedLogger.getLogger<HentKravgrunnlagService>()
 
     fun hentKravgrunnlagFraØkonomi(
         kravgrunnlagId: BigInteger,
-        kodeAksjon: KodeAksjon,
+        kodeAksjon: KodeAksjonDto,
         logContext: SecureLog.Context,
     ): DetaljertKravgrunnlagDto {
         log.medContext(logContext) {
             info(
-                "Henter kravgrunnlag for kravgrunnlagId={} for kodeAksjon={}, rest={}",
+                "Henter kravgrunnlag for kravgrunnlagId={} for kodeAksjon={}, rest=true",
                 kravgrunnlagId,
                 kodeAksjon,
-                featureService.modellFeatures[Toggle.OppdragRestClient],
             )
         }
-        return if (featureService.modellFeatures[Toggle.OppdragRestClient]) {
-            oppdragRestClient.hentKravgrunnlag(kravgrunnlagId, kodeAksjon.kode).kravgrunnlag.tilDetaljertKravgrunnlagDto()
-        } else {
-            oppdragClient.hentKravgrunnlag(kravgrunnlagId, lagRequest(kravgrunnlagId, kodeAksjon), logContext)
+        val response = oppdragRestClient.hentKravgrunnlag(kravgrunnlagId, kodeAksjon)
+        validerHentKravgrunnlagRespons(response, kravgrunnlagId, logContext)
+        return response.kravgrunnlag.tilDetaljertKravgrunnlagDto()
+    }
+
+    private fun validerHentKravgrunnlagRespons(
+        response: HentKravgrunnlagDetaljerResponseDto,
+        kravgrunnlagId: BigInteger,
+        logContext: SecureLog.Context,
+    ) {
+        if (!OppdragRestClient.erResponseOk(response.status) || erKravgrunnlagIkkeFinnes(response)) {
+            SecureLog.medContext(logContext) {
+                warn("Mottok ugyldig kravgrunnlag. Mangler feltet `detaljertKravgrunnlag`. {}. {}", keyValue("kravgrunnlagId", kravgrunnlagId), objectMapper.writeValueAsString(response))
+            }
+            log.medContext(logContext) {
+                error(
+                    "Fikk feil respons:${response.status} fra økonomi ved henting av kravgrunnlag " +
+                        "for kravgrunnlagId=$kravgrunnlagId.",
+                )
+            }
+            throw IntegrasjonException(
+                msg =
+                    "Fikk feil respons:${response.status} fra økonomi " +
+                        "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.",
+                logContext = logContext,
+            )
+        } else if (erKravgrunnlagSperret(response)) {
+            log.medContext(logContext) {
+                warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
+            }
+            throw SperretKravgrunnlagFeil(
+                melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret",
+                logContext = logContext,
+            )
         }
     }
+
+    private fun erKravgrunnlagSperret(response: HentKravgrunnlagDetaljerResponseDto): Boolean = KODE_MELDING_SPERRET_KRAVGRUNNLAG == response.melding
+
+    private fun erKravgrunnlagIkkeFinnes(response: HentKravgrunnlagDetaljerResponseDto): Boolean = KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES == response.melding
 
     fun hentTilbakekrevingskravgrunnlag(behandlingId: UUID): Kravgrunnlag431 = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandlingId)
 
@@ -92,19 +123,8 @@ class HentKravgrunnlagService(
         )
     }
 
-    private fun lagRequest(
-        kravgrunnlagId: BigInteger,
-        kodeAksjon: KodeAksjon,
-    ): KravgrunnlagHentDetaljRequest {
-        val hentkravgrunnlag = HentKravgrunnlagDetaljDto()
-        hentkravgrunnlag.kravgrunnlagId = kravgrunnlagId
-        hentkravgrunnlag.kodeAksjon = kodeAksjon.kode
-        hentkravgrunnlag.enhetAnsvarlig = "8020" // fast verdi
-        hentkravgrunnlag.saksbehId = "K231B433" // fast verdi
-
-        val request = KravgrunnlagHentDetaljRequest()
-        request.hentkravgrunnlag = hentkravgrunnlag
-
-        return request
+    companion object {
+        const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
+        const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
     }
 }

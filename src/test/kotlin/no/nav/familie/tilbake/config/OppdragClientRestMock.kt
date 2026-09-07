@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPeriodeDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPosteringDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnulerResponseDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
@@ -29,9 +30,11 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class OppdragClientRestMock : OppdragRestClient {
     private val iverksettelseRequests = ConcurrentLinkedQueue<TilbakekrevingsvedtakRequestDto>()
 
+    private val mockIverksettelseSvar = mutableMapOf<BigInteger, TilbakekrevingsvedtakResponseDto>()
+
     override fun iverksettVedtak(request: TilbakekrevingsvedtakRequestDto): TilbakekrevingsvedtakResponseDto {
         iverksettelseRequests.add(request)
-        return TilbakekrevingsvedtakResponseDto(
+        return mockIverksettelseSvar.remove(request.vedtakId) ?: TilbakekrevingsvedtakResponseDto(
             status = 0,
             melding = "OK",
             vedtakId = request.vedtakId,
@@ -39,7 +42,7 @@ class OppdragClientRestMock : OppdragRestClient {
         )
     }
 
-    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): HentKravgrunnlagDetaljerResponseDto {
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: KodeAksjonDto): HentKravgrunnlagDetaljerResponseDto {
         return HentKravgrunnlagDetaljerResponseDto(
             status = 0,
             melding = "OK",
@@ -113,5 +116,14 @@ class OppdragClientRestMock : OppdragRestClient {
     ) {
         iverksettelseRequests.forOne { it.vedtakId shouldBe vedtakId }
         callback(iverksettelseRequests.single { it.vedtakId == vedtakId })
+    }
+
+    internal fun mockIversettelse(vedtakId: BigInteger, alvorlighetsgrad: String, kodeMelding: String) {
+        mockIverksettelseSvar[vedtakId] = TilbakekrevingsvedtakResponseDto(
+            status = alvorlighetsgrad.toInt(),
+            melding = kodeMelding,
+            vedtakId = vedtakId,
+            datoVedtakFagsystem = LocalDate.now(),
+        )
     }
 }

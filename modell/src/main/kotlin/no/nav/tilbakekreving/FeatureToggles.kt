@@ -23,7 +23,6 @@ enum class Toggle(val default: Boolean) {
     EregServices(default = false),
     EntraProxy(default = true),
     FjernUttalelsesfrist(default = false),
-    OppdragRestClient(default = false),
     ForhandsvarselTypst(default = false),
     EndretKravgrunnlagVisning(default = false),
 }

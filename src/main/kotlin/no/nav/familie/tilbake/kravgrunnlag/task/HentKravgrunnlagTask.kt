@@ -8,9 +8,9 @@ import no.nav.familie.tilbake.behandling.steg.StegService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
-import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -47,12 +47,11 @@ class HentKravgrunnlagTask(
         val originalBehandlingId = requireNotNull(behandling.sisteÅrsak?.originalBehandlingId)
 
         val tilbakekrevingsgrunnlag = hentKravgrunnlagService.hentTilbakekrevingskravgrunnlag(originalBehandlingId)
-        val hentetKravgrunnlag =
-            hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
-                tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
-                KodeAksjon.HENT_GRUNNLAG_OMGJØRING,
-                logContext,
-            )
+        val hentetKravgrunnlag = hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
+            tilbakekrevingsgrunnlag.eksternKravgrunnlagId,
+            KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_OMGJORING_AV_TILBAKEKREVINGSVEDTAK,
+            logContext,
+        )
         hentKravgrunnlagService.lagreHentetKravgrunnlag(behandlingId, hentetKravgrunnlag, logContext)
 
         hentKravgrunnlagService.opprettHistorikkinnslag(behandlingId, logContext)

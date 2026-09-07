@@ -7,6 +7,7 @@ import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnulerResponseDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
@@ -18,7 +19,7 @@ interface OppdragRestClient {
 
     fun hentKravgrunnlag(
         kravgrunnlagId: BigInteger,
-        kodeAksjon: String,
+        kodeAksjon: KodeAksjonDto,
     ): HentKravgrunnlagDetaljerResponseDto
 
     fun annullerKravgrunnlag(vedtakId: BigInteger): KravgrunnlagAnnulerResponseDto
@@ -46,5 +47,7 @@ interface OppdragRestClient {
             val baseUrl: String,
             val scope: String,
         )
+
+        fun erResponseOk(status: Int): Boolean = status in setOf(0, 4)
     }
 }

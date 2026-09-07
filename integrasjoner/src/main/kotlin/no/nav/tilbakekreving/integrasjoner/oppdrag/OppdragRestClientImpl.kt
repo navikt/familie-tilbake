@@ -57,7 +57,7 @@ internal class OppdragRestClientImpl(
         }
     }
 
-    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: String): HentKravgrunnlagDetaljerResponseDto {
+    override fun hentKravgrunnlag(kravgrunnlagId: BigInteger, kodeAksjon: KodeAksjonDto): HentKravgrunnlagDetaljerResponseDto {
         return runBlocking {
             val token = tokenExchangeService.clientCredentialsToken(config.scope)
             httpClient.post(

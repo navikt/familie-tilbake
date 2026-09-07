@@ -36,11 +36,11 @@ internal class IntegrasjonerClientTest {
     @BeforeEach
     fun setUp() {
         wireMockServer.start()
-        integrasjonerClient =
-            IntegrasjonerClient(
-                restOperations,
-                IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"),
-            )
+        wireMockServer.resetAll()
+        integrasjonerClient = IntegrasjonerClient(
+            restOperations,
+            IntegrasjonerConfig(URI.create(wireMockServer.baseUrl()), "tilbake"),
+        )
     }
 
     @AfterEach

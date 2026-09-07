@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.vedtak
 
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -30,17 +29,6 @@ data class IverksattVedtak(
         val rentebeløp: BigDecimal,
     ) {
         companion object {
-            fun fra(request: TilbakekrevingsvedtakRequest) = request.tilbakekrevingsvedtak.tilbakekrevingsperiode.map { periode ->
-                IverksattPeriode(
-                    id = UUID.randomUUID(),
-                    fom = periode.periode.fom,
-                    tom = periode.periode.tom,
-                    beløpTilbakekreves = periode.tilbakekrevingsbelop.sumOf { it.belopTilbakekreves },
-                    skattebeløp = periode.tilbakekrevingsbelop.sumOf { it.belopSkatt },
-                    rentebeløp = periode.belopRenter,
-                )
-            }
-
             fun fra(request: TilbakekrevingsvedtakRequestDto): List<IverksattPeriode> = request.perioder.map { periode ->
                 IverksattPeriode(
                     id = UUID.randomUUID(),

@@ -1,15 +1,11 @@
 package no.nav.familie.tilbake
 
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
-import com.github.tomakehurst.wiremock.WireMockServer
 import no.nav.familie.tilbake.database.DbContainerInitializer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers.E2E_TILGANG_GRUPPE
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,7 +16,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 
 @ExtendWith(SpringExtension::class)
@@ -29,9 +24,6 @@ import java.math.BigInteger
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
-    private val listAppender = initLoggingEventListAppender()
-    protected var loggingEvents: MutableList<ILoggingEvent> = listAppender.list
-
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
 
@@ -43,13 +35,6 @@ abstract class OppslagSpringRunnerTest {
 
     @LocalServerPort
     private var port: Int? = 0
-
-    @AfterEach
-    @Transactional
-    fun reset() {
-        loggingEvents.clear()
-        resetWiremockServers()
-    }
 
     fun authorizationHeaders(
         ident: String = SAKSBEHANDLER_IDENT,
@@ -80,19 +65,9 @@ abstract class OppslagSpringRunnerTest {
         .replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>$fagsystemId</urn:fagsystemId>")
         .replace("<urn:kravgrunnlagId>0</urn:kravgrunnlagId>", "<urn:kravgrunnlagId>${BigInteger(kravgrunnlagId)}</urn:kravgrunnlagId>")
 
-    private fun resetWiremockServers() {
-        applicationContext.getBeansOfType(WireMockServer::class.java).values.forEach(WireMockServer::resetRequests)
-    }
-
     protected fun getPort(): String = port.toString()
 
     companion object {
         private const val LOCALHOST = "http://localhost:"
-
-        protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {
-            val listAppender = ListAppender<ILoggingEvent>()
-            listAppender.start()
-            return listAppender
-        }
     }
 }

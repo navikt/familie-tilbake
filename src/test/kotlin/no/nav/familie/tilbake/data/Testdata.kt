@@ -26,7 +26,6 @@ import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
 import no.nav.familie.tilbake.foreldelse.domain.Foreldelsesperiode
 import no.nav.familie.tilbake.foreldelse.domain.VurdertForeldelse
-import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
 import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -402,13 +401,6 @@ object Testdata {
             periode = Månedsperiode(LocalDate.now(), LocalDate.now()),
             fritekst = "testverdi",
             fritekststype = Friteksttype.FAKTA,
-        )
-
-    fun lagØkonomiXmlSendt(behandlingId: UUID) =
-        ØkonomiXmlSendt(
-            behandlingId = behandlingId,
-            melding = "testverdi",
-            kvittering = "testverdi",
         )
 
     fun lagBrevsporing(behandlingId: UUID) =

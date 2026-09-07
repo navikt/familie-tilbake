@@ -1,40 +1,14 @@
 package no.nav.familie.tilbake.integration.økonomi
 
 import AbstractPingableRestClient
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
-import no.nav.familie.tilbake.common.exceptionhandler.KravgrunnlagIkkeFunnetFeil
-import no.nav.familie.tilbake.common.exceptionhandler.SperretKravgrunnlagFeil
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.getDataOrThrow
-import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetalingerFraSimulering
 import no.nav.familie.tilbake.kontrakter.simulering.FeilutbetaltPeriode
 import no.nav.familie.tilbake.kontrakter.simulering.HentFeilutbetalingerFraSimuleringRequest
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagMapper
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
-import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
-import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
-import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
-import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerRequest
-import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagAnnulerResponse
-import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
-import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
-import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
-import no.nav.tilbakekreving.typer.v1.MmelDto
-import no.nav.tilbakekreving.typer.v1.PeriodeDto
-import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
-import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -42,33 +16,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.net.URI
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 interface OppdragClient {
-    fun iverksettVedtak(
-        behandlingId: UUID,
-        tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
-        logContext: SecureLog.Context,
-    ): TilbakekrevingsvedtakResponse
-
-    fun hentKravgrunnlag(
-        kravgrunnlagId: BigInteger,
-        hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
-        logContext: SecureLog.Context,
-    ): DetaljertKravgrunnlagDto
-
-    fun annulerKravgrunnlag(
-        eksternKravgrunnlagId: BigInteger,
-        kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
-        logContext: SecureLog.Context,
-    )
-
     fun hentFeilutbetalingerFraSimulering(
         request: HentFeilutbetalingerFraSimuleringRequest,
         logContext: SecureLog.Context,
@@ -84,165 +35,12 @@ class DefaultOppdragClient(
     OppdragClient {
     private val logger = TracedLogger.getLogger<DefaultOppdragClient>()
 
-    private fun iverksettelseUri(behandlingId: UUID): URI =
-        UriComponentsBuilder
-            .fromUri(familieOppdragUrl)
-            .pathSegment(IVERKSETTELSE_PATH, behandlingId.toString())
-            .build()
-            .toUri()
-
-    private fun hentKravgrunnlagUri(kravgrunnlagId: BigInteger): URI =
-        UriComponentsBuilder
-            .fromUri(familieOppdragUrl)
-            .pathSegment(HENT_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString())
-            .build()
-            .toUri()
-
-    private fun annulerKravgrunnlagUri(kravgrunnlagId: BigInteger): URI =
-        UriComponentsBuilder
-            .fromUri(familieOppdragUrl)
-            .pathSegment(ANNULER_KRAVGRUNNLAG_PATH, kravgrunnlagId.toString())
-            .build()
-            .toUri()
-
     private val hentFeilutbetalingerFraSimuleringUri: URI =
         UriComponentsBuilder
             .fromUri(familieOppdragUrl)
             .pathSegment(HENT_FEILUTBETALINGER_PATH)
             .build()
             .toUri()
-
-    override fun iverksettVedtak(
-        behandlingId: UUID,
-        tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
-        logContext: SecureLog.Context,
-    ): TilbakekrevingsvedtakResponse {
-        logger.medContext(logContext) {
-            info("Sender tilbakekrevingsvedtak til økonomi for behandling $behandlingId")
-        }
-        try {
-            val respons =
-                postForEntity<Ressurs<TilbakekrevingsvedtakResponse>>(
-                    uri = iverksettelseUri(behandlingId),
-                    payload = tilbakekrevingsvedtakRequest,
-                ).getDataOrThrow()
-            if (!erResponsOk(respons.mmel)) {
-                logger.medContext(logContext) {
-                    error(
-                        "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
-                            "Mottatt respons:${lagRespons(respons.mmel)}",
-                    )
-                }
-                throw IntegrasjonException(
-                    msg =
-                        "Fikk feil respons fra økonomi ved iverksetting av behandling=$behandlingId." +
-                            "Mottatt respons:${lagRespons(respons.mmel)}",
-                    logContext = logContext,
-                )
-            }
-            logger.medContext(logContext) {
-                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi ved iverksetting av behandling=$behandlingId.")
-            }
-            return respons
-        } catch (exception: Exception) {
-            logger.medContext(logContext) {
-                error(
-                    "tilbakekrevingsvedtak kan ikke sende til økonomi for behandling=$behandlingId. " +
-                        "Feiler med ${exception.message}.",
-                )
-            }
-            throw IntegrasjonException(
-                msg = "Noe gikk galt ved iverksetting av behandling=$behandlingId",
-                throwable = exception,
-                logContext = logContext,
-            )
-        }
-    }
-
-    override fun hentKravgrunnlag(
-        kravgrunnlagId: BigInteger,
-        hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
-        logContext: SecureLog.Context,
-    ): DetaljertKravgrunnlagDto {
-        logger.medContext(logContext) {
-            info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
-        }
-        try {
-            val respons =
-                postForEntity<Ressurs<KravgrunnlagHentDetaljResponse>>(
-                    uri = hentKravgrunnlagUri(kravgrunnlagId),
-                    payload = hentKravgrunnlagRequest,
-                ).getDataOrThrow()
-            validerHentKravgrunnlagRespons(respons, kravgrunnlagId, logContext)
-            logger.medContext(logContext) {
-                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
-            }
-            return respons.detaljertkravgrunnlag
-        } catch (exception: Exception) {
-            logger.medContext(logContext) {
-                error(
-                    "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$kravgrunnlagId. " +
-                        "Feiler med ${exception.message}",
-                )
-            }
-            if (exception.message?.contains("Kravgrunnlag ikke funnet") == true) {
-                throw KravgrunnlagIkkeFunnetFeil(exception.message!!, logContext)
-            }
-            throw IntegrasjonException(
-                msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId",
-                throwable = exception,
-                logContext = logContext,
-            )
-        }
-    }
-
-    override fun annulerKravgrunnlag(
-        eksternKravgrunnlagId: BigInteger,
-        kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
-        logContext: SecureLog.Context,
-    ) {
-        logger.medContext(logContext) {
-            info("Annulerer kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId")
-        }
-        try {
-            val respons =
-                postForEntity<Ressurs<KravgrunnlagAnnulerResponse>>(
-                    uri = annulerKravgrunnlagUri(eksternKravgrunnlagId),
-                    payload = kravgrunnlagAnnulerRequest,
-                ).getDataOrThrow()
-            if (!erResponsOk(respons.mmel)) {
-                logger.medContext(logContext) {
-                    error(
-                        "Fikk feil respons fra økonomi ved annulering " +
-                            "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
-                            "Mottatt respons:${lagRespons(respons.mmel)}",
-                    )
-                }
-                throw IntegrasjonException(
-                    msg =
-                        "Fikk feil respons fra økonomi ved annulering " +
-                            "av kravgrunnlag med eksternKravgrunnlagId=$eksternKravgrunnlagId." +
-                            "Mottatt respons:${lagRespons(respons.mmel)}",
-                    logContext = logContext,
-                )
-            }
-            logger.medContext(logContext) {
-                info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$eksternKravgrunnlagId.")
-            }
-        } catch (exception: Exception) {
-            logger.medContext(logContext) {
-                error(
-                    "Kravgrunnlag kan ikke hentes fra økonomi for eksternKravgrunnlagId=$eksternKravgrunnlagId. " +
-                        "Feiler med ${exception.message}",
-                )
-            }
-            throw IntegrasjonException(
-                msg = "Noe gikk galt ved henting av kravgrunnlag for kravgrunnlagId=$eksternKravgrunnlagId",
-                throwable = exception,
-                logContext = logContext,
-            )
-        }
-    }
 
     override fun hentFeilutbetalingerFraSimulering(
         request: HentFeilutbetalingerFraSimuleringRequest,
@@ -275,105 +73,14 @@ class DefaultOppdragClient(
         }
     }
 
-    private fun validerHentKravgrunnlagRespons(
-        response: KravgrunnlagHentDetaljResponse,
-        kravgrunnlagId: BigInteger,
-        logContext: SecureLog.Context,
-    ) {
-        val mmelDto = response.mmel
-        if (!erResponsOk(mmelDto) || erKravgrunnlagIkkeFinnes(mmelDto) || response.detaljertkravgrunnlag == null) {
-            SecureLog.medContext(logContext) {
-                warn("Mottok ugyldig kravgrunnlag. Mangler feltet `detaljertKravgrunnlag`. {}. {}", keyValue("kravgrunnlagId", kravgrunnlagId), objectMapper.writeValueAsString(response))
-            }
-            logger.medContext(logContext) {
-                error(
-                    "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi ved henting av kravgrunnlag " +
-                        "for kravgrunnlagId=$kravgrunnlagId.",
-                )
-            }
-            throw IntegrasjonException(
-                msg =
-                    "Fikk feil respons:${lagRespons(mmelDto)} fra økonomi " +
-                        "ved henting av kravgrunnlag for kravgrunnlagId=$kravgrunnlagId.",
-                logContext = logContext,
-            )
-        } else if (erKravgrunnlagSperret(mmelDto)) {
-            logger.medContext(logContext) {
-                warn("Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret")
-            }
-            throw SperretKravgrunnlagFeil(
-                melding = "Hentet kravgrunnlag for kravgrunnlagId=$kravgrunnlagId er sperret",
-                logContext = logContext,
-            )
-        }
-    }
-
-    private fun erResponsOk(mmelDto: MmelDto): Boolean = mmelDto.alvorlighetsgrad in setOf("00", "04")
-
-    private fun erKravgrunnlagSperret(mmelDto: MmelDto): Boolean = KODE_MELDING_SPERRET_KRAVGRUNNLAG == mmelDto.kodeMelding
-
-    private fun erKravgrunnlagIkkeFinnes(mmelDto: MmelDto): Boolean = KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES == mmelDto.kodeMelding
-
-    private fun lagRespons(mmelDto: MmelDto): String = objectMapper.writeValueAsString(mmelDto)
-
     companion object {
-        const val KODE_MELDING_SPERRET_KRAVGRUNNLAG = "B420012I"
-        const val KODE_MELDING_KRAVGRUNNLAG_IKKE_FINNES = "B420010I"
-
-        const val IVERKSETTELSE_PATH = "api/tilbakekreving/iverksett"
-        const val HENT_KRAVGRUNNLAG_PATH = "api/tilbakekreving/kravgrunnlag"
-        const val ANNULER_KRAVGRUNNLAG_PATH = "api/tilbakekreving/annuler/kravgrunnlag"
         const val HENT_FEILUTBETALINGER_PATH = "api/simulering/feilutbetalinger"
-        const val PING_PATH = "internal/status/alive"
     }
 }
 
 @Service
 @Profile("e2e", "mock-økonomi")
-class MockOppdragClient(
-    private val kravgrunnlagRepository: KravgrunnlagRepository,
-    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
-) : OppdragClient {
-    override fun iverksettVedtak(
-        behandlingId: UUID,
-        tilbakekrevingsvedtakRequest: TilbakekrevingsvedtakRequest,
-        logContext: SecureLog.Context,
-    ): TilbakekrevingsvedtakResponse {
-        logger.medContext(logContext) {
-            info("Sender mock iverksettelse respons i e2e-profil")
-        }
-        val mmelDto = MmelDto()
-        mmelDto.alvorlighetsgrad = "00"
-        val response = TilbakekrevingsvedtakResponse()
-        response.mmel = mmelDto
-        return response
-    }
-
-    override fun hentKravgrunnlag(
-        kravgrunnlagId: BigInteger,
-        hentKravgrunnlagRequest: KravgrunnlagHentDetaljRequest,
-        logContext: SecureLog.Context,
-    ): DetaljertKravgrunnlagDto {
-        logger.medContext(logContext) {
-            info("Henter kravgrunnlag fra økonomi for kravgrunnlagId=$kravgrunnlagId")
-        }
-        val respons = lagKravgrunnlagRespons(hentKravgrunnlagRequest)
-        logger.medContext(logContext) {
-            info("Mottatt respons: ${lagRespons(respons.mmel)} fra økonomi til kravgrunnlagId=$kravgrunnlagId.")
-        }
-        return respons.detaljertkravgrunnlag
-    }
-
-    override fun annulerKravgrunnlag(
-        eksternKravgrunnlagId: BigInteger,
-        kravgrunnlagAnnulerRequest: KravgrunnlagAnnulerRequest,
-        logContext: SecureLog.Context,
-    ) {
-        logger.medContext(logContext) {
-            info("Kaller mock annulering request i e2e-profil")
-        }
-    }
-
+class MockOppdragClient : OppdragClient {
     override fun hentFeilutbetalingerFraSimulering(
         request: HentFeilutbetalingerFraSimuleringRequest,
         logContext: SecureLog.Context,
@@ -393,93 +100,6 @@ class MockOppdragClient(
                 nyttBeløp = BigDecimal("10000"),
             )
         return FeilutbetalingerFraSimulering(feilutbetaltePerioder = listOf(feilutbetaltPeriode))
-    }
-
-    fun lagKravgrunnlagRespons(request: KravgrunnlagHentDetaljRequest): KravgrunnlagHentDetaljResponse {
-        val hentKravgrunnlagRequest = request.hentkravgrunnlag
-        val eksisterendeKravgrunnlag =
-            kravgrunnlagRepository
-                .findByEksternKravgrunnlagIdAndAktivIsTrue(
-                    hentKravgrunnlagRequest
-                        .kravgrunnlagId,
-                )
-                ?: hentMottattKravgrunnlag(hentKravgrunnlagRequest.kravgrunnlagId)
-
-        val respons = KravgrunnlagHentDetaljResponse()
-        respons.mmel = lagMmelDto()
-
-        respons.detaljertkravgrunnlag =
-            DetaljertKravgrunnlagDto().apply {
-                kravgrunnlagId = hentKravgrunnlagRequest.kravgrunnlagId
-                enhetAnsvarlig = hentKravgrunnlagRequest.enhetAnsvarlig
-                enhetBehandl = hentKravgrunnlagRequest.enhetAnsvarlig
-                enhetBosted = hentKravgrunnlagRequest.enhetAnsvarlig
-                saksbehId = hentKravgrunnlagRequest.saksbehId
-                kodeFagomraade = Fagområdekode.BA.name
-                vedtakId = eksisterendeKravgrunnlag?.vedtakId ?: BigInteger.ZERO
-                kodeStatusKrav = Kravstatuskode.NYTT.kode
-                fagsystemId = eksisterendeKravgrunnlag?.fagsystemId ?: "0"
-                datoVedtakFagsystem = eksisterendeKravgrunnlag?.fagsystemVedtaksdato ?: LocalDate.now()
-                vedtakIdOmgjort = eksisterendeKravgrunnlag?.omgjortVedtakId ?: BigInteger.ZERO
-                vedtakGjelderId = eksisterendeKravgrunnlag?.gjelderVedtakId ?: "1234"
-                typeGjelderId = TypeGjelderDto.PERSON
-                utbetalesTilId = eksisterendeKravgrunnlag?.utbetalesTilId ?: "1234"
-                typeUtbetId = TypeGjelderDto.PERSON
-                kontrollfelt = eksisterendeKravgrunnlag?.kontrollfelt ?: LocalDateTime
-                    .now()
-                    .format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS"))
-                referanse = eksisterendeKravgrunnlag?.referanse ?: "0"
-                tilbakekrevingsPeriode.addAll(mapPeriode(eksisterendeKravgrunnlag?.perioder!!))
-            }
-        return respons
-    }
-
-    private fun lagMmelDto(): MmelDto {
-        val mmelDto = MmelDto()
-        mmelDto.alvorlighetsgrad = "00"
-        mmelDto.kodeMelding = "OK"
-        return mmelDto
-    }
-
-    private fun mapPeriode(perioder: Set<Kravgrunnlagsperiode432>): List<DetaljertKravgrunnlagPeriodeDto> =
-        perioder.map {
-            DetaljertKravgrunnlagPeriodeDto().apply {
-                periode =
-                    PeriodeDto().apply {
-                        fom = it.periode.fomDato
-                        tom = it.periode.tomDato
-                    }
-                belopSkattMnd = it.månedligSkattebeløp
-                tilbakekrevingsBelop.addAll(mapBeløp(it.beløp))
-            }
-        }
-
-    private fun mapBeløp(beløper: Set<Kravgrunnlagsbeløp433>): List<DetaljertKravgrunnlagBelopDto> =
-        beløper.map {
-            DetaljertKravgrunnlagBelopDto().apply {
-                kodeKlasse = it.klassekode.name
-                typeKlasse = TypeKlasseDto.fromValue(it.klassetype.name)
-                belopNy = it.nyttBeløp
-                belopOpprUtbet = it.opprinneligUtbetalingsbeløp
-                belopUinnkrevd = it.uinnkrevdBeløp
-                belopTilbakekreves = it.tilbakekrevesBeløp
-                skattProsent = it.skatteprosent
-            }
-        }
-
-    private fun lagRespons(mmelDto: MmelDto): String = objectMapper.writeValueAsString(mmelDto)
-
-    private fun hentMottattKravgrunnlag(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431? {
-        val mottattXml =
-            økonomiXmlMottattRepository
-                .findByEksternKravgrunnlagId(eksternKravgrunnlagId)
-                ?.melding
-        return mottattXml?.let {
-            KravgrunnlagMapper.tilKravgrunnlag431(
-                KravgrunnlagUtil.unmarshalKravgrunnlag(it),
-                UUID.randomUUID(),
-            )
-        }
     }
 
     companion object {

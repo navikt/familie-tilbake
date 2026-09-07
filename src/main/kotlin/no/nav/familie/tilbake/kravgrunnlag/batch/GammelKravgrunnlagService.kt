@@ -21,7 +21,6 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
-import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottattArkiv
@@ -29,6 +28,7 @@ import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
@@ -202,7 +202,7 @@ class GammelKravgrunnlagService(
         try {
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 mottattXml.eksternKravgrunnlagId!!,
-                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+                KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
                 logContext,
             ) to false
         } catch (e: SperretKravgrunnlagFeil) {

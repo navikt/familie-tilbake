@@ -43,9 +43,6 @@ ainntekt:
 tilbakekreving:
   kravgrunnlag:
     - LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG
-  toggles:
-    nyModell:
-      OppdragRestClient: true
   tilgangsstyring:
     grupper:
       aap:

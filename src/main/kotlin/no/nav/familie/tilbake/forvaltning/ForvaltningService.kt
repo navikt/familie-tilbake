@@ -25,10 +25,8 @@ import no.nav.familie.tilbake.dokumentbestilling.vedtak.SendVedtaksbrevTask
 import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
-import no.nav.familie.tilbake.kravgrunnlag.AnnulerKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.domain.KodeAksjon
 import no.nav.familie.tilbake.kravgrunnlag.event.EndretKravgrunnlagEventPublisher
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattService
@@ -37,6 +35,8 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
+import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -56,7 +56,6 @@ class ForvaltningService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
     private val hentKravgrunnlagService: HentKravgrunnlagService,
-    private val annulerKravgrunnlagService: AnnulerKravgrunnlagService,
     private val økonomiXmlMottattService: ØkonomiXmlMottattService,
     private val stegService: StegService,
     private val behandlingskontrollService: BehandlingskontrollService,
@@ -68,6 +67,7 @@ class ForvaltningService(
     private val endretKravgrunnlagEventPublisher: EndretKravgrunnlagEventPublisher,
     private val logService: LogService,
     private val bigQueryAdapterService: BigQueryAdapterService,
+    private val oppdragRestClient: OppdragRestClient,
 ) {
     private val log = TracedLogger.getLogger<ForvaltningService>()
 
@@ -82,7 +82,7 @@ class ForvaltningService(
         val hentetKravgrunnlag =
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 kravgrunnlagId,
-                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+                KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
                 logContext,
             )
 
@@ -113,7 +113,7 @@ class ForvaltningService(
         val hentetKravgrunnlag =
             hentKravgrunnlagService.hentKravgrunnlagFraØkonomi(
                 kravgrunnlagId,
-                KodeAksjon.HENT_KORRIGERT_KRAVGRUNNLAG,
+                KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
                 logContext,
             )
 
@@ -243,10 +243,7 @@ class ForvaltningService(
                 logContext = SecureLog.Context.tom(),
             )
         }
-        val vedtakId = økonomiXmlMottatt?.vedtakId ?: kravgrunnlag431!!.vedtakId
-        val fagsakId = økonomiXmlMottatt?.eksternFagsakId ?: kravgrunnlag431?.fagsystemId!!
-        val logContext = SecureLog.Context.medBehandling(fagsakId, kravgrunnlag431?.behandlingId?.toString())
-        annulerKravgrunnlagService.annulerKravgrunnlagRequest(eksternKravgrunnlagId, vedtakId, logContext)
+        oppdragRestClient.annullerKravgrunnlag(økonomiXmlMottatt?.vedtakId ?: kravgrunnlag431?.vedtakId!!)
     }
 
     fun hentForvaltningsinfo(

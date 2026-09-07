@@ -3,12 +3,6 @@ package no.nav.tilbakekreving.avstemmingMediator
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.repository.Sporbar
-import no.nav.familie.tilbake.config.Constants
-import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.iverksettvedtak.domain.ØkonomiXmlSendt
-import no.nav.familie.tilbake.iverksettvedtak.ØkonomiXmlSendtRepository
-import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.tilbakekreving.e2e.E2EBase
 import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
@@ -40,26 +34,9 @@ class AvstemmingMediatorTest : E2EBase() {
     @Autowired
     lateinit var iverksettRepository: IverksettRepository
 
-    @Autowired
-    lateinit var økonomiXmlSendtRepository: ØkonomiXmlSendtRepository
-
     @Test
     fun `test avstemming`() {
         val opprettetTid = LocalDate.of(2025, 1, 10)
-
-        val fagsak = fagsakRepository.insert(Testdata.fagsak())
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
-        val xml = readXml("/tilbakekrevingsvedtak/tilbakekrevingsvedtak.xml")
-        val økonomiXmlSendt = ØkonomiXmlSendt(
-            behandlingId = behandling.id,
-            melding = xml,
-            kvittering = objectMapper.writeValueAsString(lagMmmelDto("00", "OK")),
-            sporbar =
-                Sporbar(
-                    opprettetAv = Constants.BRUKER_ID_VEDTAKSLØSNINGEN,
-                    opprettetTid = opprettetTid.atStartOfDay(),
-                ),
-        )
 
         val iverksattVedtak1 = IverksattVedtak(
             id = UUID.fromString("11111111-2222-3333-4444-55555555555a"),
@@ -87,7 +64,6 @@ class AvstemmingMediatorTest : E2EBase() {
             behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
         )
 
-        økonomiXmlSendtRepository.insert(økonomiXmlSendt)
         iverksettRepository.lagreIverksattVedtak(iverksattVedtak = iverksattVedtak1)
         iverksettRepository.lagreIverksattVedtak(iverksattVedtak = iverksattVedtak2)
 
@@ -97,7 +73,6 @@ class AvstemmingMediatorTest : E2EBase() {
             avsender;vedtakId;fnr;vedtaksdato;fagsakYtelseType;tilbakekrevesBruttoUtenRenter;skatt;tilbakekrevesNettoUtenRenter;renter;erOmgjøringTilIngenTilbakekreving
             familie-tilbake;1234;11223344556;20250110;TSO;6000;6;5994;200;
             familie-tilbake;1235;11223344557;20250110;TSO;0;0;0;0;Omgjoring0
-            familie-tilbake;0;32132132111;20250110;BA;2108;0;2108;0;
         """.trimIndent().trimEnd()
 
         result?.toString(Charsets.UTF_8) shouldBe expected
