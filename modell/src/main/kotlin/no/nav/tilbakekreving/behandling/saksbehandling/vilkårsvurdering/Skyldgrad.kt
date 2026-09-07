@@ -70,7 +70,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 aktsomhet = VurdertAktsomhetDto(
                     aktsomhet = Aktsomhet.SIMPEL_UAKTSOMHET,
                     ileggRenter = renter(),
-                    andelTilbakekreves = reduksjon().andel,
+                    andelTilbakekreves = reduksjon().andelTilbakekreves,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = reduksjonSærligeGrunner?.vurderteGrunner(),
@@ -147,7 +147,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 aktsomhet = VurdertAktsomhetDto(
                     aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
                     ileggRenter = renter(),
-                    andelTilbakekreves = reduksjon().andel,
+                    andelTilbakekreves = reduksjon().andelTilbakekreves,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = reduksjonSærligeGrunner.vurderteGrunner(),
@@ -221,7 +221,7 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
                 aktsomhet = VurdertAktsomhetDto(
                     aktsomhet = Aktsomhet.FORSETT,
                     ileggRenter = renter(),
-                    andelTilbakekreves = reduksjon().andel,
+                    andelTilbakekreves = reduksjon().andelTilbakekreves,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseAktsomhet,
                     særligeGrunner = null,
