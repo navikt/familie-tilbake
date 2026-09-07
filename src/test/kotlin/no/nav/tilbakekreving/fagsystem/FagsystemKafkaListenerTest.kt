@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.fagsystem
 
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.test.januar
@@ -56,9 +55,9 @@ class FagsystemKafkaListenerTest {
             FagsysteminfoSvarHendelse(
                 eksternFagsakId = "123456",
                 hendelseOpprettet = LocalDateTime.of(2025, 1, 13, 12, 30, 45, 0),
-                mottaker = MottakerDto(
+                mottaker = FagsysteminfoSvarHendelse.MottakerDto(
                     ident = Testdata.STANDARD_BRUKERIDENT,
-                    type = MottakerDto.MottakerType.PERSON,
+                    type = FagsysteminfoSvarHendelse.MottakerDto.MottakerType.PERSON,
                 ),
                 revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
                     behandlingId = "654321",
