@@ -3,10 +3,10 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
-import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
+import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse.MottakerDto
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN

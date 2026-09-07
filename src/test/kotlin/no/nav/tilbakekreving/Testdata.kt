@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
 import no.nav.tilbakekreving.test.januar
@@ -25,9 +24,9 @@ object Testdata {
     ) = FagsysteminfoSvarHendelse(
         eksternFagsakId = fagsystemId,
         hendelseOpprettet = LocalDateTime.now(),
-        mottaker = MottakerDto(
+        mottaker = FagsysteminfoSvarHendelse.MottakerDto(
             ident = Testdata.STANDARD_BRUKERIDENT,
-            type = MottakerDto.MottakerType.PERSON,
+            type = FagsysteminfoSvarHendelse.MottakerDto.MottakerType.PERSON,
         ),
         revurdering = FagsysteminfoSvarHendelse.RevurderingDto(
             behandlingId = eksternBehandlingId,

@@ -3,10 +3,10 @@ package no.nav.tilbakekreving.e2e.tilstand
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
+import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse.MottakerDto
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase

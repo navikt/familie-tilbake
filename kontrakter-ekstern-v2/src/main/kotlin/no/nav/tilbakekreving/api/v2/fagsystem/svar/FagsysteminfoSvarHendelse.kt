@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.api.v2.fagsystem.svar
 
-import no.nav.tilbakekreving.api.v2.MottakerDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import java.time.LocalDate
@@ -14,6 +13,15 @@ data class FagsysteminfoSvarHendelse(
     val utvidPerioder: List<UtvidetPeriodeDto>?,
     val behandlendeEnhet: String?,
 ) : KafkameldingFraFagsystem {
+    data class MottakerDto(
+        val ident: String,
+        val type: MottakerType,
+    ) {
+        enum class MottakerType {
+            PERSON,
+        }
+    }
+
     data class UtvidetPeriodeDto(
         val kravgrunnlagPeriode: PeriodeDto,
         val vedtaksperiode: PeriodeDto,
