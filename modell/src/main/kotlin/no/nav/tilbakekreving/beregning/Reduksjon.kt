@@ -3,32 +3,31 @@ package no.nav.tilbakekreving.beregning
 import java.math.BigDecimal
 
 sealed interface Reduksjon {
-    val andel: BigDecimal? get() = null
+    val andelTilbakekreves: BigDecimal? get() = null
 
     fun beregn(
         kravgrunnlagBeløp: BigDecimal,
         andelAvBeløp: BigDecimal,
     ): BigDecimal
 
-    class Prosentdel(override val andel: BigDecimal) : Reduksjon {
+    class Prosentdel(override val andelTilbakekreves: BigDecimal) : Reduksjon {
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,
             andelAvBeløp: BigDecimal,
         ): BigDecimal {
             return kravgrunnlagBeløp
-                .multiply(andel)
+                .multiply(andelTilbakekreves)
                 .divide(HUNDRE_PROSENT)
         }
     }
 
-    class ProsentdelAvBeløpIBehold(override val andel: BigDecimal, val beløp: BigDecimal) : Reduksjon {
+    class ProsentdelAvBeløpIBehold(override val andelTilbakekreves: BigDecimal, val beløp: BigDecimal) : Reduksjon {
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,
             andelAvBeløp: BigDecimal,
         ): BigDecimal {
-            val test = andelAvBeløp
             return beløp.multiply(andelAvBeløp)
-                .multiply(andel)
+                .multiply(andelTilbakekreves)
                 .divide(HUNDRE_PROSENT)
         }
     }
@@ -41,7 +40,7 @@ sealed interface Reduksjon {
     }
 
     class FullstendigTilbakekreving : Reduksjon {
-        override val andel = HUNDRE_PROSENT
+        override val andelTilbakekreves = HUNDRE_PROSENT
 
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,
@@ -50,7 +49,7 @@ sealed interface Reduksjon {
     }
 
     class IngenTilbakekreving : Reduksjon {
-        override val andel: BigDecimal = BigDecimal.ZERO
+        override val andelTilbakekreves: BigDecimal = BigDecimal.ZERO
 
         override fun beregn(
             kravgrunnlagBeløp: BigDecimal,

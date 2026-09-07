@@ -58,7 +58,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = VurdertAktsomhetDto(
                     aktsomhet = AktsomhetDTO.FORSETT,
                     ileggRenter = false,
-                    andelTilbakekreves = reduksjon().andel,
+                    andelTilbakekreves = reduksjon().andelTilbakekreves,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseMottakersForståelse,
                     særligeGrunner = null,
@@ -126,7 +126,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 aktsomhet = VurdertAktsomhetDto(
                     aktsomhet = grad.aktsomhet,
                     ileggRenter = false,
-                    andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andel,
+                    andelTilbakekreves = kanUnnlates4XRettsgebyr.reduksjon().andelTilbakekreves,
                     beløpTilbakekreves = null,
                     begrunnelse = begrunnelseMottakersForståelse,
                     særligeGrunner = reduksjonSærligeGrunner?.vurderteGrunner(),

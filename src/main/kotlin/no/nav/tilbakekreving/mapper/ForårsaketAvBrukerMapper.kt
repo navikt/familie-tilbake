@@ -119,7 +119,7 @@ object ForårsaketAvBrukerMapper {
                                         begrunnelse = reduksjon.begrunnelse,
                                         grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
                                         skalReduseres = Ja(
-                                            prosentdel = reduksjon.prosentReduksjon,
+                                            prosentdelReduksjon = reduksjon.prosentReduksjon,
                                         ),
                                     ),
                                 ),
@@ -158,7 +158,7 @@ object ForårsaketAvBrukerMapper {
                                     reduksjonMomenter = ReduksjonGodTro(
                                         begrunnelse = reduksjon.begrunnelse,
                                         grunner = reduksjon.relevans.map { mapRelevanteMomenterGodTro(it.moment, reduksjon.annetBegrunnelse) }.toSet(),
-                                        skalReduseres = SkalReduseres.Ja(prosentdel = reduksjon.prosentReduksjon),
+                                        skalReduseres = SkalReduseres.Ja(prosentdelReduksjon = reduksjon.prosentReduksjon),
                                     ),
                                 ),
                             ),

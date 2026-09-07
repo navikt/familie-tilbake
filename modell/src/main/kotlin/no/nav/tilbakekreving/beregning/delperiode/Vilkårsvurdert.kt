@@ -47,7 +47,7 @@ class Vilkårsvurdert(
             feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() },
             riktigYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::riktigYtelsesbeløp) },
             utbetaltYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::utbetaltYtelsesbeløp) },
-            andelAvBeløp = vurdering.reduksjon().andel,
+            andelAvBeløp = vurdering.reduksjon().andelTilbakekreves,
             manueltSattTilbakekrevingsbeløp = (vurdering.reduksjon() as? Reduksjon.ManueltBeløp)?.beløp,
             tilbakekrevingsbeløpUtenRenter = delperioder.sumOf { it.summer(JusterbartBeløp::tilbakekrevesBrutto) },
             rentebeløp = delperioder.sumOf { it.renter() },
