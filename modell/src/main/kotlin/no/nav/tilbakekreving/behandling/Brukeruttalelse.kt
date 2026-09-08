@@ -1,8 +1,5 @@
 package no.nav.tilbakekreving.behandling
 
-import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
@@ -23,22 +20,6 @@ class Brukeruttalelse(
 
     fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
         this.tilbakeført = tilbakeført
-    }
-
-    fun tilFrontendDto(): BrukeruttalelseDto {
-        return BrukeruttalelseDto(
-            harBrukerUttaltSeg = HarBrukerUttaltSeg.valueOf(uttalelseVurdering.name),
-            uttalelsesdetaljer = uttalelseInfo?.let { info ->
-                listOf(
-                    Uttalelsesdetaljer(
-                        uttalelsesdato = info.uttalelsesdato,
-                        hvorBrukerenUttalteSeg = info.hvorBrukerenUttalteSeg,
-                        uttalelseBeskrivelse = info.uttalelseBeskrivelse,
-                    ),
-                )
-            },
-            kommentar = kommentar,
-        )
     }
 
     internal fun nyTilFrontendDto(): UttalelseDto {

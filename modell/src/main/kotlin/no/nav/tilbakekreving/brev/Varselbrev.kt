@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.aktør.Bruker
-import no.nav.tilbakekreving.api.v1.dto.VarselbrevDto
 import no.nav.tilbakekreving.behandling.Forhåndsvarselinfo
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.entities.BrevEntity
@@ -84,10 +83,6 @@ data class Varselbrev(
             vedtaksbrevEntity = null,
             opprettet = opprettet,
         )
-    }
-
-    fun tilFrontendDto(): VarselbrevDto {
-        return VarselbrevDto(varselbrevSendtTid = sendtTid, opprinneligFristForUttalelse = fristForUttalelse, tekstFraSaksbehandler = tekstFraSaksbehandler)
     }
 
     fun tilForhåndsvarselDto() = ForhaandsvarselInfoDto(

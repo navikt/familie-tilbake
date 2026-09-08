@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
@@ -19,9 +18,6 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
-import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
-import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -59,7 +55,6 @@ import java.util.UUID
 
 @Service
 class ForhåndsvarselService(
-    private val pdfBrevService: PdfBrevService,
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
@@ -79,76 +74,16 @@ class ForhåndsvarselService(
         return varselbrevtekst
     }
 
-    fun forhåndsvisVarselbrev(
-        context: LesContext,
-        tilbakekreving: Tilbakekreving,
-        bestillBrevDto: BestillBrevDto,
-    ): ByteArray {
-        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(bestillBrevDto.behandlingId, context)
-        val varselbrevsdokument = opprettVarselbrevsdokument(
-            varselbrevInfo = varselbrevInfo,
-            brevmetadata = opprettMetadata(varselbrevInfo),
-        ).copy(varseltekstFraSaksbehandler = bestillBrevDto.fritekst)
-
-        return pdfBrevService.genererForhåndsvisning(
-            Brevdata(
-                mottager = Brevmottager.BRUKER,
-                overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false),
-                brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false),
-                metadata = varselbrevsdokument.brevmetadata,
-                vedleggHtml = varselbrevUtil.lagVedlegg(varselbrevsdokument, bestillBrevDto.behandlingId),
-            ),
-        )
-    }
-
-    fun lagreUttalelse(
-        tilbakekreving: Tilbakekreving,
-        behandlingId: UUID,
-        brukeruttalelse: BrukeruttalelseDto,
-        sideeffektContext: SideeffektContext,
-    ) {
-        when (brukeruttalelse.harBrukerUttaltSeg) {
-            HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG -> {
-                val uttalelsedetaljer = requireNotNull(brukeruttalelse.uttalelsesdetaljer) {
-                    "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var null"
-                }.also {
-                    require(it.isNotEmpty()) {
-                        "Det kreves uttalelsedetaljer når brukeren har uttalet seg. uttalelsedetaljer var tom"
-                    }
-                }[0]
-                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
-                    lagreUttalelse(
-                        uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                        uttalelseInfo = UttalelseInfo(UUID.randomUUID(), uttalelsedetaljer.uttalelsesdato, uttalelsedetaljer.hvorBrukerenUttalteSeg, uttalelsedetaljer.uttalelseBeskrivelse),
-                        kommentar = null,
-                    )
-                }
-            }
-            HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL, HarBrukerUttaltSeg.UNNTAK_INGEN_UTTALELSE -> {
-                val kommentar = requireNotNull(brukeruttalelse.kommentar) {
-                    "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var null"
-                }.also {
-                    require(it.isNotBlank()) { "Det kreves en kommentar når brukeren ikke uttaler seg. Kommentar var tom" }
-                }
-
-                tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
-                    lagreUttalelse(
-                        uttalelseVurdering = UttalelseVurdering.valueOf(brukeruttalelse.harBrukerUttaltSeg.name),
-                        uttalelseInfo = null,
-                        kommentar = kommentar,
-                    )
-                }
-            }
-            else -> throw IllegalArgumentException("Ukjent verdi for uttalelseVurdering: ${brukeruttalelse.harBrukerUttaltSeg} ")
-        }
-    }
-
     fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {
         val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
             UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
+
             UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
+
             UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG -> UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG
+
             UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE -> UttalelseVurdering.UNNTAK_INGEN_UTTALELSE
+
             UttalelseVurderingDto.IKKE_VURDERT -> throw IllegalStateException(
                 "Burde ikke være i denne tilstanden. IKKE_VURDERT er enum til frontend.",
             )
@@ -173,6 +108,7 @@ class ForhåndsvarselService(
                     )
                 }
             }
+
             UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
                 tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
                     lagreUttalelse(

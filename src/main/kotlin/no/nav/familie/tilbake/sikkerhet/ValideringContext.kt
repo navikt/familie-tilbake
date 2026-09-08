@@ -30,11 +30,6 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Fattet vedtak",
     ),
-    HentVedtaksbrevTekster(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter vedtaksbrevtekst",
-    ),
     UtførSteg(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
@@ -50,30 +45,10 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.CREATE,
         handling = "Sender brev",
     ),
-    ForhåndsvisBrev(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Forhåndsviser brev",
-    ),
     HentForhåndsvarselTekster(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter varselbrevtekst",
-    ),
-    RegistrerUtsattFrist(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Utsette frist på uttalelsen",
-    ),
-    RegistrerForhåndsvarselUnntak(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Registrert unntak for forhåndsvarsel",
-    ),
-    RegistrerBrukeruttalelse(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
-        auditLoggerEvent = AuditLoggerEvent.CREATE,
-        handling = "Lagrer brukers uttalelse",
     ),
     HentFagsak(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
@@ -169,11 +144,6 @@ enum class ValideringContext(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter fakta om feilutbetalingen",
-    ),
-    HentForhåndsvarselinformasjon(
-        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-        auditLoggerEvent = AuditLoggerEvent.ACCESS,
-        handling = "Henter forhåndsvarselinformasjon",
     ),
     ListJournalposter(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,

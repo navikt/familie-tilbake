@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.behandling
 
 import no.nav.tilbakekreving.Klokke
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
@@ -119,13 +118,6 @@ class Forhåndsvarsel(
             tilbakeført = null,
         )
     }
-
-    fun tilFrontendDto(varselbrev: Varselbrev?) = ForhåndsvarselDto(
-        varselbrevDto = varselbrev?.tilFrontendDto(),
-        brukeruttalelse = brukeruttalelse?.tilFrontendDto(),
-        forhåndsvarselUnntak = forhåndsvarselUnntak?.tilFrontendDto(),
-        utsettUttalelseFrist = uttalelsesfrist?.tilFrontendDto(),
-    )
 
     override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> {
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()

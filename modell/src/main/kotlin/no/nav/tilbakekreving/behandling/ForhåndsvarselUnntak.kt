@@ -1,7 +1,5 @@
 package no.nav.tilbakekreving.behandling
 
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
@@ -19,11 +17,6 @@ data class ForhåndsvarselUnntak(
     fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
         this.tilbakeført = tilbakeført
     }
-
-    fun tilFrontendDto(): ForhåndsvarselUnntakDto = ForhåndsvarselUnntakDto(
-        begrunnelseForUnntak = VarslingsUnntak.valueOf(begrunnelseForUnntak.name),
-        beskrivelse = beskrivelse,
-    )
 
     internal fun nyTilFrontendDto(ferdigvurdert: Boolean): ForhaandsvarselUnntakDto {
         return ForhaandsvarselUnntakDto(

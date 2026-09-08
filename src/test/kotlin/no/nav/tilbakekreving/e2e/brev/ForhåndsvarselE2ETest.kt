@@ -8,11 +8,6 @@ import no.nav.familie.tilbake.api.DokumentController
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
-import no.nav.tilbakekreving.api.v1.dto.BrukeruttalelseDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselUnntakDto
-import no.nav.tilbakekreving.api.v1.dto.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.api.v1.dto.Uttalelsesdetaljer
-import no.nav.tilbakekreving.api.v1.dto.VarslingsUnntak
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -68,153 +63,6 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         }
     }
 
-    @Test
-    fun `uttalelse kan redigeres`() {
-        val behandlingId = hentBehandlingId()
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2026, 1, 2)))
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
-                    uttalelsesdetaljer.shouldNotBeNull {
-                        size shouldBe 1
-                        get(0).uttalelsesdato shouldBe LocalDate.of(2026, 1, 2)
-                    }
-                }
-            }
-
-            documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
-                    uttalelsesdetaljer.shouldNotBeNull {
-                        size shouldBe 1
-                        get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `unntak kan redigeres`() {
-        val behandlingId = hentBehandlingId()
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            documentController.forhåndsvarselUnntak(
-                behandlingId,
-                ForhåndsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
-                    beskrivelse = "Ikke mulig",
-                ),
-            )
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldNotBeNull {
-                    begrunnelseForUnntak shouldBe VarslingsUnntak.IKKE_PRAKTISK_MULIG
-                    beskrivelse shouldBe "Ikke mulig"
-                }
-            }
-            documentController.forhåndsvarselUnntak(
-                behandlingId,
-                ForhåndsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING,
-                    beskrivelse = "Ukjent adresse",
-                ),
-            )
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldNotBeNull {
-                    begrunnelseForUnntak shouldBe VarslingsUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING
-                    beskrivelse shouldBe "Ukjent adresse"
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `unntak med alternativ ÅPENBART_UNØDVENDIG og registrert uttalelse kan redigeres`() {
-        val behandlingId = hentBehandlingId()
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            documentController.forhåndsvarselUnntak(
-                behandlingId,
-                ForhåndsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntak.ÅPENBART_UNØDVENDIG,
-                    beskrivelse = "allerede uttalet seg",
-                ),
-            )
-            documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG, LocalDate.of(2026, 1, 2)))
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldNotBeNull {
-                    begrunnelseForUnntak shouldBe VarslingsUnntak.ÅPENBART_UNØDVENDIG
-                    beskrivelse shouldBe "allerede uttalet seg"
-                }
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG
-                    uttalelsesdetaljer.shouldNotBeNull {
-                        get(0).uttalelsesdato shouldBe LocalDate.of(2026, 1, 2)
-                    }
-                }
-            }
-            documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG, LocalDate.of(2025, 12, 2)))
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldNotBeNull()
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.UNNTAK_ALLEREDE_UTTALT_SEG
-                    uttalelsesdetaljer.shouldNotBeNull {
-                        get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
-                    }
-                }
-            }
-            documentController.bestillBrev(BestillBrevDto(behandlingId, Dokumentmalstype.VARSEL, "TEST"))
-            documentController.lagreBrukeruttalelse(behandlingId, hentBrukerUttalelseDto(HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL, LocalDate.of(2025, 12, 2)))
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldBeNull()
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.JA_ETTER_FORHÅNDSVARSEL
-                    uttalelsesdetaljer.shouldNotBeNull {
-                        get(0).uttalelsesdato shouldBe LocalDate.of(2025, 12, 2)
-                    }
-                }
-            }
-            documentController.lagreBrukeruttalelse(
-                behandlingId,
-                BrukeruttalelseDto(
-                    harBrukerUttaltSeg = HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL,
-                    uttalelsesdetaljer = null,
-                    kommentar = "har ikke uttalet seg",
-                ),
-            )
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldBeNull()
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI_ETTER_FORHÅNDSVARSEL
-                    uttalelsesdetaljer.shouldBeNull()
-                    kommentar shouldBe "har ikke uttalet seg"
-                }
-            }
-
-            documentController.forhåndsvarselUnntak(
-                behandlingId,
-                ForhåndsvarselUnntakDto(
-                    begrunnelseForUnntak = VarslingsUnntak.IKKE_PRAKTISK_MULIG,
-                    beskrivelse = "Unntak",
-                ),
-            )
-
-            documentController.hentForhåndsvarselinfo(behandlingId).data.shouldNotBeNull {
-                forhåndsvarselUnntak.shouldNotBeNull {
-                    begrunnelseForUnntak shouldBe VarslingsUnntak.IKKE_PRAKTISK_MULIG
-                    beskrivelse shouldBe "Unntak"
-                }
-                brukeruttalelse.shouldBeNull()
-            }
-        }
-    }
-
     private fun hentBehandlingId(): UUID {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
@@ -226,18 +74,6 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         return behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
     }
-
-    private fun hentBrukerUttalelseDto(harBrukerUttaltSeg: HarBrukerUttaltSeg, uttalelsesdato: LocalDate) = BrukeruttalelseDto(
-        harBrukerUttaltSeg = harBrukerUttaltSeg,
-        uttalelsesdetaljer = listOf(
-            Uttalelsesdetaljer(
-                uttalelsesdato = uttalelsesdato,
-                hvorBrukerenUttalteSeg = "Godsys",
-                uttalelseBeskrivelse = "uttalelse",
-            ),
-        ),
-        kommentar = null,
-    )
 
     @Test
     fun `sende forhåndsvarsel skal oppdatere varselbrevet i brevhistorikk med tid og journlaførtId`() {

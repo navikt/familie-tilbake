@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.aktør.Bruker.Companion.tilNullableFrontendDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.api.v1.dto.ForhåndsvarselDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.BehandlingHistorikk
@@ -51,7 +50,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
@@ -98,18 +96,6 @@ class Tilbakekreving internal constructor(
             behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
             behandlingId = null,
         )
-    }
-
-    internal fun oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext): List<KravgrunnlagSammenligning.Forskjell> {
-        val resultat = behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
-            val kravgrunnlagHistorikkEntry = kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlagMedUliktBeløp(kravgrunnlagHistorikkEntry)
-        }
-        sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
-            behandlingId = null,
-        )
-        return resultat
     }
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
@@ -473,10 +459,6 @@ class Tilbakekreving internal constructor(
         val behandling = hentBehandling(behandlingId)
         val varselbrev = behandling.opprettVarselbrev("", lesContext)
         return varselbrev.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak)
-    }
-
-    fun hentForhåndsvarselFrontendDto(behandlingId: UUID): ForhåndsvarselDto {
-        return hentBehandling(behandlingId).forhåndsvarselFrontendDto(brevHistorikk.sisteVarselbrev())
     }
 
     fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID, klokke: Klokke): ForhaandsvarselResponseDto {

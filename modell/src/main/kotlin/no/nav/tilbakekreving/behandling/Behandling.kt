@@ -91,7 +91,6 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevantMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tekst.slåSammen
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -157,12 +156,6 @@ class Behandling internal constructor(
         } else {
             nyttKravgrunnlag = oppdatertKravgrunnlag
         }
-    }
-
-    internal fun oppdaterKravgrunnlagMedUliktBeløp(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>): List<KravgrunnlagSammenligning.Forskjell> {
-        val resultat = kravgrunnlag.entry.sammenlign(oppdatertKravgrunnlag.entry, sporingsinformasjon()).resultat()
-        kravgrunnlag = oppdatertKravgrunnlag
-        return resultat
     }
 
     override fun faktastegFrontendDto(
@@ -500,8 +493,6 @@ class Behandling internal constructor(
         feilutbetaltePerioder = listOf(fullstendigPeriode()),
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
-
-    internal fun forhåndsvarselFrontendDto(varselbrev: Varselbrev?) = forhåndsvarsel.tilFrontendDto(varselbrev)
 
     internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
         return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet())
