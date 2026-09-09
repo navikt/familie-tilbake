@@ -140,6 +140,7 @@ class Behandling internal constructor(
             harTilleggsfrist = foreldelsesteg.harTilleggsfrist(),
             tilbakekrevingId = tilbakekrevingId,
             oppdagetAv = if (faktasteg.oppdagetAv() == Faktasteg.Vurdering.Oppdaget.Av.Bruker) "Bruker" else "Nav",
+            forhåndsvarselSendt = forhåndsvarsel.erForhåndsvarselSendt(),
         )
     }
 

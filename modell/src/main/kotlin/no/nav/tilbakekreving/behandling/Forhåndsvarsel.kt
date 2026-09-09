@@ -156,6 +156,12 @@ class Forhåndsvarsel(
         )
     }
 
+    fun erForhåndsvarselSendt(): Boolean? {
+        if (uttalelsesfrist != null) return true
+        if (forhåndsvarselUnntak != null) return false
+        return null
+    }
+
     companion object {
         fun opprett(): Forhåndsvarsel {
             return Forhåndsvarsel(

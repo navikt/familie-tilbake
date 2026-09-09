@@ -37,6 +37,7 @@ class BigQueryAdapterService(
                 harTilleggsfrist = harTilleggsfrist,
                 tilbakekrevingId = tilbakekreving.id.toString(),
                 oppdagetAv = null,
+                forhåndsvarselSendt = null,
             ),
         )
     }
