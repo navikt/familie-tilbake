@@ -550,6 +550,41 @@ class FaktaStegTest {
     }
 
     @Test
+    fun `fjernet periode i kravgrunnlag`() {
+        val revurdering = eksternFagsakBehandling()
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode),
+                kravgrunnlagPeriode(fjernetPeriode),
+            ),
+        )
+
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.vurder("årsak")
+
+        faktasteg.trengerNyVurdering() shouldBe null
+        faktasteg.periodeFjernet(KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner))
+
+        faktasteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        faktasteg.nyTilFrontendDto(
+            kravgrunnlag = kravgrunnlag,
+            revurdering = revurdering,
+            varselbrev = null,
+            klokke = SystemKlokke,
+        ).should {
+            it.perioder.size shouldBe 1
+            it.perioder[0].fom shouldBe periode.fom
+            it.perioder[0].tom shouldBe periode.tom
+        }
+    }
+
+    @Test
     fun `endret periode i kravgrunnlag`() {
         val revurdering = eksternFagsakBehandling()
         val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021))))

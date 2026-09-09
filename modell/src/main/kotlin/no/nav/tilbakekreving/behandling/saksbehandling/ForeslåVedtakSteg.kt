@@ -46,6 +46,10 @@ class ForeslåVedtakSteg(
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 
+    override fun periodeFjernet(periode: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+    }
+
     override fun nullstill(
         kravgrunnlag: KravgrunnlagHendelse,
         eksternFagsakRevurdering: EksternFagsakRevurdering,

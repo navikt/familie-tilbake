@@ -132,4 +132,21 @@ class ForhåndsvarselTest {
             .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
             .tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
     }
+
+    @Test
+    fun `fjernet periode i kravgrunnlag`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
+            beskrivelse = "",
+        )
+
+        forhåndsvarsel.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(1.februar(2021) til 28.februar(2021), 2000.kroner),
+        )
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke)
+            .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            .tilbakeført shouldBe null
+    }
 }

@@ -53,4 +53,18 @@ class ForeslåVedtakStegTest {
 
         foreslåVedtakSteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
+
+    @Test
+    fun `fjernet periode i kravgrunnlag`() {
+        val foreslåVedtakSteg = ForeslåVedtakSteg.opprett()
+
+        foreslåVedtakSteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(
+                periode = 1.januar(2021) til 31.januar(2021),
+                beløp = 2000.kroner,
+            ),
+        )
+
+        foreslåVedtakSteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+    }
 }

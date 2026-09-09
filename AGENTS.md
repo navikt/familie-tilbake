@@ -70,22 +70,14 @@ Ktlint kjøres på alle pull requests i CI. **Alltid kjør `ktlintFormat` før d
 
 - Følg standard Kotlin-konvensjoner
 - Linjegrense er satt til `off` (ingen hard grense), men hold linjer lesbare
-- Bruk Kotest assertions (`shouldBe`, `shouldNotBe`, osv.) i tester fremfor JUnit assertions
 - Bruk kun kode fra `no.nav.tilbakekreving`-pakken for inspirasjon
-- Foretrekk å skrive testkode i `modell`-modulen
 - Logikk skal implementeres i `modell`-modulen
 - rot-modulen skal kun inneholde kode som kobler modellen mot eksterne systemer
 - Bruk aldri default-verdier i konstruktører, med unntak av entity-klasser i tilfeller det er nødvendig for bakoverkompatibilitet ved databaselesing
 
 ## Testkonvensjoner
 
-- Unngå mocking, foretrekk alltid stubs av interface
-- Unngå å skrive en integrasjonstest med mindre det er nødvendig
-- **Enhetstest:** JUnit Jupiter + Kotest assertions
-- **Integrasjonstest:** Testcontainers (PostgreSQL, ActiveMQ) + WireMock
-- Integrasjonstester arver fra `OppslagSpringRunnerTest` som setter opp Spring-kontekst med testcontainers
-- Testdata og builders finnes i `:testdata`-modulen
-- Aldri endre asserts i eksisterende tester uten å spørre om tilbakemelding, kun refaktorering.
+- Bruk `test-writer`-agenten når du skriver eller oppdaterer tester – den kjenner de detaljerte testkonvensjonene i prosjektet.
 
 ## Databasemigrasjoner
 

@@ -131,6 +131,21 @@ class Vilkårsvurderingsteg(
         vurderinger = (vurderinger + nåværendeVurdering).sorted()
     }
 
+    override fun periodeFjernet(periode: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        val fjernet = vurderinger.single { periode.periode.overlapper(it.periode()) }
+        vurderinger = vurderinger.filterNot { it == fjernet }
+        val kopiert = vurderinger.singleOrNull { (it.vurdering as? ForårsaketAvBruker.KopiertVurdering)?.forrigePeriodeId == fjernet.id }
+        if (kopiert != null) {
+            when (fjernet.vurdering) {
+                // Hvis perioden som er fjernet kopierer tidligere perioder splitter vi opp vurderingen sånn at etterfølgende perioder må vurderes på nytt
+                is ForårsaketAvBruker.KopiertVurdering -> kopiert.vurder(ForårsaketAvBruker.IkkeVurdert())
+                // Hvis perioden som fjernes har vurdering tar neste perioden over denne vurderingen
+                else -> kopiert.vurder(fjernet.vurdering)
+            }
+        }
+    }
+
     fun oppsummer(periode: Datoperiode) = finnPeriode(periode).vurdering.oppsummerVurdering()
 
     fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = if (vurderinger.any { it.renter() }) {

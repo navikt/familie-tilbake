@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.KravgrunnlagForskjellDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
@@ -51,7 +52,6 @@ class KravgrunnlagSammenligning(
 
         val feil = when {
             ukjentePerioder.any { ny -> originalePerioder.count { ny.overlapper(it) } > 1 } -> UtenforScope.KravgrunnlagMedSammenslåttPerioder
-            originalePerioder.size > perioderFraNyttKravgrunnlag.size -> UtenforScope.KravgrunnlagMedFærrePerioder
             !originaltKravgrunnlag.harNokOverlapp(nyttKravgrunnlag) -> UtenforScope.KravgrunnlagMedUlikeVerdier
             else -> null
         }
@@ -80,6 +80,10 @@ class KravgrunnlagSammenligning(
                 )
             }
         }
+
+        forskjeller += originaltKravgrunnlag.perioder()
+            .filter { original -> nyttKravgrunnlag.perioder().none { it.periode().overlapper(original.periode()) } }
+            .map { Forskjell.FjernetPeriode(it.periode(), it.feilutbetaltYtelsesbeløp()) }
     }
 
     sealed interface Forskjell {
@@ -195,6 +199,45 @@ class KravgrunnlagSammenligning(
             override fun tilDto(): KravgrunnlagForskjellDto = NyPeriodeDto(periode.fom, periode.tom, nyttBeløp.toInt())
         }
 
+        data class FjernetPeriode(override val periode: Datoperiode, val beløp: BigDecimal) : Forskjell {
+            override val nyttBeløp: BigDecimal get() = BigDecimal.ZERO
+
+            override fun oppdater(steg: EndretKravgrunnlagObservatør) {
+                steg.periodeFjernet(this)
+            }
+
+            override fun tilEntity(
+                faktavurderingPeriodeRef: UUID?,
+                vilkårsvurderingPeriodeRef: UUID?,
+                foreldelsesvurderingPeriodeRef: UUID?,
+            ): ForskjellEntity {
+                return ForskjellEntity(
+                    id = UUID.randomUUID(),
+                    faktavurderingPeriodeRef = faktavurderingPeriodeRef,
+                    vilkårsvurderingPeriodeRef = vilkårsvurderingPeriodeRef,
+                    foreldelsesvurderingPeriodeRef = foreldelsesvurderingPeriodeRef,
+                    type = ForskjellType.FjernetPeriode,
+                    originalPeriode = DatoperiodeEntity(periode.fom, periode.tom),
+                    nyPeriode = null,
+                    gammeltBeløp = beløp,
+                    nyttBeløp = null,
+                )
+            }
+
+            override fun slåSammen(other: Forskjell): Forskjell? {
+                return when (other) {
+                    is FjernetPeriode -> FjernetPeriode(periode.fom til other.periode.tom, beløp + other.beløp)
+                    else -> null
+                }
+            }
+
+            override fun tilDto(): KravgrunnlagForskjellDto = FjernetPeriodeDto(
+                fom = periode.fom,
+                tom = periode.tom,
+                beløp = beløp.toInt(),
+            )
+        }
+
         data class UendretPeriode(
             override val periode: Datoperiode,
             override val nyttBeløp: BigDecimal,
@@ -225,5 +268,6 @@ class KravgrunnlagSammenligning(
     enum class ForskjellType {
         JustertBeløp,
         NyPeriode,
+        FjernetPeriode,
     }
 }

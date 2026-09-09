@@ -30,6 +30,10 @@ data class ForskjellEntity(
                 nyttBeløp = nyttBeløp!!,
                 etterfølgende = null,
             )
+            ForskjellType.FjernetPeriode -> KravgrunnlagSammenligning.Forskjell.FjernetPeriode(
+                periode = originalPeriode!!.fom til originalPeriode.tom,
+                beløp = gammeltBeløp!!,
+            )
         }
     }
 }

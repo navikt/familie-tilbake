@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForaarsaketAvMottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
@@ -38,6 +40,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresu
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
@@ -856,6 +859,217 @@ class VilkårsvurderingstegTest {
             it[2].tom shouldBe kopiertPeriode.tom
             it[2].endringIKravgrunnlag shouldBe null
             it[2].valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjerner vurdert periode`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode),
+                kravgrunnlagPeriode(fjernetPeriode),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro(beløpIBehold = null))
+        val fjernetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
+            .periodeId
+        vilkårsvurderingsteg.splittVilkårsvurdering(fjernetPeriodeId)
+        vilkårsvurderingsteg.vurder(fjernetPeriodeId, forårsaketAvBruker().uaktsomt(skalUnnlates()))
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].fom shouldBe periode.fom
+            it[0].tom shouldBe periode.tom
+            it[0].valg.shouldBeInstanceOf<GodTroDto>()
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjerner kopiert periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val fjernetPeriode = 1.mars(2021) til 31.mars(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(periode2),
+                kravgrunnlagPeriode(fjernetPeriode),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
+        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }
+            .periodeId
+        vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
+        vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt(skalUnnlates()))
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 2
+            it[0].valg.shouldBeInstanceOf<GodTroDto>()
+            it[0].fom shouldBe periode1.fom
+            it[0].tom shouldBe periode1.tom
+            it[1].valg.shouldBeInstanceOf<ForaarsaketAvMottakerDto>()
+            it[1].fom shouldBe periode2.fom
+            it[1].tom shouldBe periode2.tom
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjerner vurdert periode hvor vurderingen er kopiert`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val periode3 = 1.mars(2021) til 31.mars(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(fjernetPeriode),
+                kravgrunnlagPeriode(periode3),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(periode1, forårsaketAvBruker().uaktsomt())
+        val splittetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
+            .periodeId
+        vilkårsvurderingsteg.splittVilkårsvurdering(splittetPeriodeId)
+
+        vilkårsvurderingsteg.vurder(splittetPeriodeId, forårsaketAvNav().godTro())
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 2
+            it[0].valg.shouldBeInstanceOf<ForaarsaketAvMottakerDto>()
+            it[0].fom shouldBe periode1.fom
+            it[0].tom shouldBe periode1.tom
+            it[1].valg.shouldBeInstanceOf<GodTroDto>()
+            it[1].fom shouldBe periode3.fom
+            it[1].tom shouldBe periode3.tom
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjernet periode hvor det er flere etterfølgende kopierte perioder`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val periode3 = 1.mars(2021) til 31.mars(2021)
+        val periode4 = 1.april(2021) til 30.april(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(fjernetPeriode),
+                kravgrunnlagPeriode(periode3),
+                kravgrunnlagPeriode(periode4),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro())
+
+        val fjernetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
+            .periodeId
+        vilkårsvurderingsteg.splittVilkårsvurdering(fjernetPeriodeId)
+        vilkårsvurderingsteg.vurder(fjernetPeriodeId, forårsaketAvBruker().uaktsomt())
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 2
+            it[0].valg.shouldBeInstanceOf<GodTroDto>()
+            it[0].fom shouldBe periode1.fom
+            it[0].tom shouldBe periode1.tom
+            it[0].delbarePerioder shouldHaveSize 1
+            it[1].valg.shouldBeInstanceOf<ForaarsaketAvMottakerDto>()
+            it[1].fom shouldBe periode3.fom
+            it[1].tom shouldBe periode4.tom
+            it[1].delbarePerioder shouldHaveSize 2
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjerner periode uavhengig av annen vurdering på senere periode`() {
+        val fjernetPeriode = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val periode3 = 1.mars(2021) til 31.mars(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(fjernetPeriode),
+                kravgrunnlagPeriode(periode2),
+                kravgrunnlagPeriode(periode3),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(fjernetPeriode, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
+            .single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }
+            .periodeId
+        vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
+        vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt(skalUnnlates()))
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 1
+            it[0].valg.shouldBeInstanceOf<ForaarsaketAvMottakerDto>()
+            it[0].fom shouldBe periode2.fom
+            it[0].tom shouldBe periode3.tom
+            it[0].delbarePerioder shouldHaveSize 2
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag - fjerner periode i midten av vurdert periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val periode2 = 1.mars(2021) til 31.mars(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(fjernetPeriode),
+                kravgrunnlagPeriode(periode2),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
+        vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
+
+        vilkårsvurderingsteg.periodeFjernet(
+            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner),
+        )
+
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it.size shouldBe 2
+            it[0].valg.shouldBeInstanceOf<GodTroDto>()
+            it[0].fom shouldBe periode1.fom
+            it[0].tom shouldBe periode1.tom
+            it[1].valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+            it[1].fom shouldBe periode2.fom
+            it[1].tom shouldBe periode2.tom
         }
     }
 

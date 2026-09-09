@@ -11,5 +11,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 @JsonSubTypes(
     JsonSubTypes.Type(value = EndretPeriodeDto::class, name = "endret_periode"),
     JsonSubTypes.Type(value = NyPeriodeDto::class, name = "ny_periode"),
+    JsonSubTypes.Type(value = FjernetPeriodeDto::class, name = "fjernet_periode"),
 )
 sealed interface KravgrunnlagForskjellDto

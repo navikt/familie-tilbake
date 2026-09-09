@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.e2e
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
@@ -20,6 +21,7 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -288,6 +290,84 @@ class KravgrunnlagEndretE2ETest {
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekreving.validerInnenforScope(features)
+        }
+    }
+
+    @Test
+    fun `kravgrunnlag med fjernet periode`() {
+        val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
+        val saksbehandlerContext = saksbehandlerContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val systemContext = systemContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = periode1),
+                    kravgrunnlagPeriode(periode = periode2),
+                ),
+            ),
+            context = systemContext,
+        )
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode1, periode2)))
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderVilkår(periode1, forårsaketAvBruker().uaktsomt())
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode = periode1),
+            ),
+        )
+        tilbakekreving.håndter(oppdatertKravgrunnlag, systemContext)
+
+        tilbakekreving.frontendDtoForBehandling(
+            tilbakekreving.nåværendeBehandlingId(),
+            saksbehandlerContext,
+            true,
+            BehandlerRolle.SAKSBEHANDLER,
+        ).endretKravgrunnlag.shouldNotBeNull {
+            this.gammeltBeløp shouldBe 4000
+            this.nyttBeløp shouldBe 2000
+            this.gammelPeriode shouldBe (1.januar(2021) til 28.februar(2021))
+            this.nyPeriode shouldBe periode1
+            this.endringer shouldContain FjernetPeriodeDto(periode2.fom, periode2.tom, 2000)
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FAKTA skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+
+        tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId()).should {
+            it.feilutbetaltePerioder shouldHaveSize 1
+            it.feilutbetaltePerioder[0].periode shouldBe periode1
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode1)))
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.FORHÅNDSVARSEL skalHaStatus Behandlingsstegstatus.UTFØRT
+
+        tilbakekreving.nåværendeBehandling().foreldelsestegDto.tilFrontendDto(saksbehandlerContext).should {
+            it.foreldetPerioder shouldHaveSize 1
+            it.foreldetPerioder[0].periode shouldBe periode1
+            it.foreldetPerioder[0].foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET
+        }
+
+        tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
+
+        tilbakekreving.nåværendeBehandling().vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext).should {
+            it.perioder shouldHaveSize 1
+            it.perioder[0].periode shouldBe periode1
         }
     }
 }

@@ -265,6 +265,33 @@ class ForeldelsestegTest {
     }
 
     @Test
+    fun `fjernet periode i kravgrunnlag`() {
+        val revurdering = eksternFagsakBehandling()
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val fjernetPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode),
+                kravgrunnlagPeriode(fjernetPeriode),
+            ),
+        )
+
+        val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
+        foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.IkkeForeldet("begrunnelse"))
+        foreldelsesteg.vurderForeldelse(fjernetPeriode, Foreldelsesteg.Vurdering.IkkeForeldet("begrunnelse"))
+        foreldelsesteg.trengerNyVurdering() shouldBe null
+
+        foreldelsesteg.periodeFjernet(KravgrunnlagSammenligning.Forskjell.FjernetPeriode(fjernetPeriode, 2000.kroner))
+
+        foreldelsesteg.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.should {
+            it.size shouldBe 1
+            it[0].periode.fom shouldBe periode.fom
+            it[0].periode.tom shouldBe periode.tom
+        }
+    }
+
+    @Test
     fun `endret beløp i kravgrunnlag markeres på foreldelsesperioden`() {
         val revurdering = eksternFagsakBehandling()
         val periode = 1.januar(2021) til 31.januar(2021)

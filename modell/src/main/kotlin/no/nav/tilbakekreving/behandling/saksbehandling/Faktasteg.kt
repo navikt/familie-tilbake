@@ -193,6 +193,11 @@ class Faktasteg(
         vurdering.perioder.finn(forskjell.periode).periodeEndret(forskjell)
     }
 
+    override fun periodeFjernet(periode: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        vurdering.fjernPeriode(periode)
+    }
+
     fun tilEntity(behandlingRef: UUID): FaktastegEntity {
         return vurdering.tilEntity(id, behandlingRef, tilbakeført, rettsgebyrÅrFraSaksbehandler)
     }
@@ -309,6 +314,11 @@ class Faktasteg(
                     endringIKravgrunnlag = forskjell,
                 )
             ).sorted()
+        }
+
+        internal fun fjernPeriode(forskjell: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
+            val fjernet = perioder.finn(forskjell.periode)
+            perioder = perioder.filterNot { it.id == fjernet.id }
         }
 
         sealed interface Oppdaget {

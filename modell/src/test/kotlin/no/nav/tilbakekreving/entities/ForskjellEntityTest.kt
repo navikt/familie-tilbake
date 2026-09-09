@@ -5,7 +5,6 @@ import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Com
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.ForskjellType
-import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -25,7 +24,7 @@ class ForskjellEntityTest {
 
     @Test
     fun `mapper NyPeriode til og fra entity`() {
-        val periode = 1.februar(2021) til 28.februar(2021)
+        val periode = 1.januar(2021) til 31.januar(2021)
         val forskjell = KravgrunnlagSammenligning.Forskjell.NyPeriode(periode, 2000.kroner)
 
         val entity = forskjell.tilEntity(null, UUID.randomUUID(), null)
@@ -48,6 +47,18 @@ class ForskjellEntityTest {
         val entity = forskjell.tilEntity(UUID.randomUUID(), null, null)
 
         entity.type shouldBe ForskjellType.JustertBeløp
+        val tilbake = entity.fraEntity()
+        tilbake shouldBe forskjell
+    }
+
+    @Test
+    fun `mapper FjernetPeriode til og fra entity`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val forskjell = KravgrunnlagSammenligning.Forskjell.FjernetPeriode(periode, 2000.kroner)
+
+        val entity = forskjell.tilEntity(UUID.randomUUID(), null, null)
+
+        entity.type shouldBe ForskjellType.FjernetPeriode
         val tilbake = entity.fraEntity()
         tilbake shouldBe forskjell
     }

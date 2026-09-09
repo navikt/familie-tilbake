@@ -140,6 +140,12 @@ class Foreldelsesteg(
         ).sorted()
     }
 
+    override fun periodeFjernet(periode: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
+        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        val id = vurdertePerioder.finnIdFor(periode.periode)
+        vurdertePerioder = vurdertePerioder.filterNot { it.id == id }
+    }
+
     fun foreldetPerioder(): List<Datoperiode> = vurdertePerioder.finnForeldetPerioder()
 
     fun tilFrontendDto(
