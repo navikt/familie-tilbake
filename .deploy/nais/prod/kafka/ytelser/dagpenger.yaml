@@ -22,7 +22,7 @@ spec:
       application: burde-forstatt
       access: readwrite
     - team: teamdagpenger
-      application: dp-behandling
+      application: dp-tilbakekreving
       access: readwrite
     - team: teamdagpenger
       application: dp-saksbehandling
