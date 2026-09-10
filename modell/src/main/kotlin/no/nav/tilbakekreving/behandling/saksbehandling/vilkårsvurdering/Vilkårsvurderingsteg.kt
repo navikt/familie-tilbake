@@ -338,7 +338,7 @@ class Vilkårsvurderingsteg(
                 .map { (underliggendeVurdering, perioder) ->
                     val endringIKravgrunnnlag = perioder
                         .mapNotNull { it.endringIKravgrunnnlag }
-                        .reduceOrNull { acc, forskjell -> acc.slåSammen(forskjell)!! }
+                        .reduceOrNull { acc, forskjell -> acc.slåSammenForVisning(forskjell) }
                     VilkaarsvurderingDto(
                         id = perioder.first().id,
                         fom = perioder.minOf { it.periode.fom },
