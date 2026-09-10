@@ -1,7 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "3.1.0"
+val springDocVersion = "3.1.1"
 val testcontainersVersion = "1.21.4"
 val tokenValidationVersion = "6.0.12"
 val flywayVersion = "11.3.4"
@@ -13,9 +13,9 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     id("org.springframework.boot") version "4.1.1"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.4.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.4.20"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -87,7 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.70.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.71.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -143,7 +143,7 @@ dependencies {
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.3.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.4.0")
 
     testImplementation(project(":testdata"))
 
