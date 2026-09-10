@@ -654,6 +654,44 @@ class VilkårsvurderingstegTest {
     }
 
     @Test
+    fun `endret periode og etterfølgende periode i kravgrunnlag - eksisterende periode uten vurdering`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 250.kroner,
+                nyttBeløp = 500.kroner,
+                etterfølgende = null,
+            ),
+        )
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+
+        vilkårsvurderingsteg.tilFrontendDto().forOne {
+            it.fom shouldBe periode1.fom
+            it.tom shouldBe nyPeriode.tom
+            it.endringIKravgrunnlag shouldBe EndretPeriodeDto(
+                fom = periode1.fom,
+                tom = nyPeriode.tom,
+                gammelPeriode = PeriodeDto(periode1.fom, periode1.tom),
+                gammeltBeløp = 250,
+                nyttBeløp = 2500,
+            )
+        }
+    }
+
+    @Test
     fun `endring i kravgrunnlag - har ikke mottatt nytt kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val kravgrunnlag = kravgrunnlag(

@@ -94,6 +94,8 @@ class KravgrunnlagSammenligning(
 
         fun slåSammen(other: Forskjell): Forskjell?
 
+        fun slåSammenForVisning(other: Forskjell): Forskjell = slåSammen(other) ?: throw NotImplementedError("Kan ikke slå sammen endring av ${this::class.simpleName} med ${other.javaClass.simpleName}")
+
         fun tilEntity(
             faktavurderingPeriodeRef: UUID?,
             vilkårsvurderingPeriodeRef: UUID?,
@@ -164,6 +166,18 @@ class KravgrunnlagSammenligning(
                 gammeltBeløp = gammeltBeløp.toInt(),
                 nyttBeløp = nyttBeløp.toInt(),
             )
+
+            override fun slåSammenForVisning(other: Forskjell): Forskjell = when (other) {
+                is NyPeriode -> EndretPeriode(
+                    periode = periode,
+                    nyPeriode = (nyPeriode?.fom ?: periode.fom) til other.periode.tom,
+                    gammeltBeløp = gammeltBeløp,
+                    nyttBeløp = nyttBeløp + other.nyttBeløp,
+                    etterfølgende = null,
+                )
+
+                else -> super.slåSammenForVisning(other)
+            }
         }
 
         data class NyPeriode(override val periode: Datoperiode, override val nyttBeløp: BigDecimal) : Forskjell {
