@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Compani
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilDto
-import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer.tilVisningstekst
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -131,9 +130,9 @@ class NyVedtaksbrevService(
                 fom = BrevFormatterer.norskNumeriskDato(it.fom),
                 tom = BrevFormatterer.norskNumeriskDato(it.tom),
                 feilutbetaltBeløp = BrevFormatterer.beløpString(it.feilutbetaltBeløp),
-                vurdering = it.vurdering.tilVisningstekst(),
-                andelAvBeløp = BrevFormatterer.prosentString(it.andelAvBeløp),
-                renteprosent = BrevFormatterer.prosentString(it.renteprosent),
+                reduksjonBeløp = BrevFormatterer.beløpString(it.reduksjon),
+                renteBeløp = BrevFormatterer.beløpString(it.renteBeløp),
+                skatt = BrevFormatterer.beløpString(it.skatteBeløp),
                 tilbakekrevingsbeløp = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
                 tilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(it.tilbakekrevesBeløpEtterSkatt),
             )
