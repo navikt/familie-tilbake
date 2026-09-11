@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake
 
-import no.nav.familie.tilbake.config.TestLauncherConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
@@ -22,7 +21,7 @@ fun main(args: Array<String>) {
         "local, mock-pdl, mock-oauth, mock-oppgave, mock-integrasjoner, mock-økonomi",
     )
 
-    TestLauncherConfig().settClientIdOgSecretForLokalKjøring()
+    // TestLauncherConfig().settClientIdOgSecretForLokalKjøring()
 
     SpringApplicationBuilder(LauncherLocalPostgres::class.java)
         .profiles("local", "mock-pdl", "mock-oauth", "mock-oppgave", "mock-integrasjoner", "mock-økonomi")

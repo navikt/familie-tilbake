@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.Beregningsresultatsperio
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksresultatDto
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import java.math.BigDecimal
 
 class Beregningsresultat(
@@ -37,6 +38,7 @@ class Beregningsresultat(
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
                 val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
+                val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
                 BeregningsresultatsperiodeDto(
                     fom = periode.periode.fom,
                     tom = periode.periode.tom,
@@ -46,6 +48,9 @@ class Beregningsresultat(
                     renteprosent = periode.renteprosent?.toInt(),
                     tilbakekrevingsbeløp = periode.tilbakekrevingsbeløp.toInt(),
                     tilbakekrevesBeløpEtterSkatt = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
+                    renteBeløp = periode.rentebeløp.toInt(),
+                    skatteBeløp = periode.skattebeløp.toInt(),
+                    reduksjon = reduksjon.toInt(),
                 )
             },
             vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
@@ -53,7 +58,7 @@ class Beregningsresultat(
     }
 }
 
-private fun no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto {
+private fun Vurdering.tilBeregningsresultatVurderingDto(): BeregningsresultatVurderingDto {
     return when (this) {
         Aktsomhet.FORSETT -> BeregningsresultatVurderingDto.Forsett
         Aktsomhet.GROV_UAKTSOMHET -> BeregningsresultatVurderingDto.GrovUaktsomhet
