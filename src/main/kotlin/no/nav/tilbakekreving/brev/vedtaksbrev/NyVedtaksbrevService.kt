@@ -130,13 +130,18 @@ class NyVedtaksbrevService(
                 fom = BrevFormatterer.norskNumeriskDato(it.fom),
                 tom = BrevFormatterer.norskNumeriskDato(it.tom),
                 feilutbetaltBeløp = BrevFormatterer.beløpString(it.feilutbetaltBeløp),
-                reduksjonBeløp = BrevFormatterer.beløpString(it.reduksjon),
-                renteBeløp = BrevFormatterer.beløpString(it.renteBeløp),
-                skatt = BrevFormatterer.beløpString(it.skatteBeløp),
+                reduksjonBeløp = beløpMedFortegn(it.reduksjon, "-"),
+                renteBeløp = beløpMedFortegn(it.renteBeløp, "+"),
+                skatt = beløpMedFortegn(it.skatteBeløp, "-"),
                 tilbakekrevingsbeløp = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
                 tilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(it.tilbakekrevesBeløpEtterSkatt),
             )
         }
+    }
+
+    private fun beløpMedFortegn(beløp: Int, fortegn: String): String {
+        val formatertBeløp = BrevFormatterer.beløpString(beløp)
+        return if (beløp > 0) "$fortegn$formatertBeløp" else formatertBeløp
     }
 
     fun oppdaterVedtaksbrevData(
