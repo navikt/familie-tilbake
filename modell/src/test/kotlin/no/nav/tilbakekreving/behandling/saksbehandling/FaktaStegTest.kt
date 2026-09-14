@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.inspectors.forNone
 import io.kotest.inspectors.forOne
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -16,12 +17,15 @@ import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RettsligGrunnlagDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.desember
 import no.nav.tilbakekreving.test.februar
@@ -619,5 +623,71 @@ class FaktaStegTest {
         frontendDto.feilutbetaltePerioder.forNone {
             it.periode shouldBe (1.januar(2021) til 31.januar(2021))
         }
+    }
+
+    @Test
+    fun `ny endring i kravgrunnlag som ikke treffer tidligere endret periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val revurdering = eksternFagsakBehandling()
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 4000.kroner)),
+                kravgrunnlagPeriode(periode2, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner)),
+            ),
+        )
+        val faktasteg = Faktasteg.opprett(
+            eksternFagsakRevurdering = revurdering,
+            kravgrunnlag = kravgrunnlag,
+            brevHistorikk = BrevHistorikk(historikk = mutableListOf()),
+        )
+        faktasteg.vurder("årsak")
+
+        faktasteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+        faktasteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode2,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        faktasteg.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = periode1.fom,
+                tom = periode1.tom,
+                nyttBeløp = 4000.kroner,
+                gammeltBeløp = 3000.kroner,
+            ),
+        )
+        faktasteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 3000.kroner,
+                nyttBeløp = 4000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        val perioder = faktasteg.nyTilFrontendDto(kravgrunnlag, revurdering, varselbrev = null, klokke = SystemKlokke).perioder
+        perioder.single { it.fom == periode1.fom }.endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            fom = periode1.fom,
+            tom = periode1.tom,
+            gammelPeriode = PeriodeDto(periode1.fom, periode1.tom),
+            gammeltBeløp = 3000,
+            nyttBeløp = 4000,
+        )
+        perioder.single { it.fom == periode2.fom }.endringIKravgrunnlag.shouldBeNull()
     }
 }

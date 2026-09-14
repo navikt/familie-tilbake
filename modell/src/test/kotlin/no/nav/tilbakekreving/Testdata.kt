@@ -267,3 +267,11 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
 
 fun Tilbakekreving.nåværendeBehandling() = hentBehandling(nåværendeBehandlingId())
+
+fun Tilbakekreving.vilkårsvurderingsperiodeId(periode: Datoperiode): UUID =
+    nåværendeBehandling()
+        .vilkårsvurderingDto(lesContext(klokke = SystemKlokke))
+        .vilkårsperioder
+        .flatMap { it.vilkårsvurdering.delbarePerioder }
+        .single { (it.periode.fom til it.periode.tom) == periode }
+        .periodeId

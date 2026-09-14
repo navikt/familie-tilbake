@@ -1,8 +1,10 @@
 package no.nav.tilbakekreving.e2e
+
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -21,10 +23,13 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.lesContext
 import no.nav.tilbakekreving.nåværendeBehandling
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -32,6 +37,7 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
+import no.nav.tilbakekreving.vilkårsvurderingsperiodeId
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
 
@@ -369,5 +375,90 @@ class KravgrunnlagEndretE2ETest {
             it.perioder shouldHaveSize 1
             it.perioder[0].periode shouldBe periode1
         }
+    }
+
+    @Test
+    fun `periode med endring i kravgrunnlaget får enda et nytt kravgrunnlag uten ny endring`() {
+        val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
+        val klokke = KlokkeStub(1.januar(2022))
+        val saksbehandlerContext = saksbehandlerContext(features = features, klokke = klokke)
+        val systemContext = systemContext(features = features, klokke = klokke)
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner)),
+                    kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 2000.kroner)),
+                ),
+            ),
+            context = systemContext,
+        )
+
+        val periode2Id = tilbakekreving.vilkårsvurderingsperiodeId(periode2)
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode1, periode2)))
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+        }
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderVilkår(periode1, forårsaketAvBruker().uaktsomt())
+            splittVilkårsvurdering(periode2Id)
+            vurderVilkår(periode2, forårsaketAvBruker().grovtUaktsomt())
+        }
+
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner)),
+                    kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner)),
+                ),
+            ),
+            systemContext,
+        )
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 4000.kroner)),
+                    kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 3000.kroner)),
+                ),
+            ),
+            systemContext,
+        )
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        val expectedEndring = EndretPeriodeDto(
+            fom = 1.januar(2021),
+            tom = 31.januar(2021),
+            gammelPeriode = PeriodeDto(
+                fom = 1.januar(2021),
+                tom = 31.januar(2021),
+            ),
+            nyttBeløp = 4000,
+            gammeltBeløp = 3000,
+        )
+
+        tilbakekreving.tilFeilutbetalingFrontendDto(tilbakekreving.nåværendeBehandlingId(), klokke)
+            .perioder
+            .should { faktaPerioder ->
+                faktaPerioder.single { it.fom == periode1.fom }.endringIKravgrunnlag shouldBe expectedEndring
+                faktaPerioder.single { it.fom == periode2.fom }.endringIKravgrunnlag.shouldBeNull()
+            }
+
+        tilbakekreving.nåværendeBehandling()
+            .vilkårsvurderingDto(lesContext(klokke = klokke))
+            .vilkårsperioder
+            .should { vilkårsperioder ->
+                vilkårsperioder.single { it.vilkårsvurdering.fom == periode1.fom }
+                    .vilkårsvurdering.endringIKravgrunnlag shouldBe expectedEndring
+                vilkårsperioder.single { it.vilkårsvurdering.fom == periode2.fom }
+                    .vilkårsvurdering.endringIKravgrunnlag.shouldBeNull()
+            }
     }
 }

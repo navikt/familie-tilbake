@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.UtenforScope
@@ -36,6 +37,27 @@ private fun sammenlign(
 ).sammendrag()
 
 private fun beløp(tilbakekrevesBeløp: BigDecimal) = ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp) + feilutbetalteBeløp(ytelsesbeløp(tilbakekrevesBeløp = tilbakekrevesBeløp))
+
+private fun sammendrag(
+    nåværende: List<KravgrunnlagHendelse.Periode>,
+    oppdatert: List<KravgrunnlagHendelse.Periode>,
+) = KravgrunnlagSammenligning(
+    originaltKravgrunnlag = kravgrunnlag(perioder = nåværende),
+    nyttKravgrunnlag = kravgrunnlag(perioder = oppdatert),
+    sporing = Sporing("", ""),
+).let {
+    var resultat: KravgrunnlagSammenligning.OverordnetSammendrag? = null
+    it.oppdaterSteg(
+        listOf(
+            object : EndretKravgrunnlagObservatør {
+                override fun nyttKravgrunnlagMottatt(sammendrag: KravgrunnlagSammenligning.OverordnetSammendrag) {
+                    resultat = sammendrag
+                }
+            },
+        ),
+    )
+    resultat
+}
 
 class KravgrunnlagSammenligningTest {
     @Test
@@ -587,5 +609,88 @@ class KravgrunnlagSammenligningTest {
             FjernetPeriodeDto(periode2.fom, periode2.tom, 1000),
             NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 1000),
         )
+    }
+
+    @Test
+    fun `overordnet sammendrag - ingen endring`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        sammendrag(
+            nåværende = listOf(kravgrunnlagPeriode(periode = periode, ytelsesbeløp = beløp(1000.kroner))),
+            oppdatert = listOf(kravgrunnlagPeriode(periode = periode, ytelsesbeløp = beløp(1000.kroner))),
+        ) shouldBe null
+    }
+
+    @Test
+    fun `overordnet sammendrag - endret beløp`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+
+        val sammendrag = sammendrag(
+            nåværende = listOf(kravgrunnlagPeriode(periode = periode, ytelsesbeløp = beløp(1000.kroner))),
+            oppdatert = listOf(kravgrunnlagPeriode(periode = periode, ytelsesbeløp = beløp(1500.kroner))),
+        ).shouldNotBeNull()
+
+        sammendrag.fom shouldBe 1.januar(2021)
+        sammendrag.tom shouldBe 31.januar(2021)
+        sammendrag.gammeltBeløp.compareTo(1000.kroner) shouldBe 0
+        sammendrag.nyttBeløp.compareTo(1500.kroner) shouldBe 0
+    }
+
+    @Test
+    fun `overordnet sammendrag - endret beløp i flere perioder`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode3 = 1.mars(2021) til 31.mars(2021)
+        val sammendrag = sammendrag(
+            nåværende = listOf(
+                kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = periode3, ytelsesbeløp = beløp(2000.kroner)),
+            ),
+            oppdatert = listOf(
+                kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1500.kroner)),
+                kravgrunnlagPeriode(periode = periode3, ytelsesbeløp = beløp(2500.kroner)),
+            ),
+        ).shouldNotBeNull()
+
+        sammendrag.fom shouldBe 1.januar(2021)
+        sammendrag.tom shouldBe 31.mars(2021)
+        sammendrag.gammeltBeløp.compareTo(3000.kroner) shouldBe 0
+        sammendrag.nyttBeløp.compareTo(4000.kroner) shouldBe 0
+    }
+
+    @Test
+    fun `overordnet sammendrag - ny periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+
+        val sammendrag = sammendrag(
+            nåværende = listOf(kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner))),
+            oppdatert = listOf(
+                kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = beløp(2000.kroner)),
+            ),
+        ).shouldNotBeNull()
+
+        sammendrag.fom shouldBe 1.februar(2021)
+        sammendrag.tom shouldBe 28.februar(2021)
+        sammendrag.gammeltBeløp.compareTo(BigDecimal.ZERO) shouldBe 0
+        sammendrag.nyttBeløp.compareTo(2000.kroner) shouldBe 0
+    }
+
+    @Test
+    fun `overordnet sammendrag - fjernet periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+
+        val sammendrag = sammendrag(
+            nåværende = listOf(
+                kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = periode2, ytelsesbeløp = beløp(2000.kroner)),
+            ),
+            oppdatert = listOf(kravgrunnlagPeriode(periode = periode1, ytelsesbeløp = beløp(1000.kroner))),
+        ).shouldNotBeNull()
+
+        sammendrag.fom shouldBe 1.februar(2021)
+        sammendrag.tom shouldBe 28.februar(2021)
+        sammendrag.gammeltBeløp.compareTo(2000.kroner) shouldBe 0
+        sammendrag.nyttBeløp.compareTo(BigDecimal.ZERO) shouldBe 0
     }
 }

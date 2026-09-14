@@ -17,7 +17,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import java.time.LocalDate
 import java.util.UUID
 
@@ -123,14 +123,10 @@ class Forhåndsvarsel(
         return brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
     }
 
-    override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
-        if (forskjell.gammeltBeløp.toInt() < forskjell.nyttBeløp.toInt()) {
+    override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+        if (sammendrag.gammeltBeløp < sammendrag.nyttBeløp) {
             forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
         }
-    }
-
-    override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
-        forhåndsvarselUnntak?.vurderPåNytt(ÅrsakTilTilbakeføring.NyttKravgrunnlag)
     }
 
     fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto = when {

@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.tilbakekreving.UtenforScope
-import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.entities.DatoperiodeEntity
 import no.nav.tilbakekreving.entities.ForskjellEntity
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -15,6 +14,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 
 class KravgrunnlagSammenligning(
@@ -39,7 +39,17 @@ class KravgrunnlagSammenligning(
         .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
         .toList()
 
-    internal fun oppdaterSteg(steg: List<Saksbehandlingsteg>) {
+    internal fun oppdaterSteg(steg: List<EndretKravgrunnlagObservatør>) {
+        val endringer = resultat()
+        if (endringer.isNotEmpty()) {
+            val sammendrag = OverordnetSammendrag(
+                fom = endringer.minOf { it.periode.fom },
+                tom = endringer.maxOf { it.periode.tom },
+                nyttBeløp = endringer.sumOf { it.nyttBeløp },
+                gammeltBeløp = endringer.sumOf { it.gammeltBeløp() },
+            )
+            steg.forEach { it.nyttKravgrunnlagMottatt(sammendrag) }
+        }
         forskjeller.forEach { forskjell ->
             steg.forEach { forskjell.oppdater(it) }
         }
@@ -92,6 +102,8 @@ class KravgrunnlagSammenligning(
 
         fun oppdater(steg: EndretKravgrunnlagObservatør)
 
+        fun gammeltBeløp(): BigDecimal
+
         fun slåSammen(other: Forskjell): Forskjell?
 
         fun slåSammenForVisning(other: Forskjell): Forskjell = slåSammen(other) ?: throw NotImplementedError("Kan ikke slå sammen endring av ${this::class.simpleName} med ${other.javaClass.simpleName}")
@@ -114,6 +126,8 @@ class KravgrunnlagSammenligning(
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.periodeEndret(this)
             }
+
+            override fun gammeltBeløp(): BigDecimal = gammeltBeløp
 
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
@@ -185,6 +199,8 @@ class KravgrunnlagSammenligning(
                 steg.nyPeriode(this)
             }
 
+            override fun gammeltBeløp(): BigDecimal = BigDecimal.ZERO
+
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
                 vilkårsvurderingPeriodeRef: UUID?,
@@ -219,6 +235,8 @@ class KravgrunnlagSammenligning(
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.periodeFjernet(this)
             }
+
+            override fun gammeltBeløp(): BigDecimal = beløp
 
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
@@ -259,6 +277,8 @@ class KravgrunnlagSammenligning(
         ) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {}
 
+            override fun gammeltBeløp(): BigDecimal = gammeltBeløp
+
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
                 vilkårsvurderingPeriodeRef: UUID?,
@@ -284,4 +304,11 @@ class KravgrunnlagSammenligning(
         NyPeriode,
         FjernetPeriode,
     }
+
+    data class OverordnetSammendrag(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val nyttBeløp: BigDecimal,
+        val gammeltBeløp: BigDecimal,
+    )
 }

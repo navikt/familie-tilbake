@@ -32,6 +32,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.math.abs
@@ -100,6 +101,10 @@ class Vilkårsvurderingsteg(
 
     private fun finnPeriodeMedId(id: UUID): Vilkårsvurderingsperiode {
         return vurderinger.single { it.id == id }
+    }
+
+    override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+        vurderinger.forEach { it.nyttKravgrunnlagMottatt(sammendrag) }
     }
 
     override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
@@ -260,7 +265,7 @@ class Vilkårsvurderingsteg(
         private var periode: Datoperiode,
         val begrunnelseForTilbakekreving: String?,
         private var _vurdering: ForårsaketAvBruker,
-        var endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell?,
+        private var endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell?,
     ) : VilkårsvurdertPeriodeAdapter, Comparable<Vilkårsvurderingsperiode> {
         val vurdering get() = _vurdering
 
@@ -296,6 +301,10 @@ class Vilkårsvurderingsteg(
                     foreldelsesvurderingPeriodeRef = null,
                 ),
             )
+        }
+
+        fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+            endringIKravgrunnnlag = null
         }
 
         fun periodeEndret(endring: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {

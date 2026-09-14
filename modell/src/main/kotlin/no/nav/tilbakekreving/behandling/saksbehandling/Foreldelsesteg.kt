@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -123,6 +124,10 @@ class Foreldelsesteg(
 
     fun harTilleggsfrist(): Boolean = vurdertePerioder.any { it.vurdering is Vurdering.Tilleggsfrist }
 
+    override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+        vurdertePerioder.forEach { it.nyttKravgrunnlagMottatt(sammendrag) }
+    }
+
     override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         vurdertePerioder
@@ -170,7 +175,7 @@ class Foreldelsesteg(
         val id: UUID,
         private var periode: Datoperiode,
         private var _vurdering: Vurdering,
-        var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
+        private var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
     ) : Comparable<Foreldelseperiode> {
         val vurdering get() = _vurdering
 
@@ -190,6 +195,10 @@ class Foreldelsesteg(
                     foreldelsesvurderingPeriodeRef = id,
                 ),
             )
+        }
+
+        fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+            endringIKravgrunnlag = null
         }
 
         fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {

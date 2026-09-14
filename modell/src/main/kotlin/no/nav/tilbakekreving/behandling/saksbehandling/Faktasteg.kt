@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -186,6 +187,10 @@ class Faktasteg(
     override fun nyPeriode(periode: KravgrunnlagSammenligning.Forskjell.NyPeriode) {
         tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         vurdering.nyPeriode(periode)
+    }
+
+    override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+        vurdering.perioder.forEach { it.nyttKravgrunnlagMottatt(sammendrag) }
     }
 
     override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
@@ -389,7 +394,7 @@ class Faktasteg(
         private var periode: Datoperiode,
         var rettsligGrunnlag: Hendelsestype,
         var rettsligGrunnlagUnderkategori: Hendelsesundertype,
-        var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
+        private var endringIKravgrunnlag: KravgrunnlagSammenligning.Forskjell?,
     ) : Comparable<FaktaPeriode> {
         fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.FaktaPeriodeEntity {
             return FaktastegEntity.FaktaPeriodeEntity(
@@ -436,6 +441,10 @@ class Faktasteg(
         fun vurder(oppdatering: OppdaterFaktaPeriodeDto) {
             rettsligGrunnlag = enumValueOf(oppdatering.rettsligGrunnlag.single().bestemmelse)
             rettsligGrunnlagUnderkategori = enumValueOf(oppdatering.rettsligGrunnlag.single().grunnlag)
+        }
+
+        fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+            endringIKravgrunnlag = null
         }
 
         fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {

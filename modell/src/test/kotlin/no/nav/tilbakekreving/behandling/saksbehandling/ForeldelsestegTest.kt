@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 
 import io.kotest.inspectors.forNone
 import io.kotest.inspectors.forSingle
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
@@ -12,6 +13,7 @@ import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
@@ -338,5 +340,60 @@ class ForeldelsestegTest {
                 it.periode shouldBe (1.januar(2021) til 31.januar(2021))
             }
         }
+    }
+
+    @Test
+    fun `ny endring i kravgrunnlag som ikke treffer tidligere endret periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val foreldelsesteg = Foreldelsesteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode1),
+                    kravgrunnlagPeriode(periode2),
+                ),
+            ),
+        )
+
+        foreldelsesteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+        foreldelsesteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode2,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        val nyEndringPeriode1 = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+            periode = periode1,
+            nyPeriode = null,
+            gammeltBeløp = 3000.kroner,
+            nyttBeløp = 4000.kroner,
+            etterfølgende = null,
+        )
+        foreldelsesteg.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = periode1.fom,
+                tom = periode1.tom,
+                nyttBeløp = 4000.kroner,
+                gammeltBeløp = 3000.kroner,
+            ),
+        )
+        foreldelsesteg.periodeEndret(nyEndringPeriode1)
+
+        val perioder = foreldelsesteg.tilEntity(UUID.randomUUID()).vurdertePerioder
+        perioder.single { it.periode.fraEntity() == periode1 }.endringIKravgrunnlag?.fraEntity() shouldBe nyEndringPeriode1
+        perioder.single { it.periode.fraEntity() == periode2 }.endringIKravgrunnlag.shouldBeNull()
     }
 }

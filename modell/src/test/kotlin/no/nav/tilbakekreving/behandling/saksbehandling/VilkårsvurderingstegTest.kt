@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -39,6 +40,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.februar
@@ -1133,5 +1135,72 @@ class VilkårsvurderingstegTest {
             it[1].fom shouldBe nyPeriode.fom
             it[1].tom shouldBe nyPeriode.tom
         }
+    }
+
+    @Test
+    fun `ny endring i kravgrunnlag som ikke treffer tidligere endret periode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(periode2),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode.fom == periode2.fom }.periodeId
+        vilkårsvurderingsteg.vurder(periode1, forårsaketAvBruker().uaktsomt())
+        vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
+        vilkårsvurderingsteg.vurder(periode2, forårsaketAvBruker().grovtUaktsomt())
+
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode2,
+                nyPeriode = null,
+                gammeltBeløp = 2000.kroner,
+                nyttBeløp = 3000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        vilkårsvurderingsteg.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = periode1.fom,
+                tom = periode1.tom,
+                gammeltBeløp = 3000.kroner,
+                nyttBeløp = 4000.kroner,
+            ),
+        )
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = null,
+                gammeltBeløp = 3000.kroner,
+                nyttBeløp = 4000.kroner,
+                etterfølgende = null,
+            ),
+        )
+
+        val perioder = vilkårsvurderingsteg.tilFrontendDto()
+        perioder.single { it.fom == periode1.fom }.endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            fom = periode1.fom,
+            tom = periode1.tom,
+            gammelPeriode = PeriodeDto(periode1.fom, periode1.tom),
+            gammeltBeløp = 3000,
+            nyttBeløp = 4000,
+        )
+        perioder.single { it.fom == periode2.fom }.endringIKravgrunnlag.shouldBeNull()
     }
 }

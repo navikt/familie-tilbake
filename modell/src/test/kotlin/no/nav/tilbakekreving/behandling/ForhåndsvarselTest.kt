@@ -9,8 +9,7 @@ import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Com
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
-import no.nav.tilbakekreving.kontrakter.periode.til
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
@@ -97,34 +96,19 @@ class ForhåndsvarselTest {
     }
 
     @Test
-    fun `ny periode i kravgrunnlag krever ny vurdering av forhåndsvarselunntak`() {
+    fun `økt beløp i kravgrunnlaget fører til ny vurdering av forhåndsvarselunntak`() {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
             beskrivelse = "",
         )
 
-        forhåndsvarsel.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(1.februar(2021) til 28.februar(2021), BigDecimal("2000")))
-
-        val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
-        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
-    }
-
-    @Test
-    fun `endret periode i kravgrunnlag fører til tilbakeføring`() {
-        val forhåndsvarsel = Forhåndsvarsel.opprett()
-        forhåndsvarsel.lagreForhåndsvarselUnntak(
-            begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
-            beskrivelse = "",
-        )
-
-        forhåndsvarsel.periodeEndret(
-            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
-                periode = 1.januar(2021) til 31.januar(2021),
-                nyPeriode = 1.januar(2021) til 20.januar(2021),
-                gammeltBeløp = 1000.kroner,
+        forhåndsvarsel.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = 1.januar(2021),
+                tom = 31.januar(2021),
                 nyttBeløp = 1500.kroner,
-                etterfølgende = null,
+                gammeltBeløp = 1000.kroner,
             ),
         )
 
@@ -134,15 +118,20 @@ class ForhåndsvarselTest {
     }
 
     @Test
-    fun `fjernet periode i kravgrunnlag`() {
+    fun `redusert beløp i kravgrunnlaget fører ikke til ny vurdering av forhåndsvarselunntak`() {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG,
             beskrivelse = "",
         )
 
-        forhåndsvarsel.periodeFjernet(
-            KravgrunnlagSammenligning.Forskjell.FjernetPeriode(1.februar(2021) til 28.februar(2021), 2000.kroner),
+        forhåndsvarsel.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = 1.februar(2021),
+                tom = 28.februar(2021),
+                nyttBeløp = BigDecimal.ZERO,
+                gammeltBeløp = 2000.kroner,
+            ),
         )
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke)
