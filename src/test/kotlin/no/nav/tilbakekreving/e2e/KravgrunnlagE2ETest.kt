@@ -150,7 +150,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             val fagsystemIder = (0..4).map {
                 val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
                 val future = Thread {
-                    fagsystemIntegrasjonService.håndter(Ytelse.Arbeidsavklaringspenger, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+                    fagsystemIntegrasjonService.håndter(Ytelse.Dagpenger, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
                 }
 
                 kafkaProducerStub.settFagsysteminfoSvar(fagsystemId) {
@@ -158,7 +158,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                     future.start()
                 }
 
-                sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forAAP(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
+                sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forDP(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
                 kravgrunnlagMediator.lesKravgrunnlag()
                 future.join()
                 fagsystemId
