@@ -111,7 +111,7 @@ sealed interface Ytelse {
 
         override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.ARBEIDSAVKLARINGSPENGER
 
-        override fun integrererMotFagsystem(): Boolean = false
+        override fun integrererMotFagsystem(): Boolean = true
 
         override fun tilYtelsestype(): Ytelsestype = Ytelsestype.ARBEIDSAVKLARINGSPENGER
 

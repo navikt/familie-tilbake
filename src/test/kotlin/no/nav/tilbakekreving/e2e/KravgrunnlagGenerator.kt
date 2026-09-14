@@ -84,6 +84,31 @@ object KravgrunnlagGenerator {
         )
     }
 
+    fun forDP(
+        vedtakId: String = nextPaddedId(6),
+        fagsystemId: String = nextPaddedId(6),
+        kravgrunnlagId: String = nextPaddedId(6),
+        referanse: String = nextPaddedId(4),
+        ansvarligEnhet: String = nextPaddedId(4),
+        fødselsnummer: String = "40026912345",
+        kravStatusKode: String = "NY",
+        kontrollfelt: String = "2025-12-24-11.12.13.123456",
+        perioder: List<Tilbakekrevingsperiode> = listOf(standardPeriode(1.januar(2021) til 14.januar(2021))),
+    ): String {
+        return forFagområde(
+            vedtakId = vedtakId,
+            fagsystemId = fagsystemId,
+            kravgrunnlagId = kravgrunnlagId,
+            referanse = referanse,
+            ansvarligEnhet = ansvarligEnhet,
+            fødselsnummer = fødselsnummer,
+            kravStatusKode = kravStatusKode,
+            kontrollfelt = kontrollfelt,
+            perioder = perioder,
+            fagområde = "DP",
+        )
+    }
+
     fun forFagområde(
         vedtakId: String,
         fagsystemId: String,

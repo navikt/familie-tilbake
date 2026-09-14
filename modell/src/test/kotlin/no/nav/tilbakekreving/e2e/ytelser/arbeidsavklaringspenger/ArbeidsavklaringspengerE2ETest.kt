@@ -9,10 +9,12 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.systemContext
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class ArbeidsavklaringspengerE2ETest {
+    @Disabled
     @Test
     fun `hopper over innhenting av fagsystem info`() {
         val observatør = BehovObservatørOppsamler()
