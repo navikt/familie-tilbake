@@ -1,7 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "3.1.0"
+val springDocVersion = "3.1.1"
 val testcontainersVersion = "1.21.4"
 val tokenValidationVersion = "6.0.12"
 val flywayVersion = "11.3.4"
@@ -13,9 +13,9 @@ description = "familie-tilbake"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     id("org.springframework.boot") version "4.1.1"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.4.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "2.4.20"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -56,7 +56,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.2.4")
+        testImplementation("io.kotest:kotest-assertions-core:6.2.5")
     }
 
     tasks.test {
@@ -87,7 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.70.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.71.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -139,11 +139,11 @@ dependencies {
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
     api("io.getunleash:unleash-client-java:12.3.0")
-    api("org.messaginghub:pooled-jms:3.2.4")
+    api("org.messaginghub:pooled-jms:3.2.5")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.3.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.4.0")
 
     testImplementation(project(":testdata"))
 
@@ -151,7 +151,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.mockk:mockk-jvm:1.14.11")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.4")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:6.2.5")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
