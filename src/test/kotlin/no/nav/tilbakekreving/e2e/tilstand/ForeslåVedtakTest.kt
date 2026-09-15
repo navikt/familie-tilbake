@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.kanBehandle
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -27,7 +26,6 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
     fun `foreslå vedtak via nytt endepunkt`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),

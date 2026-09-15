@@ -85,20 +85,11 @@ import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@TestPropertySource(
-    properties = [
-        "rolle.barnetrygd.beslutter=bb123",
-        "rolle.barnetrygd.saksbehandler=bs123",
-        "rolle.barnetrygd.veileder=bv123",
-        "rolle.teamfamilie.forvalter=familie123",
-    ],
-)
 internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -632,7 +623,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             ytelsestype = YtelsestypeDTO.BARNETRYGD,
         )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         assertFellesBehandlingRespons(behandlingDto, behandling)
         behandlingDto.kanHenleggeBehandling.shouldBeFalse()
@@ -660,7 +653,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
             ytelsestype = YtelsestypeDTO.BARNETRYGD,
         )
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         assertFellesBehandlingRespons(behandlingDto, behandling)
         behandlingDto.kanHenleggeBehandling.shouldBeFalse()
@@ -692,7 +687,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val oppdatertBehandling = lagretBehandling.copy(sporbar = sporbar)
         behandlingRepository.update(oppdatertBehandling)
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         assertFellesBehandlingRespons(behandlingDto, oppdatertBehandling)
         behandlingDto.kanHenleggeBehandling.shouldBeTrue()
@@ -722,7 +719,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         val lagretBehandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(lagretBehandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.kanEndres.shouldBeFalse()
         behandlingDto.kanHenleggeBehandling.shouldBeFalse()
@@ -868,7 +867,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
         behandlingDto.kanRevurderingOpprettes.shouldBeFalse()
     }
 
@@ -881,7 +882,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.findByIdOrThrow(behandling.id)
         behandlingRepository.update(behandling.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
         behandlingDto.kanRevurderingOpprettes.shouldBeTrue()
     }
 
@@ -896,7 +899,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
         behandlingRepository.insert(Testdata.lagRevurdering(behandling.id, fagsak.id))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
         behandlingDto.kanRevurderingOpprettes.shouldBeFalse()
     }
 
@@ -913,7 +918,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         revurdering = behandlingRepository.findByIdOrThrow(revurdering.id)
         behandlingRepository.update(revurdering.copy(status = Behandlingsstatus.AVSLUTTET))
 
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
         behandlingDto.kanRevurderingOpprettes.shouldBeTrue()
     }
 
@@ -1479,7 +1486,9 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         )
 
         val behandling = behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        val behandlingDto = behandlingService.hentBehandling(behandling.id)
+        val behandlingDto = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            behandlingService.hentBehandling(behandling.id)
+        }
 
         behandlingDto.støtterManuelleBrevmottakere shouldBe false
     }

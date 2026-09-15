@@ -1,36 +1,33 @@
 package no.nav.tilbakekreving.e2e
 
-import io.kotest.assertions.nondeterministic.eventually
-import io.kotest.assertions.nondeterministic.eventuallyConfig
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.runBlocking
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.UtenforScope
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.query
-import kotlin.time.Duration.Companion.milliseconds
 
 class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
+    @Autowired
+    private lateinit var statusmeldingBufferRepository: StatusmeldingBufferRepository
+
     @Test
     fun `statusmelding lagres i buffer for senere behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendStatusmelding(
-            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"),
-            fagsystemId = fagsystemId,
-        )
+        sendStatusmelding(statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"))
 
         val antallKravgrunnlag = jdbcTemplate.query(
             "SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=?;",
@@ -44,17 +41,11 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     fun `annullert kravgrunnlag blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
-        )
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(
-            statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"),
-            fagsystemId = fagsystemId,
-        )
+        sendStatusmelding(statusmelding = statusmelding(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"))
 
         val exception = shouldThrow<ModellFeil.UtenforScopeException> {
             behandlingController.hentBehandling(behandlingId)
@@ -64,24 +55,19 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
 
     private fun sendStatusmelding(
         statusmelding: String,
-        fagsystemId: String,
         forventetAntallUleste: Int = 1,
     ) {
-        sendMessage(TILLEGGSSTØNADER_KØ_NAVN, statusmelding)
-        avventAntallUlesteStatusmeldinger(forventetAntallUleste, fagsystemId)
-    }
-
-    private fun avventAntallUlesteStatusmeldinger(antall: Int, fagsystemId: String) {
-        runBlocking {
-            eventually(
-                eventuallyConfig {
-                    duration = 2000.milliseconds
-                    interval = 10.milliseconds
-                },
-            ) {
-                tellUlesteStatusmeldinger(fagsystemId) shouldBe antall
-            }
-        }
+        val dto = KravgrunnlagUtil.unmarshalStatusmelding(statusmelding)
+        statusmeldingBufferRepository.lagre(
+            StatusmeldingBufferRepository.Entity(
+                statusmelding = statusmelding,
+                fagsystemId = dto.fagsystemId,
+                vedtakId = dto.vedtakId.toString(),
+                status = dto.kodeStatusKrav,
+            ),
+        )
+        statusmeldingBufferRepository
+        tellUlesteStatusmeldinger(dto.fagsystemId) shouldBe forventetAntallUleste
     }
 
     private fun tellUlesteStatusmeldinger(fagsystemId: String): Int {

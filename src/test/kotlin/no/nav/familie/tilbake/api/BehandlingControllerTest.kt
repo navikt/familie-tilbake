@@ -1,7 +1,7 @@
 package no.nav.familie.tilbake.api
 
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -30,19 +30,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 import java.util.UUID
 
-@TestPropertySource(
-    properties = [
-        "rolle.enslig.veileder=ef-veileder",
-        "rolle.enslig.saksbehandler=ef-saksbehandler",
-        "rolle.enslig.beslutter=ef-beslutter",
-        "rolle.teamfamilie.forvalter=forvalter",
-    ],
-)
-class BehandlingControllerTest() : OppslagSpringRunnerTest() {
+class BehandlingControllerTest() : OppslagSpringRunnerMedWebserverTest() {
     private val restTemplate = TestRestTemplate()
 
     @Autowired
@@ -65,7 +56,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.UTREDES,
                 behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
             ),
-            authorizationHeaders(grupper = listOf("forvalter")),
+            authorizationHeaders(grupper = listOf("familie123")),
         )
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
@@ -78,7 +69,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 Behandlingsstatus.UTREDES,
                 Behandlingsstegstatus.KLAR,
             ),
-            headers = authorizationHeaders(grupper = listOf("forvalter", "ef-saksbehandler")),
+            headers = authorizationHeaders(grupper = listOf("familie123", "es123")),
         )
         assertEquals(HttpStatus.OK, response.statusCode)
     }
@@ -91,7 +82,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.UTREDES,
                 behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
             ),
-            authorizationHeaders(grupper = listOf("ef-beslutter")),
+            authorizationHeaders(grupper = listOf("eb123")),
         )
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
@@ -104,7 +95,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.UTREDES,
                 behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
             ),
-            authorizationHeaders(grupper = listOf("ef-saksbehandler")),
+            authorizationHeaders(grupper = listOf("es123")),
         )
         assertEquals(HttpStatus.OK, response.statusCode)
     }
@@ -117,7 +108,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.UTREDES,
                 behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
             ),
-            authorizationHeaders(grupper = listOf("ef-saksbehandler")),
+            authorizationHeaders(grupper = listOf("es123")),
         )
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
@@ -130,7 +121,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.FATTER_VEDTAK,
                 behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
             ),
-            authorizationHeaders(grupper = listOf("ef-saksbehandler")),
+            authorizationHeaders(grupper = listOf("es123")),
         )
         assertThat(HttpStatus.FORBIDDEN).isEqualTo(response.statusCode)
         assertThat(response.body).contains("Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta")
@@ -144,7 +135,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
                 behandlingStatus = Behandlingsstatus.UTREDES,
                 behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
             ),
-            authorizationHeaders(grupper = listOf("ef-saksbehandler")),
+            authorizationHeaders(grupper = listOf("es123")),
         )
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
         assertThat(response.body).contains("Behandling er på vent og kan derfor ikke flyttes tilbake til fakta")
@@ -156,7 +147,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<Nothing>>(
             localhost("/api/behandling/$behandlingId/steg/v1"),
             HttpMethod.POST,
-            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("ef-saksbehandler"))),
+            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("es123"))),
         )
         response.statusCode shouldBe HttpStatus.FORBIDDEN
         response.body?.melding shouldBe "$SAKSBEHANDLER_IDENT med rolle SAKSBEHANDLER har ikke tilgang til å Utfører behandlingens aktiv steg og fortsetter den til neste steg. Krever BESLUTTER."
@@ -172,7 +163,7 @@ class BehandlingControllerTest() : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<Nothing>>(
             localhost("/api/behandling/$behandlingId/steg/v1"),
             HttpMethod.POST,
-            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("ef-beslutter"))),
+            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("eb123"))),
         )
         response.statusCode shouldBe HttpStatus.BAD_REQUEST
         response.body?.melding shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"

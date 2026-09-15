@@ -7,7 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -41,7 +41,7 @@ import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
-internal class FagsakServiceTest : OppslagSpringRunnerTest() {
+internal class FagsakServiceTest : OppslagSpringRunnerMedWebserverTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

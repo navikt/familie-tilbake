@@ -23,6 +23,7 @@ import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppgavePrioritetService
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.familie.tilbake.person.PersonService
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -118,7 +119,10 @@ internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest(
                     it.payload == behandling.id.toString()
             }.shouldBeFalse()
 
-        Assertions.assertEquals(behandlingService.hentBehandling(behandling.id).status, Behandlingsstatus.AVSLUTTET)
+        Assertions.assertEquals(
+            ContextServiceHelpers.somSaksbehandler { behandlingService.hentBehandling(behandling.id) }.status,
+            Behandlingsstatus.AVSLUTTET,
+        )
     }
 
     private fun lagTask(behandlingId: UUID) =

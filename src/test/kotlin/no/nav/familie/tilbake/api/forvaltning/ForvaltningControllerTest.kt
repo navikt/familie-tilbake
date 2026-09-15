@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.api.forvaltning
 
-import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -26,19 +26,10 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.TestPropertySource
 import java.time.LocalDate
 import java.util.UUID
 
-@TestPropertySource(
-    properties = [
-        "rolle.enslig.veileder=ef-veileder",
-        "rolle.enslig.saksbehandler=ef-saksbehandler",
-        "rolle.enslig.beslutter=ef-beslutter",
-        "rolle.teamfamilie.forvalter=forvalter",
-    ],
-)
-class ForvaltningControllerTest : OppslagSpringRunnerTest() {
+class ForvaltningControllerTest : OppslagSpringRunnerMedWebserverTest() {
     private val restTemplate = TestRestTemplate()
 
     @Autowired
@@ -55,7 +46,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Forvalter kan sette behandling på vent tilbake til fakta`() {
-        val headers = authorizationHeaders(grupper = listOf("forvalter"))
+        val headers = authorizationHeaders(grupper = listOf("familie123"))
 
         val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -63,14 +54,14 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Beslutter skal ikke kunne kalle på forvalterendepunkt`() {
-        val headers = authorizationHeaders(grupper = listOf("ef-beslutter"))
+        val headers = authorizationHeaders(grupper = listOf("eb123"))
         val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
     }
 
     @Test
     fun `Saksbehandler og forvalter som ikke er ansvarlig saksbehandler skal kunne bruke forvaltningsendepunkt`() {
-        val headers = authorizationHeaders(ident = "ikke ansvarlig", grupper = listOf("forvalter", "ef-saksbehandler"))
+        val headers = authorizationHeaders(ident = "ikke ansvarlig", grupper = listOf("familie123", "es123"))
 
         val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -78,7 +69,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Veileder skal ikke kunne sette behandling tilbake til faktasteg`() {
-        val headers = authorizationHeaders(grupper = listOf("ef-veileder"))
+        val headers = authorizationHeaders(grupper = listOf("ev123"))
 
         val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
         assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
@@ -86,7 +77,7 @@ class ForvaltningControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Forvalter kan sette behandling tilbake til fakta når behandling ikke er under utredning`() {
-        val headers = authorizationHeaders(grupper = listOf("forvalter"))
+        val headers = authorizationHeaders(grupper = listOf("familie123"))
         val response = flyttBehandlingTilFakta(opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK), headers)
         assertEquals(HttpStatus.OK, response.statusCode)
     }

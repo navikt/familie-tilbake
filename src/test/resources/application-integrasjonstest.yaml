@@ -39,6 +39,23 @@ NAIS_CLUSTER_NAME: dev-gcp
 ainntekt:
   baseUrl: http://mock-ainntekt-server
 
+oppdrag.mq.enabled: false
+
+rolle:
+  barnetrygd:
+    veileder: bv123
+    saksbehandler: bs123
+    beslutter: bb123
+  enslig:
+    veileder: ev123
+    saksbehandler: es123
+    beslutter: eb123
+  kontantstøtte:
+    veileder: kv123
+    saksbehandler: ks123
+    beslutter: kb123
+  teamfamilie:
+    forvalter: familie123
 
 tilbakekreving:
   kravgrunnlag:
@@ -48,7 +65,8 @@ tilbakekreving:
       aap:
         beslutter: [ "e2e-tilgang" ]
       ts:
-        beslutter: [ "e2e-tilgang" ]
+        saksbehandler: [ "ts-saksbehandler" ]
+        beslutter: [ "e2e-tilgang", "ts-beslutter" ]
       tp:
         beslutter: [ "e2e-tilgang" ]
   tilgangsmaskinen:

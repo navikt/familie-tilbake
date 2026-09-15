@@ -32,28 +32,10 @@ import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import java.util.EnumMap
 import java.util.Optional
 import java.util.UUID
 
-@TestPropertySource(
-    properties = [
-        "rolle.barnetrygd.beslutter=bb123",
-        "rolle.barnetrygd.saksbehandler=bs123",
-        "rolle.barnetrygd.veileder=bv123",
-        "rolle.enslig.beslutter=eb123",
-        "rolle.enslig.saksbehandler=es123",
-        "rolle.enslig.veileder=ev123",
-        "rolle.kontantstøtte.beslutter = kb123",
-        "rolle.kontantstøtte.saksbehandler = ks123",
-        "rolle.kontantstøtte.veileder = kv123",
-        "rolle.teamfamilie.forvalter = familie123",
-        "tilbakekreving.tilgangsstyring.grupper.ts.saksbehandler = ts-saksbehandler",
-        "tilbakekreving.tilgangsstyring.grupper.ts.beslutter = ts-beslutter",
-        "tilbakekreving.toggles.tilgangsmaskinen-enabled = true",
-    ],
-)
 internal class NyTilgangskontrollServiceTest : OppslagSpringRunnerTest() {
     companion object {
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"

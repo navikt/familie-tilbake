@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpHeaders
@@ -20,7 +19,7 @@ import java.math.BigInteger
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
@@ -32,9 +31,6 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired
     private lateinit var mockOAuth2Server: MockOAuth2Server
-
-    @LocalServerPort
-    private var port: Int? = 0
 
     fun authorizationHeaders(
         ident: String = SAKSBEHANDLER_IDENT,
@@ -49,8 +45,6 @@ abstract class OppslagSpringRunnerTest {
         }
     }
 
-    protected fun localhost(uri: String): String = LOCALHOST + getPort() + uri
-
     fun readXml(fileName: String): String {
         val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }
         return url.readText()
@@ -64,10 +58,4 @@ abstract class OppslagSpringRunnerTest {
         .konverterDatoIXMLTilIkkeForeldet()
         .replace("<urn:fagsystemId>testverdi</urn:fagsystemId>", "<urn:fagsystemId>$fagsystemId</urn:fagsystemId>")
         .replace("<urn:kravgrunnlagId>0</urn:kravgrunnlagId>", "<urn:kravgrunnlagId>${BigInteger(kravgrunnlagId)}</urn:kravgrunnlagId>")
-
-    protected fun getPort(): String = port.toString()
-
-    companion object {
-        private const val LOCALHOST = "http://localhost:"
-    }
 }

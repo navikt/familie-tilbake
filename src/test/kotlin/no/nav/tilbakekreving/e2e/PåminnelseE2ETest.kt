@@ -7,7 +7,6 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -47,7 +46,6 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val fødselsnummer = "feil${KravgrunnlagGenerator.nextPaddedId(7)}"
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = fødselsnummer),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
@@ -97,7 +95,6 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
     fun `perioder som er avsluttet skal ikke bli påminnet`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -144,7 +141,6 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
     fun `sender ikke flere påminnelser for tilstander som ikke feiler`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
@@ -178,11 +174,9 @@ class PåminnelseE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId2 = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId1),
         )
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId2),
         )
 

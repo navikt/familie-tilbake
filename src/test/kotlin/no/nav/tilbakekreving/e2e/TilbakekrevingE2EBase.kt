@@ -1,11 +1,6 @@
 package no.nav.tilbakekreving.e2e
-import io.kotest.assertions.nondeterministic.eventually
-import io.kotest.assertions.nondeterministic.eventuallyConfig
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import jakarta.jms.ConnectionFactory
-import jakarta.jms.JMSException
-import kotlinx.coroutines.runBlocking
 import no.nav.familie.tilbake.api.BehandlingController
 import no.nav.familie.tilbake.api.VilkårsvurderingController
 import no.nav.familie.tilbake.config.PdlClientMock
@@ -37,7 +32,6 @@ import org.springframework.jdbc.core.query
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 
 @ActiveProfiles("ny-modell")
 open class TilbakekrevingE2EBase : E2EBase() {
@@ -54,9 +48,6 @@ open class TilbakekrevingE2EBase : E2EBase() {
     protected lateinit var tilbakekrevingService: TilbakekrevingService
 
     @Autowired
-    private lateinit var connectionFactory: ConnectionFactory
-
-    @Autowired
     protected lateinit var pdlClient: PdlClientMock
 
     @Autowired
@@ -71,48 +62,23 @@ open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var vilkårsvurderingController: VilkårsvurderingController
 
-    fun sendMessage(
-        queueName: String,
-        text: String,
-    ) {
-        repeat(5) {
-            try {
-                connectionFactory.createConnection().use {
-                    it.createSession().use { session ->
-                        val message = session.createTextMessage(text)
-                        val queue = session.createQueue(queueName)
-                        session.createProducer(queue).use {
-                            it.send(message)
-                        }
-                    }
-                }
-                return
-            } catch (e: JMSException) {
-                e.printStackTrace()
-                Thread.sleep(500)
-            }
-        }
+    protected fun sendKravgrunnlag(kravgrunnlag: String) {
+        val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
+        kravgrunnlagBufferRepository.lagre(
+            KravgrunnlagBufferRepository.Entity(
+                kravgrunnlag = kravgrunnlag,
+                kravgrunnlagId = dto.kravgrunnlagId.toString(),
+                fagsystemId = dto.fagsystemId,
+            ),
+        )
     }
 
-    fun sendKravgrunnlag(
-        queueName: String,
-        kravgrunnlag: String,
-    ) {
+    fun sendKravgrunnlagOgAvventLesing(kravgrunnlag: String) {
         val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
-        sendMessage(queueName, kravgrunnlag)
-
-        avventAntallUlesteKravgrunnlag(1, dto.kravgrunnlagId.toString())
-    }
-
-    fun sendKravgrunnlagOgAvventLesing(
-        queueName: String,
-        kravgrunnlag: String,
-    ) {
-        val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
-        sendKravgrunnlag(queueName, kravgrunnlag)
+        sendKravgrunnlag(kravgrunnlag)
         kravgrunnlagMediator.lesKravgrunnlag()
 
-        avventAntallUlesteKravgrunnlag(0, dto.kravgrunnlagId.toString())
+        tellUlesteKravgrunnlag(dto.kravgrunnlagId.toString()) shouldBe 0
     }
 
     fun behandlingIdFor(
@@ -208,19 +174,6 @@ open class TilbakekrevingE2EBase : E2EBase() {
             behandlingId = behandlingId,
             stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
         )
-    }
-
-    fun avventAntallUlesteKravgrunnlag(antall: Int, kravgrunnlagId: String) {
-        runBlocking {
-            eventually(
-                eventuallyConfig {
-                    duration = 2000.milliseconds
-                    interval = 10.milliseconds
-                },
-            ) {
-                tellUlesteKravgrunnlag(kravgrunnlagId) shouldBe antall
-            }
-        }
     }
 
     private fun tellUlesteKravgrunnlag(kravgrunnlagId: String): Int {

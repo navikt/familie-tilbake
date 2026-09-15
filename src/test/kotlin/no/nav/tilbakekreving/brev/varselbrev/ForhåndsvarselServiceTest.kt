@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
@@ -124,7 +123,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fødselsnummer = fnr,
                 fagsystemId = fagsystemId,

@@ -17,7 +17,6 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
@@ -50,7 +49,6 @@ import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.februar
-import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.juli
 import no.nav.tilbakekreving.test.mai
@@ -74,7 +72,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `endringer i behandling skal føre til kafka-meldinger til dvh`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -171,7 +168,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `lagrer vurderingsperioder for fakta`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -194,7 +190,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `lagrer begrunnelse riktig for god tro`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -242,7 +237,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `lagrer begrunnelse riktig for god tro med to perioder`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -303,7 +297,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `slår sammen flere perioder`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -372,7 +365,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `splitte vilkårsvurdering perioder`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -437,7 +429,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `slå sammen vilkårsvurderingsperioder etter splitting`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -508,7 +499,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `begrunnelse for aktsomhet forårsaket av bruker`(aktsomhet: Aktsomhet) {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -562,7 +552,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `endringer i behandling skal føre til kafka-meldinger til fagsystem`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -610,7 +599,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `vurdering av oppdaget blir lagret for faktasteget`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -652,7 +640,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `vurdering av årsak blir lagret for faktasteget`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -683,7 +670,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `vurdering av perioder blir lagret for faktasteget`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -741,7 +727,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
     fun `trenger ny vurdering av steg blir lagret`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -807,7 +792,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 1.februar(2021)),
         )
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = perioder,
@@ -891,7 +875,6 @@ class BehandlingE2ETest : TilbakekrevingE2EBase() {
             KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 1.februar(2021)),
         )
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = perioder,

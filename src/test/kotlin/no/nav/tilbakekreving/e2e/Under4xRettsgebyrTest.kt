@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.builders.VilkårsvurderingDtoBuilder.forårsaketAvBruker
 import no.nav.tilbakekreving.builders.VilkårsvurderingDtoBuilder.forårsaketAvNav
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.standardPeriode
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
@@ -38,7 +37,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
     fun `behandler FORSTO_BURDE_FORSTÅTT under 4x rettsgebyr, ingen tilbakekreving`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -71,7 +69,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
     fun `behandler FEIL_OPPLYSNINGER_FRA_BRUKER og under 4x rettsgebyr, full tilbakekreving`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -107,7 +104,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -147,7 +143,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -202,7 +197,6 @@ class Under4xRettsgebyrTest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(

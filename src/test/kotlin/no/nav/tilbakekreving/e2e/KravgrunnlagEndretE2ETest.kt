@@ -7,7 +7,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
-import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -36,7 +35,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -65,7 +63,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -95,7 +92,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -109,7 +105,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
         }
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -138,7 +133,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -152,7 +146,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
         }
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -181,7 +174,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -225,7 +217,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -269,7 +260,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val nyPeriode = 1.februar(2021) til 28.februar(2021)
         val context = opprettBehandling(periode)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
                 vedtakId = context.vedtakId,
@@ -314,7 +304,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,

@@ -52,7 +52,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val ansvarligEnhet = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
-            TILLEGGSSTØNADER_KØ_NAVN,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fødselsnummer = fnr,
                 fagsystemId = fagsystemId,
@@ -177,7 +176,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -229,7 +227,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     fun `underkjenning av vedtak skal tilbakeføre behandling til tidligere steg`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),

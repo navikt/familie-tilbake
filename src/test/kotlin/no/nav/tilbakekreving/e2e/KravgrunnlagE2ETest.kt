@@ -24,7 +24,6 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -78,7 +77,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     fun `kan lese kravgrunnlag for tilleggsstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
@@ -123,7 +121,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `lagrer bare en gang dersom noe feiler under håndtering av kravgrunnlag`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "feil1234567"))
 
         kravgrunnlagMediator.lesKravgrunnlag()
 
@@ -133,7 +131,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `flere konsumenter leser fra tabellen samtidig`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
+        sendKravgrunnlag(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
 
         runBlocking(Dispatchers.IO) {
             (0..4).map {
@@ -158,7 +156,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                     future.start()
                 }
 
-                sendKravgrunnlag(QUEUE_NAME, KravgrunnlagGenerator.forDP(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
+                sendKravgrunnlag(KravgrunnlagGenerator.forDP(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
                 kravgrunnlagMediator.lesKravgrunnlag()
                 future.join()
                 fagsystemId
@@ -217,11 +215,11 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `statuskode som ikke er støttet blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekreving(FagsystemDTO.TS, fagsystemId)
@@ -237,7 +235,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -297,7 +294,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             kravgrunnlagId = kravgrunnlagId,
         ).replace(Regex("<urn:referanse>[0-9]+</urn:referanse>"), "")
 
-        sendKravgrunnlagOgAvventLesing(QUEUE_NAME, kravgrunnlag)
+        sendKravgrunnlagOgAvventLesing(kravgrunnlag)
 
         val fagsystemInfoBehov = kafkaProducerStub.finnKafkamelding(fagsystemId, FagsysteminfoBehovHendelse.METADATA)
             .single()
@@ -310,7 +307,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
@@ -324,7 +320,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             .status shouldBe Behandlingsstatus.AVSLUTTET
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
@@ -343,7 +338,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val vedtakId1 = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId1,
@@ -370,7 +364,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val vedtakId2 = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId2,
@@ -403,7 +396,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -423,7 +415,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -458,7 +449,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -473,7 +463,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -510,7 +499,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -532,7 +520,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -557,7 +544,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -578,7 +564,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
 
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
@@ -593,7 +578,6 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         )
 
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,

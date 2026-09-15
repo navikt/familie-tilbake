@@ -3,10 +3,14 @@ package no.nav.familie.tilbake.config
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagListener
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
+import org.springframework.jms.annotation.EnableJms
 import org.springframework.jms.annotation.JmsListenerConfigurer
 import org.springframework.jms.config.JmsListenerEndpointRegistrar
 import org.springframework.jms.config.SimpleJmsListenerEndpoint
 
+@Profile("!integrasjonstest & !e2e")
+@EnableJms
 @Configuration
 class JmsConfiguration(
     private val applicationProperties: ApplicationProperties,

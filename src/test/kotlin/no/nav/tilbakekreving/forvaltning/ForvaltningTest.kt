@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.api.forvaltning.ForvaltningController
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
@@ -36,7 +35,6 @@ class ForvaltningTest : TilbakekrevingE2EBase() {
     fun `hentBehandlingsinfo skal hente info basert på eksternFagsakId og ytelsestype for tilleggsstønader`() {
         val fagsystemId = UUID.randomUUID().toString()
         sendKravgrunnlagOgAvventLesing(
-            QUEUE_NAME,
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 perioder = listOf(

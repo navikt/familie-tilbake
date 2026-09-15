@@ -23,7 +23,6 @@ import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.standardPeriode
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
-import no.nav.tilbakekreving.e2e.ytelser.TilleggsstønaderE2ETest.Companion.TILLEGGSSTØNADER_KØ_NAVN
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
@@ -55,7 +54,6 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     fun `vedtaksbrev sendes og lagres riktig i DB`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -93,7 +91,6 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     ) {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -163,7 +160,6 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     fun `beholder avsnitt-id ved endring av vilkårsvurdering`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
             ),
@@ -220,7 +216,6 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
     fun `flere perioder sammenslåes for MVP`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
-            queueName = TILLEGGSSTØNADER_KØ_NAVN,
             kravgrunnlag = KravgrunnlagGenerator.forAAP(
                 fagsystemId = fagsystemId,
                 perioder = listOf(
