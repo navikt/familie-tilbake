@@ -48,9 +48,9 @@ class Beregningsresultat(
                     renteprosent = periode.renteprosent?.toInt(),
                     tilbakekrevingsbeløp = periode.tilbakekrevingsbeløp.toInt(),
                     tilbakekrevesBeløpEtterSkatt = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
-                    renteBeløp = periode.rentebeløp.toInt(),
-                    skatteBeløp = periode.skattebeløp.toInt(),
-                    reduksjon = reduksjon.toInt(),
+                    rentebeløp = periode.rentebeløp.toInt(),
+                    skattebeløp = periode.skattebeløp.toInt(),
+                    redusertBeløp = reduksjon.toInt(),
                 )
             },
             vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
