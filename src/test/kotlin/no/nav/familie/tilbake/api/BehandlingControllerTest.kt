@@ -1,7 +1,9 @@
 package no.nav.familie.tilbake.api
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
+import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -10,31 +12,26 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.exchange
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 import java.util.UUID
 
-class BehandlingControllerTest() : OppslagSpringRunnerMedWebserverTest() {
-    private val restTemplate = TestRestTemplate()
+class BehandlingControllerTest : OppslagSpringRunnerTest() {
+    @Autowired
+    private lateinit var behandlingController: BehandlingController
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -50,107 +47,116 @@ class BehandlingControllerTest() : OppslagSpringRunnerMedWebserverTest() {
 
     @Test
     fun `Man må ha minimumsrolle SAKSBEHANDLER for å bruke endepunkt`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = SAKSBEHANDLER_IDENT,
-                behandlingStatus = Behandlingsstatus.UTREDES,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-            ),
-            authorizationHeaders(grupper = listOf("familie123")),
-        )
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        shouldThrow<ForbiddenError> {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = SAKSBEHANDLER_IDENT,
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("familie123"),
+            )
+        }
     }
 
     @Test
     fun `Med rollene FORVALTER og SAKSBEHANDLER kan man bruke endepunkt`() {
-        val response = flyttBehandlingTilFakta(
-            behandlingId = opprettTestdata(
-                SAKSBEHANDLER_IDENT,
-                Behandlingsstatus.UTREDES,
-                Behandlingsstegstatus.KLAR,
-            ),
-            headers = authorizationHeaders(grupper = listOf("familie123", "es123")),
-        )
-        assertEquals(HttpStatus.OK, response.statusCode)
+        shouldNotThrowAny {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = SAKSBEHANDLER_IDENT,
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("familie123", "es123"),
+            )
+        }
     }
 
     @Test
     fun `Beslutter som ikke ansvarlig saksbehandler skal ikke kunne bruke forvaltningsendepunkt`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = "ikkeAnsvarligSaksbehandler",
-                behandlingStatus = Behandlingsstatus.UTREDES,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-            ),
-            authorizationHeaders(grupper = listOf("eb123")),
-        )
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        val feil = shouldThrow<Feil> {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = "ikkeAnsvarligSaksbehandler",
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("eb123"),
+            )
+        }
+        feil.httpStatus shouldBe HttpStatus.FORBIDDEN
     }
 
     @Test
     fun `Saksbehandler som ansvarlig saksbehandler skal kunne sette behandling tilbake til faktasteg`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = SAKSBEHANDLER_IDENT,
-                behandlingStatus = Behandlingsstatus.UTREDES,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-            ),
-            authorizationHeaders(grupper = listOf("es123")),
-        )
-        assertEquals(HttpStatus.OK, response.statusCode)
+        shouldNotThrowAny {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = SAKSBEHANDLER_IDENT,
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("es123"),
+            )
+        }
     }
 
     @Test
     fun `Saksbehandler som ikke ansvarlig saksbehandler skal få feil`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = "ikkeAnsvarligSaksbehandler",
-                behandlingStatus = Behandlingsstatus.UTREDES,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-            ),
-            authorizationHeaders(grupper = listOf("es123")),
-        )
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        val feil = shouldThrow<Feil> {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = "ikkeAnsvarligSaksbehandler",
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("es123"),
+            )
+        }
+        feil.httpStatus shouldBe HttpStatus.FORBIDDEN
+        feil.message shouldBe "Kun ansvarlig saksbehandler kan flytte behandling tilbake til fakta"
     }
 
     @Test
     fun `Behandling må være under utredning for å flyttes tilbake til fakta`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = SAKSBEHANDLER_IDENT,
-                behandlingStatus = Behandlingsstatus.FATTER_VEDTAK,
-                behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
-            ),
-            authorizationHeaders(grupper = listOf("es123")),
-        )
-        assertThat(HttpStatus.FORBIDDEN).isEqualTo(response.statusCode)
-        assertThat(response.body).contains("Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta")
+        val feil = shouldThrow<Feil> {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = SAKSBEHANDLER_IDENT,
+                    behandlingStatus = Behandlingsstatus.FATTER_VEDTAK,
+                    behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
+                ),
+                grupper = listOf("es123"),
+            )
+        }
+        feil.httpStatus shouldBe HttpStatus.FORBIDDEN
+        feil.message shouldBe "Behandling er ikke under utredning, og kan derfor ikke flyttes tilbake til fakta"
     }
 
     @Test
     fun `Skal ikke være mulig å sette behandling på vent tilbake til fakta`() {
-        val response = flyttBehandlingTilFakta(
-            opprettTestdata(
-                saksbehandler = SAKSBEHANDLER_IDENT,
-                behandlingStatus = Behandlingsstatus.UTREDES,
-                behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
-            ),
-            authorizationHeaders(grupper = listOf("es123")),
-        )
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
-        assertThat(response.body).contains("Behandling er på vent og kan derfor ikke flyttes tilbake til fakta")
+        val feil = shouldThrow<Feil> {
+            flyttBehandlingTilFakta(
+                opprettTestdata(
+                    saksbehandler = SAKSBEHANDLER_IDENT,
+                    behandlingStatus = Behandlingsstatus.UTREDES,
+                    behandlingsstegsstatus = Behandlingsstegstatus.VENTER,
+                ),
+                grupper = listOf("es123"),
+            )
+        }
+        feil.httpStatus shouldBe HttpStatus.FORBIDDEN
+        feil.message shouldBe "Behandling er på vent og kan derfor ikke flyttes tilbake til fakta"
     }
 
     @Test
     fun `Saksbehandler uten beslutterrolle kan ikke godkjenne vedtak`() {
         val behandlingId = opprettTestdata(SAKSBEHANDLER_IDENT, behandlingStatus = Behandlingsstatus.FATTER_VEDTAK, behandlingsstegsstatus = Behandlingsstegstatus.KLAR)
-        val response = restTemplate.exchange<Ressurs<Nothing>>(
-            localhost("/api/behandling/$behandlingId/steg/v1"),
-            HttpMethod.POST,
-            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("es123"))),
-        )
-        response.statusCode shouldBe HttpStatus.FORBIDDEN
-        response.body?.melding shouldBe "$SAKSBEHANDLER_IDENT med rolle SAKSBEHANDLER har ikke tilgang til å Utfører behandlingens aktiv steg og fortsetter den til neste steg. Krever BESLUTTER."
+        val feil = shouldThrow<ForbiddenError> {
+            utførFatteVedtakssteg(behandlingId, grupper = listOf("es123"))
+        }
+        feil.message shouldBe "$SAKSBEHANDLER_IDENT med rolle SAKSBEHANDLER har ikke tilgang til å Utfører behandlingens aktiv steg og fortsetter den til neste steg. Krever BESLUTTER."
     }
 
     @Test
@@ -160,23 +166,28 @@ class BehandlingControllerTest() : OppslagSpringRunnerMedWebserverTest() {
             behandlingStatus = Behandlingsstatus.FATTER_VEDTAK,
             behandlingsstegsstatus = Behandlingsstegstatus.KLAR,
         )
-        val response = restTemplate.exchange<Ressurs<Nothing>>(
-            localhost("/api/behandling/$behandlingId/steg/v1"),
-            HttpMethod.POST,
-            HttpEntity(BehandlingsstegFatteVedtaksstegDtoTest.ny(), authorizationHeaders(grupper = listOf("eb123"))),
-        )
-        response.statusCode shouldBe HttpStatus.BAD_REQUEST
-        response.body?.melding shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
+        val feil = shouldThrow<Feil> {
+            utførFatteVedtakssteg(behandlingId, grupper = listOf("eb123"))
+        }
+        feil.httpStatus shouldBe HttpStatus.BAD_REQUEST
+        feil.message shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
     }
 
     private fun flyttBehandlingTilFakta(
         behandlingId: UUID,
-        headers: HttpHeaders,
-    ): ResponseEntity<String> = restTemplate.exchange(
-        localhost("/api/behandling/$behandlingId/flytt-behandling-til-fakta"),
-        HttpMethod.PUT,
-        HttpEntity<String>(headers),
-    )
+        ident: String = SAKSBEHANDLER_IDENT,
+        grupper: List<String>,
+    ) = somSaksbehandler(ident = ident, grupper = grupper) {
+        behandlingController.flyttBehandlingTilFakta(behandlingId)
+    }
+
+    private fun utførFatteVedtakssteg(
+        behandlingId: UUID,
+        ident: String = SAKSBEHANDLER_IDENT,
+        grupper: List<String>,
+    ) = somSaksbehandler(ident = ident, grupper = grupper) {
+        behandlingController.utførBehandlingssteg(behandlingId, BehandlingsstegFatteVedtaksstegDtoTest.ny())
+    }
 
     private fun opprettTestdata(
         saksbehandler: String,

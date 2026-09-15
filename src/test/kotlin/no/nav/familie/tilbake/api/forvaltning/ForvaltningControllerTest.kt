@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.api.forvaltning
 
-import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
+import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -9,28 +11,23 @@ import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.exchange
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 import java.util.UUID
 
-class ForvaltningControllerTest : OppslagSpringRunnerMedWebserverTest() {
-    private val restTemplate = TestRestTemplate()
+class ForvaltningControllerTest : OppslagSpringRunnerTest() {
+    @Autowired
+    private lateinit var forvaltningController: ForvaltningController
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
@@ -46,51 +43,46 @@ class ForvaltningControllerTest : OppslagSpringRunnerMedWebserverTest() {
 
     @Test
     fun `Forvalter kan sette behandling på vent tilbake til fakta`() {
-        val headers = authorizationHeaders(grupper = listOf("familie123"))
-
-        val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
-        assertEquals(HttpStatus.OK, response.statusCode)
+        shouldNotThrowAny {
+            flyttBehandlingTilFakta(opprettTestdata(), grupper = listOf("familie123"))
+        }
     }
 
     @Test
     fun `Beslutter skal ikke kunne kalle på forvalterendepunkt`() {
-        val headers = authorizationHeaders(grupper = listOf("eb123"))
-        val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        shouldThrow<ForbiddenError> {
+            flyttBehandlingTilFakta(opprettTestdata(), grupper = listOf("eb123"))
+        }
     }
 
     @Test
     fun `Saksbehandler og forvalter som ikke er ansvarlig saksbehandler skal kunne bruke forvaltningsendepunkt`() {
-        val headers = authorizationHeaders(ident = "ikke ansvarlig", grupper = listOf("familie123", "es123"))
-
-        val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
-        assertEquals(HttpStatus.OK, response.statusCode)
+        shouldNotThrowAny {
+            flyttBehandlingTilFakta(opprettTestdata(), ident = "ikke ansvarlig", grupper = listOf("familie123", "es123"))
+        }
     }
 
     @Test
     fun `Veileder skal ikke kunne sette behandling tilbake til faktasteg`() {
-        val headers = authorizationHeaders(grupper = listOf("ev123"))
-
-        val response = flyttBehandlingTilFakta(opprettTestdata(), headers)
-        assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        shouldThrow<ForbiddenError> {
+            flyttBehandlingTilFakta(opprettTestdata(), grupper = listOf("ev123"))
+        }
     }
 
     @Test
     fun `Forvalter kan sette behandling tilbake til fakta når behandling ikke er under utredning`() {
-        val headers = authorizationHeaders(grupper = listOf("familie123"))
-        val response = flyttBehandlingTilFakta(opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK), headers)
-        assertEquals(HttpStatus.OK, response.statusCode)
+        shouldNotThrowAny {
+            flyttBehandlingTilFakta(opprettTestdata(behandlingStatus = Behandlingsstatus.FATTER_VEDTAK), grupper = listOf("familie123"))
+        }
     }
 
     private fun flyttBehandlingTilFakta(
         behandlingId: UUID,
-        headers: HttpHeaders,
-    ): ResponseEntity<String> =
-        restTemplate.exchange(
-            localhost("/api/forvaltning/behandling/$behandlingId/flytt-behandling/v1"),
-            HttpMethod.PUT,
-            HttpEntity<String>(headers),
-        )
+        ident: String = SAKSBEHANDLER_IDENT,
+        grupper: List<String>,
+    ) = somSaksbehandler(ident = ident, grupper = grupper) {
+        forvaltningController.flyttBehandlingTilFakta(behandlingId)
+    }
 
     private fun opprettTestdata(behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES): UUID {
         val fagsak = Fagsak(

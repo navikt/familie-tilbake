@@ -160,7 +160,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
 
     testImplementation("io.jsonwebtoken:jjwt:0.13.0")
-    testImplementation("no.nav.security:token-validation-spring-test:$tokenValidationVersion")
 
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")

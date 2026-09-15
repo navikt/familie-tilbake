@@ -1,17 +1,12 @@
 package no.nav.familie.tilbake
 
 import no.nav.familie.tilbake.database.DbContainerInitializer
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import no.nav.tilbakekreving.e2e.ContextServiceHelpers.E2E_TILGANG_GRUPPE
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
-import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
-import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -20,30 +15,13 @@ import java.math.BigInteger
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [LauncherLocal::class], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("integrasjonstest", "mock-oauth", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
-@EnableMockOAuth2Server
+@ActiveProfiles("integrasjonstest", "mock-pdl", "mock-integrasjoner", "mock-oppgave", "mock-økonomi")
 abstract class OppslagSpringRunnerTest {
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
 
     @Autowired
     private lateinit var applicationContext: ApplicationContext
-
-    @Autowired
-    private lateinit var mockOAuth2Server: MockOAuth2Server
-
-    fun authorizationHeaders(
-        ident: String = SAKSBEHANDLER_IDENT,
-        grupper: List<String> = listOf(E2E_TILGANG_GRUPPE),
-    ): HttpHeaders {
-        return HttpHeaders().apply {
-            val claims = buildMap {
-                put("NAVident", ident)
-                if (grupper.isNotEmpty()) put("groups", grupper)
-            }
-            setBearerAuth(mockOAuth2Server.issueToken("issuer1", audience = "aud-localhost", claims = claims).serialize())
-        }
-    }
 
     fun readXml(fileName: String): String {
         val url = requireNotNull(this::class.java.getResource(fileName)) { "fil med filnavn=$fileName finnes ikke" }

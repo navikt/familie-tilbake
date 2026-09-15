@@ -7,7 +7,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.tilbake.OppslagSpringRunnerMedWebserverTest
+import no.nav.familie.tilbake.OppslagSpringRunnerTest
+import no.nav.familie.tilbake.api.FagsakController
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Bruker
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -17,10 +18,10 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.FagsystemUtil
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -31,17 +32,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.exchange
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
-import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
-internal class FagsakServiceTest : OppslagSpringRunnerMedWebserverTest() {
+internal class FagsakServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 
@@ -57,18 +52,14 @@ internal class FagsakServiceTest : OppslagSpringRunnerMedWebserverTest() {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
+    @Autowired
+    private lateinit var fagsakController: FagsakController
+
     @Test
     fun test() {
-        val restTemplate = TestRestTemplate()
-        val headers = authorizationHeaders()
-        val uriHentSaksnummer = UriComponentsBuilder.fromUriString(localhost("/api/fagsystem/EF/fagsak/123456/v1")).toUriString()
-
-        val response: ResponseEntity<Ressurs<Map<String, String>>> =
-            restTemplate.exchange(
-                uriHentSaksnummer,
-                HttpMethod.GET,
-                HttpEntity<String>(headers),
-            )
+        val response = somSaksbehandler {
+            runCatching { fagsakController.hentFagsak(FagsystemDTO.EF, "123456") }
+        }
 
         println(response)
     }
