@@ -15,6 +15,7 @@ import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,7 +34,7 @@ class AutomatiskGjenopptaBehandlingService(
 
     fun hentAlleBehandlingerKlarForGjenoppta(): List<Behandling> = behandlingRepository.finnAlleBehandlingerKlarForGjenoppta(dagensdato = LocalDate.now())
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun gjenopptaBehandling(behandlingId: UUID) {
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)

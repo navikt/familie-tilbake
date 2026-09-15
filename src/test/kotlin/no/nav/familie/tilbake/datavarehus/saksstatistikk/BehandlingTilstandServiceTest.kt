@@ -204,8 +204,8 @@ class BehandlingTilstandServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentBehandlingensTilstand skal utlede behandlingstilstand for behandling på vent`() {
-        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+        behandlingsstegstilstandRepository.insert(Testdata.lagBehandlingsstegstilstand(behandling.id, Behandlingssteg.FAKTA))
         behandlingService.settBehandlingPåVent(
             behandling.id,
             BehandlingPåVentDto(

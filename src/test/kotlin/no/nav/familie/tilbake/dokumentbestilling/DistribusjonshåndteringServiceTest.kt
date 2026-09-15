@@ -30,10 +30,12 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 import java.util.Optional
 import java.util.UUID
 
+@Isolated
 class DistribusjonshåndteringServiceTest {
     private val behandlingRepository: BehandlingRepository = mockk()
     private val fagsakRepository: FagsakRepository = mockk()

@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -30,14 +29,6 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
 
     @Autowired
     protected lateinit var dokumentController: DokumentController
-
-    @BeforeEach
-    fun cleanup() {
-        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelse_informasjon")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_forhåndsvarsel_unntak")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_uttalelsesfrist")
-        jdbcTemplate.update("DELETE FROM tilbakekreving_brukeruttalelse")
-    }
 
     @Test
     fun `henter ny varselbrev tekster`() {

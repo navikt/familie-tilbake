@@ -28,11 +28,13 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
 
+@Isolated
 internal class RyddBehandlingUtenKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository

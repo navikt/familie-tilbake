@@ -14,12 +14,13 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Primary
 @Service
 @Profile("mock-pdl")
 class PdlClientMock : PdlClient {
-    private val hentPersoninfoHitsInternal = mutableListOf<PersoninfoHit>()
+    private val hentPersoninfoHitsInternal = CopyOnWriteArrayList<PersoninfoHit>()
 
     fun hentPersoninfoHits(ident: String): List<PersoninfoHit> = hentPersoninfoHitsInternal.filter { it.ident == ident }
 

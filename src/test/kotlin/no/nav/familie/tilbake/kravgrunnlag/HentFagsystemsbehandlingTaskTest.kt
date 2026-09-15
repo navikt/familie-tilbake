@@ -30,7 +30,6 @@ import no.nav.familie.tilbake.kravgrunnlag.batch.GammelKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.batch.HentFagsystemsbehandlingTask
 import no.nav.familie.tilbake.kravgrunnlag.domain.ØkonomiXmlMottatt
 import no.nav.familie.tilbake.log.SecureLog
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -117,11 +116,6 @@ internal class HentFagsystemsbehandlingTaskTest : OppslagSpringRunnerTest() {
             HentFagsystemsbehandlingTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService, taskService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
-    }
-
-    @AfterEach
-    fun tearDown() {
-        requestSendtRepository.deleteAll()
     }
 
     @Test

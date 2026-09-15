@@ -121,13 +121,13 @@ object Testdata {
     @Deprecated("Bruk utgaven hvor man må sette fagsakId", replaceWith = ReplaceWith("lagBehandling(fagsakId, ansvarligSaksbehandler, behandlingStatus)"))
     fun lagBehandling(
         ansvarligSaksbehandler: String = "saksbehandler",
-        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.OPPRETTET,
     ) = lagBehandling(fagsak.id, ansvarligSaksbehandler, behandlingStatus)
 
     fun lagBehandling(
         fagsakId: UUID,
         ansvarligSaksbehandler: String = "saksbehandler",
-        behandlingStatus: Behandlingsstatus = Behandlingsstatus.UTREDES,
+        behandlingStatus: Behandlingsstatus = Behandlingsstatus.OPPRETTET,
     ) = Behandling(
         fagsakId = fagsakId,
         status = behandlingStatus,

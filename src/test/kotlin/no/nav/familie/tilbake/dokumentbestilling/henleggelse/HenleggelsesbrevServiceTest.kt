@@ -1,111 +1,68 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Verge
-import no.nav.familie.tilbake.config.FeatureToggleService
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingService
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
+import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.organisasjon.OrganisasjonService
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.validering.PdfaValidator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
-import java.util.Optional
 
 class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
-    private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
-
+    @Autowired
     private lateinit var henleggelsesbrevService: HenleggelsesbrevService
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var brevsporingRepository: BrevsporingRepository
+
+    @Autowired
+    private lateinit var taskService: TaskService
+
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
 
-    @Autowired
-    lateinit var pdfBrevService: PdfBrevService
-    lateinit var spyPdfBrevService: PdfBrevService
-    private val fagsakRepository: FagsakRepository = mockk()
-    private val brevsporingService: BrevsporingService = mockk()
-    private val behandlingRepository: BehandlingRepository = mockk()
-    private val organisasjonService: OrganisasjonService = mockk()
-    private val distribusjonshåndteringService: DistribusjonshåndteringService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
-
-    private val brevmetadataUtil =
-        BrevmetadataUtil(
-            behandlingRepository = behandlingRepository,
-            fagsakRepository = fagsakRepository,
-            manuelleBrevmottakerRepository = mockk(relaxed = true),
-            eksterneDataForBrevService = eksterneDataForBrevService,
-            organisasjonService = organisasjonService,
-        )
-
     @BeforeEach
     fun setup() {
-        spyPdfBrevService = spyk(pdfBrevService)
-        henleggelsesbrevService =
-            HenleggelsesbrevService(
-                behandlingRepository,
-                brevsporingService,
-                fagsakRepository,
-                eksterneDataForBrevService,
-                spyPdfBrevService,
-                organisasjonService,
-                distribusjonshåndteringService,
-                brevmetadataUtil,
-            )
-        fagsak = Testdata.fagsak()
-        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
-        every { fagsakRepository.findById(fagsak.id) } returns Optional.of(fagsak)
-        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling)
-        val personinfo = Personinfo("DUMMY_FNR_1", LocalDate.now(), "Fiona")
-        val ident = fagsak.bruker.ident
-        every { eksterneDataForBrevService.hentPerson(ident, Fagsystem.BA, any()) } returns personinfo
-        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any()) }
-            .returns(Adresseinfo("DUMMY_FNR_2", "Bob"))
-        every { eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns "Siri Saksbehandler"
-        every {
-            brevsporingService.finnSisteVarsel(behandling.id)
-        } returns (Testdata.lagBrevsporing(behandling.id))
+        fagsak = fagsakRepository.insert(Testdata.fagsak())
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
     }
 
     @Test
     fun `sendHenleggelsebrev skal sende henleggelsesbrev`() {
+        brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
+
         henleggelsesbrevService.sendHenleggelsebrev(behandling.id, null, Brevmottager.BRUKER)
 
-        verify {
-            spyPdfBrevService.sendBrev(
-                behandling,
-                fagsak,
-                Brevtype.HENLEGGELSE,
-                any(),
-                any(),
-                any(),
-            )
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
+            it.type == PubliserJournalpostTask.TYPE &&
+                it.payload.contains(behandling.id.toString()) &&
+                it.metadata.getProperty("brevtype") == Brevtype.HENLEGGELSE.name
         }
     }
 
     @Test
     fun `hentForhåndsvisningHenleggelsesbrev skal returnere pdf for henleggelsebrev`() {
+        brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
+
         val bytes = henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(behandling.id, null)
 
         PdfaValidator.validatePdf(bytes)
@@ -113,7 +70,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningHenleggelsesbrev skal returnere pdf for henleggelsebrev for tilbakekreving revurdering`() {
-        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+        behandlingRepository.update(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val bytes =
             henleggelsesbrevService.hentForhåndsvisningHenleggelsesbrev(
@@ -126,10 +83,6 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendHenleggelsebrev skal ikke sende henleggelsesbrev hvis varselbrev ikke sendt`() {
-        every {
-            brevsporingService.finnSisteVarsel(behandling.id)
-        } returns (null)
-
         val e =
             shouldThrow<IllegalStateException> {
                 henleggelsesbrevService.sendHenleggelsebrev(
@@ -144,7 +97,7 @@ class HenleggelsesbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `sendHenleggelsebrev skal ikke sende henleggelsesbrev for tilbakekreving revurdering uten fritekst`() {
-        every { behandlingRepository.findById(behandling.id) } returns Optional.of(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
+        behandlingRepository.update(behandling.copy(type = Behandlingstype.REVURDERING_TILBAKEKREVING))
 
         val e =
             shouldThrow<IllegalStateException> {

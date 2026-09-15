@@ -208,8 +208,8 @@ class FagsakService(
                 ).any {
                     OpprettBehandlingManueltTask.TYPE == it.type &&
                         eksternFagsakId == it.metadata.getProperty("eksternFagsakId") &&
-                        ytelsestype.kode == it.metadata.getProperty("ytelsestype")
-                    kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
+                        ytelsestype.kode == it.metadata.getProperty("ytelsestype") &&
+                        kravgrunnlagsreferanse == it.metadata.getProperty("eksternId")
                 }
 
         if (harAlledeMottattForespørselen) {

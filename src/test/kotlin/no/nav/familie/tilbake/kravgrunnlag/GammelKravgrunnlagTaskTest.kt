@@ -42,7 +42,6 @@ import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -138,11 +137,6 @@ internal class GammelKravgrunnlagTaskTest : OppslagSpringRunnerTest() {
             GammelKravgrunnlagTask(gammelKravgrunnlagService, hentFagsystemsbehandlingService)
 
         every { kafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } returns Unit
-    }
-
-    @AfterEach
-    fun tearDown() {
-        requestSendtRepository.deleteAll()
     }
 
     @Test

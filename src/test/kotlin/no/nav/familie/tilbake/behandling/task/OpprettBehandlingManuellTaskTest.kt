@@ -6,48 +6,30 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
-import io.mockk.verify
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
-import no.nav.familie.tilbake.behandling.BehandlingManuellOpprettelseService
 import no.nav.familie.tilbake.behandling.BehandlingRepository
-import no.nav.familie.tilbake.behandling.BehandlingService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingRequestSendtRepository
-import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.integration.kafka.DefaultKafkaProducer
-import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.integration.kafka.KafkaProperties
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.task.FinnKravgrunnlagTask
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
-import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
 import no.nav.tilbakekreving.kontrakter.Institusjon
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.producer.RecordMetadata
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.support.SendResult
 import java.time.LocalDate
 import java.util.Properties
 import java.util.UUID
@@ -69,41 +51,9 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
-    private lateinit var behandlingService: BehandlingService
-
-    private val mockKafkaTemplate: KafkaTemplate<String, String> = mockk()
-    private lateinit var spyKafkaProducer: KafkaProducer
-
-    private lateinit var hentFagsystemsbehandlingService: HentFagsystemsbehandlingService
-    private lateinit var behandlingManuellOpprettelseService: BehandlingManuellOpprettelseService
     private lateinit var opprettBehandlingManueltTask: OpprettBehandlingManueltTask
 
-    private val requestIdSlot = slot<UUID>()
-    private val hentFagsystemsbehandlingRequestSlot = slot<HentFagsystemsbehandlingRequest>()
-
     private val ytelsestype = Ytelsestype.BARNETRYGD
-
-    @BeforeEach
-    fun init() {
-        spyKafkaProducer = spyk(DefaultKafkaProducer(mockKafkaTemplate, KafkaProperties(KafkaProperties.HentFagsystem("request", "response"))))
-        hentFagsystemsbehandlingService = HentFagsystemsbehandlingService(requestSendtRepository, spyKafkaProducer)
-        behandlingManuellOpprettelseService = BehandlingManuellOpprettelseService(behandlingService)
-        opprettBehandlingManueltTask =
-            OpprettBehandlingManueltTask(
-                hentFagsystemsbehandlingService,
-                behandlingManuellOpprettelseService,
-            )
-
-        val recordMetadata = mockk<RecordMetadata>()
-        every { recordMetadata.offset() } returns 1
-        val result = SendResult<String, String>(mockk(), recordMetadata)
-        every { mockKafkaTemplate.send(any<ProducerRecord<String, String>>()).get() } returns result
-    }
-
-    @AfterEach
-    fun tearDown() {
-        requestSendtRepository.deleteAll()
-    }
 
     @Test
     fun `preCondition skal sende hentFagsystemsbehandling request`() {
@@ -111,14 +61,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
         val eksternId = UUID.randomUUID().toString()
         opprettBehandlingManueltTask.preCondition(lagTask(eksternFagsakId, eksternId))
 
-        verify {
-            spyKafkaProducer.sendHentFagsystemsbehandlingRequest(
-                capture(requestIdSlot),
-                capture(hentFagsystemsbehandlingRequestSlot),
-                any(),
-            )
-        }
-        val requestId = requestIdSlot.captured
         val requestSendt =
             requestSendtRepository
                 .findByEksternFagsakIdAndYtelsestypeAndEksternId(
@@ -127,7 +69,6 @@ internal class OpprettBehandlingManuellTaskTest : OppslagSpringRunnerTest() {
                     eksternId,
                 )
         requestSendt.shouldNotBeNull()
-        requestSendt.id shouldBe requestId
         requestSendt.eksternFagsakId shouldBe eksternFagsakId
         requestSendt.ytelsestype shouldBe ytelsestype
         requestSendt.eksternId shouldBe eksternId

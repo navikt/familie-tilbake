@@ -218,8 +218,8 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre faktafeilutbetalingssteg for behandling`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
-            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
             kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.KLAR)
 
             val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
             stegService.håndterSteg(behandling.id, behandlingsstegFaktaDto, SecureLog.Context.tom())
@@ -244,11 +244,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til vilkårsvurdering når behandling er på foreslåvedtak`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
+            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
             lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
             lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.AUTOUTFØRT)
             lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
             lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-            kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
 
             val behandlingsstegFaktaDto = lagBehandlingsstegFaktaDto()
 
@@ -279,11 +279,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `håndterSteg skal utføre faktafeilutbetaling og fortsette til foreldelse når foreldelse ikke er autoutført`() {
         ContextServiceHelpers.somSaksbehandler("Z0000", emptyList()) {
-            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
-            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
-            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
-            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
-
             var kravgrunnlag431 = Testdata.lagKravgrunnlag(behandling.id)
             for (grunnlagsperiode in kravgrunnlag431.perioder) {
                 kravgrunnlag431 =
@@ -301,6 +296,12 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                     )
             }
             kravgrunnlagRepository.insert(kravgrunnlag431)
+
+            lagBehandlingsstegstilstand(Behandlingssteg.FAKTA, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORELDELSE, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.VILKÅRSVURDERING, Behandlingsstegstatus.UTFØRT)
+            lagBehandlingsstegstilstand(Behandlingssteg.FORESLÅ_VEDTAK, Behandlingsstegstatus.KLAR)
+
             val faktaFeilutbetaltePerioderDto =
                 FaktaFeilutbetalingsperiodeDto(
                     periode =

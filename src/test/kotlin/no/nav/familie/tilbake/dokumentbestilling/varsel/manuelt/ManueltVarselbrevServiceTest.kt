@@ -1,43 +1,26 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
-import io.mockk.every
-import io.mockk.excludeRecords
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.kotest.matchers.collections.shouldHaveSingleElement
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Varsel
-import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
-import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
-import no.nav.familie.tilbake.log.SecureLog
-import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
-import no.nav.tilbakekreving.api.v1.dto.FeilutbetalingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.VurderingAvBrukersUttalelseDto
-import no.nav.tilbakekreving.kontrakter.Faktainfo
-import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
+import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
-import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
-import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
+import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import no.nav.tilbakekreving.pdf.validering.PdfaValidator
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.math.BigDecimal
-import java.time.LocalDate
 
 class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private val korrigertVarseltekst = "Sender korrigert varselbrev"
@@ -50,136 +33,49 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
-    private lateinit var pdfBrevService: PdfBrevService
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
-    private lateinit var varselbrevUtil: VarselbrevUtil
+    private lateinit var faktaFeilutbetalingRepository: FaktaFeilutbetalingRepository
 
     @Autowired
-    private lateinit var eksterneDataForBrevService: EksterneDataForBrevService
-
-    private val mockEksterneDataForBrevService: EksterneDataForBrevService = mockk()
-    private val mockFeilutbetalingService: FaktaFeilutbetalingService = mockk()
-    private val mockDistribusjonshåndteringService: DistribusjonshåndteringService = mockk()
-    private lateinit var spyPdfBrevService: PdfBrevService
     private lateinit var manueltVarselbrevService: ManueltVarselbrevService
+
+    @Autowired
+    private lateinit var taskService: TaskService
+
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
-    private lateinit var brevmetadataUtil: BrevmetadataUtil
 
     @BeforeEach
     fun setup() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
-        behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
-        spyPdfBrevService = spyk(pdfBrevService)
-
-        brevmetadataUtil =
-            BrevmetadataUtil(
-                behandlingRepository = behandlingRepository,
-                fagsakRepository = fagsakRepository,
-                manuelleBrevmottakerRepository = mockk(relaxed = true),
-                eksterneDataForBrevService = mockEksterneDataForBrevService,
-                organisasjonService = mockk(),
-            )
-        manueltVarselbrevService =
-            ManueltVarselbrevService(
-                behandlingRepository,
-                fagsakRepository,
-                mockEksterneDataForBrevService,
-                spyPdfBrevService,
-                mockFeilutbetalingService,
-                varselbrevUtil,
-                mockDistribusjonshåndteringService,
-                brevmetadataUtil,
-            )
-
-        every { mockFeilutbetalingService.hentFaktaomfeilutbetaling(any()) }
-            .returns(lagFeilutbetaling())
-        val personinfo = Personinfo("DUMMY_FØDSELSNUMMER", LocalDate.now(), "Fiona")
-        every { mockEksterneDataForBrevService.hentPerson(fagsak.bruker.ident, any(), any()) }.returns(personinfo)
-        every {
-            mockEksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any())
-        }.returns(Adresseinfo("12345678901", "Test"))
-        every { mockEksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(any(), any()) } returns
-            eksterneDataForBrevService.hentPåloggetSaksbehandlernavnMedDefault(behandling.ansvarligSaksbehandler, SecureLog.Context.tom())
-
-        behandling = behandlingRepository.insert(behandling)
+        behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId = fagsak.id))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
+        faktaFeilutbetalingRepository.insert(
+            Testdata.lagFaktaFeilutbetaling(behandling.id, setOf(januar(2025) til januar(2025))),
+        )
     }
 
     @Test
     fun `sendManueltVarselBrev skal sende manuelt varselbrev`() {
         manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        verify {
-            spyPdfBrevService.sendBrev(
-                eq(behandling),
-                eq(fagsak),
-                eq(Brevtype.VARSEL),
-                any(),
-                eq(9000L),
-                any(),
-            )
-        }
+
+        assertPublisertBrevTask(brevtype = Brevtype.VARSEL, mottager = Brevmottager.BRUKER, varsletBeløp = 10000L)
     }
 
     @Test
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev`() {
-        excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
-        manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy =
-            behandling.copy(
-                varsler =
-                    setOf(
-                        Varsel(
-                            varseltekst = varseltekst,
-                            varselbeløp = 100L,
-                        ),
-                    ),
-            )
-        val behandling = behandlingRepository.update(behandlingCopy)
-
         manueltVarselbrevService.sendKorrigertVarselBrev(behandling, korrigertVarseltekst, Brevmottager.BRUKER)
 
-        verify {
-            spyPdfBrevService.sendBrev(
-                eq(behandling),
-                eq(fagsak),
-                eq(Brevtype.KORRIGERT_VARSEL),
-                any(),
-                eq(9000L),
-                any(),
-            )
-        }
+        assertPublisertBrevTask(brevtype = Brevtype.KORRIGERT_VARSEL, mottager = Brevmottager.BRUKER, varsletBeløp = 10000L)
     }
 
     @Test
     fun `sendKorrigertVarselBrev skal sende korrigert varselbrev med verge`() {
-        excludeRecords { spyPdfBrevService.sendBrev(eq(behandling), eq(fagsak), eq(Brevtype.VARSEL), any(), any(), any()) }
-        manueltVarselbrevService.sendManueltVarselBrev(behandling, varseltekst, Brevmottager.BRUKER)
-        val behandlingCopy =
-            behandling.copy(
-                varsler =
-                    setOf(
-                        Varsel(
-                            varseltekst = varseltekst,
-                            varselbeløp = 100L,
-                        ),
-                    ),
-                verger = setOf(Testdata.verge()),
-            )
-        val behandling = behandlingRepository.update(behandlingCopy)
+        manueltVarselbrevService.sendKorrigertVarselBrev(behandling, korrigertVarseltekst, Brevmottager.VERGE)
 
-        manueltVarselbrevService.sendKorrigertVarselBrev(behandling, varseltekst, Brevmottager.VERGE)
-
-        verify {
-            spyPdfBrevService.sendBrev(
-                eq(behandling),
-                eq(fagsak),
-                eq(Brevtype.KORRIGERT_VARSEL),
-                any(),
-                eq(9000L),
-                any(),
-            )
-        }
+        assertPublisertBrevTask(brevtype = Brevtype.KORRIGERT_VARSEL, mottager = Brevmottager.VERGE, varsletBeløp = 10000L)
     }
 
     @Test
@@ -196,18 +92,6 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentForhåndsvisningManueltVarselbrev skal forhåndsvise korrigert varselbrev`() {
-        val behandlingCopy =
-            behandling.copy(
-                varsler =
-                    setOf(
-                        Varsel(
-                            varseltekst = varseltekst,
-                            varselbeløp = 100L,
-                        ),
-                    ),
-            )
-        behandlingRepository.update(behandlingCopy)
-
         val data =
             manueltVarselbrevService.hentForhåndsvisningManueltVarselbrev(
                 behandling.id,
@@ -218,34 +102,17 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         PdfaValidator.validatePdf(data)
     }
 
-    private fun lagFeilutbetaling(): FaktaFeilutbetalingDto {
-        val periode =
-            Månedsperiode(
-                LocalDate.of(2019, 10, 1),
-                LocalDate.of(2019, 10, 30),
-            )
-
-        return FaktaFeilutbetalingDto(
-            totaltFeilutbetaltBeløp = BigDecimal(9000),
-            totalFeilutbetaltPeriode = periode.toDatoperiode(),
-            feilutbetaltePerioder =
-                listOf(
-                    FeilutbetalingsperiodeDto(
-                        periode.toDatoperiode(),
-                        BigDecimal(9000),
-                    ),
-                ),
-            revurderingsvedtaksdato = LocalDate.now().minusDays(1),
-            begrunnelse = "",
-            faktainfo =
-                Faktainfo(
-                    revurderingsårsak = "testverdi",
-                    revurderingsresultat = "testverdi",
-                    tilbakekrevingsvalg =
-                        Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-                ),
-            kravgrunnlagReferanse = "123456",
-            vurderingAvBrukersUttalelse = VurderingAvBrukersUttalelseDto(HarBrukerUttaltSeg.NEI, "Bruker har ikke uttalt seg"),
-        )
+    private fun assertPublisertBrevTask(
+        brevtype: Brevtype,
+        mottager: Brevmottager,
+        varsletBeløp: Long,
+    ) {
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
+            it.type == PubliserJournalpostTask.TYPE &&
+                it.payload.contains(behandling.id.toString()) &&
+                it.metadata.getProperty("brevtype") == brevtype.name &&
+                it.metadata.getProperty("mottager") == mottager.name &&
+                it.metadata.getProperty("varselbeløp") == varsletBeløp.toString()
+        }
     }
 }

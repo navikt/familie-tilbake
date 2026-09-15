@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.kontrakter.Faktainfo
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandling
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRespons
 import no.nav.tilbakekreving.kontrakter.Tilbakekrevingsvalg
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,11 +55,6 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingRepository.insert(behandling)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        requestSendtRepository.deleteAll()
     }
 
     @Test

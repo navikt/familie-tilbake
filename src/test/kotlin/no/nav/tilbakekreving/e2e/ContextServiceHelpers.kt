@@ -12,28 +12,33 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.write
 
 object ContextServiceHelpers {
     const val E2E_TILGANG_GRUPPE = "e2e-tilgang"
+    private val lock = ReentrantReadWriteLock()
 
     fun <T> somSaksbehandler(
         ident: String = SAKSBEHANDLER_IDENT,
         grupper: List<String> = listOf(E2E_TILGANG_GRUPPE),
         block: () -> T,
     ): T {
-        val tidligereRequestAttributes = RequestContextHolder.getRequestAttributes()
-        try {
-            RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
-            RequestContextHolder
-                .currentRequestAttributes()
-                .setAttribute(
-                    SpringTokenValidationContextHolder::class.java.name,
-                    tokenValidationContext(ident, grupper),
-                    RequestAttributes.SCOPE_REQUEST,
-                )
-            return block()
-        } finally {
-            RequestContextHolder.setRequestAttributes(tidligereRequestAttributes)
+        lock.write {
+            val tidligereRequestAttributes = RequestContextHolder.getRequestAttributes()
+            try {
+                RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest()))
+                RequestContextHolder
+                    .currentRequestAttributes()
+                    .setAttribute(
+                        SpringTokenValidationContextHolder::class.java.name,
+                        tokenValidationContext(ident, grupper),
+                        RequestAttributes.SCOPE_REQUEST,
+                    )
+                return block()
+            } finally {
+                RequestContextHolder.setRequestAttributes(tidligereRequestAttributes)
+            }
         }
     }
 

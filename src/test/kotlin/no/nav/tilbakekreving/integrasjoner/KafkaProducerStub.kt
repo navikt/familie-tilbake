@@ -14,19 +14,21 @@ import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
 
 @Service
 @Primary
 class KafkaProducerStub() : KafkaProducer {
-    private val saksdata = mutableMapOf<UUID, MutableList<Behandlingstilstand>>()
-    private val vedtak = mutableMapOf<UUID, MutableList<Vedtaksoppsummering>>()
-    private val kafkameldinger = mutableMapOf<String, MutableList<Pair<EventMetadata<*>, Kafkamelding>>>()
-    private val hendelser = mutableMapOf<String, MutableList<HendelseEventDto>>()
+    private val saksdata = ConcurrentHashMap<UUID, CopyOnWriteArrayList<Behandlingstilstand>>()
+    private val vedtak = ConcurrentHashMap<UUID, CopyOnWriteArrayList<Vedtaksoppsummering>>()
+    private val kafkameldinger = ConcurrentHashMap<String, CopyOnWriteArrayList<Pair<EventMetadata<*>, Kafkamelding>>>()
+    private val hendelser = ConcurrentHashMap<String, CopyOnWriteArrayList<HendelseEventDto>>()
 
-    private val fagsystemInfoSvarHandlers = mutableMapOf<String, () -> Unit>()
-    private val handlerFor = mutableMapOf<HandkerKey, () -> Unit>()
-    private val hendelseHandlerFor = mutableMapOf<HendelseHandlerKey, () -> Unit>()
+    private val fagsystemInfoSvarHandlers = ConcurrentHashMap<String, () -> Unit>()
+    private val handlerFor = ConcurrentHashMap<HandkerKey, () -> Unit>()
+    private val hendelseHandlerFor = ConcurrentHashMap<HendelseHandlerKey, () -> Unit>()
 
     override fun <K : Kafkamelding> sendKafkaEvent(
         kafkamelding: K,
@@ -36,7 +38,7 @@ class KafkaProducerStub() : KafkaProducer {
         logContext: SecureLog.Context,
     ) {
         handlerFor.remove(HandkerKey(metadata, kafkamelding.eksternFagsakId))?.invoke()
-        kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { mutableListOf() }.add(metadata to kafkamelding)
+        kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { CopyOnWriteArrayList() }.add(metadata to kafkamelding)
         when (metadata) {
             FagsysteminfoBehovHendelse.METADATA -> {
                 fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)?.invoke()
@@ -45,11 +47,11 @@ class KafkaProducerStub() : KafkaProducer {
     }
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand, logContext: SecureLog.Context) {
-        saksdata.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
+        saksdata.computeIfAbsent(behandlingId) { CopyOnWriteArrayList() }.add(request)
     }
 
     override fun sendVedtaksdata(behandlingId: UUID, request: Vedtaksoppsummering, logContext: SecureLog.Context) {
-        vedtak.computeIfAbsent(behandlingId) { mutableListOf() }.add(request)
+        vedtak.computeIfAbsent(behandlingId) { CopyOnWriteArrayList() }.add(request)
     }
 
     override fun sendRåFagsystemsbehandlingResponse(behandlingId: UUID, response: String) {}
@@ -63,7 +65,7 @@ class KafkaProducerStub() : KafkaProducer {
         logContext: SecureLog.Context,
     ) {
         hendelseHandlerFor[HendelseHandlerKey(hendelse::class, hendelse.eksternFagsakId)]?.let { handler -> handler() }
-        hendelser.computeIfAbsent(hendelse.eksternFagsakId) { mutableListOf() }.add(hendelse)
+        hendelser.computeIfAbsent(hendelse.eksternFagsakId) { CopyOnWriteArrayList() }.add(hendelse)
     }
 
     fun finnSaksdata(behandlingId: UUID): List<Behandlingstilstand> = saksdata[behandlingId] ?: emptyList()

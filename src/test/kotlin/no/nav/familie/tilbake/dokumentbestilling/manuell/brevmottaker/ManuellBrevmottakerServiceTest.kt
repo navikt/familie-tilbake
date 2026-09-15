@@ -1,7 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker
 
-import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.shouldForExactly
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldHaveSize
@@ -9,7 +10,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -21,12 +21,8 @@ import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandReposi
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
-import no.nav.familie.tilbake.historikkinnslag.Aktør
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
-import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
-import no.nav.familie.tilbake.integration.pdl.PdlClient
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kontrakter.organisasjon.Organisasjon
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
@@ -43,18 +39,19 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.brev.ManuellAdresseInfo
+import no.nav.tilbakekreving.kontrakter.brev.MottakerType
 import no.nav.tilbakekreving.kontrakter.brev.MottakerType.DØDSBO
-import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
 
-class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
+class ManuellBrevmottakerServiceTest(
+    @Autowired private val historikkService: HistorikkService,
+) : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
-    private val mockHistorikkService: HistorikkService = mockk(relaxed = true)
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
@@ -80,8 +77,10 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var logService: LogService
 
-    private lateinit var behandling: Behandling
+    @Autowired
     private lateinit var manuellBrevmottakerService: ManuellBrevmottakerService
+
+    private lateinit var behandling: Behandling
     private lateinit var featureService: FeatureService
     private lateinit var arbeidsforholdService: ArbeidsforholdService
     private lateinit var eregClient: EregClient
@@ -102,7 +101,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     private val manuellBrevmottakerIUtlandetRequestDto =
         ManuellBrevmottakerRequestDto(
-            type = DØDSBO,
+            type = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
             navn = "John Doe",
             manuellAdresseInfo =
                 ManuellAdresseInfo(
@@ -113,8 +112,6 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                     landkode = "SE",
                 ),
         )
-
-    private val mockPdlClient: PdlClient = mockk()
 
     private val mockIntegrasjonerClient: IntegrasjonerClient = mockk()
 
@@ -127,33 +124,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             every { hentOrganisasjon(any()) } returns HentOrganisasjonResponse(Navn(""), null)
         }
         arbeidsforholdService = ArbeidsforholdService(eregClient)
-        manuellBrevmottakerService =
-            ManuellBrevmottakerService(
-                manuellBrevmottakerRepository = manuellBrevmottakerRepository,
-                historikkService = mockHistorikkService,
-                behandlingRepository = behandlingRepository,
-                behandlingskontrollService = behandlingskontrollService,
-                fagsakService = fagsakService,
-                pdlClient = mockPdlClient,
-                integrasjonerClient = mockIntegrasjonerClient,
-                validerBrevmottakerService = validerBrevmottakerService,
-                logService = logService,
-                featureService = featureService,
-                arbeidsforholdService = arbeidsforholdService,
-            )
 
-        every {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = any(),
-                historikkinnslagstype = any(),
-                aktør = any(),
-                opprettetTidspunkt = any(),
-                tittel = any(),
-                beskrivelse = any(),
-            )
-        } returns mockk()
-
-        every { mockPdlClient.hentPersoninfo(any(), any(), any()) } returns Personinfo("12345678901", LocalDate.MIN, "Eldar")
         every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns true
         every { mockIntegrasjonerClient.hentOrganisasjon("123456789") } returns
             Organisasjon("123456789", navn = "Organisasjon AS")
@@ -161,10 +132,10 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `leggTilBrevmottaker skal legge til brevmottakere og oppdatere med oppdaterBrevmottaker`() {
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto)
         }
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(
                 behandling.id,
                 manuellBrevmottakerRequestDto.copy(
@@ -181,15 +152,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val dbManuellBrevmottaker = manuellBrevmottakere.filter { it.navn.equals("John Doe") }.first()
         assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerRequestDto)
 
-        verify(exactly = 2) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(2) {
+            it.tittel shouldBe "Dødsbo er lagt til som brevmottaker"
         }
 
         val oppdatertManuellBrevmottaker =
@@ -202,7 +166,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                         landkode = "NO",
                     ),
             )
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.oppdaterBrevmottaker(
                 behandling.id,
                 dbManuellBrevmottaker.id,
@@ -218,7 +182,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `leggTilBrevmottaker skal legge til brevmottakere i utlandet uten postadresse og oppdatere med oppdaterBrevmottaker`() {
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerIUtlandetRequestDto)
         }
 
@@ -228,15 +192,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val dbManuellBrevmottaker = manuellBrevmottakere.first()
         assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerIUtlandetRequestDto)
 
-        verify(exactly = 1) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(1) {
+            it.tittel shouldBe "Bruker med utenlandsk adresse er lagt til som brevmottaker"
         }
 
         val oppdatertManuellBrevmottaker =
@@ -250,7 +207,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
                         landkode = "SE",
                     ),
             )
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.oppdaterBrevmottaker(
                 behandling.id,
                 dbManuellBrevmottaker.id,
@@ -266,10 +223,10 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `fjernBrevmottaker fjerner brevmottaker`() {
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerRequestDto)
         }
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(
                 behandling.id,
                 manuellBrevmottakerRequestDto.copy(navn = "Kari Nordmann"),
@@ -282,18 +239,11 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val dbManuellBrevmottaker = manuellBrevmottakere.filter { it.navn.equals("John Doe") }.first()
         assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerRequestDto)
 
-        verify(exactly = 2) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(2) {
+            it.tittel shouldBe "Dødsbo er lagt til som brevmottaker"
         }
 
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.fjernBrevmottaker(behandling.id, dbManuellBrevmottaker.id)
         }
 
@@ -302,21 +252,14 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             .filter { it.navn.equals("John Doe") }
             .shouldBeEmpty()
 
-        verify(exactly = 1) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(1) {
+            it.tittel shouldBe "Dødsbo er fjernet som brevmottaker"
         }
     }
 
     @Test
     fun `fjernBrevmottaker fjerner brevmottaker i utlandet`() {
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, manuellBrevmottakerIUtlandetRequestDto)
         }
 
@@ -326,18 +269,11 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         val dbManuellBrevmottaker = manuellBrevmottakere.first()
         assertEqualsManuellBrevmottaker(dbManuellBrevmottaker, manuellBrevmottakerIUtlandetRequestDto)
 
-        verify(exactly = 1) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_LAGT_TIL,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(1) {
+            it.tittel shouldBe "Bruker med utenlandsk adresse er lagt til som brevmottaker"
         }
 
-        shouldNotThrow<RuntimeException> {
+        shouldNotThrowAny {
             manuellBrevmottakerService.fjernBrevmottaker(behandling.id, dbManuellBrevmottaker.id)
         }
 
@@ -345,15 +281,8 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
             .hentBrevmottakere(behandling.id)
             .shouldBeEmpty()
 
-        verify(exactly = 1) {
-            mockHistorikkService.lagHistorikkinnslag(
-                behandlingId = behandling.id,
-                historikkinnslagstype = TilbakekrevingHistorikkinnslagstype.BREVMOTTAKER_FJERNET,
-                aktør = Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                opprettetTidspunkt = any(),
-                beskrivelse = any(),
-                tittel = any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).shouldForExactly(1) {
+            it.tittel shouldBe "Bruker med utenlandsk adresse er fjernet som brevmottaker"
         }
     }
 
@@ -420,7 +349,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         manuellBrevmottakerService.leggTilBrevmottaker(behandling.id, requestMedPersonIdent)
 
         var lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe mockPdlClient.hentPersoninfo("12345678910", FagsystemDTO.BA, SecureLog.Context.tom()).navn
+        lagretMottaker.navn shouldBe "testverdi"
 
         val requestMedOrgnrUtenKontaktperson =
             manuellBrevmottakerRequestDto.copy(
@@ -431,7 +360,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrUtenKontaktperson)
 
         lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe "Organisasjon AS"
+        lagretMottaker.navn shouldBe "Bobs Burgers"
 
         val requestMedOrgnrMedKontaktperson =
             manuellBrevmottakerRequestDto.copy(
@@ -441,7 +370,7 @@ class ManuellBrevmottakerServiceTest : OppslagSpringRunnerTest() {
         manuellBrevmottakerService.oppdaterBrevmottaker(behandling.id, lagretMottaker.id, requestMedOrgnrMedKontaktperson)
 
         lagretMottaker = manuellBrevmottakerService.hentBrevmottakere(behandling.id).single()
-        lagretMottaker.navn shouldBe "Organisasjon AS v/ ${manuellBrevmottakerRequestDto.navn}"
+        lagretMottaker.navn shouldBe "Bobs Burgers v/ ${manuellBrevmottakerRequestDto.navn}"
     }
 
     private fun assertEqualsManuellBrevmottaker(
