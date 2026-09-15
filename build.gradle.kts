@@ -166,5 +166,4 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
 
     testImplementation("org.apache.kafka:kafka_2.13")
-    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 }
