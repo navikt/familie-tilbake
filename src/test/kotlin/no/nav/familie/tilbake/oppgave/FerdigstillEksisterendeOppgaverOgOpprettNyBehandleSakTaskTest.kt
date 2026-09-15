@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.oppgave
 
-import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -38,7 +38,7 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakTaskTest {
 
     @AfterEach
     fun afterEach() {
-        clearAllMocks(answers = false)
+        clearMocks(behandlingRepository, fagsakRepository, oppgaveService, oppgavePrioritetService, answers = false)
     }
 
     @Test

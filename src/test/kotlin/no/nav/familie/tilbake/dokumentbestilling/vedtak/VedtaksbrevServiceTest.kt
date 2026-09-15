@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.vedtak
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -8,11 +10,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
-import io.mockk.verify
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
@@ -21,28 +20,20 @@ import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Behandlingsårsak
 import no.nav.familie.tilbake.behandling.domain.Fagsak
-import no.nav.familie.tilbake.behandling.domain.Verge
 import no.nav.familie.tilbake.behandlingskontroll.BehandlingsstegstilstandRepository
 import no.nav.familie.tilbake.behandlingskontroll.domain.Behandlingsstegstilstand
 import no.nav.familie.tilbake.data.Testdata
-import no.nav.familie.tilbake.dokumentbestilling.DistribusjonshåndteringService
-import no.nav.familie.tilbake.dokumentbestilling.felles.BrevmetadataUtil
-import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
-import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
+import no.nav.familie.tilbake.dokumentbestilling.felles.task.PubliserJournalpostTask
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.ManuellBrevmottakerRepository
 import no.nav.familie.tilbake.dokumentbestilling.manuell.brevmottaker.domene.ManuellBrevmottaker
 import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingRepository
-import no.nav.familie.tilbake.faktaomfeilutbetaling.FaktaFeilutbetalingService
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetaling
 import no.nav.familie.tilbake.faktaomfeilutbetaling.domain.FaktaFeilutbetalingsperiode
-import no.nav.familie.tilbake.integration.pdl.internal.Personinfo
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.person.PersonService
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.tilbake.vilkårsvurdering.domain.Vilkårsvurdering
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingAktsomhet
 import no.nav.familie.tilbake.vilkårsvurdering.domain.VilkårsvurderingSærligGrunn
@@ -64,9 +55,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Adresseinfo
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
-import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.Brevdata
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Avsnittstype
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnitt
 import no.nav.tilbakekreving.pdf.dokumentbestilling.vedtak.Underavsnittstype
@@ -77,7 +66,6 @@ import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.oktober
 import org.apache.commons.lang3.RandomStringUtils
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -108,100 +96,40 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     private lateinit var vedtaksbrevsperiodeRepository: VedtaksbrevsperiodeRepository
 
     @Autowired
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
-
-    @Autowired
-    private lateinit var faktaFeilutbetalingService: FaktaFeilutbetalingService
-
-    @Autowired
-    private lateinit var pdfBrevService: PdfBrevService
-
-    private lateinit var spyPdfBrevService: PdfBrevService
-
-    @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Autowired
     private lateinit var logService: LogService
 
-    private val eksterneDataForBrevService: EksterneDataForBrevService = mockk()
-
+    @Autowired
     private lateinit var vedtaksbrevService: VedtaksbrevService
 
-    private lateinit var sendBrevService: DistribusjonshåndteringService
-
     @Autowired
-    private lateinit var brevmetadataUtil: BrevmetadataUtil
-
     private lateinit var manuellBrevmottakerRepository: ManuellBrevmottakerRepository
 
     @Autowired
     private lateinit var behandlingsstegstilstandRepository: BehandlingsstegstilstandRepository
 
     @Autowired
-    private lateinit var periodeService: PeriodeService
-
-    @Autowired
-    private lateinit var personService: PersonService
-
-    @BeforeEach
-    fun init() {
-        spyPdfBrevService = spyk(pdfBrevService)
-        manuellBrevmottakerRepository = mockk(relaxed = true)
-        sendBrevService = DistribusjonshåndteringService(
-            fagsakRepository = fagsakRepository,
-            pdfBrevService = spyPdfBrevService,
-            vedtaksbrevgrunnlagService = vedtaksbrevgrunnlagService,
-            brevmetadataUtil = brevmetadataUtil,
-            manuelleBrevmottakerRepository = manuellBrevmottakerRepository,
-        )
-        vedtaksbrevService = VedtaksbrevService(
-            behandlingRepository,
-            vedtaksbrevgeneratorService,
-            vedtaksbrevgrunnlagService,
-            faktaRepository,
-            vilkårsvurderingRepository,
-            vedtaksbrevsoppsummeringRepository,
-            vedtaksbrevsperiodeRepository,
-            spyPdfBrevService,
-            sendBrevService,
-            periodeService,
-            personService,
-            logService,
-            fagsakRepository,
-        )
-    }
+    private lateinit var taskService: TaskService
 
     @Test
-    fun `sendVedtaksbrev skal kalle pfdBrevService med behandling, fagsak og genererte brevdata`() {
-        val behandlingSlot = slot<Behandling>()
-        val fagsakSlot = slot<Fagsak>()
-        val brevtypeSlot = slot<Brevtype>()
-        val brevdataSlot = slot<Brevdata>()
-
-        val (fagsak, behandling) = nyBehandling()
+    fun `sendVedtaksbrev skal opprette task for publisering av vedtaksbrev til bruker`() {
+        val (_, behandling) = nyBehandling()
         val behandlingUtenVerge = behandling.copy(verger = emptySet())
+
         vedtaksbrevService.sendVedtaksbrev(behandlingUtenVerge)
 
-        verify {
-            spyPdfBrevService.sendBrev(
-                behandling = capture(behandlingSlot),
-                fagsak = capture(fagsakSlot),
-                brevtype = capture(brevtypeSlot),
-                data = capture(brevdataSlot),
-            )
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
+            it.type == PubliserJournalpostTask.TYPE &&
+                it.payload.contains(behandling.id.toString()) &&
+                it.metadata.getProperty("brevtype") == Brevtype.VEDTAK.name &&
+                it.metadata.getProperty("mottager") == Brevmottager.BRUKER.name
         }
-        behandlingSlot.captured shouldBe behandlingUtenVerge
-        fagsakSlot.captured shouldBe fagsak
-        brevtypeSlot.captured shouldBe Brevtype.VEDTAK
-        brevdataSlot.captured.overskrift shouldBe "Du må betale tilbake barnetrygden"
     }
 
     @Test
-    fun `sendVedtaksbrev skal ikke ha besluttersignatur for behandling uten beslutter (under 4 rettsgebyr)`() {
-        val behandlingSlot = slot<Behandling>()
-        val brevdataSlot = slot<Brevdata>()
-
+    fun `vedtaksbrev skal ikke ha besluttersignatur for behandling uten beslutter (under 4 rettsgebyr)`() {
         val (fagsak, behandling) = nyBehandling()
         val efFagsak = fagsak.copy(fagsystem = Fagsystem.EF, ytelsestype = Ytelsestype.OVERGANGSSTØNAD)
         fagsakRepository.update(efFagsak)
@@ -212,20 +140,14 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
         // setter behandlingsstegstilstand for ikke få falsk positiv. Et brev som ikke er besluttet vil heller ikke ha besluttersignatur (f.eks. forhåndsvisning)
         behandlingsstegstilstandRepository.insert(lagBehandlingstegtilstandIverksetter(under4rettsgebyrbehandling))
 
-        vedtaksbrevService.sendVedtaksbrev(under4rettsgebyrbehandling)
+        val brevdata = vedtaksbrevgeneratorService.genererVedtaksbrevForSending(
+            vedtaksbrevgrunnlagService.hentVedtaksbrevgrunnlag(under4rettsgebyrbehandling.id),
+            Brevmottager.BRUKER,
+            logContext = logService.contextFraBehandling(under4rettsgebyrbehandling.id),
+        )
 
-        verify {
-            spyPdfBrevService.sendBrev(
-                behandling = capture(behandlingSlot),
-                fagsak = any(),
-                brevtype = any(),
-                data = capture(brevdataSlot),
-            )
-        }
-
-        behandlingSlot.captured shouldBe under4rettsgebyrbehandling
-        brevdataSlot.captured.brevtekst shouldNotContain "{venstrejustert}Bob Burger{høyrejustert}Bob Burger"
-        brevdataSlot.captured.brevtekst shouldContain "{venstrejustert}Bob Burger{høyrejustert}"
+        brevdata.brevtekst shouldNotContain "{venstrejustert}Bob Burger{høyrejustert}Bob Burger"
+        brevdata.brevtekst shouldContain "{venstrejustert}Bob Burger{høyrejustert}"
     }
 
     private fun lagBehandlingstegtilstandIverksetter(under4rettsgebyrbehandling: Behandling) = Behandlingsstegstilstand(
@@ -235,25 +157,24 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
     )
 
     @Test
-    fun `sendVedtaksbrev til organisasjon skal sette orgnr som mottakerident i brevdata`() {
-        val orgNr = "123456789"
-        val brevdataSlot = mutableListOf<Brevdata>()
-
+    fun `sendVedtaksbrev til organisasjon skal sende brev til både bruker og manuell tilleggsmottaker`() {
         val (_, behandling) = nyBehandling()
-
-        every { manuellBrevmottakerRepository.findByBehandlingId(any()) } returns listOf(
+        manuellBrevmottakerRepository.insert(
             ManuellBrevmottaker(
                 type = MottakerType.FULLMEKTIG,
                 behandlingId = behandling.id,
                 navn = "Organisasjonen v/ advokatfullmektig",
-                orgNr = orgNr,
+                orgNr = "123456789",
             ),
         )
+
         vedtaksbrevService.sendVedtaksbrev(behandling.copy(verger = emptySet()))
 
-        verify { spyPdfBrevService.sendBrev(any(), any(), any(), capture(brevdataSlot)) }
-        brevdataSlot.last().mottager shouldBe Brevmottager.MANUELL_TILLEGGSMOTTAKER
-        brevdataSlot.last().metadata.mottageradresse.ident shouldBe orgNr
+        val vedtaksbrevTasks =
+            taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET))
+                .filter { it.type == PubliserJournalpostTask.TYPE && it.payload.contains(behandling.id.toString()) }
+        vedtaksbrevTasks.map { it.metadata.getProperty("mottager") }
+            .shouldContainExactlyInAnyOrder(Brevmottager.BRUKER.name, Brevmottager.MANUELL_TILLEGGSMOTTAKER.name)
     }
 
     @Test
@@ -861,16 +782,6 @@ internal class VedtaksbrevServiceTest : OppslagSpringRunnerTest() {
                 ),
             )
         }
-
-        val personinfo = Personinfo("28056325874", 1.januar(2024), "Fiona")
-
-        every { eksterneDataForBrevService.hentPerson(fagsak.bruker.ident, any(), any()) }.returns(personinfo)
-        every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligSaksbehandler) }
-            .returns("Ansvarlig O'Saksbehandler")
-        every { eksterneDataForBrevService.hentSaksbehandlernavn(behandling.ansvarligBeslutter!!) }
-            .returns("Ansvarlig O'Beslutter")
-        every { eksterneDataForBrevService.hentAdresse(any(), any(), any<Verge>(), any(), any()) }
-            .returns(Adresseinfo("12345678901", "Test"))
 
         return fagsak to behandling
     }

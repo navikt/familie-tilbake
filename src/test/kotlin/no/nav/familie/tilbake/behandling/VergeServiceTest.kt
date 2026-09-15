@@ -1,15 +1,15 @@
 package no.nav.familie.tilbake.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.http.HttpStatusCode
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.behandling.domain.Fagsak
@@ -35,8 +35,6 @@ import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.arbeidsforhold.ArbeidsforholdService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.EregClient
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.HentOrganisasjonResponse
-import no.nav.tilbakekreving.integrasjoner.arbeidsforhold.kontrakter.Navn
 import no.nav.tilbakekreving.integrasjoner.feil.NotFoundException
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -74,15 +72,16 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var logService: LogService
 
-    private lateinit var vergeService: VergeService
+    @Autowired
+    private lateinit var historikkService: HistorikkService
 
-    private val historikkService: HistorikkService = mockk(relaxed = true)
+    @Autowired
+    private lateinit var vergeService: VergeService
 
     private lateinit var fagsak: Fagsak
 
     private lateinit var behandling: Behandling
 
-    private lateinit var featureService: FeatureService
     private val vergeDto =
         VergeDto(
             orgNr = "987654321",
@@ -91,33 +90,11 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
             begrunnelse = "Det var nødvendig",
         )
 
-    private lateinit var arbeidsforholdService: ArbeidsforholdService
-    private lateinit var eregClient: EregClient
-
     @BeforeEach
     fun setUp() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id))
-        featureService = FeatureService(applicationProperties = applicationProps())
-        eregClient = mockk<EregClient> {
-            every { hentOrganisasjon(any()) } returns HentOrganisasjonResponse(Navn(""), null)
-        }
-        arbeidsforholdService = ArbeidsforholdService(eregClient)
-        vergeService =
-            VergeService(
-                behandlingRepository,
-                fagsakRepository,
-                historikkService,
-                behandlingskontrollService,
-                integrasjonerClient,
-                personService,
-                logService,
-                featureService,
-                arbeidsforholdService,
-            )
-
-        clearAllMocks(answers = false)
     }
 
     @Test
@@ -147,18 +124,15 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `lagreVerge skal kalle historikkTaskService for å opprette historikkTask`() {
+    fun `lagreVerge skal opprette historikkinnslag`() {
         vergeService.lagreVerge(behandling.id, vergeDto)
 
         val behandling = behandlingRepository.findByIdOrThrow(behandling.id)
 
-        verify {
-            historikkService.lagHistorikkinnslag(
-                behandling.id,
-                TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET,
-                Aktør.Saksbehandler(behandling.ansvarligSaksbehandler),
-                any(),
-            )
+        historikkService.hentHistorikkinnslag(behandling.id).forOne {
+            it.type shouldBe TilbakekrevingHistorikkinnslagstype.VERGE_OPPRETTET.type
+            it.aktør shouldBe Aktør.Saksbehandler(behandling.ansvarligSaksbehandler).type
+            it.opprettetAv shouldBe behandling.ansvarligSaksbehandler
         }
     }
 
@@ -171,24 +145,27 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagreVerge skal ikke lagre verge når organisasjonen ikke er gyldig`() {
-        val mockIntegrasjonerClient = mockk<IntegrasjonerClient>()
-
+        val eregClient =
+            mockk<EregClient> {
+                every { hentOrganisasjon(any()) } throws
+                    NotFoundException("not found", HttpStatusCode.NotFound, "")
+            }
+        val integrasjonerClient =
+            mockk<IntegrasjonerClient> {
+                every { validerOrganisasjon(any()) } returns false
+            }
         val vergeService =
             VergeService(
                 behandlingRepository,
                 fagsakRepository,
                 historikkService,
                 behandlingskontrollService,
-                mockIntegrasjonerClient,
+                integrasjonerClient,
                 personService,
                 logService,
-                featureService,
-                arbeidsforholdService,
+                FeatureService(applicationProps()),
+                ArbeidsforholdService(eregClient),
             )
-
-        every { mockIntegrasjonerClient.validerOrganisasjon(any()) } returns false
-        every { eregClient.hentOrganisasjon(any()) } throws
-            NotFoundException("not found", HttpStatusCode.NotFound, "")
 
         val exception = shouldThrow<RuntimeException> { vergeService.lagreVerge(behandling.id, vergeDto) }
         exception.message shouldBe "Organisasjon ${vergeDto.orgNr} er ikke gyldig"
@@ -215,8 +192,8 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
                 integrasjonerClient,
                 personService,
                 logService,
-                featureService,
-                arbeidsforholdService,
+                FeatureService(applicationProps()),
+                ArbeidsforholdService(mockk<EregClient>()),
             )
 
         every { mockPdlClient.hentPersoninfo(any(), any(), any()) } throws Feil(message = "Feil ved oppslag på person", logContext = SecureLog.Context.tom())
@@ -264,13 +241,10 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         vergeService.fjernVerge(behandling.id)
 
         behandlingRepository.findByIdOrThrow(behandlingFørOppdatering.id).harVerge.shouldBeFalse()
-        verify {
-            historikkService.lagHistorikkinnslag(
-                behandlingFørOppdatering.id,
-                TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET,
-                Aktør.Saksbehandler(behandlingFørOppdatering.ansvarligSaksbehandler),
-                any(),
-            )
+        historikkService.hentHistorikkinnslag(behandlingFørOppdatering.id).forOne {
+            it.type shouldBe TilbakekrevingHistorikkinnslagstype.VERGE_FJERNET.type
+            it.aktør shouldBe Aktør.Saksbehandler(behandlingFørOppdatering.ansvarligSaksbehandler).type
+            it.opprettetAv shouldBe behandlingFørOppdatering.ansvarligSaksbehandler
         }
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingFørOppdatering.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)
@@ -291,7 +265,7 @@ internal class VergeServiceTest : OppslagSpringRunnerTest() {
         vergeService.fjernVerge(behandlingUtenVerge.id)
 
         behandlingUtenVerge.harVerge.shouldBeFalse()
-        verify(exactly = 0) { historikkService.lagHistorikkinnslag(any(), any(), any(), any()) }
+        historikkService.hentHistorikkinnslag(behandlingUtenVerge.id).shouldBeEmpty()
 
         val behandlingsstegstilstand = behandlingsstegstilstandRepository.findByBehandlingId(behandlingUtenVerge.id)
         assertBehandlingssteg(behandlingsstegstilstand, Behandlingssteg.VARSEL, Behandlingsstegstatus.UTFØRT)

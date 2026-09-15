@@ -1,6 +1,6 @@
 package no.nav.familie.tilbake.kravgrunnlag
 
-import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -76,7 +76,20 @@ class KravvedtakstatusServiceTest {
 
     @AfterEach
     fun afterEach() {
-        clearAllMocks(answers = false)
+        clearMocks(
+            kravgrunnlagRepository,
+            behandlingRepository,
+            mottattXmlService,
+            stegService,
+            tellerService,
+            behandlingskontrollService,
+            behandlingService,
+            historikkService,
+            oppgaveTaskService,
+            oppgaveService,
+            kravgrunnlag,
+            answers = false,
+        )
     }
 
     @ParameterizedTest

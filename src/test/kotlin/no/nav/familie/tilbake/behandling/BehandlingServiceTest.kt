@@ -16,7 +16,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -50,7 +49,6 @@ import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.oppgave.FerdigstillOppgaveTask
 import no.nav.familie.tilbake.oppgave.LagOppgaveTask
 import no.nav.familie.tilbake.oppgave.OppdaterOppgaveTask
-import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
@@ -123,12 +121,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var historikkService: HistorikkService
-
-    @Autowired
-    private lateinit var oppgaveService: OppgaveService
-
-    private val fom: LocalDate = LocalDate.now().minusMonths(1)
-    private val tom: LocalDate = LocalDate.now()
 
     @Test
     fun `opprettBehandling skal opprette automatisk behandling uten verge`() {
@@ -1381,54 +1373,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `byttBehandlendeEnhet skal bytte og oppdatere oppgave`() {
-        val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
-            tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
-            finnesVerge = false,
-            finnesVarsel = false,
-            manueltOpprettet = false,
-            fagsystem = FagsystemDTO.BA,
-            ytelsestype = YtelsestypeDTO.BARNETRYGD,
-        )
-        var behandling = ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
-            behandlingService.opprettBehandling(opprettTilbakekrevingRequest)
-        }
-        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-
-        ContextServiceHelpers.somSaksbehandler(grupper = listOf(BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
-            behandlingService.byttBehandlendeEnhet(
-                behandling.id,
-                ByttEnhetDto(
-                    "4806",
-                    "bytter i unittest" + "\n\nmed linjeskift" + "\n\nto til og med",
-                ),
-            )
-        }
-
-        behandling = behandlingRepository.findByIdOrThrow(behandling.id)
-        behandling.behandlendeEnhet shouldBe "4806"
-        behandling.behandlendeEnhetsNavn shouldBe "jnkmmk"
-
-        verify(exactly = 1) {
-            oppgaveService.patchOppgave(
-                match {
-                    it.id == 1L && it.tilordnetRessurs == SAKSBEHANDLER_IDENT && it.endretAvEnhetsnr == "0425"
-                },
-            )
-        }
-
-        verify(exactly = 1) {
-            oppgaveService.tilordneOppgaveNyEnhet(1L, "4806", true, false)
-        }
-        assertHistorikkinnslag(
-            behandling.id,
-            TilbakekrevingHistorikkinnslagstype.ENDRET_ENHET,
-            Aktør.Saksbehandler(SAKSBEHANDLER_IDENT),
-            "Ny enhet: 4806, Begrunnelse: bytter i unittest  med linjeskift  to til og med",
-        )
-    }
-
-    @Test
     fun `byttBehandlendeEnhet skal ikke kunne bytte på behandling med fagsystem EF`() {
         val opprettTilbakekrevingRequest = lagOpprettTilbakekrevingRequest(
             tilbakekrevingsvalg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
@@ -1624,80 +1568,6 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         verge.ident shouldBe opprettTilbakekrevingRequest.verge?.personIdent
     }
 
-    private fun lagOpprettTilbakekrevingRequest(
-        tilbakekrevingsvalg: Tilbakekrevingsvalg,
-        finnesVerge: Boolean = false,
-        finnesVarsel: Boolean = false,
-        manueltOpprettet: Boolean = false,
-        finnesInstitusjon: Boolean = false,
-        finnesManuelleBrevmottakere: Boolean = false,
-        fagsystem: FagsystemDTO,
-        ytelsestype: YtelsestypeDTO,
-    ): OpprettTilbakekrevingRequest {
-        val varsel = if (finnesVarsel) {
-            Varsel(
-                varseltekst = "testverdi",
-                sumFeilutbetaling = BigDecimal.valueOf(1500L),
-                perioder = listOf(Periode(fom, tom)),
-            )
-        } else {
-            null
-        }
-        val verge = if (finnesVerge) {
-            Verge(
-                vergetype = Vergetype.VERGE_FOR_BARN,
-                navn = "Andy",
-                personIdent = "321321321",
-            )
-        } else {
-            null
-        }
-
-        val faktainfo = Faktainfo(
-            revurderingsårsak = "testverdi",
-            revurderingsresultat = "testresultat",
-            tilbakekrevingsvalg = tilbakekrevingsvalg,
-        )
-        val institusjon = if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
-
-        val manuelleBrevmottakere = if (finnesManuelleBrevmottakere) {
-            setOf(
-                Brevmottaker(
-                    type = MottakerType.DØDSBO,
-                    navn = "Kari Nordmann",
-                    manuellAdresseInfo = ManuellAdresseInfo(
-                        "testadresse",
-                        postnummer = "0000",
-                        poststed = "OSLO",
-                        landkode = "NO",
-                    ),
-                ),
-            )
-        } else {
-            emptySet()
-        }
-
-        return OpprettTilbakekrevingRequest(
-            ytelsestype = ytelsestype,
-            fagsystem = fagsystem,
-            eksternFagsakId = UUID.randomUUID().toString(),
-            personIdent = "321321322",
-            eksternId = UUID.randomUUID().toString(),
-            manueltOpprettet = manueltOpprettet,
-            språkkode = Språkkode.NN,
-            enhetId = "8020",
-            enhetsnavn = "Oslo",
-            varsel = varsel,
-            revurderingsvedtaksdato = fom,
-            verge = verge,
-            faktainfo = faktainfo,
-            saksbehandlerIdent = SAKSBEHANDLER_IDENT,
-            institusjon = institusjon,
-            manuelleBrevmottakere = manuelleBrevmottakere,
-            begrunnelseForTilbakekreving = null,
-        )
-    }
-
     private fun lagOpprettRevurderingDto(originalBehandlingId: UUID): OpprettRevurderingDto = OpprettRevurderingDto(YtelsestypeDTO.BARNETRYGD, originalBehandlingId, Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR)
 
     private fun assertAnsvarligSaksbehandler(behandling: Behandling) {
@@ -1742,10 +1612,86 @@ internal class BehandlingServiceTest : OppslagSpringRunnerTest() {
         return oppgaveTask!!
     }
 
-    private companion object {
+    companion object {
         const val BARNETRYGD_BESLUTTER_ROLLE = "bb123"
         const val BARNETRYGD_SAKSBEHANDLER_ROLLE = "bs123"
         const val BARNETRYGD_VEILEDER_ROLLE = "bv123"
         const val TEAMFAMILIE_FORVALTER_ROLLE = "familie123"
+        private val fom: LocalDate = LocalDate.now().minusMonths(1)
+        private val tom: LocalDate = LocalDate.now()
+
+        fun lagOpprettTilbakekrevingRequest(
+            tilbakekrevingsvalg: Tilbakekrevingsvalg,
+            finnesVerge: Boolean = false,
+            finnesVarsel: Boolean = false,
+            manueltOpprettet: Boolean = false,
+            finnesInstitusjon: Boolean = false,
+            finnesManuelleBrevmottakere: Boolean = false,
+            fagsystem: FagsystemDTO,
+            ytelsestype: YtelsestypeDTO,
+        ): OpprettTilbakekrevingRequest {
+            val varsel = if (finnesVarsel) {
+                Varsel(
+                    varseltekst = "testverdi",
+                    sumFeilutbetaling = BigDecimal.valueOf(1500L),
+                    perioder = listOf(Periode(fom, tom)),
+                )
+            } else {
+                null
+            }
+            val verge = if (finnesVerge) {
+                Verge(
+                    vergetype = Vergetype.VERGE_FOR_BARN,
+                    navn = "Andy",
+                    personIdent = "321321321",
+                )
+            } else {
+                null
+            }
+
+            val faktainfo = Faktainfo(
+                revurderingsårsak = "testverdi",
+                revurderingsresultat = "testresultat",
+                tilbakekrevingsvalg = tilbakekrevingsvalg,
+            )
+            val institusjon = if (finnesInstitusjon) Institusjon(organisasjonsnummer = "987654321") else null
+
+            val manuelleBrevmottakere = if (finnesManuelleBrevmottakere) {
+                setOf(
+                    Brevmottaker(
+                        type = MottakerType.DØDSBO,
+                        navn = "Kari Nordmann",
+                        manuellAdresseInfo = ManuellAdresseInfo(
+                            "testadresse",
+                            postnummer = "0000",
+                            poststed = "OSLO",
+                            landkode = "NO",
+                        ),
+                    ),
+                )
+            } else {
+                emptySet()
+            }
+
+            return OpprettTilbakekrevingRequest(
+                ytelsestype = ytelsestype,
+                fagsystem = fagsystem,
+                eksternFagsakId = UUID.randomUUID().toString(),
+                personIdent = "321321322",
+                eksternId = UUID.randomUUID().toString(),
+                manueltOpprettet = manueltOpprettet,
+                språkkode = Språkkode.NN,
+                enhetId = "8020",
+                enhetsnavn = "Oslo",
+                varsel = varsel,
+                revurderingsvedtaksdato = fom,
+                verge = verge,
+                faktainfo = faktainfo,
+                saksbehandlerIdent = SAKSBEHANDLER_IDENT,
+                institusjon = institusjon,
+                manuelleBrevmottakere = manuelleBrevmottakere,
+                begrunnelseForTilbakekreving = null,
+            )
+        }
     }
 }

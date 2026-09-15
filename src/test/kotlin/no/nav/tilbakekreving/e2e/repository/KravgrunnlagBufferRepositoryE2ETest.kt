@@ -27,8 +27,11 @@ class KravgrunnlagBufferRepositoryE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
+        val egneFagsystemIder = setOf(fagsystemId1, fagsystemId2)
+
         repeat(2) {
             kravgrunnlagBufferRepository.konsumerKravgrunnlag {
+                if (it.fagsystemId !in egneFagsystemIder) throw Exception("Skal ikke konsumere kravgrunnlag kjørt av parallelle tester")
                 if (it.fagsystemId == fagsystemId1) throw Exception("Feil under konsumering av kravgrunnlag")
             }
         }
@@ -40,7 +43,9 @@ class KravgrunnlagBufferRepositoryE2ETest : TilbakekrevingE2EBase() {
             fagsystemId2 to true,
         )
 
-        kravgrunnlagBufferRepository.konsumerKravgrunnlag { }
+        kravgrunnlagBufferRepository.konsumerKravgrunnlag {
+            if (it.fagsystemId !in egneFagsystemIder) throw Exception("Skal ikke konsumere kravgrunnlag kjørt av parallelle tester")
+        }
 
         jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE fagsystem_id IN (?, ?) ORDER BY fagsystem_id", fagsystemId1, fagsystemId2) { resultSet, _ ->
             resultSet.getString("fagsystem_id") to resultSet.getBoolean("lest")
