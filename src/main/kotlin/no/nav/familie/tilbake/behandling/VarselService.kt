@@ -13,6 +13,7 @@ class VarselService(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val faktaFeilutbetalingService: FaktaFeilutbetalingService,
+    private val varselRepository: VarselRepository,
 ) {
     fun lagre(
         behandlingId: UUID,
@@ -32,14 +33,13 @@ class VarselService(
                     ?: error("Aktivt varsel har ikke med varselsperioder")
             }
 
-        val varsler =
-            behandling.varsler.map { it.copy(aktiv = false) } +
-                Varsel(
-                    varseltekst = varseltekst,
-                    varselbeløp = varselbeløp,
-                    perioder = varselsperioder,
-                )
-        val copy = behandling.copy(varsler = varsler.toSet())
-        behandlingRepository.update(copy)
+        varselRepository.erstattAktivtVarsel(
+            behandling.id,
+            Varsel(
+                varseltekst = varseltekst,
+                varselbeløp = varselbeløp,
+                perioder = varselsperioder,
+            ),
+        )
     }
 }
