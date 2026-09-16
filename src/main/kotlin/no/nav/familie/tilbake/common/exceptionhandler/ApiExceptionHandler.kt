@@ -1,5 +1,6 @@
 package no.nav.familie.tilbake.common.exceptionhandler
 
+import io.ktor.http.HttpStatusCode
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -72,6 +73,15 @@ class ApiExceptionHandler {
         }
         logger.medContext(logContext) {
             error("Fikk ugyldig svar fra {}, status {}", exception.endpoint, exception.statusCode, exception)
+        }
+        if (exception.statusCode == HttpStatusCode.Forbidden) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(
+                    ErrorDto(
+                        tittel = "Du har ikke tilgang",
+                        melding = exception.message ?: "Ukjent feil",
+                    ),
+                )
         }
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
             .body(
