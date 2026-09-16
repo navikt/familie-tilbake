@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.common.exceptionhandler
 
 import io.ktor.http.HttpStatusCode
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -79,7 +80,7 @@ class ApiExceptionHandler {
                 .body(
                     ErrorDto(
                         tittel = "Du har ikke tilgang",
-                        melding = exception.message ?: "Ukjent feil",
+                        melding = meldingFraRespons(exception.response) ?: exception.message ?: "Ukjent feil",
                     ),
                 )
         }
@@ -90,6 +91,13 @@ class ApiExceptionHandler {
                     melding = exception.message ?: "Ukjent feil",
                 ),
             )
+    }
+
+    private fun meldingFraRespons(respons: String?): String? {
+        if (respons.isNullOrBlank()) return null
+        return runCatching {
+            objectMapper.readTree(respons).path("message").takeIf { it.isTextual }?.asText()
+        }.getOrNull()?.takeIf { it.isNotBlank() }
     }
 
     @ExceptionHandler(ForbiddenError::class)
