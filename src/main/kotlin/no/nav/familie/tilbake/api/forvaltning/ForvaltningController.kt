@@ -1,8 +1,10 @@
 package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
+import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -24,8 +26,6 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import org.springframework.http.MediaType
@@ -59,8 +59,7 @@ class ForvaltningController(
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
-    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
-    private val kravgrunnlagMediator: KravgrunnlagMediator,
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -388,6 +387,24 @@ class ForvaltningController(
             tilbakekrevingRepository.hentTilbakekreving(
                 TilbakekrevingFilter.fagsak(fagsystemId, fagsystem),
             ),
+        )
+    }
+
+    @PostMapping("/bytt-institusjon/{behandlingId}")
+    fun oppdaterInstutisjon(
+        @PathVariable behandlingId: UUID,
+        @RequestBody orgnummer: String,
+    ) {
+        tilgangskontrollService.validerTilgangBehandlingID(
+            behandlingId = behandlingId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.UPDATE,
+            handling = "Manuell oppdatering av instutisjon",
+        )
+        fagsakRepository
+        fagsakRepository.update(
+            fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+                .copy(institusjon = Institusjon(orgnummer)),
         )
     }
 }
