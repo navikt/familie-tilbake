@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.tilFrontendDto
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.trengerNyVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
@@ -23,6 +24,7 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
@@ -49,7 +51,7 @@ class Vilkårsvurderingsteg(
     override fun erPåbegynt(): Boolean = vurderinger.any { it.vurdering.underliggendeVurdering() !is ForårsaketAvBruker.IkkeVurdert }
 
     override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
-        return tilbakeført
+        return vurderinger.trengerNyVurdering() ?: tilbakeført
     }
 
     override fun underkjennSteget() {
@@ -108,7 +110,6 @@ class Vilkårsvurderingsteg(
     }
 
     override fun periodeEndret(forskjell: KravgrunnlagSammenligning.Forskjell.EndretPeriode) {
-        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         finnPeriode(forskjell.periode).periodeEndret(forskjell)
     }
 
@@ -116,11 +117,11 @@ class Vilkårsvurderingsteg(
         val forrigePeriode = vurderinger
             .lastOrNull { it.periode() < periode.periode }
             ?.takeIf { it.vurdering.underliggendeVurdering() is ForårsaketAvBruker.IkkeVurdert }
-        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         val nåværendeVurdering = Vilkårsvurderingsperiode.opprett(
             periode = periode.periode,
             forrigePeriode = forrigePeriode,
             endringIKravgrunnnlag = periode,
+            tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
         )
 
         val nestePeriode = vurderinger.firstOrNull { it.periode() > periode.periode }
@@ -137,7 +138,6 @@ class Vilkårsvurderingsteg(
     }
 
     override fun periodeFjernet(periode: KravgrunnlagSammenligning.Forskjell.FjernetPeriode) {
-        tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
         val fjernet = vurderinger.single { periode.periode.overlapper(it.periode()) }
         vurderinger = vurderinger.filterNot { it == fjernet }
         val kopiert = vurderinger.singleOrNull { (it.vurdering as? ForårsaketAvBruker.KopiertVurdering)?.forrigePeriodeId == fjernet.id }
@@ -266,10 +266,12 @@ class Vilkårsvurderingsteg(
         val begrunnelseForTilbakekreving: String?,
         private var _vurdering: ForårsaketAvBruker,
         private var endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell?,
+        private var tilbakeført: ÅrsakTilTilbakeføring?,
     ) : VilkårsvurdertPeriodeAdapter, Comparable<Vilkårsvurderingsperiode> {
         val vurdering get() = _vurdering
 
         fun vurder(vurdering: ForårsaketAvBruker) {
+            tilbakeført = null
             _vurdering = vurdering
         }
 
@@ -300,10 +302,12 @@ class Vilkårsvurderingsteg(
                     vilkårsvurderingPeriodeRef = id,
                     foreldelsesvurderingPeriodeRef = null,
                 ),
+                tilbakeført = tilbakeført,
             )
         }
 
         fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag) {
+            tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
             endringIKravgrunnnlag = null
         }
 
@@ -326,6 +330,7 @@ class Vilkårsvurderingsteg(
                 periode: Datoperiode,
                 forrigePeriode: Vilkårsvurderingsperiode?,
                 endringIKravgrunnnlag: KravgrunnlagSammenligning.Forskjell? = null,
+                tilbakeført: ÅrsakTilTilbakeføring?,
             ): Vilkårsvurderingsperiode {
                 val id = UUID.randomUUID()
                 return Vilkårsvurderingsperiode(
@@ -340,6 +345,7 @@ class Vilkårsvurderingsteg(
                     },
                     begrunnelseForTilbakekreving = null,
                     endringIKravgrunnnlag = endringIKravgrunnnlag,
+                    tilbakeført = tilbakeført,
                 )
             }
 
@@ -360,8 +366,16 @@ class Vilkårsvurderingsteg(
                         },
                         valg = underliggendeVurdering.tilNyFrontendDto(),
                         endringIKravgrunnlag = endringIKravgrunnnlag?.tilDto(),
+                        tilbakeført = perioder[0].tilbakeført?.let {
+                            when (it) {
+                                ÅrsakTilTilbakeføring.NyttKravgrunnlag -> ArsakTilTilbakeforingDto.NyttKravgrunnlag
+                                ÅrsakTilTilbakeføring.Underkjent -> ArsakTilTilbakeforingDto.TilbakemeldingFraSaksbehandler
+                            }
+                        },
                     )
                 }
+
+            fun Iterable<Vilkårsvurderingsperiode>.trengerNyVurdering() = firstNotNullOfOrNull { it.tilbakeført }
         }
     }
 
@@ -389,6 +403,7 @@ class Vilkårsvurderingsteg(
                     Vilkårsvurderingsperiode.opprett(
                         periode = utvidetPeriode,
                         forrigePeriode = vurderingTilForrigePeriode,
+                        tilbakeført = null,
                     ),
                 )
             }

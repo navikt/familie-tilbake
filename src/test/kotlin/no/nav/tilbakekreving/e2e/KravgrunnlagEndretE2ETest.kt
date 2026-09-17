@@ -6,6 +6,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.e2e.KravgrunnlagE2ETest.Companion.QUEUE_NAME
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
@@ -81,6 +82,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val behandlingEntity = behandlingRepository.hentBehandlinger(tilbakekreving(context.behandlingId).id)
             .single { it.id == context.behandlingId }
 
+        behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
         behandlingEntity.vilkårsvurderingstegEntity.vurderinger.single().endringIKravgrunnlag.shouldNotBeNull {
             originalPeriode?.fraEntity() shouldBe periode
             gammeltBeløp shouldBe 3000.00.kroner
@@ -303,6 +305,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             it.endringIKravgrunnlag?.nyPeriode?.fraEntity() shouldBe nyPeriode
             it.endringIKravgrunnlag?.type shouldBe KravgrunnlagSammenligning.ForskjellType.NyPeriode
         }
+        lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single { it.periode.fraEntity() == periode }.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single { it.periode.fraEntity() == nyPeriode }.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
     }
 
     private fun opprettBehandling(periode: Datoperiode): KravgrunnlagContext {

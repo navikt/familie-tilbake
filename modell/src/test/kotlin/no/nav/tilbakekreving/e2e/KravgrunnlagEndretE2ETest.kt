@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
@@ -165,9 +166,10 @@ class KravgrunnlagEndretE2ETest {
 
         tilbakekreving.nåværendeBehandling() skalHaSteg Behandlingssteg.VILKÅRSVURDERING skalHaStatus Behandlingsstegstatus.TILBAKEFØRT
 
-        tilbakekreving.nåværendeBehandling().vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext).should {
-            it.perioder shouldHaveSize 2
-            it.perioder[1].periode shouldBe nyPeriode
+        tilbakekreving.nåværendeBehandling().vilkårsvurderingDto(lesContext(klokke = KlokkeStub(1.januar(2022)))).vilkårsperioder.should {
+            it shouldHaveSize 2
+            it.single { vilkårsperiode -> vilkårsperiode.vilkårsvurdering.fom == periode.fom }.vilkårsvurdering.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+            it.single { vilkårsperiode -> vilkårsperiode.vilkårsvurdering.fom == nyPeriode.fom }.vilkårsvurdering.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
         }
     }
 

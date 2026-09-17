@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entities
 
+import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
@@ -9,13 +10,17 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAv
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoEllerBurdeForstaattDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
@@ -95,5 +100,28 @@ class VilkårsvurderingstegEntityTest {
             særligeGrunner.særligeGrunnerMot.first().moment shouldBe "ANNET"
             særligeGrunner.begrunnelse shouldBe "Begrunnelse"
         }
+    }
+
+    @Test
+    fun `tilbakeført i perioder til og fra entity`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val vilkårsvurdering = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode))),
+        )
+
+        vilkårsvurdering.nyttKravgrunnlagMottatt(
+            KravgrunnlagSammenligning.OverordnetSammendrag(
+                periode.fom,
+                periode.tom,
+                1000.kroner,
+                500.kroner,
+            ),
+        )
+
+        val gjenopprettet = vilkårsvurdering.tilEntity(UUID.randomUUID()).fraEntity()
+
+        gjenopprettet.trengerNyVurdering() shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        gjenopprettet.tilFrontendDto().shouldBeSingle().tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
     }
 }

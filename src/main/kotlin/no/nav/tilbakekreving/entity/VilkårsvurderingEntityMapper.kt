@@ -103,6 +103,12 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
             FieldConverter.StringConverter,
         )
 
+        val tilbakeført = field(
+            "tilbakeført",
+            VilkårsvurderingsperiodeEntity::tilbakeført,
+            FieldConverter.EnumConverter.of(),
+        )
+
         fun map(
             resultSet: ResultSet,
             godTro: GodTroEntity?,
@@ -129,6 +135,7 @@ object VilkårsvurderingEntityMapper : Entity<VilkårsvurderingstegEntity, UUID,
                     begrunnelseForUnnlatelse = resultSet[begrunnelseForUnnlatelse],
                 ),
                 endringIKravgrunnlag = endringIKravgrunnnlag,
+                tilbakeført = resultSet[tilbakeført],
             )
         }
     }

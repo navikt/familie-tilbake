@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import java.util.UUID
 
 data class VilkårsvurderingsperiodeEntity(
@@ -10,6 +11,7 @@ data class VilkårsvurderingsperiodeEntity(
     val begrunnelseForTilbakekreving: String?,
     val vurdering: AktsomhetsvurderingEntity,
     val endringIKravgrunnlag: ForskjellEntity?,
+    val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun fraEntity(vurderinger: Map<UUID, Vilkårsvurderingsperiode>): Vilkårsvurderingsperiode {
         return Vilkårsvurderingsperiode(
@@ -18,6 +20,7 @@ data class VilkårsvurderingsperiodeEntity(
             begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
             _vurdering = vurdering.fraEntity(vurderinger),
             endringIKravgrunnnlag = endringIKravgrunnlag?.fraEntity(),
+            tilbakeført = tilbakeført,
         )
     }
 }

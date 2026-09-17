@@ -1189,6 +1189,7 @@ class BeregningTest {
         begrunnelseForTilbakekreving = "",
         _vurdering = vurdering,
         endringIKravgrunnnlag = null,
+        tilbakeført = null,
     )
 
     fun Delperiode<out Delperiode.Beløp>.shouldMatch(
