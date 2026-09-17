@@ -396,6 +396,7 @@ class Enhet(
             "4415" to "Nav arbeid og ytelser Møre og Romsdal",
             "4416" to "Nav arbeid og ytelser Trondheim",
             "4418" to "Nav arbeid og ytelser Fauske",
+            "4449" to "Nav arbeid og ytelser dagpenger og lønnsgaranti",
             "4450" to "Nav arbeid og ytelser - dagpenger",
             "4461" to "Nav arbeid og ytelser grunn- og hjelpestønad",
             "4462" to "Nav arbeid og ytelser - tilleggsstønad",
