@@ -67,6 +67,7 @@ class KafkaConfig(
             ConsumerConfig.GROUP_ID_CONFIG to "familie-tilbake",
             ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-tilbake-1",
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
+            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to 10,
             CommonClientConfigs.RETRIES_CONFIG to 10,
             CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100,
         ) + securityConfig()
