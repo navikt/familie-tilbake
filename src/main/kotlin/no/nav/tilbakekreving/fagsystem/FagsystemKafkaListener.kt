@@ -49,7 +49,12 @@ class FagsystemKafkaListener(
         @Language("JSON") melding: String,
     ) {
         val obj = objectMapper.readTree(melding)
-        val header = objectMapper.convertValue<EventMetadata<*>>(obj)
+        val header = try {
+            objectMapper.convertValue<EventMetadata<*>>(obj)
+        } catch (e: Exception) {
+            SecureLog.utenContext().warn("Mottok ukjent melding {}.", melding, e)
+            return
+        }
         when (header) {
             FagsysteminfoSvarHendelse.METADATA -> {
                 val fagsysteminfo = objectMapper.treeToValue<FagsysteminfoSvarHendelse>(obj)
