@@ -6,12 +6,14 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import java.util.UUID
 
-data class ForhåndsvarselUnntak(
+class ForhåndsvarselUnntak(
     private val id: UUID,
     private val begrunnelseForUnntak: BegrunnelseForUnntak,
     private val beskrivelse: String,
     private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
+    fun skalBeholdeBrukeruttalelse(): Boolean = begrunnelseForUnntak == BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
+
     fun tilbakeført(): ÅrsakTilTilbakeføring? = tilbakeført
 
     fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {

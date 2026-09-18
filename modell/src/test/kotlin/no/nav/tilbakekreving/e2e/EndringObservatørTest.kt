@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.fagsystem.ForenkletBehandlingsstatus
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
@@ -143,6 +144,7 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
             lagreUttalelse(UttalelseVurdering.JA, null, "")
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
@@ -207,6 +209,7 @@ class EndringObservatørTest {
         )
         tilbakekreving.håndter(brukerinfoHendelse(), systemContext(endringObservatør))
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
             lagreUttalelse(UttalelseVurdering.JA, null, "")
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
@@ -265,6 +268,7 @@ class EndringObservatørTest {
             vurderFakta(faktastegVurdering())
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
             lagreUttalelse(UttalelseVurdering.JA, null, "")
         }
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(

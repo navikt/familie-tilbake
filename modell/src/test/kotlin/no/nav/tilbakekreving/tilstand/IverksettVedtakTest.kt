@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
@@ -88,6 +89,7 @@ class IverksettVedtakTest {
             håndter(fagsysteminfoHendelse(), systemContext(endringOppsamler))
             håndter(brukerinfoHendelse(), systemContext(endringOppsamler))
             gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler)) {
+                lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
                 lagreUttalelse(UttalelseVurdering.JA, null, "")
                 vurderFakta(faktastegVurdering())
                 vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())

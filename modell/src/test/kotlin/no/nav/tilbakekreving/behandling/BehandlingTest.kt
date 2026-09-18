@@ -71,6 +71,10 @@ class BehandlingTest {
         val revurdering = eksternFagsakBehandling()
         val behandling = behandling(kravgrunnlag, revurdering)
         behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Forhåndsvarsel er ikke nødvendig i testen",
+            )
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(listOf(periode)))
             vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
@@ -85,6 +89,10 @@ class BehandlingTest {
     fun `flytt behandling tilbake til fakta - nullstiller vilkårsvurderingen`() {
         val behandling = behandling()
         behandling.medSaksbehandling(saksbehandlerContext()) {
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Forhåndsvarsel er ikke nødvendig i testen",
+            )
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(listOf(periode)))
             vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
@@ -103,7 +111,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
@@ -138,7 +146,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
@@ -163,7 +171,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
@@ -223,7 +231,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
@@ -251,7 +259,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
@@ -282,7 +290,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
         }
@@ -313,7 +321,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             lagreForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
-                "Trenger ikke forhåndsvarsel i test lol",
+                "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(periode, foreldelseVurdering())
         }

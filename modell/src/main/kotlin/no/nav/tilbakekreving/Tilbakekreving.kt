@@ -461,8 +461,8 @@ class Tilbakekreving internal constructor(
         return varselbrev.tilVarselbrevInfo(bruker!!, behandling.hentForhåndsvarselinfo(), eksternFagsak)
     }
 
-    fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID, klokke: Klokke): ForhaandsvarselResponseDto {
-        return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev(), klokke)
+    fun nyHentForhåndsvarselFrontendDto(behandlingId: UUID): ForhaandsvarselResponseDto {
+        return hentBehandling(behandlingId).nyForhåndsvarselTilFrontend(brevHistorikk.sisteVarselbrev())
     }
 
     fun tilFeilutbetalingFrontendDto(behandlingId: UUID, klokke: Klokke): FaktaOmFeilutbetalingDto {

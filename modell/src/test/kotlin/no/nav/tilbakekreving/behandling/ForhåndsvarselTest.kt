@@ -2,13 +2,19 @@ package no.nav.tilbakekreving.behandling
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
+import no.nav.tilbakekreving.brev.Varselbrev
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
+import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
@@ -21,6 +27,7 @@ class ForhåndsvarselTest {
     @Test
     fun `skal gi melding til saksbehandler dersom bruker har uttalt seg på forhåndsvarsel`() {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
         forhåndsvarsel.lagreUttalelse(
             uttalelseVurdering = UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
             uttalelseInfo = UttalelseInfo(
@@ -88,11 +95,38 @@ class ForhåndsvarselTest {
     }
 
     @Test
-    fun `deler av behandling påbegynt`() {
+    fun `forhåndsvarsel sendes`() {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.erForhåndsvarselSendt() shouldBe null
+        forhåndsvarsel.behandlingsstatus shouldBe BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
 
         forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
+
+        forhåndsvarsel.erForhåndsvarselSendt() shouldBe true
+        forhåndsvarsel.behandlingsstatus shouldBe BehandlingsstatusModell.TIL_BEHANDLING
         forhåndsvarsel.erPåbegynt() shouldBe true
+    }
+
+    @Test
+    fun `forhåndsvarsel sendes etter tidligere unntak var registrert`() {
+        val varselbrev = Varselbrev.opprett(
+            "",
+            fakeReferanse(kravgrunnlag()),
+            "",
+            defaultFeatures(),
+            SystemKlokke,
+        )
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
+            beskrivelse = "",
+        )
+        forhåndsvarsel.erForhåndsvarselSendt() shouldBe false
+
+        forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
+
+        forhåndsvarsel.erForhåndsvarselSendt() shouldBe true
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev).forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
     }
 
     @Test
@@ -112,7 +146,7 @@ class ForhåndsvarselTest {
             ),
         )
 
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke)
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null)
             .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
             .tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
     }
@@ -134,7 +168,7 @@ class ForhåndsvarselTest {
             ),
         )
 
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke)
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null)
             .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
             .tilbakeført shouldBe null
     }

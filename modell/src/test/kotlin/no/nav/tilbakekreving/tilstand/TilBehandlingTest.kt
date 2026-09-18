@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.assertions.skalHaSteg
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
@@ -220,7 +221,7 @@ class TilBehandlingTest {
             lagreUttalelse(
                 uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
                 uttalelseInfo = null,
-                kommentar = "Trenger ikke forhåndsvarsel i test lol",
+                kommentar = "Forhåndsvarsel er ikke nødvendig i testen",
             )
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvNav().burdeForstått())
@@ -246,6 +247,7 @@ class TilBehandlingTest {
         context: SideeffektContext,
     ) = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse).apply {
         gjørSaksbehandling(nåværendeBehandlingId(), context) {
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
             lagreUttalelse(UttalelseVurdering.JA, null, "")
             vurderFakta(faktastegVurdering())
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
