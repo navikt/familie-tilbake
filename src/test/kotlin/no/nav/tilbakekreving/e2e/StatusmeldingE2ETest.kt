@@ -50,7 +50,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         val exception = shouldThrow<ModellFeil.UtenforScopeException> {
             behandlingController.hentBehandling(behandlingId)
         }
-        exception.utenforScope shouldBe UtenforScope.KravgrunnlagAnnullert
+        exception.utenforScope shouldBe UtenforScope.KravgrunnlagBortfalt
     }
 
     private fun sendStatusmelding(
