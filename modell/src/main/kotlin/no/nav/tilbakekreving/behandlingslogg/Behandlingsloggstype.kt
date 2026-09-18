@@ -16,6 +16,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    NYTT_KRAVGRUNNLAG_MOTTATT(
+        tittel = "Nytt kravgrunnlag mottatt",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     TILBAKEKREVING_OPPRETTET(
         tittel = "Tilbakekreving opprettet",
         tekst = null,
