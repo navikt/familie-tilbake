@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Saksbehandlingsteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.nullstillTilbakeført
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.tilFrontendDto
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg.Vilkårsvurderingsperiode.Companion.trengerNyVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
@@ -87,7 +88,9 @@ class Vilkårsvurderingsteg(
         vurdering: ForårsaketAvBruker,
     ) {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
-        vurderinger.single { it.id == id }.vurder(vurdering)
+        val periode = vurderinger.single { it.id == id }
+        periode.vurder(vurdering)
+        vurderinger.nullstillTilbakeført(periode)
         tilbakeført = null
     }
 
@@ -376,6 +379,10 @@ class Vilkårsvurderingsteg(
                 }
 
             fun Iterable<Vilkårsvurderingsperiode>.trengerNyVurdering() = firstNotNullOfOrNull { it.tilbakeført }
+
+            fun Iterable<Vilkårsvurderingsperiode>.nullstillTilbakeført(hørerTil: Vilkårsvurderingsperiode) = this
+                .filter { it.vurdering.underliggendeVurdering() == hørerTil.vurdering }
+                .forEach { it.tilbakeført = null }
         }
     }
 

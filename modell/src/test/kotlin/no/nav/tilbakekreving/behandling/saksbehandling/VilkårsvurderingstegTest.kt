@@ -1355,8 +1355,8 @@ class VilkårsvurderingstegTest {
                 gammeltBeløp = 0.kroner,
             ),
         )
-        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
         vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro())
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
 
         val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(nyPeriode.fom, nyPeriode.tom) }.periodeId
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
@@ -1366,5 +1366,34 @@ class VilkårsvurderingstegTest {
             it[0].tilbakeført shouldBe null
             it[1].tilbakeført shouldBe null
         }
+    }
+
+    @Test
+    fun `tilbakeføring - periode vurderes etter ny periode ble oppdaget`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val nyPeriode = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
+
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakBehandling(),
+            kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.nyttKravgrunnlagMottatt(
+            OverordnetSammendrag(
+                fom = nyPeriode.fom,
+                tom = nyPeriode.tom,
+                nyttBeløp = 2000.kroner,
+                gammeltBeløp = 0.kroner,
+            ),
+        )
+        vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
+        vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro())
+
+        vilkårsvurderingsteg.tilFrontendDto().should {
+            it shouldHaveSize 1
+            it[0].tilbakeført shouldBe null
+        }
+        vilkårsvurderingsteg.trengerNyVurdering() shouldBe null
     }
 }
