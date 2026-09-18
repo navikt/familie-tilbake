@@ -42,6 +42,7 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
@@ -192,6 +193,11 @@ class TilbakekrevingService(
                 } catch (e: Exception) {
                     logger.medContext(logContext) {
                         warn("Feilet under håndtering av behov", e)
+                    }
+                    if (e is UnexpectedResponseException) {
+                        SecureLog.medContext(logContext) {
+                            warn("Feilet under håndtering av behov, status: {}, response: {}", e.statusCode, e.response, e)
+                        }
                     }
                     tilbakekreving.oppdaterPåminnelsestidspunkt(systemContext.klokke)
                     break
