@@ -10,17 +10,10 @@ class ForhåndsvarselUnntak(
     private val id: UUID,
     private val begrunnelseForUnntak: BegrunnelseForUnntak,
     private val beskrivelse: String,
-    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun skalBeholdeBrukeruttalelse(): Boolean = begrunnelseForUnntak == BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
 
-    fun tilbakeført(): ÅrsakTilTilbakeføring? = tilbakeført
-
-    fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
-        this.tilbakeført = tilbakeført
-    }
-
-    internal fun nyTilFrontendDto(ferdigvurdert: Boolean): ForhaandsvarselUnntakDto {
+    internal fun nyTilFrontendDto(): ForhaandsvarselUnntakDto {
         return ForhaandsvarselUnntakDto(
             begrunnelseForUnntak = when (begrunnelseForUnntak) {
                 BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG -> VarslingsunntakDto.IKKE_PRAKTISK_MULIG
@@ -29,12 +22,13 @@ class ForhåndsvarselUnntak(
                 BegrunnelseForUnntak.ALLEREDE_UTTALET_SEG -> VarslingsunntakDto.ALLEREDE_UTTALET_SEG
             },
             beskrivelse = beskrivelse,
-            ferdigvurdert = ferdigvurdert,
-            tilbakeført = tilbakeført?.frontendDto,
         )
     }
 
-    fun tilEntity(behandlingRef: UUID): ForhåndsvarselUnntakEntity = ForhåndsvarselUnntakEntity(
+    fun tilEntity(
+        behandlingRef: UUID,
+        tilbakeført: ÅrsakTilTilbakeføring?,
+    ): ForhåndsvarselUnntakEntity = ForhåndsvarselUnntakEntity(
         id = id,
         behandlingRef = behandlingRef,
         begrunnelseForUnntak = begrunnelseForUnntak,

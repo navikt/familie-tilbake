@@ -1,12 +1,12 @@
 package no.nav.tilbakekreving.behandling
 
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
-import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.brev.Varselbrev
@@ -62,9 +62,7 @@ class ForhåndsvarselTest {
         )
         forhåndsvarsel.underkjennSteget()
 
-        val forhåndsvarselEntity = forhåndsvarsel.tilEntity(UUID.randomUUID())
-        forhåndsvarselEntity.forhåndsvarselUnntakEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
-        forhåndsvarselEntity.brukeruttalelseEntity?.tilbakeført shouldBe ÅrsakTilTilbakeføring.Underkjent
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev()).tilbakeført shouldBe ArsakTilTilbakeforingDto.TilbakemeldingFraSaksbehandler
     }
 
     @Test
@@ -109,13 +107,6 @@ class ForhåndsvarselTest {
 
     @Test
     fun `forhåndsvarsel sendes etter tidligere unntak var registrert`() {
-        val varselbrev = Varselbrev.opprett(
-            "",
-            fakeReferanse(kravgrunnlag()),
-            "",
-            defaultFeatures(),
-            SystemKlokke,
-        )
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreForhåndsvarselUnntak(
             begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
@@ -126,7 +117,7 @@ class ForhåndsvarselTest {
         forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
 
         forhåndsvarsel.erForhåndsvarselSendt() shouldBe true
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev).forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev()).forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
     }
 
     @Test
@@ -146,9 +137,10 @@ class ForhåndsvarselTest {
             ),
         )
 
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(null)
-            .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
-            .tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+        }
     }
 
     @Test
@@ -168,8 +160,17 @@ class ForhåndsvarselTest {
             ),
         )
 
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(null)
-            .forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
-            .tilbakeført shouldBe null
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.tilbakeført shouldBe null
+        }
     }
+
+    fun varselbrev() = Varselbrev.opprett(
+        "",
+        fakeReferanse(kravgrunnlag()),
+        "",
+        defaultFeatures(),
+        SystemKlokke,
+    )
 }

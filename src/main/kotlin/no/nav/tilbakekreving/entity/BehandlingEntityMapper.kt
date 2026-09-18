@@ -133,6 +133,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
                 brukeruttalelseEntity,
                 forhåndsvarselUnntak,
                 fristUtsettelse,
+                tilbakeført = forhåndsvarselUnntak?.tilbakeført,
             ),
             forrigeBehandlingsstatus = resultSet[forrigeBehandlingsstatus],
         )

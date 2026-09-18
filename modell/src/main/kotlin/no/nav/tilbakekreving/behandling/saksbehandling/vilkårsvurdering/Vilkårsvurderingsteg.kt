@@ -25,7 +25,6 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
-import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
@@ -369,12 +368,7 @@ class Vilkårsvurderingsteg(
                         },
                         valg = underliggendeVurdering.tilNyFrontendDto(),
                         endringIKravgrunnlag = endringIKravgrunnnlag?.tilDto(),
-                        tilbakeført = perioder[0].tilbakeført?.let {
-                            when (it) {
-                                ÅrsakTilTilbakeføring.NyttKravgrunnlag -> ArsakTilTilbakeforingDto.NyttKravgrunnlag
-                                ÅrsakTilTilbakeføring.Underkjent -> ArsakTilTilbakeforingDto.TilbakemeldingFraSaksbehandler
-                            }
-                        },
+                        tilbakeført = perioder[0].tilbakeført?.frontendDto,
                     )
                 }
 

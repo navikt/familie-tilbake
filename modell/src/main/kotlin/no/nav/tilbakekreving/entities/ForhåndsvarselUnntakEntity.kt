@@ -17,7 +17,6 @@ data class ForhåndsvarselUnntakEntity(
             id = id,
             begrunnelseForUnntak = begrunnelseForUnntak,
             beskrivelse = beskrivelse,
-            tilbakeført = tilbakeført,
         )
     }
 }

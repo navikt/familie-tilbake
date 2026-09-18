@@ -3,11 +3,13 @@ package no.nav.tilbakekreving.entities
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel.Unntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 
 data class ForhåndsvarselEntity(
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
     val uttalelsesfristEntity: UttalelsesfristEntity?,
+    val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun fraEntity(): Forhåndsvarsel {
         val brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity()
@@ -16,7 +18,7 @@ data class ForhåndsvarselEntity(
                 error("Forhåndsvarsel kan ikke være både sendt og unntatt")
             }
             uttalelsesfristEntity != null -> Forhåndsvarsel(Forhåndsvarsel.VarselSendt(uttalelsesfristEntity.fraEntity(), brukeruttalelse))
-            forhåndsvarselUnntakEntity != null -> Forhåndsvarsel(Unntak(forhåndsvarselUnntakEntity.fraEntity(), brukeruttalelse))
+            forhåndsvarselUnntakEntity != null -> Forhåndsvarsel(Unntak(forhåndsvarselUnntakEntity.fraEntity(), brukeruttalelse, tilbakeført))
             brukeruttalelse != null -> error("Brukeruttalelse kan ikke eksistere uten forhåndsvarsel eller unntak")
             else -> Forhåndsvarsel(Forhåndsvarsel.IkkeVurdert)
         }

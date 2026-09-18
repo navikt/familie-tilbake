@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.behandling
 
-import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
@@ -14,14 +13,7 @@ class Brukeruttalelse(
     private val uttalelseVurdering: UttalelseVurdering,
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
-    private var tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
-    fun tilbakeført(): ÅrsakTilTilbakeføring? = tilbakeført
-
-    fun vurderPåNytt(tilbakeført: ÅrsakTilTilbakeføring) {
-        this.tilbakeført = tilbakeført
-    }
-
     internal fun nyTilFrontendDto(): UttalelseDto {
         when (uttalelseVurdering) {
             UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG, UttalelseVurdering.JA -> {
@@ -55,7 +47,6 @@ class Brukeruttalelse(
             )
         },
         kommentar = kommentar,
-        tilbakeført = tilbakeført,
     )
 
     fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler
