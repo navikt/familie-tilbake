@@ -49,6 +49,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
@@ -92,8 +93,12 @@ class Tilbakekreving internal constructor(
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, kravgrunnlag, sideeffektContext)
+        val behandlingsloggType = when (tilstand.tilbakekrevingTilstand) {
+            TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO -> Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT
+            else -> Behandlingsloggstype.NYTT_KRAVGRUNNLAG_MOTTATT
+        }
         sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
+            behandlingsloggstype = behandlingsloggType,
             behandlingId = null,
         )
     }

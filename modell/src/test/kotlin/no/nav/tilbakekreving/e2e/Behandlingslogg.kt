@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
+import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.skalUnnlates
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -91,6 +92,17 @@ class Behandlingslogg {
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
         }
 
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(3.januar(2021) til 3.januar(2021)),
+                    kravgrunnlagPeriode(1.februar(2021) til 1.februar(2021)),
+                    kravgrunnlagPeriode(1.mars(2021) til 1.mars(2021)),
+                ),
+            ),
+            systemContext(behandlingslogg = behandlingslogg),
+        )
+
         behandlingslogg.tilFrontend().map { it.tittel } shouldContainAll listOf(
             "Kravgrunnlag mottatt",
             "Tilbakekreving opprettet",
@@ -102,6 +114,7 @@ class Behandlingslogg {
             "Varselbrev journalført",
             "Foreldelse vurdert",
             "Vilkår vurdert",
+            "Nytt kravgrunnlag mottatt",
         )
         val forhåndsvarsel = behandlingslogg.tilFrontend().filter { it.tittel == "Forhåndsvarsel sendt" }.shouldHaveSize(1)
 
