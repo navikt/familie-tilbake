@@ -1,6 +1,8 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel.manuelt
 
-import io.kotest.matchers.collections.shouldHaveSingleElement
+import io.kotest.inspectors.shouldForOne
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
@@ -107,12 +109,12 @@ class ManueltVarselbrevServiceTest : OppslagSpringRunnerTest() {
         mottager: Brevmottager,
         varsletBeløp: Long,
     ) {
-        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldHaveSingleElement {
-            it.type == PubliserJournalpostTask.TYPE &&
-                it.payload.contains(behandling.id.toString()) &&
-                it.metadata.getProperty("brevtype") == brevtype.name &&
-                it.metadata.getProperty("mottager") == mottager.name &&
-                it.metadata.getProperty("varselbeløp") == varsletBeløp.toString()
+        taskService.finnTasksMedStatus(listOf(Status.UBEHANDLET)).shouldForOne {
+            it.type shouldBe PubliserJournalpostTask.TYPE
+            it.payload shouldContain behandling.id.toString()
+            it.metadata.getProperty("brevtype") shouldBe brevtype.name
+            it.metadata.getProperty("mottager") shouldBe mottager.name
+            it.metadata.getProperty("varselbeløp") shouldBe varsletBeløp.toString()
         }
     }
 }

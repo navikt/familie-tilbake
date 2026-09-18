@@ -30,47 +30,15 @@ class VarselRepositoryImpl(
 
         val endret = nyttVarsel.sporbar.endret
         jdbcOperations.update(
-            """
-            UPDATE varsel
-            SET aktiv = FALSE,
-                endret_av = :endretAv,
-                endret_tid = :endretTid
-            WHERE behandling_id = :behandlingId
-              AND aktiv = TRUE
-            """,
-            mapOf(
-                "behandlingId" to behandlingId,
-                "endretAv" to endret.endretAv,
-                "endretTid" to endret.endretTid,
-            ),
+            "UPDATE varsel SET aktiv = FALSE WHERE behandling_id = :behandlingId AND aktiv = TRUE",
+            mapOf("behandlingId" to behandlingId),
         )
 
         jdbcOperations.update(
             """
-            INSERT INTO varsel (
-                id,
-                versjon,
-                behandling_id,
-                aktiv,
-                varseltekst,
-                varselbelop,
-                opprettet_av,
-                opprettet_tid,
-                endret_av,
-                endret_tid
-            ) VALUES (
-                :id,
-                :versjon,
-                :behandlingId,
-                :aktiv,
-                :varseltekst,
-                :varselbelop,
-                :opprettetAv,
-                :opprettetTid,
-                :endretAv,
-                :endretTid
-            )
-            """,
+INSERT INTO varsel (id,versjon,behandling_id,aktiv,varseltekst,varselbelop,opprettet_av,opprettet_tid,endret_av,endret_tid) 
+VALUES (:id, :versjon, :behandlingId, :aktiv, :varseltekst, :varselbelop, :opprettetAv, :opprettetTid, :endretAv, :endretTid)
+            """.trimIndent(),
             mapOf(
                 "id" to nyttVarsel.id,
                 "versjon" to nyttVarsel.versjon,
@@ -87,28 +55,9 @@ class VarselRepositoryImpl(
 
         jdbcOperations.batchUpdate(
             """
-            INSERT INTO varselsperiode (
-                id,
-                versjon,
-                varsel_id,
-                fom,
-                tom,
-                opprettet_av,
-                opprettet_tid,
-                endret_av,
-                endret_tid
-            ) VALUES (
-                :id,
-                :versjon,
-                :varselId,
-                :fom,
-                :tom,
-                :opprettetAv,
-                :opprettetTid,
-                :endretAv,
-                :endretTid
-            )
-            """,
+INSERT INTO varselsperiode (id, versjon, varsel_id, fom, tom, opprettet_av, opprettet_tid, endret_av, endret_tid) 
+VALUES (:id, :versjon, :varselId, :fom, :tom, :opprettetAv, :opprettetTid, :endretAv, :endretTid)
+            """.trimIndent(),
             nyttVarsel.perioder
                 .map { periode ->
                     mapOf(
