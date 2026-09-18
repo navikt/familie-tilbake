@@ -26,12 +26,14 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.test.FellesTestdata
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
+import okio.withLock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.locks.ReentrantLock
 
 @ActiveProfiles("ny-modell")
 open class TilbakekrevingE2EBase : E2EBase() {
@@ -62,6 +64,8 @@ open class TilbakekrevingE2EBase : E2EBase() {
     @Autowired
     protected lateinit var vilkårsvurderingController: VilkårsvurderingController
 
+    private val readLock = ReentrantLock()
+
     protected fun sendKravgrunnlag(kravgrunnlag: String) {
         val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
         kravgrunnlagBufferRepository.lagre(
@@ -76,7 +80,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
     fun sendKravgrunnlagOgAvventLesing(kravgrunnlag: String) {
         val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
         sendKravgrunnlag(kravgrunnlag)
-        kravgrunnlagMediator.lesKravgrunnlag()
+        readLock.withLock {
+            kravgrunnlagMediator.lesKravgrunnlag()
+        }
 
         tellUlesteKravgrunnlag(dto.kravgrunnlagId.toString()) shouldBe 0
     }
