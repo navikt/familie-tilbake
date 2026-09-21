@@ -5,11 +5,18 @@ import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.entities.FaktastegEntity
+import no.nav.tilbakekreving.entity.BehandlingsloggMapper.behandlingId
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -31,9 +38,52 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
     @Test
-    fun `endring i kravgrunnlag for fakta periode`() {
+    fun `endret kravgrunnlag etter sendt forhåndsvarsel`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val context = opprettBehandling(periode)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingSendVarselbrev(context.behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
+            behandlingApiController.behandlingLagreBrukersuttalelse(
+                context.behandlingId,
+                UttalelseDto(
+                    harBrukerUttaltSeg = UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
+                    uttalelsesdato = 1.februar(2021),
+                    hvorBrukerenUttalteSeg = "Telefon",
+                    beskrivelse = "Har uttalt seg",
+                ),
+            )
+        }
+
+        sendKravgrunnlagOgAvventLesing(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = context.fagsystemId,
+                vedtakId = context.vedtakId,
+                kravgrunnlagId = context.kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.234567",
+                kravStatusKode = "ENDR",
+                perioder = listOf(KravgrunnlagGenerator.standardPeriode(periode, feilutbetaltBeløp = 4000.kroner)),
+            ),
+        )
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingForhandsvarsel(context.behandlingId).body.shouldNotBeNull {
+                tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+                ferdigvurdert shouldBe false
+                forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
+                brukeruttalelse?.beskrivelse shouldBe "Har uttalt seg"
+            }
+        }
+    }
+
+    @Test
+    fun `endring i kravgrunnlag for fakta periode`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -61,7 +111,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `endring i kravgrunnlag for vilkårsvurderingsperiode`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -90,7 +140,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `fakta periode holder på siste endring i kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -131,7 +181,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `vilkårsvurderingsperiode holder på siste endring i kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -172,7 +222,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `fakta periode fjerner endring i kravgrunnlag når den settes til null`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -215,7 +265,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `vilkårsvurderingsperiode fjerner endret av kravgrunnlag når den settes til null`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -258,7 +308,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     fun `ny periode i kravgrunnlag lagres i faktasteg, foreldelse og vilkårsvurdering`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val nyPeriode = 1.februar(2021) til 28.februar(2021)
-        val context = opprettBehandling(periode)
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -313,22 +363,28 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterFakta(
                 behandlingId.toString(),
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(periode))
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(periode))
-
         return KravgrunnlagContext(
             behandlingId = behandlingId,
             fagsystemId = fagsystemId,
             vedtakId = vedtakId,
             kravgrunnlagId = kravgrunnlagId,
         )
+    }
+
+    private fun opprettBehandlingMedUnntak(periode: Datoperiode): KravgrunnlagContext {
+        val context = opprettBehandling(periode)
+
+        lagreUttalelse(context.behandlingId)
+        utførSteg(context.behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(periode))
+        utførSteg(context.behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving(periode))
+
+        return context
     }
 
     private data class KravgrunnlagContext(

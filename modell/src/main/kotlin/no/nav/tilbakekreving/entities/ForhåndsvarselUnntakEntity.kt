@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.Brukeruttalelse
+import no.nav.tilbakekreving.behandling.Forhåndsvarsel
 import no.nav.tilbakekreving.behandling.ForhåndsvarselUnntak
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import java.util.UUID
@@ -12,11 +14,18 @@ data class ForhåndsvarselUnntakEntity(
     val beskrivelse: String,
     val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
-    fun fraEntity(): ForhåndsvarselUnntak {
-        return ForhåndsvarselUnntak(
-            id = id,
-            begrunnelseForUnntak = begrunnelseForUnntak,
-            beskrivelse = beskrivelse,
+    internal fun fraEntity(
+        brukeruttalelse: Brukeruttalelse?,
+        tilbakeført: ÅrsakTilTilbakeføring?,
+    ): Forhåndsvarsel.Unntak {
+        return Forhåndsvarsel.Unntak(
+            forhåndsvarselUnntak = ForhåndsvarselUnntak(
+                id = id,
+                begrunnelseForUnntak = begrunnelseForUnntak,
+                beskrivelse = beskrivelse,
+            ),
+            brukeruttalelse = brukeruttalelse,
+            tilbakeført = tilbakeført,
         )
     }
 }

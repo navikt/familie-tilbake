@@ -887,8 +887,8 @@ class Behandling internal constructor(
         )
     }
 
-    internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?): ForhaandsvarselResponseDto {
-        return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev)
+    internal fun nyForhåndsvarselTilFrontend(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto {
+        return forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev, klokke)
     }
 
     fun vilkårsvurderingDto(lesecontext: LesContext): VilkaarDto {

@@ -4,16 +4,13 @@ import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.entities.BehandlerEntity
 import no.nav.tilbakekreving.entities.BehandlerType
 import no.nav.tilbakekreving.entities.BehandlingEntity
-import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.EnhetEntity
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.entities.FatteVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
-import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
-import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
@@ -106,9 +103,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         vilkårsvurdering: VilkårsvurderingstegEntity,
         foreslåVedtak: ForeslåVedtakStegEntity,
         fatteVedtak: FatteVedtakStegEntity,
-        brukeruttalelseEntity: BrukeruttalelseEntity?,
-        forhåndsvarselUnntak: ForhåndsvarselUnntakEntity?,
-        fristUtsettelse: UttalelsesfristEntity?,
+        forhåndsvarselEntity: ForhåndsvarselEntity,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -129,12 +124,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             vilkårsvurderingstegEntity = vilkårsvurdering,
             foreslåVedtakStegEntity = foreslåVedtak,
             fatteVedtakStegEntity = fatteVedtak,
-            forhåndsvarselEntity = ForhåndsvarselEntity(
-                brukeruttalelseEntity,
-                forhåndsvarselUnntak,
-                fristUtsettelse,
-                tilbakeført = forhåndsvarselUnntak?.tilbakeført,
-            ),
+            forhåndsvarselEntity = forhåndsvarselEntity,
             forrigeBehandlingsstatus = resultSet[forrigeBehandlingsstatus],
         )
     }

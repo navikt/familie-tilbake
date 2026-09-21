@@ -1,34 +1,43 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel
-import no.nav.tilbakekreving.behandling.Forhåndsvarsel.Unntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
+import java.util.UUID
 
 data class ForhåndsvarselEntity(
+    val id: UUID,
+    val vurderingstype: ForhåndsvarselVurderingstype,
     val brukeruttalelseEntity: BrukeruttalelseEntity?,
     val forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
     val uttalelsesfristEntity: UttalelsesfristEntity?,
     val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun fraEntity(): Forhåndsvarsel {
-        val brukeruttalelse = midlertidigMapping(forhåndsvarselUnntakEntity, brukeruttalelseEntity)?.fraEntity()
-        return when {
-            uttalelsesfristEntity != null && forhåndsvarselUnntakEntity != null -> {
-                error("Forhåndsvarsel kan ikke være både sendt og unntatt")
-            }
-            uttalelsesfristEntity != null -> Forhåndsvarsel(Forhåndsvarsel.VarselSendt(uttalelsesfristEntity.fraEntity(), brukeruttalelse))
-            forhåndsvarselUnntakEntity != null -> Forhåndsvarsel(Unntak(forhåndsvarselUnntakEntity.fraEntity(), brukeruttalelse, tilbakeført))
-            brukeruttalelse != null -> error("Brukeruttalelse kan ikke eksistere uten forhåndsvarsel eller unntak")
-            else -> Forhåndsvarsel(Forhåndsvarsel.IkkeVurdert)
-        }
+        val brukeruttalelse = midlertidigMapping()?.fraEntity()
+        return Forhåndsvarsel(
+            when (vurderingstype) {
+                ForhåndsvarselVurderingstype.IKKE_VURDERT -> Forhåndsvarsel.IkkeVurdert
+                ForhåndsvarselVurderingstype.VARSEL_SENDT -> {
+                    val uttalelsesfrist = requireNotNull(uttalelsesfristEntity) {
+                        "Uttalelsesfrist må finnes når forhåndsvarsel er sendt"
+                    }
+                    Forhåndsvarsel.VarselSendt(uttalelsesfrist.fraEntity(), brukeruttalelse, tilbakeført)
+                }
+
+                ForhåndsvarselVurderingstype.MÅ_VURDERES_PÅ_NYTT -> Forhåndsvarsel.MåVurderesPåNytt(brukeruttalelse)
+                ForhåndsvarselVurderingstype.UNNTAK -> {
+                    val unntak = requireNotNull(forhåndsvarselUnntakEntity) {
+                        "Forhåndsvarselunntak må finnes når vurderingstypen er unntak"
+                    }
+                    unntak.fraEntity(brukeruttalelse, tilbakeført ?: unntak.tilbakeført)
+                }
+            },
+        )
     }
 
     // Fjernes etter prodsatt og migrering kjørt
-    private fun midlertidigMapping(
-        forhåndsvarselUnntakEntity: ForhåndsvarselUnntakEntity?,
-        brukeruttalelseEntity: BrukeruttalelseEntity?,
-    ): BrukeruttalelseEntity? {
+    private fun midlertidigMapping(): BrukeruttalelseEntity? {
         val entity = brukeruttalelseEntity ?: return null
 
         val legacy = entity.uttalelseVurdering
@@ -58,4 +67,11 @@ data class ForhåndsvarselEntity(
 
         return entity.copy(uttalelseVurdering = nyVurdering)
     }
+}
+
+enum class ForhåndsvarselVurderingstype {
+    IKKE_VURDERT,
+    VARSEL_SENDT,
+    MÅ_VURDERES_PÅ_NYTT,
+    UNNTAK,
 }

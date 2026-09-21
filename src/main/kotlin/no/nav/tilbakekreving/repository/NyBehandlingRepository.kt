@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entity.BehandlingEntityMapper
+import no.nav.tilbakekreving.entity.BehandlingsloggMapper.behandlingId
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import org.springframework.jdbc.core.JdbcTemplate
@@ -16,9 +17,7 @@ class NyBehandlingRepository(
     private val fatteVedtakRepository: NyFatteVedtakRepository,
     private val foreslåVedtakRepository: NyForeslåVedtakRepository,
     private val vilkårsvurderingRepository: NyVilkårsvurderingRepository,
-    private val uttalelseRepository: NyUttalelseRepository,
-    private val forhåndsvarselUnntakRepository: NyForhåndsvarselUnntakRepository,
-    private val utsettUttalelseRepository: NyUtsettUttalelseRepository,
+    private val forhåndsvarselRepository: NyForhåndsvarselRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -35,9 +34,7 @@ class NyBehandlingRepository(
                 vilkårsvurdering = vilkårsvurderingRepository.hentVilkårsvurdering(behandlingId),
                 foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId),
                 fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId),
-                brukeruttalelseEntity = uttalelseRepository.hentBrukerUttalelsen(behandlingId),
-                forhåndsvarselUnntak = forhåndsvarselUnntakRepository.hentForhåndsvarselUnntak(behandlingId),
-                fristUtsettelse = utsettUttalelseRepository.hentUtsettUttalelseFrist(behandlingId),
+                forhåndsvarselEntity = forhåndsvarselRepository.hentForhåndsvarsel(behandlingId),
             )
         }
     }
@@ -50,11 +47,7 @@ class NyBehandlingRepository(
             fatteVedtakRepository.lagre(behandling.fatteVedtakStegEntity)
             vilkårsvurderingRepository.lagre(behandling.vilkårsvurderingstegEntity)
             foreslåVedtakRepository.lagre(behandling.foreslåVedtakStegEntity)
-            behandling.forhåndsvarselEntity.let {
-                forhåndsvarselUnntakRepository.lagre(it.forhåndsvarselUnntakEntity, behandling.id)
-                uttalelseRepository.lagre(it.brukeruttalelseEntity, behandling.id)
-                utsettUttalelseRepository.lagre(it.uttalelsesfristEntity, behandling.id)
-            }
+            forhåndsvarselRepository.lagre(behandling.forhåndsvarselEntity, behandling.id)
         }
     }
 }
