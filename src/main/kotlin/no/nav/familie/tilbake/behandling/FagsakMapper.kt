@@ -47,6 +47,7 @@ object FagsakMapper {
             }
 
         return FagsakDto(
+            tilbakekrevingSakId = fagsak.eksternFagsakId,
             eksternFagsakId = fagsak.eksternFagsakId,
             ytelsestype = fagsak.ytelsestype.tilDTO(),
             fagsystem = fagsak.fagsystem.tilDTO(),

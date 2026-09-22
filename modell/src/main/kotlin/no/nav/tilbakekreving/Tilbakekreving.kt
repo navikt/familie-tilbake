@@ -359,6 +359,7 @@ class Tilbakekreving internal constructor(
     fun tilFrontendDto(klokke: Klokke): FagsakDto {
         val eksternFagsakDto = eksternFagsak.tilFrontendDto()
         return FagsakDto(
+            tilbakekrevingSakId = tilbakekrevingSakId(),
             eksternFagsakId = eksternFagsakDto.eksternId,
             ytelsestype = eksternFagsakDto.ytelsestype,
             fagsystem = eksternFagsakDto.fagsystem,
@@ -397,13 +398,14 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    private fun tilbakekrevingSakId(): String = when {
+        eksternFagsak.ytelse.brukerEksternFagsakIdForUrl -> eksternFagsak.eksternId
+        else -> id
+    }
+
     fun hentTilbakekrevingUrl(baseUrl: String): String {
         return URLBuilder(baseUrl).apply {
-            val fagsakId = when {
-                eksternFagsak.ytelse.brukerEksternFagsakIdForUrl -> eksternFagsak.eksternId
-                else -> id
-            }
-            path("fagsystem", eksternFagsak.ytelse.tilFagsystemDTO().toString(), "fagsak", fagsakId)
+            path("fagsystem", eksternFagsak.ytelse.tilFagsystemDTO().toString(), "fagsak", tilbakekrevingSakId())
             if (behandlingHistorikk.harBehandling()) {
                 appendPathSegments("behandling", behandlingHistorikk.nåværende().entry.id.toString())
             }
