@@ -239,11 +239,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         }
 
         fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
-            return when (beløpIBehold) {
-                is BeløpIBehold.HeleIBehold -> feilutbetaltBeløp.subtract(skattebeløp).toInt()
-                is BeløpIBehold.DelerIBehold -> beløpIBehold.beløp.toInt()
-                is BeløpIBehold.Nei -> 0
-            }
+            return beløpIBehold.beløpIBehold(feilutbetaltBeløp, skattebeløp)
         }
 
         sealed interface BeløpIBehold {
@@ -256,6 +252,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             fun tilFrontendDto(): BelopIBeholdDto
 
             fun kanUnnlates(): KanUnnlates4xRettsgebyr?
+
+            fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int
 
             class HeleIBehold(
                 val annetBegrunnelse: String?,
@@ -290,6 +288,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
+                    return feilutbetaltBeløp.subtract(skattebeløp).toInt()
+                }
             }
 
             class DelerIBehold(
@@ -328,6 +330,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
+                    return beløp.toInt()
+                }
             }
 
             class Nei(
@@ -351,6 +357,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = null
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int = 0
             }
         }
     }
