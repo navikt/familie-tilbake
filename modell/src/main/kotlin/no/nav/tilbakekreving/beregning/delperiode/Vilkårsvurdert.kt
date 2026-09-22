@@ -58,16 +58,16 @@ class Vilkårsvurdert(
             tilbakekrevingsbeløpEtterSkatt = delperioder.sumOf { it.tilbakekrevesNetto() },
             skattebeløp = skattebeløp,
             tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() },
-            beløpIbehold = beløpIBehold(feilutbetaltBeløp, skattebeløp),
+            beløpIbehold = beløpIBehold(delperioder.sumOf { it.tilbakekrevesNetto() }),
         )
     }
 
-    private fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int? {
+    private fun beløpIBehold(heleBeløpet: BigDecimal): Int? {
         val godTro = (vurdering as? Vilkårsvurderingsteg.Vilkårsvurderingsperiode)
             ?.vurdering as? NivåAvForståelse.GodTro
             ?: return null
 
-        return godTro.beløpIBehold(feilutbetaltBeløp, skattebeløp)
+        return godTro.beløpIBehold(heleBeløpet)
     }
 
     class Utbetalingsperiode(

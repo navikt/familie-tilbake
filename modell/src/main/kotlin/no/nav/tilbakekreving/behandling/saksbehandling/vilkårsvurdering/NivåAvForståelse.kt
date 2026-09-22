@@ -238,8 +238,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
-            return beløpIBehold.beløpIBehold(feilutbetaltBeløp, skattebeløp)
+        fun beløpIBehold(heleBeløpet: BigDecimal): Int {
+            return beløpIBehold.beløpIBehold(heleBeløpet)
         }
 
         sealed interface BeløpIBehold {
@@ -253,7 +253,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
             fun kanUnnlates(): KanUnnlates4xRettsgebyr?
 
-            fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int
+            fun beløpIBehold(heleBeløpet: BigDecimal): Int
 
             class HeleIBehold(
                 val annetBegrunnelse: String?,
@@ -289,8 +289,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
 
-                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
-                    return feilutbetaltBeløp.subtract(skattebeløp).toInt()
+                override fun beløpIBehold(heleBeløpet: BigDecimal): Int {
+                    return heleBeløpet.toInt()
                 }
             }
 
@@ -331,7 +331,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
 
-                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
+                override fun beløpIBehold(heleBeløpet: BigDecimal): Int {
                     return beløp.toInt()
                 }
             }
@@ -358,7 +358,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = null
 
-                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int = 0
+                override fun beløpIBehold(heleBeløpet: BigDecimal): Int = 0
             }
         }
     }
