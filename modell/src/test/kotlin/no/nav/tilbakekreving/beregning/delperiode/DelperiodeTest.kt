@@ -54,6 +54,7 @@ class DelperiodeTest {
                 tilbakekrevingsbeløpEtterSkatt = 0.kroner,
                 utbetaltYtelsesbeløp = 60000.kroner,
                 riktigYtelsesbeløp = 54000.kroner,
+                beløpIbehold = null,
             ),
         )
     }

@@ -1,5 +1,7 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
@@ -7,6 +9,10 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelSkattebeløp
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -40,11 +46,13 @@ class Vilkårsvurdert(
     }
 
     override fun beregningsresultat(): Beregningsresultatsperiode {
+        val skattebeløp = delperioder.sumOf { it.summer(JusterbartBeløp::skatt) }
+        val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }
         return Beregningsresultatsperiode(
             periode = vurdering.periode(),
             vurdering = vurdering.vurdering(),
             renteprosent = if (beregnRenter && vurdering.renter()) RENTESATS else null,
-            feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() },
+            feilutbetaltBeløp = feilutbetaltBeløp,
             riktigYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::riktigYtelsesbeløp) },
             utbetaltYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::utbetaltYtelsesbeløp) },
             andelAvBeløp = vurdering.reduksjon().andelTilbakekreves,
@@ -52,9 +60,23 @@ class Vilkårsvurdert(
             tilbakekrevingsbeløpUtenRenter = delperioder.sumOf { it.summer(JusterbartBeløp::tilbakekrevesBrutto) },
             rentebeløp = delperioder.sumOf { it.renter() },
             tilbakekrevingsbeløpEtterSkatt = delperioder.sumOf { it.tilbakekrevesNetto() },
-            skattebeløp = delperioder.sumOf { it.summer(JusterbartBeløp::skatt) },
+            skattebeløp = skattebeløp,
             tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() },
+            beløpIbehold = beløpIBehold(feilutbetaltBeløp, skattebeløp),
         )
+    }
+
+    private fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int? {
+        val godTro = (vurdering as? Vilkårsvurderingsteg.Vilkårsvurderingsperiode)
+            ?.vurdering as? NivåAvForståelse.GodTro
+            ?: return null
+
+        val dto = godTro.tilNyFrontendDto() as? GodTroDto ?: return null
+        return when (val beløpIBehold = dto.beløpIBehold) {
+            is HeleDto -> feilutbetaltBeløp.subtract(skattebeløp).toInt()
+            is DelerDto -> beløpIBehold.beløp
+            is IngentingDto -> 0
+        }
     }
 
     class Utbetalingsperiode(
