@@ -105,7 +105,6 @@ class Foreldelsesteg(
     ) {
         val periodeId = vurdertePerioder.finnIdFor(periode) // I fremtiden ønsker vi å sende inn id, ikke periode
         vurderForeldelse(periodeId, vurdering)
-        tilbakeført = null
     }
 
     internal fun vurderForeldelse(
@@ -114,6 +113,7 @@ class Foreldelsesteg(
     ) {
         // TODO: Ordentlig feilhåndtering i stedet for NoSuchElementException ved ugyldig periode
         vurdertePerioder.single { it.id == periodeId }.vurderForeldelse(vurdering)
+        tilbakeført = null
     }
 
     fun erForeldet(periode: Datoperiode): Boolean {
