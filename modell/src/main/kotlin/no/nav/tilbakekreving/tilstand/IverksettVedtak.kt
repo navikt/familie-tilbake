@@ -22,6 +22,9 @@ object IverksettVedtak : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
+        if (tilbakekreving.eksternFagsak.ytelse.brukerEksternFagsakIdForUrl) {
+            tilbakekreving.påminnNåværendePeriode(sideeffektContext)
+        }
         tilbakekreving.trengerIverksettelse(sideeffektContext)
         tilbakekreving.sendVedtakIverksatt(sideeffektContext.endringObservatør)
     }

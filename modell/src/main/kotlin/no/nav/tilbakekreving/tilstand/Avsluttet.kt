@@ -20,6 +20,8 @@ object Avsluttet : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
-        tilbakekreving.oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
+        if (tilbakekreving.eksternFagsak.ytelse.brukerEksternFagsakIdForUrl) {
+            tilbakekreving.påminnNåværendePeriode(sideeffektContext)
+        }
     }
 }
