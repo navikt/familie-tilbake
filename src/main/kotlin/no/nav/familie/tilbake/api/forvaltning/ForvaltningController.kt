@@ -191,7 +191,7 @@ class ForvaltningController(
         @PathVariable ytelsestype: YtelsestypeDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<List<Behandlingsinfo>> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)), ValideringContext.HentForvaltningsinfo)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsakEllerTilbakekrevingId(eksternFagsakId, FagsystemUtil.hentFagsystemFraYtelsestype(ytelsestype)), ValideringContext.HentForvaltningsinfo)
         if (tilbakekreving != null) {
             return Ressurs.success(
                 listOf(
@@ -385,7 +385,7 @@ class ForvaltningController(
         )
         return ResponseEntity.ofNullable(
             tilbakekrevingRepository.hentTilbakekreving(
-                TilbakekrevingFilter.fagsak(fagsystemId, fagsystem),
+                TilbakekrevingFilter.fagsakEllerTilbakekrevingId(fagsystemId, fagsystem),
             ),
         )
     }

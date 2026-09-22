@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.repository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.entity.FieldConverter
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.springframework.jdbc.core.JdbcTemplate
@@ -85,6 +86,13 @@ sealed interface TilbakekrevingFilter {
         fun behandling(id: UUID): TilbakekrevingFilter = BehandlingId(id)
 
         fun fagsak(fagsakId: String, fagsystem: FagsystemDTO): TilbakekrevingFilter = EksternFagsakId(fagsakId, fagsystem)
+
+        fun fagsakEllerTilbakekrevingId(fagsakId: String, fagsystem: FagsystemDTO): TilbakekrevingFilter = when {
+            (Ytelse.ytelser().singleOrNull { it.tilFagsystemDTO() == fagsystem }?.brukerEksternFagsakIdForUrl ?: true) -> {
+                EksternFagsakId(fagsakId, fagsystem)
+            }
+            else -> TilbakekrevingId(fagsakId)
+        }
 
         fun tilbakekreving(id: String): TilbakekrevingFilter = TilbakekrevingId(id)
     }

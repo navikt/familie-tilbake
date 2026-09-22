@@ -44,7 +44,7 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsak(eksternFagsakId, fagsystem), ValideringContext.HentFagsak)
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsakEllerTilbakekrevingId(eksternFagsakId, fagsystem), ValideringContext.HentFagsak)
         if (tilbakekreving != null) {
             return Ressurs.success(tilbakekreving.tilFrontendDto(SystemKlokke))
         }

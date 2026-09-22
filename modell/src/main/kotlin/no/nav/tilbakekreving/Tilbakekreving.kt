@@ -399,7 +399,11 @@ class Tilbakekreving internal constructor(
 
     fun hentTilbakekrevingUrl(baseUrl: String): String {
         return URLBuilder(baseUrl).apply {
-            path("fagsystem", eksternFagsak.ytelse.tilFagsystemDTO().toString(), "fagsak", eksternFagsak.eksternId)
+            val fagsakId = when {
+                eksternFagsak.ytelse.brukerEksternFagsakIdForUrl -> eksternFagsak.eksternId
+                else -> id
+            }
+            path("fagsystem", eksternFagsak.ytelse.tilFagsystemDTO().toString(), "fagsak", fagsakId)
             if (behandlingHistorikk.harBehandling()) {
                 appendPathSegments("behandling", behandlingHistorikk.nåværende().entry.id.toString())
             }

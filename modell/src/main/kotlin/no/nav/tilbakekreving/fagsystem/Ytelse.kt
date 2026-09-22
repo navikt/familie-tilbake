@@ -24,6 +24,8 @@ sealed interface Ytelse {
 
     fun hentYtelsesnavn(språkkode: Språkkode): String
 
+    val brukerEksternFagsakIdForUrl: Boolean get() = false
+
     val kafkaTopic: String
 
     val beregnerSkatt: Boolean
@@ -55,6 +57,8 @@ sealed interface Ytelse {
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.BA
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-barnetrygd"
+
+        override val brukerEksternFagsakIdForUrl: Boolean = true
 
         override val beregnerSkatt: Boolean = true
 
@@ -93,6 +97,8 @@ sealed interface Ytelse {
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tilleggsstonad"
 
+        override val brukerEksternFagsakIdForUrl: Boolean = true
+
         override val beregnerSkatt: Boolean = false
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.TILLEGGSSTØNAD)
@@ -128,6 +134,8 @@ sealed interface Ytelse {
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-arbeidsavklaringspenger"
 
+        override val brukerEksternFagsakIdForUrl: Boolean = true
+
         override val beregnerSkatt: Boolean = true
 
         override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.ARBEIDSAVKLARINGSPENGER)
@@ -162,6 +170,8 @@ sealed interface Ytelse {
         override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.TILTAKSPENGER
 
         override val kafkaTopic: String = "tilbake.privat-tilbakekreving-tiltakspenger"
+
+        override val brukerEksternFagsakIdForUrl: Boolean = true
 
         override val beregnerSkatt: Boolean = false
 
