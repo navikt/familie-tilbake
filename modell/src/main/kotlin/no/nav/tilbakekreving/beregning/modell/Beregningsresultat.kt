@@ -55,7 +55,7 @@ class Beregningsresultat(
         )
     }
 
-    fun tilVedtkasbrevOppsummeringstabell(): List<VedtaksbrevOppsummeirngstabell> {
+    fun tilVedtaksbrevOppsummeringstabell(): List<VedtaksbrevOppsummeirngstabell> {
         return beregningsresultatsperioder.map { periode ->
             val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
             VedtaksbrevOppsummeirngstabell(

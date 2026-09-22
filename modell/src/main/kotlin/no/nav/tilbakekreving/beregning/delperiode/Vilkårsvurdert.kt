@@ -9,10 +9,6 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelSkattebeløp
 import no.nav.tilbakekreving.beregning.delperiode.JusterbartBeløp.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
-import no.nav.tilbakekreving.kontrakter.frontend.models.DelerDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.GodTroDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.HeleDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.IngentingDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -71,12 +67,7 @@ class Vilkårsvurdert(
             ?.vurdering as? NivåAvForståelse.GodTro
             ?: return null
 
-        val dto = godTro.tilNyFrontendDto() as? GodTroDto ?: return null
-        return when (val beløpIBehold = dto.beløpIBehold) {
-            is HeleDto -> feilutbetaltBeløp.subtract(skattebeløp).toInt()
-            is DelerDto -> beløpIBehold.beløp
-            is IngentingDto -> 0
-        }
+        return godTro.beløpIBehold(feilutbetaltBeløp, skattebeløp)
     }
 
     class Utbetalingsperiode(

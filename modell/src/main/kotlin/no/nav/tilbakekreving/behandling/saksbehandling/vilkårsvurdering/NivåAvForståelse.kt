@@ -238,6 +238,14 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        fun beløpIBehold(feilutbetaltBeløp: BigDecimal, skattebeløp: BigDecimal): Int {
+            return when (beløpIBehold) {
+                is BeløpIBehold.HeleIBehold -> feilutbetaltBeløp.subtract(skattebeløp).toInt()
+                is BeløpIBehold.DelerIBehold -> beløpIBehold.beløp.toInt()
+                is BeløpIBehold.Nei -> 0
+            }
+        }
+
         sealed interface BeløpIBehold {
             fun reduksjon(): Reduksjon
 
