@@ -18,6 +18,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.HarBrukerUttaltSeg
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
@@ -277,7 +278,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
     }
@@ -309,7 +310,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
 
@@ -322,7 +323,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe 2025
         }
     }
@@ -354,7 +355,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
 
@@ -367,7 +368,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe 2026
         }
     }
@@ -402,7 +403,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe false
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.OVER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
     }
@@ -437,7 +438,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe false
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.UNDER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
     }
@@ -470,7 +471,7 @@ class FaktaStegTest {
             varselbrev = null,
             klokke = SystemKlokke,
         ).shouldNotBeNull {
-            usikker4xRettsgebyr shouldBe true
+            status4xRettsgebyret shouldBe FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
             rettsgebyrÅrFraSaksbehandler shouldBe null
         }
 

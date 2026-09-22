@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.endring.VurdertUtbetaling
 import no.nav.tilbakekreving.entities.KanUnnlatesEntity
+import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeAktueltDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NeiSaerligeGrunnerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SkalIkkeUnnlatesDto
@@ -182,5 +183,12 @@ sealed interface KanUnnlates4xRettsgebyr {
         Ja,
         Nei,
         Usikkert,
+        ;
+
+        fun tilFrontendDto(): FaktaOmFeilutbetalingDto.Status4xRettsgebyret = when (this) {
+            Ja -> FaktaOmFeilutbetalingDto.Status4xRettsgebyret.UNDER
+            Nei -> FaktaOmFeilutbetalingDto.Status4xRettsgebyret.OVER
+            Usikkert -> FaktaOmFeilutbetalingDto.Status4xRettsgebyret.USIKKER
+        }
     }
 }

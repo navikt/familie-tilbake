@@ -125,12 +125,12 @@ class Faktasteg(
             tidligereVarsletBeløp = varselbrev?.hentVarsletBeløp()?.toInt()?.takeIf { it != beløpTilbakekreves },
             ferdigvurdert = erKlar(klokke),
             tilbakeført = trengerNyVurdering()?.frontendDto,
-            usikker4xRettsgebyr = KanUnnlates4xRettsgebyr.kanUnnlates(
+            status4xRettsgebyret = KanUnnlates4xRettsgebyr.kanUnnlates(
                 fullstendigVedtaksperiode = kravgrunnlag.perioder().map { it.periode() }.overordnet(),
                 // Siden dette bestemmer om valget skal vises eller ikke sender vi ikke med saksbehandlers valg av år her.
                 årForRettsgebyr = null,
                 beløp = kravgrunnlag.feilutbetaltBeløpForAllePerioder(),
-            ) == KanUnnlates4xRettsgebyr.KanUnnlates.Usikkert,
+            ).tilFrontendDto(),
             rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
         )
     }
