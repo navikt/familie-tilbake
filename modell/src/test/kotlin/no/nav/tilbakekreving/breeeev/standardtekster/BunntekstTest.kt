@@ -146,6 +146,7 @@ class BunntekstTest {
                             tilbakekrevingsbeløpEtterSkatt = 5000.kroner,
                             utbetaltYtelsesbeløp = 5000.kroner,
                             riktigYtelsesbeløp = 0.kroner,
+                            beløpIbehold = null,
                         ),
                     ),
                     vedtaksresultat = vedtaksresultat,

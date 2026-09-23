@@ -238,6 +238,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
+        fun beløpIBehold(feilutbetaltBeløp: BigDecimal): Int {
+            return beløpIBehold.beløpIBehold(feilutbetaltBeløp)
+        }
+
         sealed interface BeløpIBehold {
             fun reduksjon(): Reduksjon
 
@@ -248,6 +252,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             fun tilFrontendDto(): BelopIBeholdDto
 
             fun kanUnnlates(): KanUnnlates4xRettsgebyr?
+
+            fun beløpIBehold(feilutbetaltBeløp: BigDecimal): Int
 
             class HeleIBehold(
                 val annetBegrunnelse: String?,
@@ -282,6 +288,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal): Int {
+                    return feilutbetaltBeløp.toInt()
+                }
             }
 
             class DelerIBehold(
@@ -320,6 +330,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = kanUnnlates4XRettsgebyr
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal): Int {
+                    return beløp.toInt()
+                }
             }
 
             class Nei(
@@ -343,6 +357,8 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                 }
 
                 override fun kanUnnlates(): KanUnnlates4xRettsgebyr? = null
+
+                override fun beløpIBehold(feilutbetaltBeløp: BigDecimal): Int = 0
             }
         }
     }

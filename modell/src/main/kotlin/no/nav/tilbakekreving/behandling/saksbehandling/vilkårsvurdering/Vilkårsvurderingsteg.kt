@@ -36,6 +36,7 @@ import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.util.UUID
 import kotlin.math.abs
 
@@ -291,6 +292,10 @@ class Vilkårsvurderingsteg(
         override fun renter(): Boolean = vurdering.renter()
 
         override fun vurdering(): Vurdering = vurdering.vurderingstype()
+
+        override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): Int? {
+            return (vurdering as? NivåAvForståelse.GodTro)?.beløpIBehold(feilutbetaltBeløp)
+        }
 
         fun tilEntity(vurderingRef: UUID): VilkårsvurderingsperiodeEntity {
             return VilkårsvurderingsperiodeEntity(

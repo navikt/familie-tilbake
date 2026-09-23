@@ -40,11 +40,13 @@ class Vilkårsvurdert(
     }
 
     override fun beregningsresultat(): Beregningsresultatsperiode {
+        val skattebeløp = delperioder.sumOf { it.summer(JusterbartBeløp::skatt) }
+        val feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() }
         return Beregningsresultatsperiode(
             periode = vurdering.periode(),
             vurdering = vurdering.vurdering(),
             renteprosent = if (beregnRenter && vurdering.renter()) RENTESATS else null,
-            feilutbetaltBeløp = delperioder.sumOf { it.feilutbetaltBeløp() },
+            feilutbetaltBeløp = feilutbetaltBeløp,
             riktigYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::riktigYtelsesbeløp) },
             utbetaltYtelsesbeløp = delperioder.sumOf { it.summer(JusterbartBeløp::utbetaltYtelsesbeløp) },
             andelAvBeløp = vurdering.reduksjon().andelTilbakekreves,
@@ -52,8 +54,9 @@ class Vilkårsvurdert(
             tilbakekrevingsbeløpUtenRenter = delperioder.sumOf { it.summer(JusterbartBeløp::tilbakekrevesBrutto) },
             rentebeløp = delperioder.sumOf { it.renter() },
             tilbakekrevingsbeløpEtterSkatt = delperioder.sumOf { it.tilbakekrevesNetto() },
-            skattebeløp = delperioder.sumOf { it.summer(JusterbartBeløp::skatt) },
+            skattebeløp = skattebeløp,
             tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() },
+            beløpIbehold = vurdering.beløpIbehold(feilutbetaltBeløp),
         )
     }
 

@@ -24,6 +24,7 @@ class Foreldet(
             vurdering = AnnenVurdering.FORELDET,
             skattebeløp = delperioder.sumOf { it.summer(Delperiode.Beløp::skatt) },
             tilbakekrevingsbeløpEtterSkatt = BigDecimal.ZERO,
+            beløpIbehold = null,
         )
     }
 

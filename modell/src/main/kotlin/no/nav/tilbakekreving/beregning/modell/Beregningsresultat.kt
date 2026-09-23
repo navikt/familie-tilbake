@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.beregning.modell
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -38,23 +39,36 @@ class Beregningsresultat(
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
                 val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
-                val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
                 BeregningsresultatsperiodeDto(
                     fom = periode.periode.fom,
                     tom = periode.periode.tom,
                     feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
+                    beløpIbehold = periode.beløpIbehold,
                     vurdering = vurdering,
-                    andelAvBeløp = periode.andelAvBeløp?.toInt(),
+                    reduksjonprosent = periode.andelAvBeløp?.toInt(),
                     renteprosent = periode.renteprosent?.toInt(),
-                    tilbakekrevingsbeløp = periode.tilbakekrevingsbeløp.toInt(),
-                    tilbakekrevesBeløpEtterSkatt = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
-                    rentebeløp = periode.rentebeløp.toInt(),
                     skattebeløp = periode.skattebeløp.toInt(),
-                    redusertBeløp = reduksjon.toInt(),
+                    tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
                 )
             },
             vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
         )
+    }
+
+    fun tilVedtaksbrevOppsummeringstabell(): List<VedtaksbrevOppsummeringstabell> {
+        return beregningsresultatsperioder.map { periode ->
+            val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
+            VedtaksbrevOppsummeringstabell(
+                fom = periode.periode.fom,
+                tom = periode.periode.tom,
+                feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
+                beløpIbehold = periode.beløpIbehold,
+                rentebeløp = periode.rentebeløp.toInt(),
+                skattebeløp = periode.skattebeløp.toInt(),
+                redusertBeløp = reduksjon.toInt(),
+                tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
+            )
+        }
     }
 }
 
