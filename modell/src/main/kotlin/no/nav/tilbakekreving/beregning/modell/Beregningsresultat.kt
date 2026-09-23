@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.beregning.modell
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeirngstabell
+import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -55,10 +55,10 @@ class Beregningsresultat(
         )
     }
 
-    fun tilVedtaksbrevOppsummeringstabell(): List<VedtaksbrevOppsummeirngstabell> {
+    fun tilVedtaksbrevOppsummeringstabell(): List<VedtaksbrevOppsummeringstabell> {
         return beregningsresultatsperioder.map { periode ->
             val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
-            VedtaksbrevOppsummeirngstabell(
+            VedtaksbrevOppsummeringstabell(
                 fom = periode.periode.fom,
                 tom = periode.periode.tom,
                 feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),

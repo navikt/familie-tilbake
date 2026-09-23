@@ -862,7 +862,7 @@ class Behandling internal constructor(
             skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
             tilbakekrevingId = tilbakekrevingId,
             beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
-            vedtaksbrevOppsummeirngstabell = resultat.tilVedtaksbrevOppsummeringstabell(),
+            vedtaksbrevOppsummeringstabell = resultat.tilVedtaksbrevOppsummeringstabell(),
             hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
                 ytelse.hjemlerForTilbakekreving() +
                 foreldelsesteg.hjemlerForTilbakekreving() +

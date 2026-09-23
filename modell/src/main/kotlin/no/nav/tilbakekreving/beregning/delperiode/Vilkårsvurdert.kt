@@ -1,7 +1,5 @@
 package no.nav.tilbakekreving.beregning.delperiode
 
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.HUNDRE_PROSENT
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.KravgrunnlagPeriodeAdapter
@@ -58,16 +56,8 @@ class Vilkårsvurdert(
             tilbakekrevingsbeløpEtterSkatt = delperioder.sumOf { it.tilbakekrevesNetto() },
             skattebeløp = skattebeløp,
             tilbakekrevingsbeløp = delperioder.sumOf { it.tilbakekrevesBruttoMedRenter() },
-            beløpIbehold = beløpIBehold(delperioder.sumOf { it.tilbakekrevesNetto() }),
+            beløpIbehold = vurdering.beløpIbehold(feilutbetaltBeløp),
         )
-    }
-
-    private fun beløpIBehold(heleBeløpet: BigDecimal): Int? {
-        val godTro = (vurdering as? Vilkårsvurderingsteg.Vilkårsvurderingsperiode)
-            ?.vurdering as? NivåAvForståelse.GodTro
-            ?: return null
-
-        return godTro.beløpIBehold(heleBeløpet)
     }
 
     class Utbetalingsperiode(

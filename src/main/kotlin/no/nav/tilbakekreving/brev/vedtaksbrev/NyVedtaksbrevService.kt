@@ -16,7 +16,7 @@ import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
-import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeirngstabell
+import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
@@ -89,7 +89,7 @@ class NyVedtaksbrevService(
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeirngstabell),
+                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeringstabell),
                 sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
             ),
@@ -117,14 +117,14 @@ class NyVedtaksbrevService(
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeirngstabell),
+                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeringstabell),
                 sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
             ),
         )
     }
 
-    private fun mapOppsummeringsperioder(beregningsresultat: List<VedtaksbrevOppsummeirngstabell>): List<OppsummertPeriodeDto> {
+    private fun mapOppsummeringsperioder(beregningsresultat: List<VedtaksbrevOppsummeringstabell>): List<OppsummertPeriodeDto> {
         return beregningsresultat.map {
             OppsummertPeriodeDto(
                 fom = BrevFormatterer.norskNumeriskDato(it.fom),

@@ -16,12 +16,12 @@ data class VedtaksbrevInfo(
     val bunntekster: Set<Bunntekst>,
     val tilbakekrevingId: String,
     val beregningsresultat: List<BeregningsresultatsperiodeDto>,
-    val vedtaksbrevOppsummeirngstabell: List<VedtaksbrevOppsummeirngstabell>,
+    val vedtaksbrevOppsummeringstabell: List<VedtaksbrevOppsummeringstabell>,
     val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
     val beregnerSkatt: Boolean,
 )
 
-data class VedtaksbrevOppsummeirngstabell(
+data class VedtaksbrevOppsummeringstabell(
     val fom: LocalDate,
     val tom: LocalDate,
     val feilutbetaltBeløp: Int,

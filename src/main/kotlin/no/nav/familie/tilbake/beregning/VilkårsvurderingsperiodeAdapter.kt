@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vurdering
+import java.math.BigDecimal
 
 class VilkårsvurderingsperiodeAdapter(
     private val vurdering: Vilkårsvurderingsperiode,
@@ -56,5 +57,9 @@ class VilkårsvurderingsperiodeAdapter(
             vurdering.godTro != null -> AnnenVurdering.GOD_TRO
             else -> throw IllegalArgumentException("Vurdering skal peke til GodTro-entiet eller Aktsomhet-entitet")
         }
+    }
+
+    override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): Int? {
+        return vurdering.godTro?.beløpSomErIBehold?.toInt()
     }
 }
