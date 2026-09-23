@@ -27,6 +27,15 @@ class StatusmeldingBufferRepository(
         }.singleOrNull() ?: false
     }
 
+    fun erSperret(fagsystemId: String): Boolean {
+        return jdbcTemplate.query(
+            "SELECT COUNT(1) as count FROM statusmelding_buffer WHERE fagsystem_id=? AND status='SPER';",
+            fagsystemId,
+        ) { rs, _ ->
+            rs.getInt("count") > 0
+        }.singleOrNull() ?: false
+    }
+
     data class Entity(
         val statusmelding: String,
         val fagsystemId: String,
