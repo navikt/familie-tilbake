@@ -37,7 +37,7 @@ class PdlClientMock : PdlClient {
     }
 
     fun harVentendeLås(ident: String): Boolean {
-        return !pauser.containsKey(ident)
+        return pauser.containsKey(ident)
     }
 
     override fun hentPersoninfo(

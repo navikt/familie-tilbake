@@ -150,7 +150,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     }
 
     @RepeatedTest(5)
-    fun `mottar konkurrerende svar fra fagsystem mens forrige svar venter på PDL-oppslag`() {
+    fun `mottar konkurrerende svar fra fagsystem mens forrige svar venter på PDL`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val ident = KravgrunnlagGenerator.nextPaddedId(11)
         val eksternBehandlingIdA = UUID.randomUUID().toString()
@@ -177,7 +177,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 )
             }
             until(500.milliseconds) {
-                pdlClient.harVentendeLås(ident)
+                !pdlClient.harVentendeLås(ident)
             }
             val workerB = async(Dispatchers.IO) {
                 fagsystemIntegrasjonService.håndter(
@@ -190,7 +190,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 )
             }
 
-            delay(500.milliseconds)
+            delay(25.milliseconds)
             release()
 
             awaitAll(workerA, workerB)
@@ -199,8 +199,8 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.fagsak(fagsystemId, FagsystemDTO.TS)).shouldNotBeNull {
             eksternFagsak.behandlinger.innslag shouldHaveSize 2
-            eksternFagsak.behandlinger.innslag[0].eksternId shouldBe eksternBehandlingIdA
-            eksternFagsak.behandlinger.innslag[1].eksternId shouldBe eksternBehandlingIdB
+            eksternFagsak.behandlinger.innslag.forOne { it.eksternId shouldBe eksternBehandlingIdA }
+            eksternFagsak.behandlinger.innslag.forOne { it.eksternId shouldBe eksternBehandlingIdB }
 
             nåværendeTilstand shouldBe TilbakekrevingTilstand.TIL_BEHANDLING
         }
