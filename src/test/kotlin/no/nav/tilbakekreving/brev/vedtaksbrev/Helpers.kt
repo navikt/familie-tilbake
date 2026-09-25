@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.brev.vedtaksbrev
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
-import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.fagsystem.Ytelse
@@ -48,25 +47,13 @@ fun vedtaksbrevInfo(
             tom = 31.januar(2021),
             vurdering = BeregningsresultatVurderingDto.GodTro,
             feilutbetaltBeløp = 4000,
-            renteprosent = 0,
+            rentebeløp = 0,
             tilbakekrevingsbeløp = 4000,
-            reduksjonprosent = 0,
-            beløpIbehold = null,
+            reduksjon = 0,
+            beløpIBehold = null,
             skattebeløp = 0,
         ),
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
     beregnerSkatt = true,
-    vedtaksbrevOppsummeringstabell = listOf(
-        VedtaksbrevOppsummeringstabell(
-            fom = 1.januar(2021),
-            tom = 31.januar(2021),
-            feilutbetaltBeløp = 4000,
-            tilbakekrevingsbeløp = 4000,
-            beløpIbehold = null,
-            skattebeløp = 0,
-            redusertBeløp = 0,
-            rentebeløp = 0,
-        ),
-    ),
 )

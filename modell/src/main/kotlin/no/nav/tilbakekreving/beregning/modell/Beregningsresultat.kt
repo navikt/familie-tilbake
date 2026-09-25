@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.beregning.modell
 
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
-import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -36,38 +35,43 @@ class Beregningsresultat(
     }
 
     fun tilFrontendDto(): BeregningsresultatDto {
-        return BeregningsresultatDto(
-            beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
-                val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
-                BeregningsresultatsperiodeDto(
-                    fom = periode.periode.fom,
-                    tom = periode.periode.tom,
-                    feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
-                    beløpIbehold = periode.beløpIbehold,
-                    vurdering = vurdering,
-                    reduksjonprosent = periode.andelAvBeløp?.toInt(),
-                    renteprosent = periode.renteprosent?.toInt(),
-                    skattebeløp = periode.skattebeløp.toInt(),
-                    tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
-                )
-            },
-            vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
-        )
-    }
+        val beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
+            val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
+            val reduksjon = beregnReduksjon(periode, vurdering)
 
-    fun tilVedtaksbrevOppsummeringstabell(): List<VedtaksbrevOppsummeringstabell> {
-        return beregningsresultatsperioder.map { periode ->
-            val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
-            VedtaksbrevOppsummeringstabell(
+            BeregningsresultatsperiodeDto(
                 fom = periode.periode.fom,
                 tom = periode.periode.tom,
                 feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
-                beløpIbehold = periode.beløpIbehold,
+                vurdering = vurdering,
+                beløpIBehold = periode.beløpIbehold?.toInt(),
+                reduksjon = reduksjon,
                 rentebeløp = periode.rentebeløp.toInt(),
                 skattebeløp = periode.skattebeløp.toInt(),
-                redusertBeløp = reduksjon.toInt(),
                 tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
             )
+        }
+
+        return BeregningsresultatDto(
+            beregningsresultatsperioder = beregningsresultatsperioder,
+            vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
+            totaltBeløpIBehold = beregningsresultatsperioder.sumOf { it.beløpIBehold ?: 0 },
+            totaltReduksjon = beregningsresultatsperioder.sumOf { it.reduksjon ?: 0 },
+            totaltRentebeløp = totaltRentebeløp.toInt(),
+            totaltSkattebeløp = totaltSkattetrekk.toInt(),
+            totaltTilbakekrevingsbeløp = totaltTilbakekrevesBeløpMedRenterUtenSkatt.toInt(),
+            totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp.toInt(),
+        )
+    }
+
+    private fun beregnReduksjon(
+        periode: Beregningsresultatsperiode,
+        vurdering: BeregningsresultatVurderingDto,
+    ): Int? = when (vurdering) {
+        BeregningsresultatVurderingDto.Forsett -> null
+        else -> {
+            val beløp = periode.beløpIbehold ?: periode.feilutbetaltBeløp
+            beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt()
         }
     }
 }

@@ -19,5 +19,5 @@ data class Beregningsresultatsperiode(
     // Rått beløp, ikke justert for ev. trekk
     val utbetaltYtelsesbeløp: BigDecimal,
     val riktigYtelsesbeløp: BigDecimal,
-    val beløpIbehold: Int?,
+    val beløpIbehold: BigDecimal?,
 )
