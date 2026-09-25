@@ -31,7 +31,7 @@ class ForhåndsvarselTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
         forhåndsvarsel.lagreOpprinneligFrist(LocalDate.now())
         forhåndsvarsel.lagreUttalelse(
-            uttalelseVurdering = UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+            uttalelseVurdering = UttalelseVurdering.JA,
             uttalelseInfo = UttalelseInfo(
                 id = UUID.randomUUID(),
                 uttalelsesdato = LocalDate.now(),
@@ -53,7 +53,7 @@ class ForhåndsvarselTest {
             beskrivelse = "",
         )
         forhåndsvarsel.lagreUttalelse(
-            UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
+            UttalelseVurdering.JA,
             uttalelseInfo = UttalelseInfo(
                 id = UUID.randomUUID(),
                 uttalelsesdato = LocalDate.now(),
@@ -207,7 +207,7 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.lagreOpprinneligFrist(15.februar(2021))
 
-        forhåndsvarsel.lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, uttalelse("Ny uttalelse"), "vurdering")
+        forhåndsvarsel.lagreUttalelse(UttalelseVurdering.JA, uttalelse("Ny uttalelse"), "vurdering")
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
@@ -239,7 +239,7 @@ class ForhåndsvarselTest {
     private fun forhåndsvarselSendtMedUttalelse(uttalelse: String): Forhåndsvarsel = Forhåndsvarsel.opprett().also {
         it.lagreOpprinneligFrist(31.januar(2021))
         it.lagreUttalelse(
-            uttalelseVurdering = UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+            uttalelseVurdering = UttalelseVurdering.JA,
             uttalelseInfo = uttalelse(uttalelse),
             kommentar = "Uttalelsen er vurdert",
         )

@@ -219,7 +219,7 @@ class TilBehandlingTest {
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
             lagreUttalelse(
-                uttalelseVurdering = UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG,
+                uttalelseVurdering = UttalelseVurdering.JA,
                 uttalelseInfo = null,
                 kommentar = "Forhåndsvarsel er ikke nødvendig i testen",
             )

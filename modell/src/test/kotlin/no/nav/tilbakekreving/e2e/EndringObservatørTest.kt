@@ -156,7 +156,7 @@ class EndringObservatørTest {
             vurderFakta(faktastegVurdering())
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
-            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
+            lagreUttalelse(UttalelseVurdering.JA, null, "")
         }
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
@@ -223,7 +223,7 @@ class EndringObservatørTest {
         }
 
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringObservatør)) {
-            lagreUttalelse(UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, null, "")
+            lagreUttalelse(UttalelseVurdering.JA, null, "")
             vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
             vurderVilkår(1.januar(2021) til 31.januar(2021), forårsaketAvBruker().grovtUaktsomt())
             foreslåVedtak()

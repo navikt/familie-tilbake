@@ -14,19 +14,25 @@ class Brukeruttalelse(
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
 ) {
-    internal fun nyTilFrontendDto(): UttalelseDto {
+    internal fun nyTilFrontendDto(etterForhåndsvarsel: Boolean): UttalelseDto {
         when (uttalelseVurdering) {
-            UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG, UttalelseVurdering.JA -> {
+            UttalelseVurdering.JA -> {
                 return UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.valueOf(uttalelseVurdering.name),
+                    harBrukerUttaltSeg = when (etterForhåndsvarsel) {
+                        true -> UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL
+                        else -> UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG
+                    },
                     uttalelsesdato = uttalelseInfo!!.uttalelsesdato,
                     hvorBrukerenUttalteSeg = uttalelseInfo.hvorBrukerenUttalteSeg,
                     beskrivelse = uttalelseInfo.uttalelseBeskrivelse,
                 )
             }
-            UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
+            UttalelseVurdering.NEI -> {
                 return UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.valueOf(uttalelseVurdering.name),
+                    harBrukerUttaltSeg = when (etterForhåndsvarsel) {
+                        true -> UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
+                        else -> UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE
+                    },
                     beskrivelse = kommentar,
                 )
             }
@@ -60,14 +66,6 @@ data class UttalelseInfo(
 )
 
 enum class UttalelseVurdering(val meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>) {
-    JA_ETTER_FORHÅNDSVARSEL(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
-    NEI_ETTER_FORHÅNDSVARSEL(emptySet()),
-    UNNTAK_ALLEREDE_UTTALT_SEG(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
-    UNNTAK_INGEN_UTTALELSE(emptySet()),
-
-    @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
     JA(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
-
-    @Deprecated("midreltidig, fjernes etter prodsatt og migrering")
     NEI(emptySet()),
 }

@@ -76,13 +76,15 @@ class ForhåndsvarselService(
 
     fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {
         val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
-            UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
+            UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
+            UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG,
+            UttalelseVurderingDto.JA,
+            -> UttalelseVurdering.JA
 
-            UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL -> UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
-
-            UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG -> UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG
-
-            UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE -> UttalelseVurdering.UNNTAK_INGEN_UTTALELSE
+            UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL,
+            UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE,
+            UttalelseVurderingDto.NEI,
+            -> UttalelseVurdering.NEI
 
             UttalelseVurderingDto.IKKE_VURDERT -> throw IllegalStateException(
                 "Burde ikke være i denne tilstanden. IKKE_VURDERT er enum til frontend.",
@@ -90,7 +92,7 @@ class ForhåndsvarselService(
         }
 
         when (uttalelseVurdering) {
-            UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG, UttalelseVurdering.JA -> {
+            UttalelseVurdering.JA -> {
                 tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
                     lagreUttalelse(
                         uttalelseVurdering = uttalelseVurdering,
@@ -109,7 +111,7 @@ class ForhåndsvarselService(
                 }
             }
 
-            UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, UttalelseVurdering.UNNTAK_INGEN_UTTALELSE, UttalelseVurdering.NEI -> {
+            UttalelseVurdering.NEI -> {
                 tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
                     lagreUttalelse(
                         uttalelseVurdering = uttalelseVurdering,

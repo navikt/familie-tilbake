@@ -104,10 +104,10 @@ open class TilbakekrevingE2EBase : E2EBase() {
             tilbakekreving.gjørSaksbehandling(behandlingId, context(ANSVARLIG_SAKSBEHANDLER)) {
                 lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
                 if (uttalelse == null) {
-                    lagreUttalelse(UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL, null, "")
+                    lagreUttalelse(UttalelseVurdering.NEI, null, "")
                 } else {
                     lagreUttalelse(
-                        UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+                        UttalelseVurdering.JA,
                         UttalelseInfo(UUID.randomUUID(), LocalDate.now(), "Reddit", uttalelse),
                         null,
                     )

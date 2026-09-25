@@ -1,7 +1,6 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel
-import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import java.util.UUID
 
@@ -14,7 +13,7 @@ data class ForhåndsvarselEntity(
     val tilbakeført: ÅrsakTilTilbakeføring?,
 ) {
     fun fraEntity(): Forhåndsvarsel {
-        val brukeruttalelse = midlertidigMapping()?.fraEntity()
+        val brukeruttalelse = brukeruttalelseEntity?.fraEntity()
         return Forhåndsvarsel(
             when (vurderingstype) {
                 ForhåndsvarselVurderingstype.IKKE_VURDERT -> Forhåndsvarsel.IkkeVurdert
@@ -34,38 +33,6 @@ data class ForhåndsvarselEntity(
                 }
             },
         )
-    }
-
-    // Fjernes etter prodsatt og migrering kjørt
-    private fun midlertidigMapping(): BrukeruttalelseEntity? {
-        val entity = brukeruttalelseEntity ?: return null
-
-        val legacy = entity.uttalelseVurdering
-        val harUnntak = forhåndsvarselUnntakEntity != null
-
-        val nyVurdering = when (legacy) {
-            UttalelseVurdering.JA -> {
-                if (harUnntak) {
-                    UttalelseVurdering.UNNTAK_ALLEREDE_UTTALT_SEG
-                } else {
-                    UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL
-                }
-            }
-
-            UttalelseVurdering.NEI -> {
-                if (harUnntak) {
-                    UttalelseVurdering.UNNTAK_INGEN_UTTALELSE
-                } else {
-                    UttalelseVurdering.NEI_ETTER_FORHÅNDSVARSEL
-                }
-            }
-
-            else -> {
-                legacy
-            }
-        }
-
-        return entity.copy(uttalelseVurdering = nyVurdering)
     }
 }
 

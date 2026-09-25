@@ -26,7 +26,7 @@ class ForhåndsvarselEntityTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett().also {
             it.lagreOpprinneligFrist(31.januar(2021))
             it.lagreUttalelse(
-                uttalelseVurdering = UttalelseVurdering.JA_ETTER_FORHÅNDSVARSEL,
+                uttalelseVurdering = UttalelseVurdering.JA,
                 uttalelseInfo = UttalelseInfo(
                     id = UUID.randomUUID(),
                     uttalelsesdato = 20.januar(2021),
