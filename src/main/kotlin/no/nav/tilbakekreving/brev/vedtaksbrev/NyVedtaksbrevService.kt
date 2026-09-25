@@ -130,9 +130,9 @@ class NyVedtaksbrevService(
                 fom = BrevFormatterer.norskNumeriskDato(it.fom),
                 tom = BrevFormatterer.norskNumeriskDato(it.tom),
                 feilutbetaltBeløp = BrevFormatterer.beløpString(it.feilutbetaltBeløp),
-                redusertBeløp = beløpMedFortegn(it.reduksjon, "-"),
+                redusertBeløp = it.reduksjon.let { BrevFormatterer.beløpString(it ?: 0) },
                 rentebeløp = beløpMedFortegn(it.rentebeløp, "+"),
-                skatt = beløpMedFortegn(it.skattebeløp, "-"),
+                skatt = BrevFormatterer.beløpString(it.skattebeløp),
                 tilbakekrevingsbeløp = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
                 tilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
             )

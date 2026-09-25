@@ -38,16 +38,20 @@ class Beregningsresultat(
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
                 val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
-                val reduksjon = periode.feilutbetaltBeløp - periode.tilbakekrevingsbeløpUtenRenter
+                val reduksjon = when (vurdering) {
+                    BeregningsresultatVurderingDto.Forsett -> null
+                    else -> periode.feilutbetaltBeløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
+                }
+
                 BeregningsresultatsperiodeDto(
                     fom = periode.periode.fom,
                     tom = periode.periode.tom,
                     feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
                     vurdering = vurdering,
                     beløpIBehold = periode.beløpIbehold,
-                    reduksjon = reduksjon.toInt(),
+                    reduksjon = reduksjon,
                     rentebeløp = periode.rentebeløp.toInt(),
-                    skattebeløp = periode.skattebeløp.toInt(),
+                    skattebeløp = periode.skattebeløp.toInt().unaryMinus(),
                     tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
                 )
             },
