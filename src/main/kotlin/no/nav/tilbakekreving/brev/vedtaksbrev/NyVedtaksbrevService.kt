@@ -16,7 +16,6 @@ import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
-import no.nav.tilbakekreving.breeeev.VedtaksbrevOppsummeringstabell
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
@@ -30,6 +29,7 @@ import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummeringsdataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummertPeriodeDto
@@ -89,7 +89,7 @@ class NyVedtaksbrevService(
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeringstabell),
+                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
                 sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
             ),
@@ -117,20 +117,20 @@ class NyVedtaksbrevService(
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
             oppsummeringstabell = OppsummeringsdataDto(
                 beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.vedtaksbrevOppsummeringstabell),
+                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
                 sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
             ),
         )
     }
 
-    private fun mapOppsummeringsperioder(beregningsresultat: List<VedtaksbrevOppsummeringstabell>): List<OppsummertPeriodeDto> {
+    private fun mapOppsummeringsperioder(beregningsresultat: List<BeregningsresultatsperiodeDto>): List<OppsummertPeriodeDto> {
         return beregningsresultat.map {
             OppsummertPeriodeDto(
                 fom = BrevFormatterer.norskNumeriskDato(it.fom),
                 tom = BrevFormatterer.norskNumeriskDato(it.tom),
                 feilutbetaltBeløp = BrevFormatterer.beløpString(it.feilutbetaltBeløp),
-                redusertBeløp = beløpMedFortegn(it.redusertBeløp, "-"),
+                redusertBeløp = beløpMedFortegn(it.reduksjon, "-"),
                 rentebeløp = beløpMedFortegn(it.rentebeløp, "+"),
                 skatt = beløpMedFortegn(it.skattebeløp, "-"),
                 tilbakekrevingsbeløp = BrevFormatterer.beløpString(it.tilbakekrevingsbeløp),
