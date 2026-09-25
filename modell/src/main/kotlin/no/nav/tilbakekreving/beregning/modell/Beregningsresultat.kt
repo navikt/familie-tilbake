@@ -37,16 +37,14 @@ class Beregningsresultat(
     fun tilFrontendDto(): BeregningsresultatDto {
         val beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
             val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
-            val reduksjon = when (vurdering) {
-                BeregningsresultatVurderingDto.Forsett -> null
-                else -> periode.feilutbetaltBeløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
-            }
+            val reduksjon = beregnReduksjon(periode, vurdering)
+
             BeregningsresultatsperiodeDto(
                 fom = periode.periode.fom,
                 tom = periode.periode.tom,
                 feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
                 vurdering = vurdering,
-                beløpIBehold = periode.beløpIbehold,
+                beløpIBehold = periode.beløpIbehold?.toInt(),
                 reduksjon = reduksjon,
                 rentebeløp = periode.rentebeløp.toInt(),
                 skattebeløp = periode.skattebeløp.toInt().unaryMinus(),
@@ -63,6 +61,17 @@ class Beregningsresultat(
             totalSkattebeløp = beregningsresultatsperioder.sumOf { it.skattebeløp },
             totalTilbakekrevingsbeløp = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp },
         )
+    }
+
+    private fun beregnReduksjon(
+        periode: Beregningsresultatsperiode,
+        vurdering: BeregningsresultatVurderingDto,
+    ): Int? = when (vurdering) {
+        BeregningsresultatVurderingDto.Forsett -> null
+        else -> {
+            val beløp = periode.beløpIbehold ?: periode.feilutbetaltBeløp
+            beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
+        }
     }
 }
 
