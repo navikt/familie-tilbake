@@ -28,6 +28,10 @@ import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksresultatDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
@@ -1148,6 +1152,58 @@ class BeregningTest {
                 utbetaltYtelsesbeløp = 20000.kroner,
                 klassekode = "BATR",
             ),
+        )
+    }
+
+    @Test
+    fun `oppsummering retunerer riktige tall`() {
+        val beregning = Beregning(
+            beregnRenter = false,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().burdeForstått()),
+                (1.februar(2021) til 28.februar(2021)).medVurdering(forårsaketAvNav().godTro(2000.kroner)),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(8000.kroner, skatteprosent = BigDecimal("25.111")),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(8000.kroner, skatteprosent = BigDecimal("22.567")),
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val result = beregning.oppsummer()
+        result.tilFrontendDto() shouldBe BeregningsresultatDto(
+            beregningsresultatsperioder = listOf(
+                BeregningsresultatsperiodeDto(
+                    fom = 1.januar(2021),
+                    tom = 31.januar(2021),
+                    feilutbetaltBeløp = 8000,
+                    vurdering = BeregningsresultatVurderingDto.BurdeForstått,
+                    beløpIBehold = null,
+                    reduksjon = 0,
+                    rentebeløp = 0,
+                    skattebeløp = -2009,
+                    tilbakekrevingsbeløp = 5991,
+                ),
+                BeregningsresultatsperiodeDto(
+                    fom = 1.februar(2021),
+                    tom = 28.februar(2021),
+                    feilutbetaltBeløp = 8000,
+                    vurdering = BeregningsresultatVurderingDto.GodTro,
+                    beløpIBehold = 2000,
+                    reduksjon = -6000,
+                    rentebeløp = 0,
+                    skattebeløp = -451,
+                    tilbakekrevingsbeløp = 1549,
+                ),
+            ),
+            vedtaksresultat = VedtaksresultatDto.DelvisTilbakebetaling,
+            totalBeløpIBehold = 2000,
+            totalReduksjon = -6000,
+            totalRentebeløp = 0,
+            totalSkattebeløp = -2460,
+            totalTilbakekrevingsbeløp = 7540,
         )
     }
 
