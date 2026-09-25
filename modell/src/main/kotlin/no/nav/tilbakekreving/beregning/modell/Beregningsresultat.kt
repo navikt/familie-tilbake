@@ -35,27 +35,33 @@ class Beregningsresultat(
     }
 
     fun tilFrontendDto(): BeregningsresultatDto {
-        return BeregningsresultatDto(
-            beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
-                val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
-                val reduksjon = when (vurdering) {
-                    BeregningsresultatVurderingDto.Forsett -> null
-                    else -> periode.feilutbetaltBeløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
-                }
+        val beregningsresultatsperioder = beregningsresultatsperioder.map { periode ->
+            val vurdering = periode.vurdering!!.tilBeregningsresultatVurderingDto()
+            val reduksjon = when (vurdering) {
+                BeregningsresultatVurderingDto.Forsett -> null
+                else -> periode.feilutbetaltBeløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
+            }
+            BeregningsresultatsperiodeDto(
+                fom = periode.periode.fom,
+                tom = periode.periode.tom,
+                feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
+                vurdering = vurdering,
+                beløpIBehold = periode.beløpIbehold,
+                reduksjon = reduksjon,
+                rentebeløp = periode.rentebeløp.toInt(),
+                skattebeløp = periode.skattebeløp.toInt().unaryMinus(),
+                tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
+            )
+        }
 
-                BeregningsresultatsperiodeDto(
-                    fom = periode.periode.fom,
-                    tom = periode.periode.tom,
-                    feilutbetaltBeløp = periode.feilutbetaltBeløp.toInt(),
-                    vurdering = vurdering,
-                    beløpIBehold = periode.beløpIbehold,
-                    reduksjon = reduksjon,
-                    rentebeløp = periode.rentebeløp.toInt(),
-                    skattebeløp = periode.skattebeløp.toInt().unaryMinus(),
-                    tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
-                )
-            },
+        return BeregningsresultatDto(
+            beregningsresultatsperioder = beregningsresultatsperioder,
             vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
+            totalBeløpIBehold = beregningsresultatsperioder.sumOf { it.beløpIBehold ?: 0 },
+            totalReduksjon = beregningsresultatsperioder.sumOf { it.reduksjon ?: 0 },
+            totalRentebeløp = beregningsresultatsperioder.sumOf { it.rentebeløp },
+            totalSkattebeløp = beregningsresultatsperioder.sumOf { it.skattebeløp },
+            totalTilbakekrevingsbeløp = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp },
         )
     }
 }
