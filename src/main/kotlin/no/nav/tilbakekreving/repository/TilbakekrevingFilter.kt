@@ -19,7 +19,7 @@ sealed interface TilbakekrevingFilter {
 
     private class BehandlingId(val id: UUID) : TilbakekrevingFilter {
         override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=? FOR UPDATE;", mapper, id)
+            return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=?;", mapper, id)
         }
 
         override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {

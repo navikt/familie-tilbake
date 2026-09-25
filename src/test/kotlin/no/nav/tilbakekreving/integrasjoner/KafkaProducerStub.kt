@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.integration.kafka.KafkaProducer
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.api.v2.fagsystem.EventMetadata
 import no.nav.tilbakekreving.api.v2.fagsystem.Kafkamelding
-import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.events.HendelseEventDto
 import no.nav.tilbakekreving.kontrakter.HentFagsystemsbehandlingRequest
@@ -26,8 +25,6 @@ class KafkaProducerStub() : KafkaProducer {
     private val kafkameldinger = ConcurrentHashMap<String, CopyOnWriteArrayList<Pair<EventMetadata<*>, Kafkamelding>>>()
     private val hendelser = ConcurrentHashMap<String, CopyOnWriteArrayList<HendelseEventDto>>()
 
-    private val fagsystemInfoSvarHandlers = ConcurrentHashMap<String, () -> Unit>()
-    private val handlerFor = ConcurrentHashMap<HandkerKey, () -> Unit>()
     private val hendelseHandlerFor = ConcurrentHashMap<HendelseHandlerKey, () -> Unit>()
 
     override fun <K : Kafkamelding> sendKafkaEvent(
@@ -37,13 +34,7 @@ class KafkaProducerStub() : KafkaProducer {
         ytelse: Ytelse,
         logContext: SecureLog.Context,
     ) {
-        handlerFor.remove(HandkerKey(metadata, kafkamelding.eksternFagsakId))?.invoke()
         kafkameldinger.computeIfAbsent(kafkamelding.eksternFagsakId) { CopyOnWriteArrayList() }.add(metadata to kafkamelding)
-        when (metadata) {
-            FagsysteminfoBehovHendelse.METADATA -> {
-                fagsystemInfoSvarHandlers.remove(kafkamelding.eksternFagsakId)?.invoke()
-            }
-        }
     }
 
     override fun sendSaksdata(behandlingId: UUID, request: Behandlingstilstand, logContext: SecureLog.Context) {
@@ -76,14 +67,6 @@ class KafkaProducerStub() : KafkaProducer {
 
     fun finnHendelser(eksternFagsakId: String): List<HendelseEventDto> = hendelser[eksternFagsakId] ?: emptyList()
 
-    fun settFagsysteminfoSvar(eksternFagsakId: String, handler: () -> Unit) {
-        fagsystemInfoSvarHandlers[eksternFagsakId] = handler
-    }
-
-    fun vedMelding(metadata: EventMetadata<*>, fagsystemId: String, callback: () -> Unit) {
-        handlerFor[HandkerKey(metadata, fagsystemId)] = callback
-    }
-
     fun vedHendelse(key: HendelseHandlerKey, callback: () -> Unit) {
         hendelseHandlerFor[key] = callback
     }
@@ -104,11 +87,6 @@ class KafkaProducerStub() : KafkaProducer {
             vedHendelse(HendelseHandlerKey(T::class, fagsystemId), callback)
         }
     }
-
-    data class HandkerKey(
-        val metadata: EventMetadata<*>,
-        val eksternFagsakId: String,
-    )
 
     data class HendelseHandlerKey(
         val type: KClass<out HendelseEventDto>,

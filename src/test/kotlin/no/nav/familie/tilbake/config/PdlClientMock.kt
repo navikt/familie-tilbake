@@ -14,15 +14,31 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @Primary
 @Service
 @Profile("mock-pdl")
 class PdlClientMock : PdlClient {
     private val hentPersoninfoHitsInternal = CopyOnWriteArrayList<PersoninfoHit>()
+    private val pauser = ConcurrentHashMap<String, CountDownLatch>()
 
     fun hentPersoninfoHits(ident: String): List<PersoninfoHit> = hentPersoninfoHitsInternal.filter { it.ident == ident }
+
+    fun pauseNesteOppslagFor(ident: String): () -> Unit {
+        val lock = CountDownLatch(1)
+        pauser[ident] = lock
+        return {
+            lock.countDown()
+        }
+    }
+
+    fun harVentendeLås(ident: String): Boolean {
+        return !pauser.containsKey(ident)
+    }
 
     override fun hentPersoninfo(
         ident: String,
@@ -30,6 +46,7 @@ class PdlClientMock : PdlClient {
         logContext: SecureLog.Context,
     ): Personinfo {
         hentPersoninfoHitsInternal.add(PersoninfoHit(ident, fagsystem))
+        pauser.remove(ident)?.await(5, TimeUnit.SECONDS)
         var personInfo = Personinfo(
             ident = ident,
             fødselsdato = LocalDate.now().minusYears(20),

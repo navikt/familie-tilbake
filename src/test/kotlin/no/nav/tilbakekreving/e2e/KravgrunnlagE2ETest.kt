@@ -1,13 +1,16 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.assertions.nondeterministic.until
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -36,8 +39,10 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.systemContext
@@ -49,6 +54,7 @@ import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.util.kroner
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -56,6 +62,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Autowired
@@ -142,35 +149,69 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternId == fagsystemId } shouldBe 1
     }
 
-    @Test
-    fun `mottar svar fra fagsystem mens vi venter på svar fra PDL`() {
-        runBlocking(Dispatchers.IO) {
-            val fagsystemIder = (0..4).map {
-                val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-                val future = Thread {
-                    fagsystemIntegrasjonService.håndter(Ytelse.Dagpenger, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
-                }
+    @RepeatedTest(5)
+    fun `mottar konkurrerende svar fra fagsystem mens forrige svar venter på PDL-oppslag`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val ident = KravgrunnlagGenerator.nextPaddedId(11)
+        val eksternBehandlingIdA = UUID.randomUUID().toString()
+        val eksternBehandlingIdB = UUID.randomUUID().toString()
+        val utvidedePerioder = listOf(
+            FagsysteminfoSvarHendelse.UtvidetPeriodeDto(
+                kravgrunnlagPeriode = PeriodeDto(fom = 1.januar(2021), tom = 1.januar(2021)),
+                vedtaksperiode = PeriodeDto(fom = 1.januar(2021), tom = 31.januar(2021)),
+            ),
+        )
 
-                kafkaProducerStub.settFagsysteminfoSvar(fagsystemId) {
-                    // Simuler at en ny melding kommer raskt fra en annen tråd
-                    future.start()
-                }
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, fødselsnummer = ident))
 
-                sendKravgrunnlag(KravgrunnlagGenerator.forDP(fagsystemId = fagsystemId, fødselsnummer = "sleepy12345"))
-                kravgrunnlagMediator.lesKravgrunnlag()
-                future.join()
-                fagsystemId
+        val release = pdlClient.pauseNesteOppslagFor(ident)
+        runBlocking {
+            val workerA = async(Dispatchers.IO) {
+                fagsystemIntegrasjonService.håndter(
+                    Ytelse.Tilleggsstønad,
+                    Testdata.fagsysteminfoSvar(
+                        fagsystemId,
+                        eksternBehandlingId = eksternBehandlingIdA,
+                        utvidPerioder = utvidedePerioder,
+                    ),
+                )
+            }
+            until(500.milliseconds) {
+                pdlClient.harVentendeLås(ident)
+            }
+            val workerB = async(Dispatchers.IO) {
+                fagsystemIntegrasjonService.håndter(
+                    Ytelse.Tilleggsstønad,
+                    Testdata.fagsysteminfoSvar(
+                        fagsystemId,
+                        eksternBehandlingId = eksternBehandlingIdB,
+                        utvidPerioder = utvidedePerioder,
+                    ),
+                )
             }
 
-            val tilbakekrevinger = tilbakekrevingRepository.hentAlleTilbakekrevinger()
-                .shouldNotBeNull()
-                .filter { it.eksternFagsak.eksternId in fagsystemIder }
+            delay(500.milliseconds)
+            release()
 
-            tilbakekrevinger.size shouldBe 5
+            awaitAll(workerA, workerB)
+        }
 
-            tilbakekrevinger.forAll {
-                it.eksternFagsak.behandlinger.innslag.size shouldBe 2
-            }
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.fagsak(fagsystemId, FagsystemDTO.TS)).shouldNotBeNull {
+            eksternFagsak.behandlinger.innslag shouldHaveSize 2
+            eksternFagsak.behandlinger.innslag[0].eksternId shouldBe eksternBehandlingIdA
+            eksternFagsak.behandlinger.innslag[1].eksternId shouldBe eksternBehandlingIdB
+
+            nåværendeTilstand shouldBe TilbakekrevingTilstand.TIL_BEHANDLING
+        }
+
+        tilbakekreving(behandlingId).shouldNotBeNull {
+            frontendDtoForBehandling(
+                behandlingId = behandlingId,
+                sideeffektContext = saksbehandlerContext(),
+                kanBeslutte = true,
+                behandlerRolle = BehandlerRolle.BESLUTTER,
+            ).fagsystemsbehandlingId shouldBe eksternBehandlingIdB
         }
     }
 
@@ -636,8 +677,4 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 skatteprosent = BigDecimal("0.0"),
             ),
         )
-
-    companion object {
-        const val QUEUE_NAME = "LOCAL_TILLEGGSSTONADER.KRAVGRUNNLAG"
-    }
 }
