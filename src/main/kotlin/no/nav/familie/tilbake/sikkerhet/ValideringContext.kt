@@ -121,7 +121,7 @@ enum class ValideringContext(
         handling = "Foreslår vedtak",
     ),
     HentForhåndsvarsel(
-        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Henter forhåndsvarselinformasjon",
     ),
