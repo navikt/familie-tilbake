@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
@@ -141,7 +142,7 @@ class ForeldelsestegTest {
         val klokke = KlokkeStub(fom.plusMonths(10))
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
-        foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
+        foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", null))
 
         foreldelsesteg.automatiskVurder(kravgrunnlag, klokke = klokke, Behandlingslogg(mutableListOf()), UUID.randomUUID())
 
@@ -339,6 +340,22 @@ class ForeldelsestegTest {
             frontendDto.foreldetPerioder.forNone {
                 it.periode shouldBe (1.januar(2021) til 31.januar(2021))
             }
+        }
+    }
+
+    @Test
+    fun `foreldet vurdering beholder foreldelsesfrist til frontend dto`() {
+        val revurdering = eksternFagsakBehandling()
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode)))
+        val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
+        val foreldelsesfrist = 1.januar(2024)
+
+        foreldelsesteg.vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", foreldelsesfrist))
+
+        foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.forSingle {
+            it.foreldelsesvurderingstype shouldBe Foreldelsesvurderingstype.FORELDET
+            it.foreldelsesfrist shouldBe foreldelsesfrist
         }
     }
 

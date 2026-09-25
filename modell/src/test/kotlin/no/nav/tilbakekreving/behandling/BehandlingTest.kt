@@ -77,7 +77,7 @@ class BehandlingTest {
             )
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(listOf(periode)))
-            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
+            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", null))
             behandling.foreldelsesteg.tilFrontendDto(kravgrunnlag, revurdering).foreldetPerioder.first().begrunnelse shouldBe "Begrunnelse"
             flyttTilbakeTilFakta()
         }
@@ -95,7 +95,7 @@ class BehandlingTest {
             )
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(listOf(periode)))
-            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse"))
+            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", null))
             vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
             behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse.shouldNotBeNull()
             flyttTilbakeTilFakta()

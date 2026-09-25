@@ -375,7 +375,7 @@ class TilbakekrevingService(
                         periode.periode,
                         when (periode.foreldelsesvurderingstype) {
                             Foreldelsesvurderingstype.IKKE_VURDERT -> Foreldelsesteg.Vurdering.IkkeVurdert
-                            Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse)
+                            Foreldelsesvurderingstype.FORELDET -> Foreldelsesteg.Vurdering.Foreldet(periode.begrunnelse, periode.foreldelsesfrist)
                             Foreldelsesvurderingstype.IKKE_FORELDET -> Foreldelsesteg.Vurdering.IkkeForeldet(periode.begrunnelse)
                             Foreldelsesvurderingstype.AUTOMATISK_VURDERT_IKKE_FORELDET -> Foreldelsesteg.Vurdering.AutomatiskIkkeForeldet(periode.begrunnelse)
                             Foreldelsesvurderingstype.TILLEGGSFRIST -> Foreldelsesteg.Vurdering.Tilleggsfrist(periode.foreldelsesfrist!!, periode.oppdagelsesdato!!)

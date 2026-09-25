@@ -21,7 +21,10 @@ data class ForeldelsesvurderingEntity(
                 )
             }
             ForeldelsesvurderingType.FORELDET -> {
-                Vurdering.Foreldet(requireNotNull(begrunnelse) { "Begrunnelse kreves for FORELDET" })
+                Vurdering.Foreldet(
+                    begrunnelse = requireNotNull(begrunnelse) { "Begrunnelse kreves for FORELDET" },
+                    frist = frist,
+                )
             }
             ForeldelsesvurderingType.IKKE_VURDERT -> Vurdering.IkkeVurdert
             ForeldelsesvurderingType.AUTOMATISK_IKKE_FORELDET -> Vurdering.AutomatiskIkkeForeldet(

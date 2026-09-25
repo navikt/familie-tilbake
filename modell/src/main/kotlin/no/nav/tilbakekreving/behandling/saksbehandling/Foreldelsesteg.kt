@@ -355,7 +355,10 @@ class Foreldelsesteg(
             )
         }
 
-        class Foreldet(override val begrunnelse: String) : Vurdering {
+        class Foreldet(
+            override val begrunnelse: String,
+            override val frist: LocalDate?,
+        ) : Vurdering {
             override fun kanOverstyresAutomatisk() = false
 
             override fun erForeldet() = true
@@ -364,7 +367,7 @@ class Foreldelsesteg(
                 return ForeldelsesvurderingEntity(
                     type = ForeldelsesvurderingType.FORELDET,
                     begrunnelse = begrunnelse,
-                    frist = null,
+                    frist = frist,
                     oppdaget = null,
                 )
             }
