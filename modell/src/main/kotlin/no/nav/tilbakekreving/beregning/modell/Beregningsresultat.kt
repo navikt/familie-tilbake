@@ -47,7 +47,7 @@ class Beregningsresultat(
                 beløpIBehold = periode.beløpIbehold?.toInt(),
                 reduksjon = reduksjon,
                 rentebeløp = periode.rentebeløp.toInt(),
-                skattebeløp = periode.skattebeløp.toInt().unaryMinus(),
+                skattebeløp = periode.skattebeløp.toInt(),
                 tilbakekrevingsbeløp = periode.tilbakekrevingsbeløpEtterSkatt.toInt(),
             )
         }
@@ -55,11 +55,12 @@ class Beregningsresultat(
         return BeregningsresultatDto(
             beregningsresultatsperioder = beregningsresultatsperioder,
             vedtaksresultat = vedtaksresultat.tilVedtaksresultatDto(),
-            totalBeløpIBehold = beregningsresultatsperioder.sumOf { it.beløpIBehold ?: 0 },
-            totalReduksjon = beregningsresultatsperioder.sumOf { it.reduksjon ?: 0 },
-            totalRentebeløp = beregningsresultatsperioder.sumOf { it.rentebeløp },
-            totalSkattebeløp = beregningsresultatsperioder.sumOf { it.skattebeløp },
-            totalTilbakekrevingsbeløp = beregningsresultatsperioder.sumOf { it.tilbakekrevingsbeløp },
+            totaltBeløpIBehold = beregningsresultatsperioder.sumOf { it.beløpIBehold ?: 0 },
+            totaltReduksjon = beregningsresultatsperioder.sumOf { it.reduksjon ?: 0 },
+            totaltRentebeløp = totaltRentebeløp.toInt(),
+            totaltSkattebeløp = totaltSkattetrekk.toInt(),
+            totaltTilbakekrevingsbeløp = totaltTilbakekrevesBeløpMedRenterUtenSkatt.toInt(),
+            totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp.toInt(),
         )
     }
 
@@ -70,7 +71,7 @@ class Beregningsresultat(
         BeregningsresultatVurderingDto.Forsett -> null
         else -> {
             val beløp = periode.beløpIbehold ?: periode.feilutbetaltBeløp
-            beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt().unaryMinus()
+            beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt()
         }
     }
 }

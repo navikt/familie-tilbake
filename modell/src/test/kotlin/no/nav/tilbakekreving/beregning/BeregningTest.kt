@@ -1183,7 +1183,7 @@ class BeregningTest {
                     beløpIBehold = null,
                     reduksjon = 0,
                     rentebeløp = 0,
-                    skattebeløp = -2009,
+                    skattebeløp = 2009,
                     tilbakekrevingsbeløp = 5991,
                 ),
                 BeregningsresultatsperiodeDto(
@@ -1194,16 +1194,17 @@ class BeregningTest {
                     beløpIBehold = 2000,
                     reduksjon = 0,
                     rentebeløp = 0,
-                    skattebeløp = -451,
+                    skattebeløp = 451,
                     tilbakekrevingsbeløp = 1549,
                 ),
             ),
             vedtaksresultat = VedtaksresultatDto.DelvisTilbakebetaling,
-            totalBeløpIBehold = 2000,
-            totalReduksjon = 0,
-            totalRentebeløp = 0,
-            totalSkattebeløp = -2460,
-            totalTilbakekrevingsbeløp = 7540,
+            totaltBeløpIBehold = 2000,
+            totaltReduksjon = 0,
+            totaltRentebeløp = 0,
+            totaltSkattebeløp = 2460,
+            totaltTilbakekrevingsbeløp = 7540,
+            totaltFeilutbetaltBeløp = 16000,
         )
     }
 

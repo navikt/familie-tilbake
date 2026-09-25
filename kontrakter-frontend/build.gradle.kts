@@ -24,7 +24,7 @@ subprojects {
     }
 
     tasks.withType<GenerateTask> {
-        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/c4f6a04071a967ad38cc060ef62ab5b296ea86d8/tsp-output/schema/openapi.yaml"
+        remoteInputSpec = "https://raw.githubusercontent.com/navikt/tilbakekreving-kontrakter/7010205bbbf9211c8b50f14ec1ee9dbea6da6aeb/tsp-output/schema/openapi.yaml"
         generatorName = "kotlin-spring"
         outputDir = projectDir.resolve("src/main/generated")
         packageName = "no.nav.tilbakekreving.kontrakter.frontend"
