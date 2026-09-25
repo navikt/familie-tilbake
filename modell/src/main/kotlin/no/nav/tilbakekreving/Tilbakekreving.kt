@@ -507,15 +507,11 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun hentDokumentInfo(dokumentType: DokumentTypeDto): DokumentInfoDto {
-        val dokument = when (dokumentType) {
+    fun hentDokumentInfo(dokumentType: DokumentTypeDto): DokumentInfoDto? {
+        return when (dokumentType) {
             DokumentTypeDto.VEDTAKSBREV -> brevHistorikk.sisteVedtaksbrev()
             DokumentTypeDto.VARSELBREV -> brevHistorikk.sisteVarselbrev()
-        }
-        return DokumentInfoDto(
-            journalpostId = dokument?.journalpostId,
-            dokumentId = dokument?.dokumentInfoId,
-        )
+        }?.tilFrontendDto()
     }
 
     fun validerInnenforScope(toggles: FeatureToggles) {

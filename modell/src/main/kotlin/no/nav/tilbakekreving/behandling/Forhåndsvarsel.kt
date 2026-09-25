@@ -176,6 +176,7 @@ class Forhåndsvarsel internal constructor(
             brukeruttalelse = null,
             ferdigvurdert = false,
             tilbakeført = null,
+            sendtVarselbrev = varselbrev?.tilFrontendDto(),
         )
 
         override fun erForhåndsvarselSendt(): Boolean? = null
@@ -255,6 +256,7 @@ class Forhåndsvarsel internal constructor(
                     ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
                 ferdigvurdert = erFullstendig(klokke),
                 tilbakeført = trengerNyVurdering()?.frontendDto,
+                sendtVarselbrev = varselbrev.tilFrontendDto(),
             )
         }
 
@@ -318,6 +320,7 @@ class Forhåndsvarsel internal constructor(
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             ferdigvurdert = false,
             tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag.frontendDto,
+            sendtVarselbrev = varselbrev?.tilFrontendDto(),
         )
 
         override fun erForhåndsvarselSendt(): Boolean? = null
@@ -390,6 +393,7 @@ class Forhåndsvarsel internal constructor(
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             ferdigvurdert = true,
             tilbakeført = tilbakeført?.frontendDto,
+            sendtVarselbrev = varselbrev?.tilFrontendDto(),
         )
 
         override fun erForhåndsvarselSendt(): Boolean = false
