@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -51,6 +52,22 @@ class ForeldelseService(
         .expectSingleOrNull(logContext) { "id=${it.id}, ${it.sporbar.opprettetTid}" }
 
     fun hentAlleForeldelser(behandlingId: UUID): List<VurdertForeldelse> = foreldelseRepository.findByBehandlingId(behandlingId)
+
+    fun hentOppdagelsesdatoForTilleggsfrist(
+        behandlingId: UUID,
+        logContext: SecureLog.Context,
+    ): LocalDate? {
+        val oppdagelsesdatoer = hentAktivVurdertForeldelse(behandlingId, logContext)
+            ?.foreldelsesperioder
+            .orEmpty()
+            .filter { it.foreldelsesvurderingstype == Foreldelsesvurderingstype.TILLEGGSFRIST }
+            .map { requireNotNull(it.oppdagelsesdato) { "Oppdagelsesdato mangler for tilleggsfrist" } }
+            .distinct()
+        require(oppdagelsesdatoer.size <= 1) {
+            "Kan ikke iverksette behandling med ulike oppdagelsesdatoer for tilleggsfrist"
+        }
+        return oppdagelsesdatoer.singleOrNull()
+    }
 
     fun erPeriodeForeldet(
         behandlingId: UUID,

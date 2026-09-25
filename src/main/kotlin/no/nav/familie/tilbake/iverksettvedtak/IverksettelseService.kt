@@ -5,6 +5,7 @@ import no.nav.familie.tilbake.behandling.BehandlingsvedtakService
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
 import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
@@ -40,6 +41,7 @@ class IverksettelseService(
     private val logService: LogService,
     private val fagsakRepository: FagsakRepository,
     private val iverksettRepository: IverksettRepository,
+    private val foreldelseService: ForeldelseService,
 ) {
     private val log = TracedLogger.getLogger<IverksettelseService>()
 
@@ -106,7 +108,7 @@ class IverksettelseService(
             kontrollfelt = kravgrunnlag.kontrollfelt,
             saksbehandlerId = ansvarligSaksbehandler,
             perioder = lagVedtaksperiode(beregnetPerioder, logContext),
-            datoTilleggsfrist = null,
+            datoTilleggsfrist = foreldelseService.hentOppdagelsesdatoForTilleggsfrist(kravgrunnlag.behandlingId, logContext),
         )
     }
 

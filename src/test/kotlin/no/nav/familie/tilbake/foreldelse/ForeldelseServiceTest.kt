@@ -280,6 +280,137 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `hentOppdagelsesdatoForTilleggsfrist skal returnere oppdagelsesdato når en periode er TILLEGGSFRIST`() {
+        val oppdagelsesdato = LocalDate.of(2017, 1, 15)
+        foreldelseService.lagreVurdertForeldelse(
+            behandling.id,
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 1, 1),
+                        LocalDate.of(2017, 1, 31),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        oppdagelsesdato,
+                    ),
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 2, 1),
+                        LocalDate.of(2017, 2, 28),
+                        Foreldelsesvurderingstype.IKKE_FORELDET,
+                    ),
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
+
+        val resultat = foreldelseService.hentOppdagelsesdatoForTilleggsfrist(behandling.id, SecureLog.Context.tom())
+
+        resultat shouldBe oppdagelsesdato
+    }
+
+    @Test
+    fun `hentOppdagelsesdatoForTilleggsfrist skal returnere null når ingen perioder er TILLEGGSFRIST`() {
+        foreldelseService.lagreVurdertForeldelse(
+            behandling.id,
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 1, 1),
+                        LocalDate.of(2017, 2, 28),
+                        Foreldelsesvurderingstype.IKKE_FORELDET,
+                    ),
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
+
+        val resultat = foreldelseService.hentOppdagelsesdatoForTilleggsfrist(behandling.id, SecureLog.Context.tom())
+
+        resultat.shouldBeNull()
+    }
+
+    @Test
+    fun `hentOppdagelsesdatoForTilleggsfrist skal returnere dato når flere TILLEGGSFRIST-perioder har samme oppdagelsesdato`() {
+        val oppdagelsesdato = LocalDate.of(2017, 1, 15)
+        foreldelseService.lagreVurdertForeldelse(
+            behandling.id,
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 1, 1),
+                        LocalDate.of(2017, 1, 31),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        oppdagelsesdato,
+                    ),
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 2, 1),
+                        LocalDate.of(2017, 2, 28),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        oppdagelsesdato,
+                    ),
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
+
+        val resultat = foreldelseService.hentOppdagelsesdatoForTilleggsfrist(behandling.id, SecureLog.Context.tom())
+
+        resultat shouldBe oppdagelsesdato
+    }
+
+    @Test
+    fun `hentOppdagelsesdatoForTilleggsfrist skal kaste exception når TILLEGGSFRIST-perioder har ulike oppdagelsesdatoer`() {
+        foreldelseService.lagreVurdertForeldelse(
+            behandling.id,
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 1, 1),
+                        LocalDate.of(2017, 1, 31),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        LocalDate.of(2017, 1, 15),
+                    ),
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 2, 1),
+                        LocalDate.of(2017, 2, 28),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        LocalDate.of(2017, 2, 15),
+                    ),
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
+
+        val exception = shouldThrow<IllegalArgumentException> {
+            foreldelseService.hentOppdagelsesdatoForTilleggsfrist(behandling.id, SecureLog.Context.tom())
+        }
+
+        exception.message shouldBe "Kan ikke iverksette behandling med ulike oppdagelsesdatoer for tilleggsfrist"
+    }
+
+    @Test
+    fun `hentOppdagelsesdatoForTilleggsfrist skal kaste exception når oppdagelsesdato mangler for TILLEGGSFRIST`() {
+        foreldelseService.lagreVurdertForeldelse(
+            behandling.id,
+            BehandlingsstegForeldelseDto(
+                listOf(
+                    lagForeldelsesperiode(
+                        LocalDate.of(2017, 1, 1),
+                        LocalDate.of(2017, 2, 28),
+                        Foreldelsesvurderingstype.TILLEGGSFRIST,
+                    ),
+                ),
+            ),
+            SecureLog.Context.tom(),
+        )
+
+        val exception = shouldThrow<IllegalArgumentException> {
+            foreldelseService.hentOppdagelsesdatoForTilleggsfrist(behandling.id, SecureLog.Context.tom())
+        }
+
+        exception.message shouldBe "Oppdagelsesdato mangler for tilleggsfrist"
+    }
+
+    @Test
     fun `sjekk likhet på foreldelsesperioder`() {
         val likForeldelsesperiode =
             lagForeldelsesperiode(
@@ -313,11 +444,13 @@ internal class ForeldelseServiceTest : OppslagSpringRunnerTest() {
         fom: LocalDate,
         tom: LocalDate,
         foreldelsesvurderingstype: Foreldelsesvurderingstype,
+        oppdagelsesdato: LocalDate? = null,
     ): ForeldelsesperiodeDto =
         ForeldelsesperiodeDto(
             periode = Datoperiode(fom, tom),
             begrunnelse = "foreldelses begrunnelse",
             foreldelsesvurderingstype = foreldelsesvurderingstype,
             foreldelsesfrist = LocalDate.of(2017, 2, 28),
+            oppdagelsesdato = oppdagelsesdato,
         )
 }

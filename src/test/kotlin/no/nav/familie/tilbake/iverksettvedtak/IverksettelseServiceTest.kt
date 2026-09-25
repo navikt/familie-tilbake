@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.foreldelse.ForeldelseService
 import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
@@ -29,9 +30,12 @@ import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsbeløp433
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlagsperiode432
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.familie.tilbake.log.LogService
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingService
 import no.nav.tilbakekreving.api.v1.dto.AktsomhetDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.ForeldelsesperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.SærligGrunnDto
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
@@ -40,6 +44,7 @@ import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
@@ -50,6 +55,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -89,6 +95,9 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var iverksettRepository: IverksettRepository
 
+    @Autowired
+    private lateinit var foreldelseService: ForeldelseService
+
     private lateinit var fagsak: Fagsak
     private lateinit var behandling: Behandling
     private lateinit var behandlingId: UUID
@@ -121,6 +130,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
                 logService,
                 fagsakRepository,
                 iverksettRepository,
+                foreldelseService,
             )
     }
 
@@ -138,6 +148,33 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         val aktivBehandlingsresultat = behandling.sisteResultat
         aktivBehandlingsresultat.shouldNotBeNull()
         aktivBehandlingsresultat.type shouldBe Behandlingsresultatstype.FULL_TILBAKEBETALING
+    }
+
+    @Test
+    fun `sendIverksettVedtak skal sende oppdagelsesdato som datoTilleggsfrist`() {
+        val oppdagelsesdato = LocalDate.of(2024, 11, 1)
+        foreldelseService.lagreVurdertForeldelse(
+            behandlingId = behandlingId,
+            behandlingsstegForeldelseDto = BehandlingsstegForeldelseDto(
+                foreldetPerioder = listOf(
+                    ForeldelsesperiodeDto(
+                        periode = perioder.first().toDatoperiode(),
+                        begrunnelse = "Tilleggsfrist",
+                        foreldelsesvurderingstype = Foreldelsesvurderingstype.TILLEGGSFRIST,
+                        foreldelsesfrist = oppdagelsesdato.plusYears(1),
+                        oppdagelsesdato = oppdagelsesdato,
+                    ),
+                ),
+            ),
+            logContext = SecureLog.Context.tom(),
+        )
+        mockIverksettelseResponse(kravgrunnlag431.vedtakId, "00", "OK")
+
+        iverksettelseService.sendIverksettVedtak(behandlingId)
+
+        oppdragRestClient.shouldHaveIverksettelse(kravgrunnlag431.vedtakId) {
+            it.datoTilleggsfrist shouldBe oppdagelsesdato
+        }
     }
 
     @Test
@@ -267,6 +304,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         request.vedtakId shouldBe expectedVedtakId
         request.kodeHjemmel shouldBe "22-15"
         request.enhetAnsvarlig shouldBe kravgrunnlag431.ansvarligEnhet
+        request.datoTilleggsfrist.shouldBeNull()
 
         val førstePeriode = request.perioder[0]
         førstePeriode.periodeFom.shouldNotBeNull()
