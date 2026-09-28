@@ -293,7 +293,7 @@ class Vilkårsvurderingsteg(
 
         override fun vurdering(): Vurdering = vurdering.vurderingstype()
 
-        override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): Int? {
+        override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): BigDecimal? {
             return (vurdering as? NivåAvForståelse.GodTro)?.beløpIBehold(feilutbetaltBeløp)
         }
 

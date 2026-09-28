@@ -59,7 +59,7 @@ class VilkårsvurderingsperiodeAdapter(
         }
     }
 
-    override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): Int? {
-        return vurdering.godTro?.beløpSomErIBehold?.toInt()
+    override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): BigDecimal? {
+        return vurdering.godTro?.beløpSomErIBehold
     }
 }

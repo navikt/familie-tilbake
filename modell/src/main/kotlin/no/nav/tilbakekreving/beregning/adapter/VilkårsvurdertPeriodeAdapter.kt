@@ -14,5 +14,5 @@ interface VilkårsvurdertPeriodeAdapter {
 
     fun vurdering(): Vurdering
 
-    fun beløpIbehold(feilutbetaltBeløp: BigDecimal): Int?
+    fun beløpIbehold(feilutbetaltBeløp: BigDecimal): BigDecimal?
 }
