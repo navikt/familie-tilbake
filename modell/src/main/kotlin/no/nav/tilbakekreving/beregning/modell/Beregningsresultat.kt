@@ -71,6 +71,12 @@ class Beregningsresultat(
         BeregningsresultatVurderingDto.Forsett -> null
         else -> {
             val beløp = periode.beløpIbehold ?: periode.feilutbetaltBeløp
+            println(
+                "=====>>>> beløpIbehold: ${periode.beløpIbehold}, " +
+                    "feilutbetaltBeløp: ${periode.feilutbetaltBeløp}, " +
+                    "tilbakekrevingsbeløpUtenRenter: ${periode.tilbakekrevingsbeløpUtenRenter}, " +
+                    "Reduksjon: ${beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt()}",
+            )
             beløp.subtract(periode.tilbakekrevingsbeløpUtenRenter).toInt()
         }
     }

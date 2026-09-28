@@ -294,7 +294,7 @@ class Vilkårsvurderingsteg(
         override fun vurdering(): Vurdering = vurdering.vurderingstype()
 
         override fun beløpIbehold(feilutbetaltBeløp: BigDecimal): BigDecimal? {
-            return (vurdering as? NivåAvForståelse.GodTro)?.beløpIBehold(feilutbetaltBeløp)
+            return (vurdering.underliggendeVurdering() as? NivåAvForståelse.GodTro)?.beløpIBehold(feilutbetaltBeløp)
         }
 
         fun tilEntity(vurderingRef: UUID): VilkårsvurderingsperiodeEntity {
