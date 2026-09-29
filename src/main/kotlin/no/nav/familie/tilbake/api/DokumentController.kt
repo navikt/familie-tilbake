@@ -94,6 +94,10 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<ByteArray> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.behandling(bestillBrevDto.behandlingId), ValideringContext.ForhåndsvisBrev)
+        if (tilbakekreving != null) {
+            return Ressurs.success(forhåndsvarselService.forhåndsvisVarselbrev(tilbakekrevingService.lesecontext(), tilbakekreving, bestillBrevDto))
+        }
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = bestillBrevDto.behandlingId,
             minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,

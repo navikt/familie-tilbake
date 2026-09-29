@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.api.DokumentController
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
@@ -60,6 +61,26 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         tilbakekrevingEtterForhåndsvarsel.brevHistorikk.sisteVarselbrev().shouldNotBeNull {
             tilForhåndsvarselDto().tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"
         }
+    }
+
+    @Test
+    fun `forhåndsvisning av varselbrev fungerer for behandling i ny modell`() {
+        val behandlingId = hentBehandlingId()
+
+        val respons = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            documentController.forhåndsvisBrev(
+                behandlingId = behandlingId,
+                bestillBrevDto = BestillBrevDto(
+                    behandlingId = behandlingId,
+                    brevmalkode = Dokumentmalstype.VARSEL,
+                    fritekst = "Tekst fra saksbehandler",
+                ),
+            )
+        }
+
+        respons.status shouldBe Ressurs.Status.SUKSESS
+        respons.data.shouldNotBeNull().isNotEmpty() shouldBe true
+        tilbakekreving(behandlingId).brevHistorikk.sisteVarselbrev().shouldBeNull()
     }
 
     private fun hentBehandlingId(): UUID {
