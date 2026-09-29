@@ -56,6 +56,22 @@ class Brukeruttalelse(
     )
 
     fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler
+
+    fun klon(): Brukeruttalelse {
+        return Brukeruttalelse(
+            id = UUID.randomUUID(),
+            uttalelseVurdering = uttalelseVurdering,
+            uttalelseInfo = uttalelseInfo?.let {
+                UttalelseInfo(
+                    id = UUID.randomUUID(),
+                    uttalelsesdato = it.uttalelsesdato,
+                    hvorBrukerenUttalteSeg = it.hvorBrukerenUttalteSeg,
+                    uttalelseBeskrivelse = it.uttalelseBeskrivelse,
+                )
+            },
+            kommentar = kommentar,
+        )
+    }
 }
 
 data class UttalelseInfo(

@@ -207,6 +207,16 @@ class Faktasteg(
         return vurdering.tilEntity(id, behandlingRef, tilbakeført, rettsgebyrÅrFraSaksbehandler)
     }
 
+    fun klon(): Faktasteg {
+        return Faktasteg(
+            id = UUID.randomUUID(),
+            brevHistorikk = brevHistorikk,
+            vurdering = vurdering.klon(),
+            tilbakeført = tilbakeført,
+            _rettsgebyrÅrFraSaksbehandler = rettsgebyrÅrFraSaksbehandler,
+        )
+    }
+
     companion object {
         fun opprett(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
@@ -326,6 +336,18 @@ class Faktasteg(
             perioder = perioder.filterNot { it.id == fjernet.id }
         }
 
+        fun klon(): Vurdering {
+            return Vurdering(
+                perioder = perioder.map { it.klon() },
+                årsakTilFeilutbetaling = årsakTilFeilutbetaling,
+                uttalelse = uttalelse,
+                oppdaget = when (oppdaget) {
+                    is Oppdaget.Vurdering -> (oppdaget as Oppdaget.Vurdering).klon()
+                    is Oppdaget.IkkeVurdert -> Oppdaget.IkkeVurdert
+                },
+            )
+        }
+
         sealed interface Oppdaget {
             fun tilFrontendDto(): OppdagetDto
 
@@ -362,6 +384,15 @@ class Faktasteg(
                         dato = dato,
                         beskrivelse = beskrivelse,
                         faktavurderingRef = faktavurderingRef,
+                    )
+                }
+
+                fun klon(): Vurdering {
+                    return Vurdering(
+                        id = UUID.randomUUID(),
+                        dato = dato,
+                        beskrivelse = beskrivelse,
+                        av = av,
                     )
                 }
             }
@@ -460,6 +491,16 @@ class Faktasteg(
             fun Collection<FaktaPeriode>.fullstendigPeriode() = minOf { it.periode.fom } til maxOf { it.periode.tom }
 
             fun Collection<FaktaPeriode>.finn(periode: Datoperiode) = single { it.periode == periode }
+        }
+
+        fun klon(): FaktaPeriode {
+            return FaktaPeriode(
+                id = UUID.randomUUID(),
+                periode = periode,
+                rettsligGrunnlag = rettsligGrunnlag,
+                rettsligGrunnlagUnderkategori = rettsligGrunnlagUnderkategori,
+                endringIKravgrunnlag = endringIKravgrunnlag,
+            )
         }
     }
 

@@ -47,6 +47,14 @@ class Vilkårsvurderingsteg(
 ) : Saksbehandlingsteg, VilkårsvurderingAdapter {
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
+    fun klon(): Vilkårsvurderingsteg {
+        return Vilkårsvurderingsteg(
+            id = UUID.randomUUID(),
+            vurderinger = vurderinger.map { it.klon() },
+            tilbakeført = tilbakeført,
+        )
+    }
+
     override fun erFullstendig(klokke: Klokke): Boolean = vurderinger.none { it.vurdering is ForårsaketAvBruker.IkkeVurdert }
 
     override fun erPåbegynt(): Boolean = vurderinger.any { it.vurdering.underliggendeVurdering() !is ForårsaketAvBruker.IkkeVurdert }
@@ -272,6 +280,17 @@ class Vilkårsvurderingsteg(
         private var tilbakeført: ÅrsakTilTilbakeføring?,
     ) : VilkårsvurdertPeriodeAdapter, Comparable<Vilkårsvurderingsperiode> {
         val vurdering get() = _vurdering
+
+        fun klon(): Vilkårsvurderingsperiode {
+            return Vilkårsvurderingsperiode(
+                id = UUID.randomUUID(),
+                periode = periode,
+                begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
+                _vurdering = _vurdering,
+                endringIKravgrunnnlag = endringIKravgrunnnlag,
+                tilbakeført = tilbakeført,
+            )
+        }
 
         fun vurder(vurdering: ForårsaketAvBruker) {
             tilbakeført = null

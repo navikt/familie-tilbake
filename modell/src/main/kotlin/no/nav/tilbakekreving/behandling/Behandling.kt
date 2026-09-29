@@ -608,6 +608,30 @@ class Behandling internal constructor(
         }
     }
 
+    fun klonBehandling(revurderingsårsak: Behandlingsårsakstype, sideeffektContext: SideeffektContext): Behandling {
+        val opprettet = sideeffektContext.klokke.nå()
+        val id = UUID.randomUUID()
+        return Behandling(
+            id = id,
+            type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            opprettet = opprettet,
+            sistEndret = opprettet,
+            enhet = enhet,
+            revurderingsårsak = revurderingsårsak,
+            ansvarligSaksbehandler = sideeffektContext.behandler,
+            eksternFagsakRevurdering = eksternFagsakRevurdering,
+            kravgrunnlag = kravgrunnlag,
+            nyttKravgrunnlag = nyttKravgrunnlag,
+            foreldelsesteg = foreldelsesteg.klon(),
+            faktasteg = faktasteg.klon(),
+            vilkårsvurderingsteg = vilkårsvurderingsteg.klon(),
+            foreslåVedtakSteg = foreslåVedtakSteg.klon(),
+            fatteVedtakSteg = fatteVedtakSteg.klon(),
+            forhåndsvarsel = forhåndsvarsel.klon(),
+            forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
+        )
+    }
+
     inner class Saksbehandling internal constructor(
         private val context: SideeffektContext,
     ) {

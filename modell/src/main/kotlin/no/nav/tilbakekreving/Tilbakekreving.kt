@@ -42,12 +42,15 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -208,6 +211,33 @@ class Tilbakekreving internal constructor(
 
     fun hentBehandling(behandlingId: UUID): Behandling {
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
+    }
+
+    fun opprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto, sideeffektContext: SideeffektContext): String {
+        // TODO: Implementer logikk for å opprette revurdering basert på revurderingDto
+        val originalBehandling = hentBehandling(behandlingId)
+        if (tilstand.behandlingsstatus(originalBehandling, sideeffektContext.klokke) != BehandlingsstatusModell.AVSLUTTET) {
+            throw IllegalStateException("Kan kun opprette revurdering for avsluttet behandling.")
+        }
+
+        val revurderingsårsak = when (revurderingDto.revurderingsarsak) {
+            TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_NFP -> Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+            TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_KA -> Behandlingsårsakstype.REVURDERING_KLAGE_KA
+            TilbakekrevingRevurderingsarsakDto.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
+            TilbakekrevingRevurderingsarsakDto.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+            TilbakekrevingRevurderingsarsakDto.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT -> Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+        }
+        val revurderingBehadling = originalBehandling.klonBehandling(revurderingsårsak, sideeffektContext)
+
+        revurderingBehadling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            behandlingHistorikk.lagre(revurderingBehadling)
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
+                behandlingId = behandlingId,
+            )
+        }
+
+        return hentTilbakekrevingUrl("https://tilbakekreving.ansatt.dev.nav.no")
     }
 
     fun opprettBehandling(

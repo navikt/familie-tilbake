@@ -49,6 +49,12 @@ class Forhåndsvarsel internal constructor(
         vurdering = vurdering.nullstillUnntakOgUttalelse()
     }
 
+    fun klon(): Forhåndsvarsel {
+        return Forhåndsvarsel(
+            vurdering = vurdering.klon(),
+        )
+    }
+
     fun lagreUttalelse(
         uttalelseVurdering: UttalelseVurdering,
         uttalelseInfo: UttalelseInfo?,
@@ -142,6 +148,8 @@ class Forhåndsvarsel internal constructor(
         fun erForhåndsvarselSendt(): Boolean?
 
         fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity
+
+        fun klon(): Vurdering
     }
 
     internal data object IkkeVurdert : Vurdering {
@@ -189,6 +197,8 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = null,
             tilbakeført = null,
         )
+
+        override fun klon(): Vurdering = this
     }
 
     internal class VarselSendt(
@@ -270,6 +280,14 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = uttalelsesfrist.tilEntity(behandlingRef),
             tilbakeført = null,
         )
+
+        override fun klon(): Vurdering {
+            return VarselSendt(
+                uttalelsesfrist = uttalelsesfrist.klon(),
+                brukeruttalelse = brukeruttalelse?.klon(),
+                tilbakeført = tilbakeført,
+            )
+        }
     }
 
     internal class MåVurderesPåNytt(
@@ -333,6 +351,12 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = null,
             tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
         )
+
+        override fun klon(): Vurdering {
+            return MåVurderesPåNytt(
+                brukeruttalelse = brukeruttalelse?.klon(),
+            )
+        }
     }
 
     internal class Unntak(
@@ -406,5 +430,13 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = null,
             tilbakeført = tilbakeført,
         )
+
+        override fun klon(): Vurdering {
+            return Unntak(
+                forhåndsvarselUnntak = forhåndsvarselUnntak.klon(),
+                brukeruttalelse = brukeruttalelse?.klon(),
+                tilbakeført = tilbakeført,
+            )
+        }
     }
 }

@@ -171,6 +171,16 @@ class Foreldelsesteg(
         )
     }
 
+    fun klon(): Foreldelsesteg {
+        return Foreldelsesteg(
+            id = UUID.randomUUID(),
+            vurdertePerioder = vurdertePerioder.map {
+                it.klon()
+            },
+            tilbakeført = tilbakeført,
+        )
+    }
+
     class Foreldelseperiode internal constructor(
         val id: UUID,
         private var periode: Datoperiode,
@@ -225,6 +235,15 @@ class Foreldelsesteg(
             foreldelsesfrist = vurdering.frist,
             oppdagelsesdato = (vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
         )
+
+        fun klon(): Foreldelseperiode {
+            return Foreldelseperiode(
+                id = UUID.randomUUID(),
+                periode = periode,
+                _vurdering = vurdering,
+                endringIKravgrunnlag = endringIKravgrunnlag,
+            )
+        }
 
         companion object {
             fun opprett(

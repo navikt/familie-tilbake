@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.brev.varselbrev
 
 import no.nav.familie.tilbake.dokumentbestilling.felles.EksterneDataForBrevService
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
+import no.nav.familie.tilbake.dokumentbestilling.felles.pdf.PdfBrevService
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil
 import no.nav.familie.tilbake.dokumentbestilling.varsel.VarselbrevUtil.Companion.TITTEL_VARSEL_TILBAKEBETALING
 import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
@@ -18,6 +19,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.api.v1.dto.BestillBrevDto
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -55,6 +57,7 @@ import java.util.UUID
 
 @Service
 class ForhåndsvarselService(
+    private val pdfBrevService: PdfBrevService,
     private val varselbrevUtil: VarselbrevUtil,
     private val dokarkivClient: DokarkivClient,
     private val eksterneDataForBrevService: EksterneDataForBrevService,
@@ -72,6 +75,28 @@ class ForhåndsvarselService(
         val varselbrevAvsnitter = VarselbrevParser.parse(brevbody)
         val varselbrevtekst = Varselbrevtekst(overskrift = overskrift, avsnitter = varselbrevAvsnitter)
         return varselbrevtekst
+    }
+
+    fun forhåndsvisVarselbrev(
+        context: LesContext,
+        tilbakekreving: Tilbakekreving,
+        bestillBrevDto: BestillBrevDto,
+    ): ByteArray {
+        val varselbrevInfo = tilbakekreving.hentVarselbrevInfo(bestillBrevDto.behandlingId, context)
+        val varselbrevsdokument = opprettVarselbrevsdokument(
+            varselbrevInfo = varselbrevInfo,
+            brevmetadata = opprettMetadata(varselbrevInfo),
+        ).copy(varseltekstFraSaksbehandler = bestillBrevDto.fritekst)
+
+        return pdfBrevService.genererForhåndsvisning(
+            Brevdata(
+                mottager = Brevmottager.BRUKER,
+                overskrift = TekstformatererVarselbrev.lagVarselbrevsoverskrift(varselbrevsdokument.brevmetadata, false),
+                brevtekst = TekstformatererVarselbrev.lagFritekst(varselbrevsdokument, false),
+                metadata = varselbrevsdokument.brevmetadata,
+                vedleggHtml = hentVedlegg(varselbrevsdokument, varselbrevInfo.eksternFagsakId, SecureLog.Context.fra(tilbakekreving)),
+            ),
+        )
     }
 
     fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {

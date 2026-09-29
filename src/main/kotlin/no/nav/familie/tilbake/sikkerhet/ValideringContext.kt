@@ -45,6 +45,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.CREATE,
         handling = "Sender brev",
     ),
+    ForhåndsvisBrev(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.ACCESS,
+        handling = "Forhåndsviser brev",
+    ),
     HentForhåndsvarselTekster(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -204,5 +209,10 @@ enum class ValideringContext(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Oppdaterer kravgrunnlag",
+    ),
+    OpprettRevurdering(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Oppretter revurdering",
     ),
 }

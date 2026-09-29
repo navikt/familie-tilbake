@@ -35,6 +35,14 @@ class ForhåndsvarselUnntak(
         beskrivelse = beskrivelse,
         tilbakeført = tilbakeført,
     )
+
+    fun klon(): ForhåndsvarselUnntak {
+        return ForhåndsvarselUnntak(
+            id = UUID.randomUUID(),
+            begrunnelseForUnntak = begrunnelseForUnntak,
+            beskrivelse = beskrivelse,
+        )
+    }
 }
 
 enum class BegrunnelseForUnntak {

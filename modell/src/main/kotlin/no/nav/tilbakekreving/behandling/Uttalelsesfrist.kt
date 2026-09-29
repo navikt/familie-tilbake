@@ -40,4 +40,13 @@ class Uttalelsesfrist(
             begrunnelse = begrunnelse,
         )
     }
+
+    fun klon(): Uttalelsesfrist {
+        return Uttalelsesfrist(
+            id = UUID.randomUUID(),
+            opprinneligFrist = opprinneligFrist,
+            nyFrist = nyFrist,
+            begrunnelse = begrunnelse,
+        )
+    }
 }
