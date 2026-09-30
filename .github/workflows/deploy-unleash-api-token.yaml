@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
       - name: deploy unleash api-token to dev
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/unleash/unleash-apitoken-preprod.yaml
@@ -27,7 +27,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
       - name: deploy unleash api-token to prod
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/unleash/unleash-apitoken-prod.yaml
