@@ -394,7 +394,7 @@ class Behandling internal constructor(
                 )
             },
             kanHenleggeBehandling = false,
-            kanRevurderingOpprettes = true,
+            kanRevurderingOpprettes = tilstand.behandlingsstatus(this, lesContext.klokke) == BehandlingsstatusModell.AVSLUTTET,
             harVerge = false,
             kanEndres = tilstand.kanEndresAvSaksbehandler && kanEndres(lesContext.behandler, kanBeslutte, lesContext.klokke),
             kanSetteTilbakeTilFakta = true,
@@ -941,6 +941,7 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             klokke: Klokke,
+            revurderingsarsak: Behandlingsårsakstype?,
         ): Behandling {
             val opprettet = klokke.nå()
             return Behandling(
@@ -949,7 +950,7 @@ class Behandling internal constructor(
                 opprettet = opprettet,
                 sistEndret = opprettet,
                 enhet = enhet,
-                revurderingsårsak = null,
+                revurderingsårsak = revurderingsarsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,

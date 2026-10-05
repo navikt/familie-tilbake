@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
@@ -23,6 +24,8 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
@@ -315,6 +318,24 @@ class BehandlingApiController(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
                     brukNyesteKravgrunnlag()
                 },
+            )
+        } ?: ResponseEntity.notFound().build()
+    }
+
+    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.OpprettRevurdering,
+        ) { tilbakekreving, context ->
+            val revurderingsårsak = when (revurderingDto.revurderingsarsak) {
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_NFP -> Behandlingsårsakstype.REVURDERING_KLAGE_NFP
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_KA -> Behandlingsårsakstype.REVURDERING_KLAGE_KA
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_OPPLYSNINGER_OM_VILKÅR -> Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_OPPLYSNINGER_OM_FORELDELSE -> Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_FORELDELSE
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT -> Behandlingsårsakstype.REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT
+            }
+            ResponseEntity.ok(
+                tilbakekreving.opprettRevurdering(behandlingId, revurderingsårsak, context),
             )
         } ?: ResponseEntity.notFound().build()
     }

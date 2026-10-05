@@ -42,6 +42,7 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
@@ -53,6 +54,7 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
+import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
@@ -210,10 +212,28 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
+    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: Behandlingsårsakstype, sideeffektContext: SideeffektContext) {
+        val originalBehandling = hentBehandling(behandlingId)
+        val tilstand = tilstand.behandlingsstatus(originalBehandling, sideeffektContext.klokke)
+        if (tilstand != BehandlingsstatusModell.AVSLUTTET) {
+            throw IllegalStateException("Behandlingen er i $tilstand. Revurdering kan kun opprette for avsluttet behandling.")
+        }
+
+        opprettBehandling(
+            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
+            sideeffektContext = sideeffektContext,
+            behandlendeEnhet = originalBehandling.hentBehandlingsinformasjon().enhet!!.kode,
+            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            revurderingsarsak = revurderingsårsak,
+        )
+    }
+
     fun opprettBehandling(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         sideeffektContext: SideeffektContext,
         behandlendeEnhet: String?,
+        behandlingstype: Behandlingstype,
+        revurderingsarsak: Behandlingsårsakstype?,
     ) {
         if (bruker == null) {
             opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)
@@ -221,18 +241,22 @@ class Tilbakekreving internal constructor(
         val behandlingId = UUID.randomUUID()
         val behandling = Behandling.nyBehandling(
             id = behandlingId,
-            type = Behandlingstype.TILBAKEKREVING,
+            type = behandlingstype,
             enhet = behandlendeEnhet?.let(Enhet::forKode),
             ansvarligSaksbehandler = sideeffektContext.behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
             klokke = sideeffektContext.klokke,
+            revurderingsarsak = revurderingsarsak,
         )
         behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(behandling)
             sideeffektContext.logg(
-                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
+                behandlingsloggstype = when (behandlingstype) {
+                    Behandlingstype.TILBAKEKREVING -> Behandlingsloggstype.BEHANDLING_OPPRETTET
+                    Behandlingstype.REVURDERING_TILBAKEKREVING -> Behandlingsloggstype.REVURDERING_OPPRETTET
+                },
                 behandlingId = behandlingId,
             )
         }
@@ -248,7 +272,7 @@ class Tilbakekreving internal constructor(
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
         val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse, sideeffektContext.klokke)
-        opprettBehandling(eksternBehandling, sideeffektContext, null)
+        opprettBehandling(eksternBehandling, sideeffektContext, null, Behandlingstype.TILBAKEKREVING, null)
         opprettBruker(kravgrunnlag.vedtakGjelder)
         byttTilstand(AvventerBrukerinfo, sideeffektContext)
     }

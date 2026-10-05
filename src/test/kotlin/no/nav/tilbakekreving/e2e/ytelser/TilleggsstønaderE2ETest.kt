@@ -1,16 +1,14 @@
 package no.nav.tilbakekreving.e2e.ytelser
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
-import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
@@ -19,14 +17,14 @@ import no.nav.tilbakekreving.e2e.avventerBehandling
 import no.nav.tilbakekreving.e2e.kanBehandle
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
@@ -172,7 +170,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     }
 
     @Test
-    fun `revurdering av vedtak med full utbetaling fører til ingen tilbakekreving`() {
+    fun `revurdering av vedtak med full utbetaling fører til ny behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
@@ -210,17 +208,21 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
-        val exception = shouldThrow<ModellFeil.UtenforScopeException> {
-            behandlingController.opprettRevurdering(
-                OpprettRevurderingDto(
-                    YtelsestypeDTO.TILLEGGSSTØNAD,
-                    behandlingId,
-                    Behandlingsårsakstype.REVURDERING_KLAGE_KA,
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = behandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_KA,
                 ),
             )
         }
 
-        exception.utenforScope shouldBe UtenforScope.Revurdering
+        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        revurderingBehandlingId shouldNotBe behandlingId
+        tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            status shouldBe Behandlingsstatus.OPPRETTET
+            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
+        }
     }
 
     @Test

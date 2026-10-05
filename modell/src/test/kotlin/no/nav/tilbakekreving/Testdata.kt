@@ -186,6 +186,7 @@ fun behandling(
         kravgrunnlag = kravgrunnlagReferanse,
         brevHistorikk = BrevHistorikk(mutableListOf()),
         klokke = klokke,
+        revurderingsarsak = null,
     )
 }
 
