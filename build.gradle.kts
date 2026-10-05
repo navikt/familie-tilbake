@@ -72,11 +72,7 @@ repositories {
     }
 
     maven {
-        url = uri("https://maven.pkg.github.com/navikt/familie-tjenestespesifikasjoner")
-        credentials {
-            username = "x-access-token"
-            password = System.getenv("GITHUB_TOKEN")
-        }
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release/")
     }
 }
 
