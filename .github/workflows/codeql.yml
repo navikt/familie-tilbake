@@ -71,7 +71,7 @@ jobs:
       env:
         GITHUB_USERNAME: x-access-token
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./gradlew build -xtest
+      run: ./gradlew assemble
 
 
     # ℹ️ Command-line programs to run using the OS shell.

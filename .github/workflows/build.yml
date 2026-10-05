@@ -52,7 +52,7 @@ jobs:
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build -xtest
+        run: ./gradlew assemble
       - uses: nais/docker-build-push@v0
         id: docker-push
         if: github.event.pull_request.user.login != 'dependabot[bot]'
@@ -82,7 +82,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build -xtest
+        run: ./gradlew testClasses
       - name: Kjør tester
         env:
           GITHUB_USERNAME: x-access-token
