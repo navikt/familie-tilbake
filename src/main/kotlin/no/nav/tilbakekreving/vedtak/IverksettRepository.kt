@@ -121,4 +121,21 @@ class IverksettRepository(
             )
         }.firstOrNull()
     }
+
+    fun findByVedtakId(vedtakId: BigInteger): List<IverksattVedtak> =
+        jdbcTemplate.query("SELECT * FROM iverksatt_vedtak WHERE vedtak_id = ?", arrayOf(vedtakId)) { rs, _ ->
+            val iverksattVedtakId = UUID.fromString(rs.getString("id"))
+            IverksattVedtak(
+                id = iverksattVedtakId,
+                behandlingId = UUID.fromString(rs.getString("behandling_id")),
+                nyModell = rs.getBoolean("ny_modell"),
+                vedtakId = rs.getObject("vedtak_id", BigInteger::class.java),
+                aktør = objectMapper.readValue(rs.getString("aktør"), AktørEntity::class.java),
+                ytelsestypeKode = rs.getString("ytelsestype"),
+                kvittering = rs.getString("kvittering"),
+                perioder = hentPerioder(iverksattVedtakId),
+                behandlingstype = Behandlingstype.valueOf(rs.getString("behandlingstype")),
+                vedtaksdato = rs.getObject("vedtaksdato", LocalDate::class.java),
+            )
+        }
 }
