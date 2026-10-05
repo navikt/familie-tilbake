@@ -35,15 +35,12 @@ class VedtakDokumentController(
     ): Ressurs<List<VedtakDokumentreferanseDto>> =
         Ressurs.success(
             vedtakDokumentService.hentDokumentreferanser(
-                skyldner = request.skyldner,
                 vedtakId = request.vedtakId.tilBigInteger(),
             ),
         )
 }
 
 data class HentVedtakDokumenterRequest(
-    @field:Pattern(regexp = "\\d{11}")
-    val skyldner: String,
     @field:Size(max = 64)
     @field:Pattern(regexp = "\\d+")
     val vedtakId: String,
