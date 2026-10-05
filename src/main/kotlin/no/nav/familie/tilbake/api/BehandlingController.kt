@@ -17,6 +17,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangService
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
+import no.nav.familie.tilbake.totrinn.TotrinnService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.UtenforScope
@@ -25,6 +26,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingPåVentDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
+import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.ByttEnhetDto
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.api.v1.dto.OpprettRevurderingDto
@@ -59,6 +61,7 @@ class BehandlingController(
     private val tilgangService: TilgangService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val totrinnService: TotrinnService,
 ) {
     @Operation(summary = "Opprett tilbakekrevingsbehandling automatisk, kan kalles av fagsystem, batch")
     @PostMapping(
@@ -174,6 +177,11 @@ class BehandlingController(
                 else -> ValideringContext.UtførSteg
             },
         ) { tilbakekreving, context ->
+            if (behandlingsstegDto is BehandlingsstegForeslåVedtaksstegDto ||
+                behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto
+            ) {
+                stansVedtak(tilbakekreving.sporingsinformasjon(behandlingId))
+            }
             tilbakekrevingService.utførSteg(tilbakekreving, context, behandlingId, behandlingsstegDto)
             Ressurs.success("OK")
         }
@@ -191,6 +199,12 @@ class BehandlingController(
             auditLoggerEvent = AuditLoggerEvent.UPDATE,
             handling = "Utfører behandlingens aktiv steg og fortsetter den til neste steg",
         )
+        if (behandlingsstegDto is BehandlingsstegForeslåVedtaksstegDto ||
+            behandlingsstegDto is BehandlingsstegFatteVedtaksstegDto
+        ) {
+            val behandling = behandlingService.hentBehandling(behandlingId)
+            stansVedtak(Sporing(behandling.eksternFagsakId, behandlingId.toString()))
+        }
         // Oppdaterer ansvarlig saksbehandler først slik at historikkinnslag får riktig saksbehandler
         // Hvis det feiler noe,bør det rullet tilbake helt siden begge 2 er på samme transaksjon
         if (stegService.kanAnsvarligSaksbehandlerOppdateres(behandlingId, behandlingsstegDto)) {
@@ -204,6 +218,10 @@ class BehandlingController(
         )
 
         return Ressurs.success("OK")
+    }
+
+    private fun stansVedtak(sporing: Sporing): Nothing {
+        throw ModellFeil.TjenesteUtilgjengeligException(sporing)
     }
 
     @Operation(summary = "Sett behandling på vent")

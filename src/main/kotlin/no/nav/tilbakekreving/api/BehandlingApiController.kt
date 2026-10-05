@@ -11,6 +11,8 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
@@ -99,15 +101,7 @@ class BehandlingApiController(
     }
 
     override fun behandlingForeslaaVedtak(behandlingId: UUID): ResponseEntity<Unit> {
-        return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
-            valideringContext = ValideringContext.ForeslåVedtak,
-        ) { tilbakekreving, context ->
-            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                foreslåVedtak()
-            }
-            ResponseEntity.ok(Unit)
-        } ?: ResponseEntity.notFound().build()
+        throw ModellFeil.TjenesteUtilgjengeligException(Sporing("Ukjent", behandlingId.toString()))
     }
 
     override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataUpdateDto: VedtaksbrevRedigerbareDataUpdateDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
