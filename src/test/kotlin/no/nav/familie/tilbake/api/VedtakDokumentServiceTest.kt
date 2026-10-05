@@ -111,7 +111,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `POST med skyldner og vedtakId som streng`() {
+    fun `POST med vedtakId som streng`() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         val behandling = behandlingRepository.findByFagsakId(fagsak.id).single()
@@ -127,7 +127,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             post("/api/vedtak/dokumenter/v1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content("""{"skyldner":"${fagsak.bruker.ident}","vedtakId":"$vedtakId"}"""),
+                .content("""{"vedtakId":"$vedtakId"}"""),
         ).andReturn().response
 
         response.status shouldBe HttpStatus.OK.value()
@@ -155,7 +155,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val annenFagsak = opprettGammelBehandling(nyttDokumentVedtakId(), Testdata.STANDARD_BRUKERIDENT)
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(annenFagsak.id).single().id))
 
-        val dokumenter = service.hentDokumentreferanser(fagsak.bruker.ident, vedtakId)
+        val dokumenter = service.hentDokumentreferanser(vedtakId)
 
         dokumenter.forSingle {
             it shouldBe VedtakDokumentreferanseDto(førsteBrev.journalpostId, førsteBrev.dokumentId)
@@ -172,22 +172,11 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `gammel modell med en annen skyldner`() {
-        val vedtakId = nyttDokumentVedtakId()
-        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id))
-
-        service.hentDokumentreferanser(no.nav.tilbakekreving.Testdata.TESTBRUKER, vedtakId) shouldBe emptyList()
-        tilgang.gamleTilganger shouldBe emptyList()
-        tilgang.nyeTilganger shouldBe emptyList()
-    }
-
-    @Test
     fun `gammel modell uten brev`() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
-        service.hentDokumentreferanser(fagsak.bruker.ident, vedtakId) shouldBe emptyList()
+        service.hentDokumentreferanser(vedtakId) shouldBe emptyList()
         tilgang.gamleTilganger.size shouldBe 1
     }
 
@@ -199,7 +188,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val tilgangsfeil = avvisTilgang()
 
         shouldThrow<Feil> {
-            service.hentDokumentreferanser(fagsak.bruker.ident, vedtakId)
+            service.hentDokumentreferanser(vedtakId)
         } shouldBe tilgangsfeil
     }
 
@@ -209,7 +198,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
         val dokumenter = somSaksbehandler {
-            service.hentDokumentreferanser(Testdata.STANDARD_BRUKERIDENT, vedtakId)
+            service.hentDokumentreferanser(vedtakId)
         }
 
         dokumenter.size shouldBe 2
@@ -225,16 +214,6 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `ny modell med en annen skyldner`() {
-        val vedtakId = nyttDokumentVedtakId()
-        opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-
-        service.hentDokumentreferanser(no.nav.tilbakekreving.Testdata.TESTBRUKER, vedtakId) shouldBe emptyList()
-        tilgang.nyeTilganger shouldBe emptyList()
-        tilgang.gamleTilganger shouldBe emptyList()
-    }
-
-    @Test
     fun `ny modell med avvist tilgang`() {
         val vedtakId = nyttDokumentVedtakId()
         opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
@@ -242,7 +221,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
         shouldThrow<Feil> {
             somSaksbehandler {
-                service.hentDokumentreferanser(Testdata.STANDARD_BRUKERIDENT, vedtakId)
+                service.hentDokumentreferanser(vedtakId)
             }
         } shouldBe tilgangsfeil
         tilgang.nyeTilganger.forSingle {
@@ -252,7 +231,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `vedtakId uten iverksatt vedtak`() {
-        service.hentDokumentreferanser(Testdata.STANDARD_BRUKERIDENT, nyttDokumentVedtakId()) shouldBe emptyList()
+        service.hentDokumentreferanser(nyttDokumentVedtakId()) shouldBe emptyList()
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
@@ -265,35 +244,34 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             iverksattVedtakForDokumentTest(UUID.randomUUID(), vedtakId, nyModell, Testdata.STANDARD_BRUKERIDENT),
         )
 
-        service.hentDokumentreferanser(Testdata.STANDARD_BRUKERIDENT, vedtakId) shouldBe emptyList()
+        service.hentDokumentreferanser(vedtakId) shouldBe emptyList()
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
 
     @Test
-    fun `samme vedtakId i begge modeller med bare en matchende skyldner`() {
+    fun `samme vedtakId i begge modeller med forskjellig skyldner`() {
         val vedtakId = nyttDokumentVedtakId()
-        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        val brev = brevsporingRepository.insert(
-            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id),
-        )
+        opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         opprettNyBehandling(vedtakId, no.nav.tilbakekreving.Testdata.TESTBRUKER)
 
-        service.hentDokumentreferanser(fagsak.bruker.ident, vedtakId).forSingle {
-            it shouldBe VedtakDokumentreferanseDto(brev.journalpostId, brev.dokumentId)
+        val feil = shouldThrow<Feil> {
+            service.hentDokumentreferanser(vedtakId)
         }
-        tilgang.gamleTilganger.size shouldBe 1
+
+        feil.httpStatus shouldBe HttpStatus.CONFLICT
+        tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
 
     @Test
-    fun `samme vedtakId og skyldner i begge modeller`() {
+    fun `samme vedtakId i begge modeller`() {
         val vedtakId = nyttDokumentVedtakId()
         opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
         val feil = shouldThrow<Feil> {
-            service.hentDokumentreferanser(Testdata.STANDARD_BRUKERIDENT, vedtakId)
+            service.hentDokumentreferanser(vedtakId)
         }
 
         feil.httpStatus shouldBe HttpStatus.CONFLICT
