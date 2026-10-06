@@ -12,6 +12,7 @@ import java.time.Duration
 object Avsluttet : Tilstand {
     override val tidTilPåminnelse: Duration? = null
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.AVSLUTTET
+    override val kanRevurderes = true
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.AVSLUTTET
 

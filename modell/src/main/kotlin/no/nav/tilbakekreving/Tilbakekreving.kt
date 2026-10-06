@@ -213,9 +213,8 @@ class Tilbakekreving internal constructor(
 
     fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: Behandlingsårsakstype, sideeffektContext: SideeffektContext) {
         val originalBehandling = hentBehandling(behandlingId)
-        val tilstand = tilstand.behandlingsstatus(originalBehandling, sideeffektContext.klokke)
-        if (tilstand != BehandlingsstatusModell.AVSLUTTET) {
-            throw IllegalStateException("Behandlingen er i $tilstand. Revurdering kan kun opprette for avsluttet behandling.")
+        if (!tilstand.kanRevurderes) {
+            throw IllegalStateException("Behandlingen er i ikke avsluttet tilstand. Revurdering kan kun opprette for avsluttet behandling.")
         }
 
         opprettBehandling(
@@ -225,6 +224,7 @@ class Tilbakekreving internal constructor(
             behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
             revurderingsårsak = revurderingsårsak,
         )
+        byttTilstand(TilBehandling, sideeffektContext)
     }
 
     fun opprettBehandling(

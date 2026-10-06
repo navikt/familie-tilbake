@@ -216,11 +216,10 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
-
         val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         revurderingBehandlingId shouldNotBe behandlingId
         tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
-            status shouldBe Behandlingsstatus.OPPRETTET
+            status shouldBe Behandlingsstatus.UTREDES
             type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
         }
     }

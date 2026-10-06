@@ -394,7 +394,7 @@ class Behandling internal constructor(
                 )
             },
             kanHenleggeBehandling = false,
-            kanRevurderingOpprettes = tilstand.behandlingsstatus(this, lesContext.klokke) == BehandlingsstatusModell.AVSLUTTET,
+            kanRevurderingOpprettes = tilstand.kanRevurderes,
             harVerge = false,
             kanEndres = tilstand.kanEndresAvSaksbehandler && kanEndres(lesContext.behandler, kanBeslutte, lesContext.klokke),
             kanSetteTilbakeTilFakta = true,

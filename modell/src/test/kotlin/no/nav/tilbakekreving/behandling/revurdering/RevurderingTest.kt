@@ -63,7 +63,7 @@ class RevurderingTest {
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER).kanRevurderingOpprettes shouldBe false
         shouldThrow<IllegalStateException> {
             tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), Behandlingsårsakstype.REVURDERING_KLAGE_KA, saksbehandlerContext())
-        }.message shouldBe "Behandlingen er i TIL_FORHÅNDSVARSEL. Revurdering kan kun opprette for avsluttet behandling."
+        }.message shouldBe "Behandlingen er i ikke avsluttet tilstand. Revurdering kan kun opprette for avsluttet behandling."
     }
 
     private fun tilbakekrevingTilAvsluttet(
