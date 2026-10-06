@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.api
+package no.nav.tilbakekreving.api
 
 data class VedtakDokumentreferanseDto(
     val journalpostId: String,
