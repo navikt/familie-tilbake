@@ -148,7 +148,7 @@ class Behandling internal constructor(
     override fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, context: SideeffektContext) {
-        if (oppdatertKravgrunnlag.entry == kravgrunnlag.entry) {
+        if (oppdatertKravgrunnlag.entry.kanBrukesUtenNyVurdering(kravgrunnlag.entry)) {
             kravgrunnlag = oppdatertKravgrunnlag
             nyttKravgrunnlag = null
         } else if (steg().none { it.erPåbegynt() }) {

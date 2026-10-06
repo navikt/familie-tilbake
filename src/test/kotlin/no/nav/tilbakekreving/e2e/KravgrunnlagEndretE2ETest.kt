@@ -6,10 +6,14 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.familie.tilbake.api.forvaltning.ForvaltningController
+import no.nav.familie.tilbake.config.OppdragClientRestMock
+import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.sikkerhet.NyTilgangskontrollServiceTest
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
+import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.entities.FaktastegEntity
-import no.nav.tilbakekreving.entity.BehandlingsloggMapper.behandlingId
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
@@ -21,6 +25,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
+import no.nav.tilbakekreving.repository.NyBehandlingsloggRepository
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
@@ -36,6 +41,48 @@ import java.util.UUID
 class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
+
+    @Autowired
+    lateinit var forvaltningController: ForvaltningController
+
+    @Autowired
+    lateinit var behandlingsloggRepository: NyBehandlingsloggRepository
+
+    @Autowired
+    lateinit var oppdragRestClient: OppdragClientRestMock
+
+    @Test
+    fun `henting av patchet kravgrunnlag`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val context = opprettBehandling(periode)
+        oppdragRestClient.mockHentKravgrunnlag(
+            kravgrunnlagId = context.kravgrunnlagId.toBigInteger(),
+            perioder = listOf(OppdragClientRestMock.kravgrunnlagPeriode(periode, feilutbetaltBeløp = 4000.kroner)),
+        )
+
+        val response = ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
+            forvaltningController.korrigerKravgrunnlag(context.behandlingId)
+        }
+
+        response.status shouldBe Ressurs.Status.SUKSESS
+        response.data shouldBe "OK"
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingFakta(context.behandlingId.toString()).body.shouldNotBeNull {
+                tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+                feilutbetaling.beløp shouldBe 4000
+                perioder.single().feilutbetaltBeløp shouldBe 4000
+            }
+        }
+
+        val tilbakekreving = tilbakekreving(context.behandlingId)
+        behandlingsloggRepository.hentBehandlingslogg(tilbakekreving.id).forOne {
+            it.behandlingsloggstype shouldBe Behandlingsloggstype.NYTT_KRAVGRUNNLAG_MOTTATT
+        }
+    }
 
     @Test
     fun `endret kravgrunnlag etter sendt forhåndsvarsel`() {

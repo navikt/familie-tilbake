@@ -243,6 +243,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                         kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6),
                         referanse = "referanse",
                         perioder = listOf(kravgrunnlagPeriode()),
+                        korrigering = false,
                         opprettet = LocalDateTime.now(),
                     ),
                     systemContext(),

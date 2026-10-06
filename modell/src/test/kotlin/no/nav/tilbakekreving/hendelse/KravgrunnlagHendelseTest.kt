@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.hendelse
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
@@ -53,7 +52,7 @@ class KravgrunnlagHendelseTest {
             kontrollfelt = "abc",
             kravgrunnlagId = "def",
         )
-        kravgrunnlag1 shouldBe kravgrunnlag2
+        kravgrunnlag1.kanBrukesUtenNyVurdering(kravgrunnlag2) shouldBe true
     }
 
     @Test
@@ -78,7 +77,7 @@ class KravgrunnlagHendelseTest {
                 kravgrunnlagPeriode(ytelsesbeløp = ytelsesbeløp2 + feilutbetalteBeløp(ytelsesbeløp2)),
             ),
         )
-        kravgrunnlag1 shouldNotBe kravgrunnlag2
+        kravgrunnlag1.kanBrukesUtenNyVurdering(kravgrunnlag2) shouldBe false
     }
 
     @Test
@@ -102,6 +101,6 @@ class KravgrunnlagHendelseTest {
                 kravgrunnlagPeriode(periode = 1.februar(2021) til 28.februar(2021)),
             ),
         )
-        kravgrunnlag1 shouldNotBe kravgrunnlag2
+        kravgrunnlag1.kanBrukesUtenNyVurdering(kravgrunnlag2) shouldBe false
     }
 }

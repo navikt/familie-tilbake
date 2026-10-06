@@ -44,6 +44,7 @@ class KravgrunnlagHendelseEntityTest {
                     beløp = emptyList(),
                 ),
             ),
+            korrigering = false,
             opprettet = LocalDateTime.now(),
         )
 

@@ -84,6 +84,12 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
         FieldConverter.LocalDateTimeConverter.required(),
     )
 
+    val korrigering = field(
+        "korrigering",
+        KravgrunnlagHendelseEntity::korrigering,
+        FieldConverter.BooleanConverter.required(),
+    )
+
     fun map(
         resultSet: ResultSet,
         perioder: List<KravgrunnlagPeriodeEntity>,
@@ -109,6 +115,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
             referanse = resultSet[referanse],
             perioder = perioder,
             opprettet = resultSet[opprettet],
+            korrigering = resultSet[korrigering],
         )
     }
 }

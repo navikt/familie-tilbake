@@ -90,6 +90,11 @@ class ForvaltningController(
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningHentKorrigertKravgrunnlag) { tilbakekreving, context ->
+            tilbakekreving.trengerKorrigertKravgrunnlag(context)
+            Ressurs.success("OK")
+        }
+        if (response != null) return response
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,
             minimumBehandlerrolle = Behandlerrolle.FORVALTER,

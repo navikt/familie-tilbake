@@ -82,6 +82,7 @@ fun kravgrunnlag(
         referanse = referanse,
         kravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
+        korrigering = false,
         opprettet = opprettet,
     )
     kravgrunnlagHendelse.valider(Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))

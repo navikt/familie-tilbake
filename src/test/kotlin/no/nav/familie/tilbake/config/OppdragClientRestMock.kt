@@ -14,6 +14,8 @@ import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagAnnule
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KravgrunnlagDetaljerDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakResponseDto
+import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.springframework.context.annotation.Primary
@@ -23,6 +25,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @Primary
@@ -31,6 +34,8 @@ class OppdragClientRestMock : OppdragRestClient {
     private val iverksettelseRequests = ConcurrentLinkedQueue<TilbakekrevingsvedtakRequestDto>()
 
     private val mockIverksettelseSvar = mutableMapOf<BigInteger, TilbakekrevingsvedtakResponseDto>()
+
+    private val mockKravgrunnlagPerioder = ConcurrentHashMap<BigInteger, List<DetaljerPeriodeDto>>()
 
     override fun iverksettVedtak(request: TilbakekrevingsvedtakRequestDto): TilbakekrevingsvedtakResponseDto {
         iverksettelseRequests.add(request)
@@ -66,39 +71,7 @@ class OppdragClientRestMock : OppdragRestClient {
                 typeUtbetalesTilId = "PERSON",
                 kontrollfelt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
                 referanse = "0",
-                perioder = listOf(
-                    DetaljerPeriodeDto(
-                        periodeFom = 1.januar(2021),
-                        periodeTom = 31.januar(2021),
-                        belopSkattMnd = BigDecimal.ZERO,
-                        posteringer = listOf(
-                            DetaljerPosteringDto(
-                                kodeKlasse = Klassekode.KL_KODE_FEIL_BA.tilKlassekodeNavn(),
-                                typeKlasse = "FEIL",
-                                belopTilbakekreves = 1000.kroner,
-                                belopNy = 1000.kroner,
-                                belopOpprinneligUtbetalt = BigDecimal.ZERO,
-                                belopUinnkrevd = BigDecimal.ZERO,
-                                skattProsent = BigDecimal.ZERO,
-                                kodeResultat = "",
-                                kodeAarsak = "",
-                                kodeSkyld = "",
-                            ),
-                            DetaljerPosteringDto(
-                                kodeKlasse = Klassekode.KL_KODE_JUST_BA.tilKlassekodeNavn(),
-                                typeKlasse = "YTEL",
-                                belopTilbakekreves = 1000.kroner,
-                                belopNy = 19000.kroner,
-                                belopOpprinneligUtbetalt = 20000.kroner,
-                                belopUinnkrevd = BigDecimal.ZERO,
-                                skattProsent = BigDecimal.ZERO,
-                                kodeResultat = "",
-                                kodeAarsak = "",
-                                kodeSkyld = "",
-                            ),
-                        ),
-                    ),
-                ),
+                perioder = mockKravgrunnlagPerioder.remove(kravgrunnlagId) ?: listOf(kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), 1000.kroner)),
             ),
         )
     }
@@ -118,12 +91,53 @@ class OppdragClientRestMock : OppdragRestClient {
         callback(iverksettelseRequests.single { it.vedtakId == vedtakId })
     }
 
+    fun mockHentKravgrunnlag(kravgrunnlagId: BigInteger, perioder: List<DetaljerPeriodeDto>) {
+        mockKravgrunnlagPerioder[kravgrunnlagId] = perioder
+    }
+
     internal fun mockIversettelse(vedtakId: BigInteger, alvorlighetsgrad: String, kodeMelding: String) {
         mockIverksettelseSvar[vedtakId] = TilbakekrevingsvedtakResponseDto(
             status = alvorlighetsgrad.toInt(),
             melding = kodeMelding,
             vedtakId = vedtakId,
             datoVedtakFagsystem = LocalDate.now(),
+        )
+    }
+
+    companion object {
+        fun kravgrunnlagPeriode(
+            periode: Datoperiode,
+            feilutbetaltBeløp: BigDecimal,
+        ) = DetaljerPeriodeDto(
+            periodeFom = periode.fom,
+            periodeTom = periode.tom,
+            belopSkattMnd = BigDecimal.ZERO,
+            posteringer = listOf(
+                DetaljerPosteringDto(
+                    kodeKlasse = Klassekode.KL_KODE_FEIL_BA.tilKlassekodeNavn(),
+                    typeKlasse = "FEIL",
+                    belopTilbakekreves = feilutbetaltBeløp,
+                    belopNy = feilutbetaltBeløp,
+                    belopOpprinneligUtbetalt = BigDecimal.ZERO,
+                    belopUinnkrevd = BigDecimal.ZERO,
+                    skattProsent = BigDecimal.ZERO,
+                    kodeResultat = "",
+                    kodeAarsak = "",
+                    kodeSkyld = "",
+                ),
+                DetaljerPosteringDto(
+                    kodeKlasse = Klassekode.KL_KODE_JUST_BA.tilKlassekodeNavn(),
+                    typeKlasse = "YTEL",
+                    belopTilbakekreves = feilutbetaltBeløp,
+                    belopNy = 20000.kroner - feilutbetaltBeløp,
+                    belopOpprinneligUtbetalt = 20000.kroner,
+                    belopUinnkrevd = BigDecimal.ZERO,
+                    skattProsent = BigDecimal.ZERO,
+                    kodeResultat = "",
+                    kodeAarsak = "",
+                    kodeSkyld = "",
+                ),
+            ),
         )
     }
 }

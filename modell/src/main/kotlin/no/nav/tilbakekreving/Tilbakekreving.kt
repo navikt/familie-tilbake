@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
+import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -348,6 +349,14 @@ class Tilbakekreving internal constructor(
             eksternFagsak.fagsysteminfoBehov(
                 eksternBehandlingId = kravgrunnlag.referanse,
                 vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
+            ),
+        )
+    }
+
+    fun trengerKorrigertKravgrunnlag(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(
+            KorrigertKravgrunnlagBehov(
+                kravgrunnlagHistorikk.nåværende().entry.kravgrunnlagId,
             ),
         )
     }
