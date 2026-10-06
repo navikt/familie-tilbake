@@ -13,7 +13,7 @@ import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -45,7 +45,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
     val årsak = field(
         column = "revurderingsårsak",
         getter = BehandlingEntity::revurderingsårsak,
-        converter = FieldConverter.EnumConverter.of<Behandlingsårsakstype>(),
+        converter = FieldConverter.EnumConverter.of<TilbakekrevingRevurderingsarsakDto>(),
     )
 
     val eksternFagsakBehandlingId = field(

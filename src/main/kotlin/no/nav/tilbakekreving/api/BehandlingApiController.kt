@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
@@ -315,6 +316,17 @@ class BehandlingApiController(
                 tilbakekreving.gjørSaksbehandling(behandlingId, context) {
                     brukNyesteKravgrunnlag()
                 },
+            )
+        } ?: ResponseEntity.notFound().build()
+    }
+
+    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.OpprettRevurdering,
+        ) { tilbakekreving, context ->
+            ResponseEntity.ok(
+                tilbakekreving.opprettRevurdering(behandlingId, revurderingDto.revurderingsarsak, context),
             )
         } ?: ResponseEntity.notFound().build()
     }

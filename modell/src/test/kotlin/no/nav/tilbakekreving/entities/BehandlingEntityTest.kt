@@ -60,6 +60,7 @@ class BehandlingEntityTest {
             kravgrunnlag = kravgrunnlag,
             brevHistorikk = brevHistorikk,
             klokke = SystemKlokke,
+            revurderingsårsak = null,
         )
 
         val behandlingEtterLagring = behandlingFørLagring

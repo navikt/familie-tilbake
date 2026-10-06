@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -33,7 +34,7 @@ object AvventerFagsysteminfo : Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
-        tilbakekreving.opprettBehandling(eksternBehandling, sideeffektContext, fagsysteminfo.behandlendeEnhet)
+        tilbakekreving.opprettBehandling(eksternBehandling, sideeffektContext, fagsysteminfo.behandlendeEnhet, Behandlingstype.TILBAKEKREVING, null)
         if (fagsysteminfo.aktør != null) {
             tilbakekreving.opprettBruker(fagsysteminfo.aktør)
         }
