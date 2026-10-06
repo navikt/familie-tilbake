@@ -10,6 +10,7 @@ import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Fagsak
+import no.nav.familie.tilbake.common.exceptionhandler.ApiExceptionHandler
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
@@ -53,7 +54,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.util.AopTestUtils
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
@@ -111,7 +113,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `POST med vedtakId som streng`() {
+    fun `GET med vedtakId som queryparameter`() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         val behandling = behandlingRepository.findByFagsakId(fagsak.id).single()
@@ -124,10 +126,9 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service)).build()
 
         val response = mvc.perform(
-            post("/api/vedtak/dokumenter/v1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content("""{"vedtakId":"$vedtakId"}"""),
+            get("/api/vedtak/dokumenter/v1")
+                .param("vedtakId", vedtakId.toString())
+                .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
         response.status shouldBe HttpStatus.OK.value()
@@ -138,6 +139,51 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             it["journalpostId"] shouldBe brev.journalpostId
             it["dokumentInfoId"] shouldBe brev.dokumentId
         }
+    }
+
+    @Test
+    fun `GET uten vedtakId`() {
+        val response = dokumentMvc().perform(
+            get("/api/vedtak/dokumenter/v1")
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.BAD_REQUEST.value()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", " ", "abc", "12a"])
+    fun `GET med blank eller ikke-numerisk vedtakId`(vedtakId: String) {
+        val response = dokumentMvc().perform(
+            get("/api/vedtak/dokumenter/v1")
+                .param("vedtakId", vedtakId)
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.BAD_REQUEST.value()
+    }
+
+    @Test
+    fun `GET med vedtakId lengre enn 64 tegn`() {
+        val response = dokumentMvc().perform(
+            get("/api/vedtak/dokumenter/v1")
+                .param("vedtakId", "0".repeat(64) + "1")
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.BAD_REQUEST.value()
+    }
+
+    @Test
+    fun `GET med vedtakId større enn Long MAX_VALUE`() {
+        val vedtakId = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)
+        val response = dokumentMvc().perform(
+            get("/api/vedtak/dokumenter/v1")
+                .param("vedtakId", vedtakId.toString())
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.BAD_REQUEST.value()
     }
 
     @Test
@@ -278,6 +324,11 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
+
+    private fun dokumentMvc(): MockMvc =
+        MockMvcBuilders.standaloneSetup(VedtakDokumentController(service))
+            .setControllerAdvice(ApiExceptionHandler())
+            .build()
 
     private fun opprettGammelBehandling(vedtakId: BigInteger, ident: String): Fagsak {
         val fagsak = fagsakRepository.insert(Testdata.fagsak(brukerident = ident))

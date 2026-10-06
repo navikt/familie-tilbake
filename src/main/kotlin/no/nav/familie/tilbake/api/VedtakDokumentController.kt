@@ -11,8 +11,8 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
@@ -24,14 +24,13 @@ import java.math.BigInteger
 class VedtakDokumentController(
     private val vedtakDokumentService: VedtakDokumentService,
 ) {
-    @PostMapping(
+    @GetMapping(
         path = ["/dokumenter/v1"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     @Operation(summary = "Hent dokumentreferanser for et iverksatt vedtak")
     fun hentDokumentreferanser(
-        @RequestBody @Valid request: HentVedtakDokumenterRequest,
+        @ModelAttribute @Valid request: HentVedtakDokumenterRequest,
     ): Ressurs<List<VedtakDokumentreferanseDto>> =
         Ressurs.success(
             vedtakDokumentService.hentDokumentreferanser(
@@ -44,11 +43,6 @@ data class HentVedtakDokumenterRequest(
     @field:Size(max = 64)
     @field:Pattern(regexp = "\\d+")
     val vedtakId: String,
-)
-
-data class VedtakDokumentreferanseDto(
-    val journalpostId: String,
-    val dokumentInfoId: String,
 )
 
 private fun String.tilBigInteger(): BigInteger =

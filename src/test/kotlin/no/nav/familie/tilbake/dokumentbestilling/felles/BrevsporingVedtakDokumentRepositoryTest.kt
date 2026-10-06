@@ -26,9 +26,8 @@ class BrevsporingVedtakDokumentRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakRepository: FagsakRepository
 
     @Test
-    fun `flere brev og behandlinger med en behandling utenfor utvalget`() {
+    fun `flere brev for en behandling og brev for en annen behandling`() {
         val førsteBehandling = opprettBehandling()
-        val andreBehandling = opprettBehandling()
         val annenBehandling = opprettBehandling()
         val førsteBrev = repository.insert(
             Testdata.lagBrevsporing(førsteBehandling).copy(journalpostId = "journalpost-1", dokumentId = "dokument-1"),
@@ -40,14 +39,11 @@ class BrevsporingVedtakDokumentRepositoryTest : OppslagSpringRunnerTest() {
                 brevtype = Brevtype.HENLEGGELSE,
             ),
         )
-        val tredjeBrev = repository.insert(
-            Testdata.lagBrevsporing(andreBehandling).copy(journalpostId = "journalpost-3", dokumentId = "dokument-3"),
-        )
         repository.insert(Testdata.lagBrevsporing(annenBehandling))
 
-        val brev = repository.findAllByBehandlingIdIn(listOf(førsteBehandling, andreBehandling))
+        val brev = repository.findAllByBehandlingId(førsteBehandling)
 
-        val forventedeBrev = listOf(førsteBrev, andreBrev, tredjeBrev)
+        val forventedeBrev = listOf(førsteBrev, andreBrev)
         brev.map { it.id }.toSet() shouldBe forventedeBrev.map { it.id }.toSet()
         brev.size shouldBe forventedeBrev.size
         brev.forAll { lagretBrev ->
@@ -63,14 +59,7 @@ class BrevsporingVedtakDokumentRepositoryTest : OppslagSpringRunnerTest() {
         val behandlingId = opprettBehandling()
         repository.insert(Testdata.lagBrevsporing(opprettBehandling()))
 
-        repository.findAllByBehandlingIdIn(listOf(behandlingId)) shouldBe emptyList()
-    }
-
-    @Test
-    fun `tomt utvalg av behandlinger med lagret brevsporing`() {
-        repository.insert(Testdata.lagBrevsporing(opprettBehandling()))
-
-        repository.findAllByBehandlingIdIn(emptyList()) shouldBe emptyList()
+        repository.findAllByBehandlingId(behandlingId) shouldBe emptyList()
     }
 
     private fun opprettBehandling(): UUID {
