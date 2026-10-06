@@ -113,7 +113,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `GET med vedtakId som queryparameter`() {
+    fun `GET med vedtakId i path`() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         val behandling = behandlingRepository.findByFagsakId(fagsak.id).single()
@@ -126,8 +126,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service)).build()
 
         val response = mvc.perform(
-            get("/api/vedtak/dokumenter/v1")
-                .param("vedtakId", vedtakId.toString())
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -142,21 +141,22 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `GET uten vedtakId`() {
-        val response = dokumentMvc().perform(
-            get("/api/vedtak/dokumenter/v1")
+    fun `GET uten vedtakId path-segment`() {
+        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service)).build()
+        val response = mvc.perform(
+            get("/api/dokumenter/vedtak/v1")
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
-        response.status shouldBe HttpStatus.BAD_REQUEST.value()
+        response.status shouldBe HttpStatus.NOT_FOUND.value()
+        response.contentAsString shouldBe ""
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["", " ", "abc", "12a"])
+    @ValueSource(strings = [" ", "abc", "12a", "１２"])
     fun `GET med blank eller ikke-numerisk vedtakId`(vedtakId: String) {
         val response = dokumentMvc().perform(
-            get("/api/vedtak/dokumenter/v1")
-                .param("vedtakId", vedtakId)
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -166,8 +166,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `GET med vedtakId lengre enn 64 tegn`() {
         val response = dokumentMvc().perform(
-            get("/api/vedtak/dokumenter/v1")
-                .param("vedtakId", "0".repeat(64) + "1")
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", "0".repeat(64) + "1")
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -178,8 +177,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     fun `GET med vedtakId større enn Long MAX_VALUE`() {
         val vedtakId = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)
         val response = dokumentMvc().perform(
-            get("/api/vedtak/dokumenter/v1")
-                .param("vedtakId", vedtakId.toString())
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId.toString())
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
