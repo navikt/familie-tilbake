@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
+import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
@@ -32,13 +33,12 @@ import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.util.UUID
-import no.nav.tilbakekreving.beslutterContext
 
 class RevurderingTest {
     @Test
-    fun `Revurdering opprettest riktig for avsluttet sak`() {
+    fun `Revurdering opprettes riktig for avsluttet sak`() {
         val context = saksbehandlerContext()
-        val tilbakekreving = tilbakekrevingTilAsluttet(opprettTilbakekrevingHendelse(), context)
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val behandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
 
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.AVSLUTTET
@@ -66,11 +66,10 @@ class RevurderingTest {
         }.message shouldBe "Behandlingen er i TIL_FORHÅNDSVARSEL. Revurdering kan kun opprette for avsluttet behandling."
     }
 
-    private fun tilbakekrevingTilAsluttet(
+    private fun tilbakekrevingTilAvsluttet(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
-        saksbehandlerContext: SideeffektContext
+        saksbehandlerContext: SideeffektContext,
     ): Tilbakekreving {
-
         val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse).apply {
             gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext) {
                 lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")

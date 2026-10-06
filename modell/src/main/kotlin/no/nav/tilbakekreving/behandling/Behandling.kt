@@ -941,7 +941,7 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             klokke: Klokke,
-            revurderingsarsak: Behandlingsårsakstype?,
+            revurderingsårsak: Behandlingsårsakstype?,
         ): Behandling {
             val opprettet = klokke.nå()
             return Behandling(
@@ -950,7 +950,7 @@ class Behandling internal constructor(
                 opprettet = opprettet,
                 sistEndret = opprettet,
                 enhet = enhet,
-                revurderingsårsak = revurderingsarsak,
+                revurderingsårsak = revurderingsårsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,

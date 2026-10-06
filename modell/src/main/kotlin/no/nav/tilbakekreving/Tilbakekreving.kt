@@ -54,7 +54,6 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
-import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
@@ -224,7 +223,7 @@ class Tilbakekreving internal constructor(
             sideeffektContext = sideeffektContext,
             behandlendeEnhet = originalBehandling.hentBehandlingsinformasjon().enhet!!.kode,
             behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            revurderingsarsak = revurderingsårsak,
+            revurderingsårsak = revurderingsårsak,
         )
     }
 
@@ -233,7 +232,7 @@ class Tilbakekreving internal constructor(
         sideeffektContext: SideeffektContext,
         behandlendeEnhet: String?,
         behandlingstype: Behandlingstype,
-        revurderingsarsak: Behandlingsårsakstype?,
+        revurderingsårsak: Behandlingsårsakstype?,
     ) {
         if (bruker == null) {
             opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)
@@ -248,7 +247,7 @@ class Tilbakekreving internal constructor(
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
             klokke = sideeffektContext.klokke,
-            revurderingsarsak = revurderingsarsak,
+            revurderingsårsak = revurderingsårsak,
         )
         behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(behandling)
