@@ -17,6 +17,7 @@ data class ForhåndsvarselUnntakEntity(
     internal fun fraEntity(
         brukeruttalelse: Brukeruttalelse?,
         tilbakeført: ÅrsakTilTilbakeføring?,
+        uttalelsesfrist: UttalelsesfristEntity?,
     ): Forhåndsvarsel.Unntak {
         return Forhåndsvarsel.Unntak(
             forhåndsvarselUnntak = ForhåndsvarselUnntak(
@@ -25,6 +26,7 @@ data class ForhåndsvarselUnntakEntity(
                 beskrivelse = beskrivelse,
             ),
             brukeruttalelse = brukeruttalelse,
+            uttalelsesfrist = uttalelsesfrist?.fraEntity(),
             tilbakeført = tilbakeført,
         )
     }

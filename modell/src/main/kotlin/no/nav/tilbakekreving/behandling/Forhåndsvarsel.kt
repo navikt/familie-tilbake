@@ -165,7 +165,7 @@ class Forhåndsvarsel internal constructor(
 
         override fun lagreOpprinneligFrist(uttalelsesfrist: Uttalelsesfrist): Vurdering = VarselSendt(uttalelsesfrist, null, null)
 
-        override fun lagreForhåndsvarselUnntak(forhåndsvarselUnntak: ForhåndsvarselUnntak): Vurdering = Unntak(forhåndsvarselUnntak, null, null)
+        override fun lagreForhåndsvarselUnntak(forhåndsvarselUnntak: ForhåndsvarselUnntak): Vurdering = Unntak(forhåndsvarselUnntak, null, null, null)
 
         override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> = emptySet()
 
@@ -176,6 +176,7 @@ class Forhåndsvarsel internal constructor(
             brukeruttalelse = null,
             ferdigvurdert = false,
             tilbakeført = null,
+            uttalelsesfrist = null,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),
         )
 
@@ -242,7 +243,7 @@ class Forhåndsvarsel internal constructor(
         override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> = brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
 
         override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag): Vurdering {
-            return MåVurderesPåNytt(brukeruttalelse)
+            return MåVurderesPåNytt(brukeruttalelse, uttalelsesfrist)
         }
 
         override fun tilFrontendDto(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto {
@@ -257,6 +258,7 @@ class Forhåndsvarsel internal constructor(
                 ferdigvurdert = erFullstendig(klokke),
                 tilbakeført = trengerNyVurdering()?.frontendDto,
                 sendtVarselbrev = varselbrev.tilFrontendDto(),
+                uttalelsesfrist = uttalelsesfrist.nyTilFrontendDto(),
             )
         }
 
@@ -274,6 +276,7 @@ class Forhåndsvarsel internal constructor(
 
     internal class MåVurderesPåNytt(
         private val brukeruttalelse: Brukeruttalelse?,
+        private var uttalelsesfrist: Uttalelsesfrist?,
     ) : Vurdering {
         override val behandlingsstatus = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
 
@@ -308,6 +311,7 @@ class Forhåndsvarsel internal constructor(
                 forhåndsvarselUnntak = forhåndsvarselUnntak,
                 brukeruttalelse = brukeruttalelseSomBeholdes,
                 tilbakeført = null,
+                uttalelsesfrist = uttalelsesfrist,
             )
         }
 
@@ -321,6 +325,7 @@ class Forhåndsvarsel internal constructor(
             ferdigvurdert = false,
             tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag.frontendDto,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),
+            uttalelsesfrist = uttalelsesfrist?.nyTilFrontendDto(),
         )
 
         override fun erForhåndsvarselSendt(): Boolean? = null
@@ -330,7 +335,7 @@ class Forhåndsvarsel internal constructor(
             vurderingstype = ForhåndsvarselVurderingstype.MÅ_VURDERES_PÅ_NYTT,
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = null,
-            uttalelsesfristEntity = null,
+            uttalelsesfristEntity = uttalelsesfrist?.tilEntity(behandlingRef),
             tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
         )
     }
@@ -338,6 +343,7 @@ class Forhåndsvarsel internal constructor(
     internal class Unntak(
         private var forhåndsvarselUnntak: ForhåndsvarselUnntak,
         private var brukeruttalelse: Brukeruttalelse?,
+        private var uttalelsesfrist: Uttalelsesfrist?,
         private var tilbakeført: ÅrsakTilTilbakeføring?,
     ) : Vurdering {
         override val behandlingsstatus = BehandlingsstatusModell.TIL_BEHANDLING
@@ -394,6 +400,7 @@ class Forhåndsvarsel internal constructor(
             ferdigvurdert = true,
             tilbakeført = tilbakeført?.frontendDto,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),
+            uttalelsesfrist = uttalelsesfrist?.nyTilFrontendDto(),
         )
 
         override fun erForhåndsvarselSendt(): Boolean = false
@@ -403,7 +410,7 @@ class Forhåndsvarsel internal constructor(
             vurderingstype = ForhåndsvarselVurderingstype.UNNTAK,
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak.tilEntity(behandlingRef, tilbakeført),
-            uttalelsesfristEntity = null,
+            uttalelsesfristEntity = uttalelsesfrist?.tilEntity(behandlingRef),
             tilbakeført = tilbakeført,
         )
     }
