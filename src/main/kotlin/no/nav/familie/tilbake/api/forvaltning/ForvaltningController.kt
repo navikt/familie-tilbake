@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.BehovMediator
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -60,6 +61,7 @@ class ForvaltningController(
     private val applicationProperties: ApplicationProperties,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val fagsakRepository: FagsakRepository,
+    private val behovMediator: BehovMediator,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -91,7 +93,9 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningHentKorrigertKravgrunnlag) { tilbakekreving, context ->
-            tilbakekreving.trengerKorrigertKravgrunnlag(context)
+            val behov = tilbakekreving.trengerKorrigertKravgrunnlag()
+            val korrigertKravgrunnlag = behovMediator.hentKorrigertKravgrunnlag(behov)
+            tilbakekreving.håndter(korrigertKravgrunnlag, context)
             Ressurs.success("OK")
         }
         if (response != null) return response

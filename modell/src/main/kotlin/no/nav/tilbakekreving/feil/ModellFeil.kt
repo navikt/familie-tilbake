@@ -21,6 +21,15 @@ sealed class ModellFeil(
         melding: String,
         sporing: Sporing,
     ) : ModellFeil("Du mangler nødvendig tilgang", melding, sporing)
+
+    class BehandlingIkkeEndretException(
+        melding: String,
+        sporing: Sporing,
+    ) : ModellFeil(
+            "Behandling ble ikke endret",
+            melding,
+            sporing,
+        )
 }
 
 data class Sporing(

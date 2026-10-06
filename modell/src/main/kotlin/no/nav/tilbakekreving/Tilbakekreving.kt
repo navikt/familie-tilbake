@@ -30,6 +30,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
@@ -183,6 +184,9 @@ class Tilbakekreving internal constructor(
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            if (kravgrunnlagHendelse.korrigering && kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse) {
+                throw ModellFeil.BehandlingIkkeEndretException("Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag", sporingsinformasjon())
+            }
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext)
         }
@@ -353,11 +357,10 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun trengerKorrigertKravgrunnlag(sideeffektContext: SideeffektContext) {
-        sideeffektContext.behovObservatør.håndter(
-            KorrigertKravgrunnlagBehov(
-                kravgrunnlagHistorikk.nåværende().entry.kravgrunnlagId,
-            ),
+    // Denne burde følge vanlig behov løype i stedet for å håndteres direkte når det skal skje automatisk.
+    fun trengerKorrigertKravgrunnlag(): KorrigertKravgrunnlagBehov {
+        return KorrigertKravgrunnlagBehov(
+            kravgrunnlagHistorikk.nåværende().entry.kravgrunnlagId,
         )
     }
 

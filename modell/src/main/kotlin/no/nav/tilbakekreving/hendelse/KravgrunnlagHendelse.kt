@@ -35,7 +35,7 @@ class KravgrunnlagHendelse(
     internal val kravgrunnlagId: String,
     val referanse: String,
     private val perioder: List<Periode>,
-    private val korrigering: Boolean,
+    val korrigering: Boolean,
     override val opprettet: LocalDateTime,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun valider(sporing: Sporing) {
@@ -97,6 +97,37 @@ class KravgrunnlagHendelse(
             this.perioder == other.perioder
     }
 
+    override fun equals(other: Any?): Boolean {
+        return this === other ||
+            other is KravgrunnlagHendelse &&
+            kanBrukesUtenNyVurdering(other) &&
+            vedtakId == other.vedtakId &&
+            kravstatuskode == other.kravstatuskode &&
+            fagsystemVedtaksdato == other.fagsystemVedtaksdato &&
+            vedtakGjelder == other.vedtakGjelder &&
+            utbetalesTil == other.utbetalesTil &&
+            ansvarligEnhet == other.ansvarligEnhet &&
+            kontrollfelt == other.kontrollfelt &&
+            kravgrunnlagId == other.kravgrunnlagId &&
+            referanse == other.referanse
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            vedtakId,
+            kravstatuskode,
+            fagsystemVedtaksdato,
+            vedtakGjelder,
+            utbetalesTil,
+            skalBeregneRenter,
+            ansvarligEnhet,
+            kontrollfelt,
+            kravgrunnlagId,
+            referanse,
+            perioder,
+        )
+    }
+
     fun sammenlign(
         nyttKravgrunnlag: KravgrunnlagHendelse,
         sporing: Sporing,
@@ -142,7 +173,7 @@ class KravgrunnlagHendelse(
                 other is Periode &&
                 periode == other.periode &&
                 månedligSkattebeløp == other.månedligSkattebeløp &&
-                beløp.zip(other.beløp).all { (a, b) -> a == b }
+                beløp == other.beløp
         }
 
         override fun hashCode(): Int {

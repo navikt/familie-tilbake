@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -63,13 +62,13 @@ class OppdragClientRestMock : OppdragRestClient {
                 vedtakId = 0,
                 kodeStatusKrav = Kravstatuskode.NYTT.kode,
                 fagsystemId = "0",
-                datoVedtakFagsystem = LocalDate.now(),
+                datoVedtakFagsystem = 1.januar(2021),
                 vedtakIdOmgjort = 0,
                 gjelderId = "1234",
                 typeGjelder = "PERSON",
                 utbetalesTilId = "1234",
                 typeUtbetalesTilId = "PERSON",
-                kontrollfelt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
+                kontrollfelt = 1.januar(2021).atTime(12, 0).format(DateTimeFormatter.ofPattern("YYYY-MM-dd-HH.mm.ss.SSSSSS")),
                 referanse = "0",
                 perioder = mockKravgrunnlagPerioder.remove(kravgrunnlagId) ?: listOf(kravgrunnlagPeriode(1.januar(2021) til 31.januar(2021), 1000.kroner)),
             ),

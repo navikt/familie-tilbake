@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldBeNull
@@ -16,6 +17,7 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.entities.FaktastegEntity
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
@@ -81,6 +83,22 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val tilbakekreving = tilbakekreving(context.behandlingId)
         behandlingsloggRepository.hentBehandlingslogg(tilbakekreving.id).forOne {
             it.behandlingsloggstype shouldBe Behandlingsloggstype.NYTT_KRAVGRUNNLAG_MOTTATT
+        }
+    }
+
+    @Test
+    fun `henting av uendret kravgrunnlag`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val context = opprettBehandling(periode)
+
+        ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
+            forvaltningController.korrigerKravgrunnlag(context.behandlingId)
+        }
+
+        shouldThrow<ModellFeil.BehandlingIkkeEndretException> {
+            ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
+                forvaltningController.korrigerKravgrunnlag(context.behandlingId)
+            }
         }
     }
 

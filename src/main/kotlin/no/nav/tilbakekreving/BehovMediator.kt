@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -200,16 +201,19 @@ class BehovMediator(
         }
     }
 
+    internal fun hentKorrigertKravgrunnlag(behov: KorrigertKravgrunnlagBehov): KravgrunnlagHendelse {
+        val oppdatertKravgrunnlag = oppdragRestClient.hentKravgrunnlag(
+            kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
+            kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
+        )
+        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke)
+    }
+
     internal fun korrigerKravgrunnlag(
         behov: KorrigertKravgrunnlagBehov,
         tilbakekreving: Tilbakekreving,
         sideeffektContext: SideeffektContext,
     ) {
-        val oppdatertKravgrunnlag = oppdragRestClient.hentKravgrunnlag(
-            kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
-            kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
-        )
-        val kravgrunnlagHendelse = KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke)
-        tilbakekreving.håndter(kravgrunnlagHendelse, sideeffektContext)
+        tilbakekreving.håndter(hentKorrigertKravgrunnlag(behov), sideeffektContext)
     }
 }
