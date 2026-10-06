@@ -127,9 +127,11 @@ no.nav.security.jwt:
             client-auth-method: client_secret_basic
 
 management:
-  endpoint.health.show-details: always
+  endpoint.health:
+    show-details: always
+    probes.enabled: true
   endpoints.web:
-    exposure.include: info, health, metrics, prometheus
+    exposure.include: info, health, metrics, prometheus, startup
     base-path: "/internal"
     path-mapping:
       info: "status/isAlive"

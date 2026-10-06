@@ -20,11 +20,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: Bygg med gradle u/test
-        env:
-          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew assemble
       - uses: nais/docker-build-push@v0
         id: docker-push
@@ -50,11 +45,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: Bygg med gradle
-        env:
-          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew test
 
   deploy-to-dev:

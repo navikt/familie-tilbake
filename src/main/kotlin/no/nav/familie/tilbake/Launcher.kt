@@ -6,6 +6,7 @@ import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
@@ -18,5 +19,7 @@ import org.springframework.context.annotation.ComponentScan
 class Launcher
 
 fun main(args: Array<String>) {
-    SpringApplication.run(Launcher::class.java, *args)
+    SpringApplication(Launcher::class.java)
+        .apply { applicationStartup = BufferingApplicationStartup(10_000) }
+        .run(*args)
 }
