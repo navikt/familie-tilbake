@@ -60,7 +60,7 @@ class VedtakDokumentService(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter dokumentreferanser for iverksatt vedtak",
         )
-        return brevsporingRepository.findAllByBehandlingIdIn(listOf(treffPåVedtak.behandlingId))
+        return brevsporingRepository.findAllByBehandlingId(treffPåVedtak.behandlingId)
             .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
     }
 }
