@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.api
+package no.nav.tilbakekreving.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.throwables.shouldThrow

@@ -1,4 +1,4 @@
-package no.nav.familie.tilbake.api
+package no.nav.tilbakekreving.api
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
