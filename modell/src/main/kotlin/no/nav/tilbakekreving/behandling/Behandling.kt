@@ -81,6 +81,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
@@ -109,7 +110,7 @@ class Behandling internal constructor(
     override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
-    private val revurderingsårsak: Behandlingsårsakstype?,
+    private val revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -416,7 +417,10 @@ class Behandling internal constructor(
             fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
             eksternFagsakId = "TODO",
-            behandlingsårsakstype = revurderingsårsak,
+            behandlingsårsakstype = when (revurderingsårsak) {
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK -> Behandlingsårsakstype.REVURDERING_ANNEN_ÅRSAK
+                null -> null
+            },
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
@@ -941,7 +945,7 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             klokke: Klokke,
-            revurderingsårsak: Behandlingsårsakstype?,
+            revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
         ): Behandling {
             val opprettet = klokke.nå()
             return Behandling(

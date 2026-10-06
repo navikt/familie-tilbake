@@ -13,14 +13,15 @@ import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.faktastegVurdering
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
@@ -43,7 +44,7 @@ class RevurderingTest {
 
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.AVSLUTTET
 
-        tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), Behandlingsårsakstype.REVURDERING_KLAGE_KA, saksbehandlerContext())
+        tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK, saksbehandlerContext())
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
             type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
@@ -61,9 +62,9 @@ class RevurderingTest {
 
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER).kanRevurderingOpprettes shouldBe false
-        shouldThrow<IllegalStateException> {
-            tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), Behandlingsårsakstype.REVURDERING_KLAGE_KA, saksbehandlerContext())
-        }.message shouldBe "Behandlingen er i ikke avsluttet tilstand. Revurdering kan kun opprette for avsluttet behandling."
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK, saksbehandlerContext())
+        }.message shouldBe "Kan ikke opprette revurdering i TIL_BEHANDLING"
     }
 
     private fun tilbakekrevingTilAvsluttet(

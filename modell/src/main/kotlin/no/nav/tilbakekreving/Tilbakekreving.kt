@@ -42,13 +42,13 @@ import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -211,20 +211,14 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
-    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: Behandlingsårsakstype, sideeffektContext: SideeffektContext) {
-        val originalBehandling = hentBehandling(behandlingId)
-        if (!tilstand.kanRevurderes) {
-            throw IllegalStateException("Behandlingen er i ikke avsluttet tilstand. Revurdering kan kun opprette for avsluttet behandling.")
-        }
-
-        opprettBehandling(
-            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
+    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: TilbakekrevingRevurderingsarsakDto, sideeffektContext: SideeffektContext) {
+        tilstand.opprettRevurdering(
+            tilbakekreving = this,
             sideeffektContext = sideeffektContext,
-            behandlendeEnhet = originalBehandling.hentBehandlingsinformasjon().enhet!!.kode,
-            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
+            behandlendeEnhet = hentBehandling(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
             revurderingsårsak = revurderingsårsak,
         )
-        byttTilstand(TilBehandling, sideeffektContext)
     }
 
     fun opprettBehandling(
@@ -232,7 +226,7 @@ class Tilbakekreving internal constructor(
         sideeffektContext: SideeffektContext,
         behandlendeEnhet: String?,
         behandlingstype: Behandlingstype,
-        revurderingsårsak: Behandlingsårsakstype?,
+        revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
     ) {
         if (bruker == null) {
             opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)

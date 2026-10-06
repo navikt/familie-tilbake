@@ -212,7 +212,7 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingOpprettRevurdering(
                 behandlingId = behandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
-                    revurderingsarsak = TilbakekrevingRevurderingsarsakDto.REVURDERING_KLAGE_KA,
+                    revurderingsarsak = TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK,
                 ),
             )
         }
