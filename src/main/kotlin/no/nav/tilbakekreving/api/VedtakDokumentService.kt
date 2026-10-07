@@ -9,32 +9,28 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import no.nav.tilbakekreving.vedtak.IverksettRepository
-import no.nav.tilbakekreving.vedtak.IverksettelseReferanse
+import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.util.UUID
 
 @Service
 class VedtakDokumentService(
-    private val iverksettRepository: IverksettRepository,
+    private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
     private val brevsporingRepository: BrevsporingRepository,
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
-    fun hentIverksettelser(
-        vedtakId: BigInteger,
-    ): List<IverksettelseReferanse> =
-        iverksettRepository.findByVedtakId(vedtakId)
-            .distinctBy { it.nyModell to it.behandlingId }
+    fun hentTilbakekrevingIderNyModell(vedtakId: BigInteger): List<String> =
+        vedtakDokumentRepository.findTilbakekrevingIdsByVedtakId(vedtakId)
 
     fun hentDokumentreferanserNyModell(
-        behandlingId: UUID,
+        tilbakekrevingId: String,
     ): List<VedtakDokumentreferanseDto> {
         val autorisertTilbakekreving = tilbakekrevingService.lesTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),
             valideringContext = ValideringContext.ListJournalposter,
         ) ?: return emptyList()
 
@@ -57,4 +53,7 @@ class VedtakDokumentService(
         return brevsporingRepository.findAllByBehandlingId(behandlingId)
             .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
     }
+
+    fun hentBehandlingIderGammelModell(vedtakId: BigInteger): List<UUID> =
+        vedtakDokumentRepository.findBehandlingIdsByVedtakId(vedtakId)
 }
