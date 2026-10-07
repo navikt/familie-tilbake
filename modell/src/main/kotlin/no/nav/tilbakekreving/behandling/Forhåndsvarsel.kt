@@ -253,7 +253,7 @@ class Forhåndsvarsel internal constructor(
                     forhåndsvarselInfo = forhåndsvarsel.tilForhåndsvarselDto(),
                     uttalelsesfrist = uttalelsesfrist.nyTilFrontendDto(),
                 ),
-                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(etterForhåndsvarsel = true)
+                brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
                     ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
                 ferdigvurdert = erFullstendig(klokke),
                 tilbakeført = trengerNyVurdering()?.frontendDto,
@@ -321,7 +321,7 @@ class Forhåndsvarsel internal constructor(
 
         override fun tilFrontendDto(varselbrev: Varselbrev?, klokke: Klokke) = ForhaandsvarselResponseDto(
             forhaandsvarselSteg = IkkeVurdertDto,
-            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(etterForhåndsvarsel = true),
+            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             ferdigvurdert = false,
             tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag.frontendDto,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),
@@ -399,7 +399,7 @@ class Forhåndsvarsel internal constructor(
 
         override fun tilFrontendDto(varselbrev: Varselbrev?, klokke: Klokke) = ForhaandsvarselResponseDto(
             forhaandsvarselSteg = forhåndsvarselUnntak.nyTilFrontendDto(),
-            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(etterForhåndsvarsel = false),
+            brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             ferdigvurdert = true,
             tilbakeført = tilbakeført?.frontendDto,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),

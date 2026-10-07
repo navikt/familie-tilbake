@@ -101,16 +101,8 @@ class ForhåndsvarselService(
 
     fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {
         val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
-            UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
-            UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG,
-            UttalelseVurderingDto.JA,
-            -> UttalelseVurdering.JA
-
-            UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL,
-            UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE,
-            UttalelseVurderingDto.NEI,
-            -> UttalelseVurdering.NEI
-
+            UttalelseVurderingDto.JA -> UttalelseVurdering.JA
+            UttalelseVurderingDto.NEI -> UttalelseVurdering.NEI
             UttalelseVurderingDto.IKKE_VURDERT -> throw IllegalStateException(
                 "Burde ikke være i denne tilstanden. IKKE_VURDERT er enum til frontend.",
             )

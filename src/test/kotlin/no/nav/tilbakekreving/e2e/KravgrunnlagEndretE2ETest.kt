@@ -112,7 +112,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 context.behandlingId,
                 UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL,
+                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
                     uttalelsesdato = 1.februar(2021),
                     hvorBrukerenUttalteSeg = "Telefon",
                     beskrivelse = "Har uttalt seg",
