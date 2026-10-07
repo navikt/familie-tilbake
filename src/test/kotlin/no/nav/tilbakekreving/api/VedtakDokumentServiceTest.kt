@@ -17,18 +17,17 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.objectMapper
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.Vedtaksbrev
-import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.config.TilgangskontrollServiceMock
@@ -43,9 +42,9 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.systemContext
-import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.vedtak.IverksettRepository
+import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
 import no.nav.tilbakekreving.vedtak.iverksattVedtakForDokumentTest
 import no.nav.tilbakekreving.vedtak.nyttDokumentVedtakId
 import org.junit.jupiter.api.BeforeEach
@@ -56,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.util.AopTestUtils
 import org.springframework.test.util.ReflectionTestUtils
@@ -76,7 +76,16 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     private lateinit var iverksettRepository: IverksettRepository
 
     @Autowired
+    private lateinit var vedtakDokumentRepository: VedtakDokumentRepository
+
+    @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
+
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
@@ -101,7 +110,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             tilgang,
         )
         service = VedtakDokumentService(
-            iverksettRepository = iverksettRepository,
+            vedtakDokumentRepository = vedtakDokumentRepository,
             behandlingRepository = behandlingRepository,
             fagsakRepository = fagsakRepository,
             brevsporingRepository = brevsporingRepository,
@@ -223,17 +232,18 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `gammel modell med flere iverksettelser og duplikater på samme fagsak`() {
+    fun `gammel modell med flere kildeoppføringer og duplikater på samme fagsak`() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
         val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
         val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-        val behandlingUtenIverksettelse = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-        listOf(førsteBehandling, andreBehandling, andreBehandling).forEach { behandling ->
-            iverksettRepository.lagreIverksattVedtak(
-                iverksattVedtakForDokumentTest(behandling.id, vedtakId, false, Testdata.STANDARD_BRUKERIDENT),
-            )
-        }
+        val behandlingUtenIverksattVedtak = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        kravgrunnlagRepository.insert(
+            Testdata.lagKravgrunnlag(andreBehandling.id).copy(vedtakId = vedtakId),
+        )
+        kravgrunnlagRepository.insert(
+            Testdata.lagKravgrunnlag(førsteBehandling.id).copy(vedtakId = vedtakId, aktiv = false),
+        )
         listOf(førsteBehandling, andreBehandling).forEach { behandling ->
             brevsporingRepository.insert(
                 Testdata.lagBrevsporing(behandling.id).copy(journalpostId = "felles-journalpost", dokumentId = "felles-dokument"),
@@ -245,7 +255,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         brevsporingRepository.insert(
             Testdata.lagBrevsporing(andreBehandling.id).copy(journalpostId = "andre-journalpost", dokumentId = "andre-dokument"),
         )
-        brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingUtenIverksettelse.id))
+        brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingUtenIverksattVedtak.id))
 
         val dokumenter = hentDokumentreferanser(vedtakId)
 
@@ -316,20 +326,11 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `ny modell med flere iverksettelser og duplikater`() {
+    fun `ny modell med flere kildeoppføringer og duplikater`() {
         val vedtakId = nyttDokumentVedtakId()
         val førsteTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1", "2", "2"))
         val andreTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("2", "3"))
-        listOf(førsteTilbakekreving, andreTilbakekreving).forEach { tilbakekreving ->
-            iverksettRepository.lagreIverksattVedtak(
-                iverksattVedtakForDokumentTest(
-                    tilbakekreving.hentBehandlingsinformasjon().behandlingId,
-                    vedtakId,
-                    true,
-                    Testdata.STANDARD_BRUKERIDENT,
-                ),
-            )
-        }
+        dupliserKravgrunnlag(førsteTilbakekreving.id, vedtakId)
 
         val dokumenter = somSaksbehandler {
             hentDokumentreferanser(vedtakId)
@@ -351,7 +352,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
-    fun `flere iverksettelser med avvist tilgang etter en tillatt behandling`(nyModell: Boolean) {
+    fun `flere kildeoppføringer med avvist tilgang etter en tillatt behandling`(nyModell: Boolean) {
         val vedtakId = nyttDokumentVedtakId()
         if (nyModell) {
             opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1"))
@@ -360,8 +361,8 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
             val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
             val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-            iverksettRepository.lagreIverksattVedtak(
-                iverksattVedtakForDokumentTest(andreBehandling.id, vedtakId, false, Testdata.STANDARD_BRUKERIDENT),
+            kravgrunnlagRepository.insert(
+                Testdata.lagKravgrunnlag(andreBehandling.id).copy(vedtakId = vedtakId),
             )
             listOf(førsteBehandling, andreBehandling).forEach { behandling ->
                 brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
@@ -388,39 +389,18 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `GET med treff i begge modeller og avvist tilgang etter en tillatt behandling`() {
-        val vedtakId = nyttDokumentVedtakId()
-        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        brevsporingRepository.insert(
-            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id),
-        )
-        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        avvisTilgang(antallTillatteKontroller = 1)
-
-        val response = dokumentMvc().perform(
-            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
-                .requestAttr(
-                    SpringTokenValidationContextHolder::class.java.name,
-                    ContextServiceHelpers.tokenValidationContext(SAKSBEHANDLER_IDENT, listOf(ContextServiceHelpers.E2E_TILGANG_GRUPPE)),
-                )
-                .accept(MediaType.APPLICATION_JSON),
-        ).andReturn().response
-
-        response.status shouldBe HttpStatus.FORBIDDEN.value()
-        val body = objectMapper.readValue<Ressurs<List<VedtakDokumentreferanseDto>>>(response.contentAsString)
-        body.status shouldBe Ressurs.Status.FEILET
-        body.data shouldBe null
-        tilgang.gamleTilganger.forSingle {
-            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
-        }
-        tilgang.nyeTilganger.forSingle {
-            it.first shouldBe tilbakekreving.id
-            it.second shouldBe ValideringContext.ListJournalposter
-        }
+    fun `ukjent vedtakId`() {
+        hentDokumentreferanser(nyttDokumentVedtakId()) shouldBe emptyList()
+        tilgang.gamleTilganger shouldBe emptyList()
+        tilgang.nyeTilganger shouldBe emptyList()
     }
 
     @Test
-    fun `vedtakId uten iverksatt vedtak`() {
+    fun `vedtakId uten samsvarende kravgrunnlag`() {
+        val annetVedtakId = nyttDokumentVedtakId()
+        opprettGammelBehandling(annetVedtakId, Testdata.STANDARD_BRUKERIDENT)
+        opprettNyBehandling(annetVedtakId, Testdata.STANDARD_BRUKERIDENT)
+
         hentDokumentreferanser(nyttDokumentVedtakId()) shouldBe emptyList()
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
@@ -428,7 +408,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
-    fun `iverksatt vedtak uten tilhørende behandling`(nyModell: Boolean) {
+    fun `iverksatt vedtak uten kravgrunnlag gir ingen dokumentreferanser`(nyModell: Boolean) {
         val vedtakId = nyttDokumentVedtakId()
         iverksettRepository.lagreIverksattVedtak(
             iverksattVedtakForDokumentTest(UUID.randomUUID(), vedtakId, nyModell, Testdata.STANDARD_BRUKERIDENT),
@@ -439,72 +419,54 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         tilgang.nyeTilganger shouldBe emptyList()
     }
 
-    @Test
-    fun `samme vedtakId i begge modeller med forskjellig skyldner`() {
-        val vedtakId = nyttDokumentVedtakId()
-        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        val brev = brevsporingRepository.insert(
-            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id),
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `iverksatt vedtak uten samsvarende kravgrunnlag gir ingen dokumentreferanser`(nyModell: Boolean) {
+        val kravgrunnlagVedtakId = nyttDokumentVedtakId()
+        val iverksattVedtakId = nyttDokumentVedtakId()
+        if (nyModell) {
+            opprettNyBehandling(kravgrunnlagVedtakId, Testdata.STANDARD_BRUKERIDENT)
+        } else {
+            val fagsak = opprettGammelBehandling(kravgrunnlagVedtakId, Testdata.STANDARD_BRUKERIDENT)
+            val behandling = behandlingRepository.findByFagsakId(fagsak.id).single()
+            brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
+        }
+        iverksettRepository.lagreIverksattVedtak(
+            iverksattVedtakForDokumentTest(
+                UUID.randomUUID(),
+                iverksattVedtakId,
+                nyModell,
+                Testdata.STANDARD_BRUKERIDENT,
+            ),
         )
-        val tilbakekreving = opprettNyBehandling(vedtakId, no.nav.tilbakekreving.Testdata.TESTBRUKER)
 
-        val dokumenter = somSaksbehandler {
-            hentDokumentreferanser(vedtakId)
-        }
-
-        dokumenter.size shouldBe 3
-        dokumenter.toSet() shouldBe setOf(
-            VedtakDokumentreferanseDto(brev.journalpostId, brev.dokumentId),
-            VedtakDokumentreferanseDto("journalpost-1", "dokument-1"),
-            VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
-        )
-        tilgang.gamleTilganger.forSingle {
-            it.fagsystem shouldBe fagsak.fagsystem.tilDTO()
-            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
-            it.minimumBehandlerrolle shouldBe Behandlerrolle.VEILEDER
-            it.auditLoggerEvent shouldBe AuditLoggerEvent.ACCESS
-            it.handling shouldBe "Henter dokumentreferanser for iverksatt vedtak"
-        }
-        tilgang.nyeTilganger.forSingle {
-            it.first shouldBe tilbakekreving.id
-            it.second shouldBe ValideringContext.ListJournalposter
-        }
-    }
-
-    @Test
-    fun `samme vedtakId i begge modeller`() {
-        val vedtakId = nyttDokumentVedtakId()
-        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        brevsporingRepository.insert(
-            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id)
-                .copy(journalpostId = "journalpost-1", dokumentId = "dokument-1"),
-        )
-        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-
-        val dokumenter = somSaksbehandler {
-            hentDokumentreferanser(vedtakId)
-        }
-
-        dokumenter.size shouldBe 2
-        dokumenter.toSet() shouldBe setOf(
-            VedtakDokumentreferanseDto("journalpost-1", "dokument-1"),
-            VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
-        )
-        tilgang.gamleTilganger.forSingle {
-            it.fagsystem shouldBe fagsak.fagsystem.tilDTO()
-            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
-            it.minimumBehandlerrolle shouldBe Behandlerrolle.VEILEDER
-            it.auditLoggerEvent shouldBe AuditLoggerEvent.ACCESS
-            it.handling shouldBe "Henter dokumentreferanser for iverksatt vedtak"
-        }
-        tilgang.nyeTilganger.forSingle {
-            it.first shouldBe tilbakekreving.id
-            it.second shouldBe ValideringContext.ListJournalposter
-        }
+        hentDokumentreferanser(iverksattVedtakId) shouldBe emptyList()
+        tilgang.gamleTilganger shouldBe emptyList()
+        tilgang.nyeTilganger shouldBe emptyList()
     }
 
     private fun hentDokumentreferanser(vedtakId: BigInteger): List<VedtakDokumentreferanseDto> =
         requireNotNull(VedtakDokumentController(service).hentDokumentreferanser(vedtakId.toString()).data)
+
+    private fun dupliserKravgrunnlag(tilbakekrevingId: String, vedtakId: BigInteger) {
+        jdbcTemplate.update(
+            """
+            INSERT INTO tilbakekreving_kravgrunnlag (
+                id, tilbakekreving_id, vedtak_id, kravstatuskode, fagsystem_vedtaksdato,
+                vedtak_gjelder_type, vedtak_gjelder_ident, utbetales_til_type, utbetales_til_ident,
+                skal_beregne_renter, ansvarlig_enhet, kontrollfelt, kravgrunnlag_id, referanse, opprettet
+            )
+            SELECT ?, tilbakekreving_id, vedtak_id, kravstatuskode, fagsystem_vedtaksdato,
+                vedtak_gjelder_type, vedtak_gjelder_ident, utbetales_til_type, utbetales_til_ident,
+                skal_beregne_renter, ansvarlig_enhet, kontrollfelt, kravgrunnlag_id, referanse, localtimestamp
+            FROM tilbakekreving_kravgrunnlag
+            WHERE tilbakekreving_id = ? AND vedtak_id = ?
+            """.trimIndent(),
+            UUID.randomUUID(),
+            tilbakekrevingId.toInt(),
+            vedtakId.toLong(),
+        ) shouldBe 1
+    }
 
     private fun dokumentMvc(): MockMvc =
         MockMvcBuilders.standaloneSetup(VedtakDokumentController(service))
@@ -514,6 +476,9 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     private fun opprettGammelBehandling(vedtakId: BigInteger, ident: String): Fagsak {
         val fagsak = fagsakRepository.insert(Testdata.fagsak(brukerident = ident))
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        kravgrunnlagRepository.insert(
+            Testdata.lagKravgrunnlag(behandling.id).copy(vedtakId = vedtakId),
+        )
         iverksettRepository.lagreIverksattVedtak(
             iverksattVedtakForDokumentTest(behandling.id, vedtakId, false, no.nav.tilbakekreving.Testdata.TESTBRUKER),
         )

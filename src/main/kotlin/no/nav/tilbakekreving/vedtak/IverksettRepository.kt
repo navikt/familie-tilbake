@@ -121,13 +121,4 @@ class IverksettRepository(
             )
         }.firstOrNull()
     }
-
-    fun findByVedtakId(vedtakId: BigInteger): List<IverksettelseReferanse> =
-        jdbcTemplate.query("SELECT id, behandling_id, ny_modell FROM iverksatt_vedtak WHERE vedtak_id = ?", arrayOf(vedtakId)) { rs, _ ->
-            IverksettelseReferanse(
-                id = UUID.fromString(rs.getString("id")),
-                behandlingId = UUID.fromString(rs.getString("behandling_id")),
-                nyModell = rs.getBoolean("ny_modell"),
-            )
-        }
 }

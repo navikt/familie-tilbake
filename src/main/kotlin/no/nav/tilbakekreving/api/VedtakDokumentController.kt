@@ -25,20 +25,21 @@ class VedtakDokumentController(
         path = ["/vedtak/{vedtakId}/v1"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Operation(summary = "Hent dokumentreferanser for et iverksatt vedtak")
+    @Operation(summary = "Hent dokumentreferanser for et vedtak")
     fun hentDokumentreferanser(
         @PathVariable vedtakId: String,
     ): Ressurs<List<VedtakDokumentreferanseDto>> =
         Ressurs.success(
-            vedtakDokumentService.hentIverksettelser(vedtakId.tilBigInteger())
-                .flatMap {
-                    if (it.nyModell) {
-                        vedtakDokumentService.hentDokumentreferanserNyModell(it.behandlingId)
-                    } else {
-                        vedtakDokumentService.hentDokumentreferanserGammelModell(it.behandlingId)
-                    }
+            vedtakId.tilBigInteger().let { id ->
+                val tilbakekrevingIder = vedtakDokumentService.hentTilbakekrevingIderNyModell(id)
+                val dokumentreferanser = if (tilbakekrevingIder.isNotEmpty()) {
+                    tilbakekrevingIder.flatMap(vedtakDokumentService::hentDokumentreferanserNyModell)
+                } else {
+                    vedtakDokumentService.hentBehandlingIderGammelModell(id)
+                        .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
                 }
-                .distinct(),
+                dokumentreferanser.distinct()
+            },
         )
 }
 
