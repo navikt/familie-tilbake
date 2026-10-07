@@ -389,7 +389,10 @@ class Forhåndsvarsel internal constructor(
 
         override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag): Vurdering {
             if (sammendrag.gammeltBeløp < sammendrag.nyttBeløp) {
-                tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+                return MåVurderesPåNytt(
+                    brukeruttalelse = brukeruttalelse,
+                    uttalelsesfrist = uttalelsesfrist,
+                )
             }
             return this
         }

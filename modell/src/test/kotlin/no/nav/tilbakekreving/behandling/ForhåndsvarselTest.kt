@@ -141,7 +141,7 @@ class ForhåndsvarselTest {
         )
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke).should {
-            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
             it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
         }
     }
