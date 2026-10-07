@@ -35,7 +35,10 @@ class IverksettRepositoryTest : OppslagSpringRunnerTest() {
         val vedtak = repository.findByVedtakId(vedtakId)
 
         vedtak.size shouldBe 2
-        vedtak.toSet() shouldBe setOf(gammel, ny)
+        vedtak.toSet() shouldBe setOf(
+            IverksettelseReferanse(id = gammel.id, behandlingId = gammel.behandlingId, nyModell = gammel.nyModell),
+            IverksettelseReferanse(id = ny.id, behandlingId = ny.behandlingId, nyModell = ny.nyModell),
+        )
     }
 
     @Test

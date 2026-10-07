@@ -2,19 +2,18 @@ package no.nav.tilbakekreving.api
 
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import no.nav.tilbakekreving.vedtak.IverksettelseReferanse
 import no.nav.tilbakekreving.vedtak.IverksettRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigInteger
+import java.util.UUID
 
 @Service
 class VedtakDokumentService(
@@ -25,33 +24,28 @@ class VedtakDokumentService(
     private val tilgangskontrollService: TilgangskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
-    fun hentDokumentreferanser(
+    fun hentIverksettelser(
         vedtakId: BigInteger,
+    ): List<IverksettelseReferanse> =
+        iverksettRepository.findByVedtakId(vedtakId)
+            .distinctBy { it.nyModell to it.behandlingId }
+
+    fun hentDokumentreferanserNyModell(
+        behandlingId: UUID,
     ): List<VedtakDokumentreferanseDto> {
-        val treff = iverksettRepository.findByVedtakId(vedtakId)
+        val autorisertTilbakekreving = tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.ListJournalposter,
+        ) ?: return emptyList()
 
-        val treffPåVedtak = when (treff.size) {
-            0 -> return emptyList()
-            1 -> treff.single()
-            else ->
-                throw Feil(
-                    message = "Fant flere behandlinger for vedtakId",
-                    logContext = SecureLog.Context.tom(),
-                    httpStatus = HttpStatus.CONFLICT,
-                )
-        }
+        return autorisertTilbakekreving.brevHistorikk.alleSendteDokumenter()
+            .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
+    }
 
-        if (treffPåVedtak.nyModell) {
-            val autorisertTilbakekreving = tilbakekrevingService.lesTilbakekreving(
-                filter = TilbakekrevingFilter.behandling(treffPåVedtak.behandlingId),
-                valideringContext = ValideringContext.ListJournalposter,
-            ) ?: return emptyList()
-
-            return autorisertTilbakekreving.brevHistorikk.alleSendteDokumenter()
-                .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
-        }
-
-        val behandling = behandlingRepository.findById(treffPåVedtak.behandlingId).orElse(null) ?: return emptyList()
+    fun hentDokumentreferanserGammelModell(
+        behandlingId: UUID,
+    ): List<VedtakDokumentreferanseDto> {
+        val behandling = behandlingRepository.findById(behandlingId).orElse(null) ?: return emptyList()
         val fagsak = fagsakRepository.findById(behandling.fagsakId).orElse(null) ?: return emptyList()
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsak.fagsystem.tilDTO(),
@@ -60,7 +54,7 @@ class VedtakDokumentService(
             auditLoggerEvent = AuditLoggerEvent.ACCESS,
             handling = "Henter dokumentreferanser for iverksatt vedtak",
         )
-        return brevsporingRepository.findAllByBehandlingId(treffPåVedtak.behandlingId)
+        return brevsporingRepository.findAllByBehandlingId(behandlingId)
             .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
     }
 }

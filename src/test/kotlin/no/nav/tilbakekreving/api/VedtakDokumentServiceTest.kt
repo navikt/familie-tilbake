@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -22,10 +23,12 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.brev.Vedtaksbrev
+import no.nav.tilbakekreving.e2e.ContextServiceHelpers
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.config.TilgangskontrollServiceMock
@@ -40,6 +43,7 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.systemContext
+import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.vedtak.IverksettRepository
 import no.nav.tilbakekreving.vedtak.iverksattVedtakForDokumentTest
@@ -199,7 +203,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val annenFagsak = opprettGammelBehandling(nyttDokumentVedtakId(), Testdata.STANDARD_BRUKERIDENT)
         brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(annenFagsak.id).single().id))
 
-        val dokumenter = service.hentDokumentreferanser(vedtakId)
+        val dokumenter = hentDokumentreferanser(vedtakId)
 
         dokumenter.forSingle {
             it shouldBe VedtakDokumentreferanseDto(førsteBrev.journalpostId, førsteBrev.dokumentId)
@@ -220,8 +224,52 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val vedtakId = nyttDokumentVedtakId()
         val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
-        service.hentDokumentreferanser(vedtakId) shouldBe emptyList()
+        hentDokumentreferanser(vedtakId) shouldBe emptyList()
         tilgang.gamleTilganger.size shouldBe 1
+    }
+
+    @Test
+    fun `gammel modell med flere iverksettelser og duplikater på samme fagsak`() {
+        val vedtakId = nyttDokumentVedtakId()
+        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
+        val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        val behandlingUtenIverksettelse = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        listOf(førsteBehandling, andreBehandling, andreBehandling).forEach { behandling ->
+            iverksettRepository.lagreIverksattVedtak(
+                iverksattVedtakForDokumentTest(behandling.id, vedtakId, false, Testdata.STANDARD_BRUKERIDENT),
+            )
+        }
+        listOf(førsteBehandling, andreBehandling).forEach { behandling ->
+            brevsporingRepository.insert(
+                Testdata.lagBrevsporing(behandling.id).copy(journalpostId = "felles-journalpost", dokumentId = "felles-dokument"),
+            )
+        }
+        brevsporingRepository.insert(
+            Testdata.lagBrevsporing(førsteBehandling.id).copy(journalpostId = "første-journalpost", dokumentId = "første-dokument"),
+        )
+        brevsporingRepository.insert(
+            Testdata.lagBrevsporing(andreBehandling.id).copy(journalpostId = "andre-journalpost", dokumentId = "andre-dokument"),
+        )
+        brevsporingRepository.insert(Testdata.lagBrevsporing(behandlingUtenIverksettelse.id))
+
+        val dokumenter = hentDokumentreferanser(vedtakId)
+
+        dokumenter.size shouldBe 3
+        dokumenter.toSet() shouldBe setOf(
+            VedtakDokumentreferanseDto("felles-journalpost", "felles-dokument"),
+            VedtakDokumentreferanseDto("første-journalpost", "første-dokument"),
+            VedtakDokumentreferanseDto("andre-journalpost", "andre-dokument"),
+        )
+        tilgang.gamleTilganger.size shouldBe 2
+        tilgang.gamleTilganger.forAll {
+            it.fagsystem shouldBe fagsak.fagsystem.tilDTO()
+            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
+            it.minimumBehandlerrolle shouldBe Behandlerrolle.VEILEDER
+            it.auditLoggerEvent shouldBe AuditLoggerEvent.ACCESS
+            it.handling shouldBe "Henter dokumentreferanser for iverksatt vedtak"
+        }
+        tilgang.nyeTilganger shouldBe emptyList()
     }
 
     @Test
@@ -232,7 +280,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val tilgangsfeil = avvisTilgang()
 
         shouldThrow<Feil> {
-            service.hentDokumentreferanser(vedtakId)
+            hentDokumentreferanser(vedtakId)
         } shouldBe tilgangsfeil
     }
 
@@ -242,7 +290,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
         val dokumenter = somSaksbehandler {
-            service.hentDokumentreferanser(vedtakId)
+            hentDokumentreferanser(vedtakId)
         }
 
         dokumenter.size shouldBe 2
@@ -265,7 +313,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
         shouldThrow<Feil> {
             somSaksbehandler {
-                service.hentDokumentreferanser(vedtakId)
+                hentDokumentreferanser(vedtakId)
             }
         } shouldBe tilgangsfeil
         tilgang.nyeTilganger.forSingle {
@@ -274,8 +322,112 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `ny modell med flere iverksettelser og duplikater`() {
+        val vedtakId = nyttDokumentVedtakId()
+        val førsteTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1", "2", "2"))
+        val andreTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("2", "3"))
+        listOf(førsteTilbakekreving, andreTilbakekreving).forEach { tilbakekreving ->
+            iverksettRepository.lagreIverksattVedtak(
+                iverksattVedtakForDokumentTest(
+                    tilbakekreving.hentBehandlingsinformasjon().behandlingId,
+                    vedtakId,
+                    true,
+                    Testdata.STANDARD_BRUKERIDENT,
+                ),
+            )
+        }
+
+        val dokumenter = somSaksbehandler {
+            hentDokumentreferanser(vedtakId)
+        }
+
+        dokumenter.size shouldBe 3
+        dokumenter.toSet() shouldBe setOf(
+            VedtakDokumentreferanseDto("journalpost-1", "dokument-1"),
+            VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
+            VedtakDokumentreferanseDto("journalpost-3", "dokument-3"),
+        )
+        tilgang.nyeTilganger.size shouldBe 2
+        tilgang.nyeTilganger.toSet() shouldBe setOf(
+            førsteTilbakekreving.id to ValideringContext.ListJournalposter,
+            andreTilbakekreving.id to ValideringContext.ListJournalposter,
+        )
+        tilgang.gamleTilganger shouldBe emptyList()
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `flere iverksettelser med avvist tilgang etter en tillatt behandling`(nyModell: Boolean) {
+        val vedtakId = nyttDokumentVedtakId()
+        if (nyModell) {
+            opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1"))
+            opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("2"))
+        } else {
+            val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+            val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
+            val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+            iverksettRepository.lagreIverksattVedtak(
+                iverksattVedtakForDokumentTest(andreBehandling.id, vedtakId, false, Testdata.STANDARD_BRUKERIDENT),
+            )
+            listOf(førsteBehandling, andreBehandling).forEach { behandling ->
+                brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
+            }
+        }
+        val tilgangsfeil = avvisTilgang(antallTillatteKontroller = 1)
+
+        shouldThrow<Feil> {
+            somSaksbehandler {
+                hentDokumentreferanser(vedtakId)
+            }
+        } shouldBe tilgangsfeil
+
+        if (nyModell) {
+            tilgang.nyeTilganger.size shouldBe 2
+            tilgang.nyeTilganger.forAll {
+                it.second shouldBe ValideringContext.ListJournalposter
+            }
+            tilgang.gamleTilganger shouldBe emptyList()
+        } else {
+            tilgang.gamleTilganger.size shouldBe 2
+            tilgang.nyeTilganger shouldBe emptyList()
+        }
+    }
+
+    @Test
+    fun `GET med treff i begge modeller og avvist tilgang etter en tillatt behandling`() {
+        val vedtakId = nyttDokumentVedtakId()
+        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        brevsporingRepository.insert(
+            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id),
+        )
+        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        avvisTilgang(antallTillatteKontroller = 1)
+
+        val response = dokumentMvc().perform(
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
+                .requestAttr(
+                    SpringTokenValidationContextHolder::class.java.name,
+                    ContextServiceHelpers.tokenValidationContext(SAKSBEHANDLER_IDENT, listOf(ContextServiceHelpers.E2E_TILGANG_GRUPPE)),
+                )
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.FORBIDDEN.value()
+        val body = objectMapper.readValue<Ressurs<List<VedtakDokumentreferanseDto>>>(response.contentAsString)
+        body.status shouldBe Ressurs.Status.FEILET
+        body.data shouldBe null
+        tilgang.gamleTilganger.forSingle {
+            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
+        }
+        tilgang.nyeTilganger.forSingle {
+            it.first shouldBe tilbakekreving.id
+            it.second shouldBe ValideringContext.ListJournalposter
+        }
+    }
+
+    @Test
     fun `vedtakId uten iverksatt vedtak`() {
-        service.hentDokumentreferanser(nyttDokumentVedtakId()) shouldBe emptyList()
+        hentDokumentreferanser(nyttDokumentVedtakId()) shouldBe emptyList()
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
@@ -288,7 +440,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             iverksattVedtakForDokumentTest(UUID.randomUUID(), vedtakId, nyModell, Testdata.STANDARD_BRUKERIDENT),
         )
 
-        service.hentDokumentreferanser(vedtakId) shouldBe emptyList()
+        hentDokumentreferanser(vedtakId) shouldBe emptyList()
         tilgang.gamleTilganger shouldBe emptyList()
         tilgang.nyeTilganger shouldBe emptyList()
     }
@@ -296,32 +448,69 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `samme vedtakId i begge modeller med forskjellig skyldner`() {
         val vedtakId = nyttDokumentVedtakId()
-        opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        opprettNyBehandling(vedtakId, no.nav.tilbakekreving.Testdata.TESTBRUKER)
+        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        val brev = brevsporingRepository.insert(
+            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id),
+        )
+        val tilbakekreving = opprettNyBehandling(vedtakId, no.nav.tilbakekreving.Testdata.TESTBRUKER)
 
-        val feil = shouldThrow<Feil> {
-            service.hentDokumentreferanser(vedtakId)
+        val dokumenter = somSaksbehandler {
+            hentDokumentreferanser(vedtakId)
         }
 
-        feil.httpStatus shouldBe HttpStatus.CONFLICT
-        tilgang.gamleTilganger shouldBe emptyList()
-        tilgang.nyeTilganger shouldBe emptyList()
+        dokumenter.size shouldBe 3
+        dokumenter.toSet() shouldBe setOf(
+            VedtakDokumentreferanseDto(brev.journalpostId, brev.dokumentId),
+            VedtakDokumentreferanseDto("journalpost-1", "dokument-1"),
+            VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
+        )
+        tilgang.gamleTilganger.forSingle {
+            it.fagsystem shouldBe fagsak.fagsystem.tilDTO()
+            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
+            it.minimumBehandlerrolle shouldBe Behandlerrolle.VEILEDER
+            it.auditLoggerEvent shouldBe AuditLoggerEvent.ACCESS
+            it.handling shouldBe "Henter dokumentreferanser for iverksatt vedtak"
+        }
+        tilgang.nyeTilganger.forSingle {
+            it.first shouldBe tilbakekreving.id
+            it.second shouldBe ValideringContext.ListJournalposter
+        }
     }
 
     @Test
     fun `samme vedtakId i begge modeller`() {
         val vedtakId = nyttDokumentVedtakId()
-        opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-        opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        brevsporingRepository.insert(
+            Testdata.lagBrevsporing(behandlingRepository.findByFagsakId(fagsak.id).single().id)
+                .copy(journalpostId = "journalpost-1", dokumentId = "dokument-1"),
+        )
+        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
 
-        val feil = shouldThrow<Feil> {
-            service.hentDokumentreferanser(vedtakId)
+        val dokumenter = somSaksbehandler {
+            hentDokumentreferanser(vedtakId)
         }
 
-        feil.httpStatus shouldBe HttpStatus.CONFLICT
-        tilgang.gamleTilganger shouldBe emptyList()
-        tilgang.nyeTilganger shouldBe emptyList()
+        dokumenter.size shouldBe 2
+        dokumenter.toSet() shouldBe setOf(
+            VedtakDokumentreferanseDto("journalpost-1", "dokument-1"),
+            VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
+        )
+        tilgang.gamleTilganger.forSingle {
+            it.fagsystem shouldBe fagsak.fagsystem.tilDTO()
+            it.eksternFagsakId shouldBe fagsak.eksternFagsakId
+            it.minimumBehandlerrolle shouldBe Behandlerrolle.VEILEDER
+            it.auditLoggerEvent shouldBe AuditLoggerEvent.ACCESS
+            it.handling shouldBe "Henter dokumentreferanser for iverksatt vedtak"
+        }
+        tilgang.nyeTilganger.forSingle {
+            it.first shouldBe tilbakekreving.id
+            it.second shouldBe ValideringContext.ListJournalposter
+        }
     }
+
+    private fun hentDokumentreferanser(vedtakId: BigInteger): List<VedtakDokumentreferanseDto> =
+        requireNotNull(VedtakDokumentController(service).hentDokumentreferanser(vedtakId.toString()).data)
 
     private fun dokumentMvc(): MockMvc =
         MockMvcBuilders.standaloneSetup(VedtakDokumentController(service))
@@ -337,7 +526,11 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         return fagsak
     }
 
-    private fun opprettNyBehandling(vedtakId: BigInteger, ident: String): Tilbakekreving {
+    private fun opprettNyBehandling(
+        vedtakId: BigInteger,
+        ident: String,
+        dokumentnumre: List<String> = listOf("1", "2"),
+    ): Tilbakekreving {
         val context = systemContext()
         val kravgrunnlag = KravgrunnlagUtil.unmarshalKravgrunnlag(
             KravgrunnlagGenerator.forTilleggsstønader(
@@ -382,7 +575,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             ),
             context,
         )
-        listOf("1", "2").forEach { nummer ->
+        dokumentnumre.forEach { nummer ->
             tilbakekreving.brevHistorikk.lagre(
                 Vedtaksbrev.opprett(SystemKlokke).apply { brevSendt("journalpost-$nummer", "dokument-$nummer") },
             )
@@ -402,11 +595,14 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         return tilbakekreving
     }
 
-    private fun avvisTilgang(): Feil = Feil(
+    private fun avvisTilgang(antallTillatteKontroller: Int = 0): Feil = Feil(
         message = "Ingen tilgang til dokumenter",
         httpStatus = HttpStatus.FORBIDDEN,
         logContext = SecureLog.Context.tom(),
-    ).also { tilgang.tilgangsfeil = it }
+    ).also {
+        tilgang.tilgangsfeil = it
+        tilgang.antallTillatteKontroller = antallTillatteKontroller
+    }
 
     private inline fun <reified T : Any> bean(): T = applicationContext.getBean(T::class.java)
 
@@ -414,6 +610,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         val gamleTilganger = mutableListOf<GammelTilgang>()
         val nyeTilganger = mutableListOf<Pair<String, ValideringContext>>()
         var tilgangsfeil: Feil? = null
+        var antallTillatteKontroller: Int = 0
 
         override fun validerTilgangFagsystemOgFagsakId(
             fagsystem: FagsystemDTO,
@@ -423,7 +620,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             handling: String,
         ) {
             gamleTilganger.add(GammelTilgang(fagsystem, eksternFagsakId, minimumBehandlerrolle, auditLoggerEvent, handling))
-            tilgangsfeil?.let { throw it }
+            avvisVedManglendeTilgang()
         }
 
         override fun validerTilgangTilbakekreving(
@@ -432,8 +629,14 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             behandler: Behandler,
         ): Behandlerrolle {
             nyeTilganger.add(tilbakekreving.id to valideringContext)
-            tilgangsfeil?.let { throw it }
+            avvisVedManglendeTilgang()
             return Behandlerrolle.VEILEDER
+        }
+
+        private fun avvisVedManglendeTilgang() {
+            if (gamleTilganger.size + nyeTilganger.size > antallTillatteKontroller) {
+                tilgangsfeil?.let { throw it }
+            }
         }
     }
 
