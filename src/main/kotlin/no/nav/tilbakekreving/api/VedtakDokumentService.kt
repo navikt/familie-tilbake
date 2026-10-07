@@ -9,8 +9,8 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import no.nav.tilbakekreving.vedtak.IverksettelseReferanse
 import no.nav.tilbakekreving.vedtak.IverksettRepository
+import no.nav.tilbakekreving.vedtak.IverksettelseReferanse
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.util.UUID
