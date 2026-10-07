@@ -58,6 +58,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.util.AopTestUtils
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -92,19 +93,12 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun opprettService() {
         tilgang = DokumentTilgangStub()
-        val tilbakekrevingService = TilbakekrevingService(
-            pdlClient = bean(),
-            iverksettService = bean(),
-            tilbakekrevingRepository = tilbakekrevingRepository,
-            bigQueryService = bean(),
-            endringObservatørService = bean(),
-            kafkaProducer = bean(),
-            statusmeldingBufferRepository = bean(),
-            dokdistService = bean(),
-            featureService = bean(),
-            forhåndsvarselService = bean(),
-            vedtaksbrevService = bean(),
-            tilgangskontrollService = tilgang,
+        val tilbakekrevingService =
+            applicationContext.autowireCapableBeanFactory.createBean(TilbakekrevingService::class.java)
+        ReflectionTestUtils.setField(
+            AopTestUtils.getUltimateTargetObject<TilbakekrevingService>(tilbakekrevingService),
+            "tilgangskontrollService",
+            tilgang,
         )
         service = VedtakDokumentService(
             iverksettRepository = iverksettRepository,
@@ -603,8 +597,6 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
         tilgang.tilgangsfeil = it
         tilgang.antallTillatteKontroller = antallTillatteKontroller
     }
-
-    private inline fun <reified T : Any> bean(): T = applicationContext.getBean(T::class.java)
 
     private class DokumentTilgangStub : TilgangskontrollService by TilgangskontrollServiceMock() {
         val gamleTilganger = mutableListOf<GammelTilgang>()
