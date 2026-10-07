@@ -606,7 +606,7 @@ class Behandling internal constructor(
         kravgrunnlag.entry.valider(sporingsinformasjon())
         if (nyttKravgrunnlag != null) {
             nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
-            if (!toggles[Toggle.EndretKravgrunnlagVisning]) {
+            if (!toggles[Toggle.EndretKravgrunnlagVisning] && !nyttKravgrunnlag!!.entry.korrigering) {
                 throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagMedEndretBeløp, sporingsinformasjon())
             }
         }
