@@ -30,9 +30,15 @@ class VedtakDokumentController(
         @PathVariable vedtakId: String,
     ): Ressurs<List<VedtakDokumentreferanseDto>> =
         Ressurs.success(
-            vedtakDokumentService.hentDokumentreferanser(
-                vedtakId = vedtakId.tilBigInteger(),
-            ),
+            vedtakDokumentService.hentIverksettelser(vedtakId.tilBigInteger())
+                .flatMap {
+                    if (it.nyModell) {
+                        vedtakDokumentService.hentDokumentreferanserNyModell(it.behandlingId)
+                    } else {
+                        vedtakDokumentService.hentDokumentreferanserGammelModell(it.behandlingId)
+                    }
+                }
+                .distinct(),
         )
 }
 
