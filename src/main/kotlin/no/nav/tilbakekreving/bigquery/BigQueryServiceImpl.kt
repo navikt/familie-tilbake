@@ -1,11 +1,13 @@
 package no.nav.tilbakekreving.bigquery
 
 import com.google.cloud.bigquery.BigQuery
+import com.google.cloud.bigquery.BigQueryException
 import com.google.cloud.bigquery.InsertAllRequest
 import com.google.cloud.bigquery.TableId
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.config.ApplicationProperties
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -22,6 +24,43 @@ class BigQueryServiceImpl(
     private val logContext = SecureLog.Context.tom()
     private val prosjektId = applicationProperties.bigQuery.prosjektId
     private val dataset = applicationProperties.bigQuery.dataset
+
+    override fun lagreVilkårsvurdering(bigqueryData: BigQueryVilkårsvurderingDataDto) {
+        if (bigqueryData.perioder.isEmpty()) {
+            logger.medContext(logContext) {
+                info("Ingen vurderte perioder å sende til BigQuery for behandling {}", bigqueryData.behandlingId)
+            }
+            return
+        }
+        val tidspunkt = Instant.now().toString()
+        val request = InsertAllRequest.newBuilder(TableId.of(prosjektId, dataset, "bq_vilkarsvurderingsperiode"))
+        bigqueryData.perioder.forEach { periode ->
+            request.addRow(
+                "${bigqueryData.behandlingId}:${periode.periodeId}",
+                mapOf(
+                    "tid" to tidspunkt,
+                    "behandling_id" to bigqueryData.behandlingId,
+                    "periode_id" to periode.periodeId.toString(),
+                    "periode_fom" to periode.periode.fom.toString(),
+                    "periode_tom" to periode.periode.tom.toString(),
+                    "ytelses_type" to bigqueryData.ytelse,
+                    "rettslig_grunnlag" to periode.rettsligGrunnlag.name,
+                ),
+            )
+        }
+        try {
+            val response = bigQuery.insertAll(request.build())
+            if (response.hasErrors()) {
+                logger.medContext(logContext) {
+                    error("Insert av vilkårsvurderingsperioder til BigQuery feilet for behandling {}: {}", bigqueryData.behandlingId, response.insertErrors)
+                }
+            }
+        } catch (e: BigQueryException) {
+            logger.medContext(logContext) {
+                error("Kunne ikke sende vilkårsvurderingsperioder til BigQuery for behandling {}", bigqueryData.behandlingId, e)
+            }
+        }
+    }
 
     override fun oppdaterBehandling(
         bigqueryData: BigQueryBehandlingDataDto,

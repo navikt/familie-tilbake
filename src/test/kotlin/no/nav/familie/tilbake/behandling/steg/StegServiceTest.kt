@@ -649,7 +649,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                         Vilkårsvurderingsperiode(
                             periode = januar(2025) til januar(2025),
                             begrunnelse = "",
-                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT,
+                            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
                             godTro = VilkårsvurderingGodTro(
                                 beløpErIBehold = false,
                                 begrunnelse = "",

@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
@@ -523,11 +524,21 @@ class Behandling internal constructor(
         callback: Behandling.() -> T,
     ): T {
         val statusFør = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
+        val vedtakVarGodkjent = kanUtbetales(sideeffektContext.klokke)
         val result = callback()
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
         sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
+        if (!vedtakVarGodkjent && kanUtbetales(sideeffektContext.klokke)) {
+            sideeffektContext.bigQueryService.lagreVilkårsvurdering(
+                BigQueryVilkårsvurderingDataDto(
+                    behandlingId = id.toString(),
+                    ytelse = ytelse.hentYtelsesnavn(Språkkode.NB),
+                    perioder = vilkårsvurderingsteg.bigqueryPerioder(),
+                ),
+            )
+        }
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
         }
