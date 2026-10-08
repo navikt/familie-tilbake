@@ -6,9 +6,6 @@ import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.familie.tilbake.sikkerhet.ValideringContext
-import no.nav.tilbakekreving.TilbakekrevingService
-import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
 import org.springframework.stereotype.Service
 import java.math.BigInteger
@@ -21,22 +18,9 @@ class VedtakDokumentService(
     private val fagsakRepository: FagsakRepository,
     private val brevsporingRepository: BrevsporingRepository,
     private val tilgangskontrollService: TilgangskontrollService,
-    private val tilbakekrevingService: TilbakekrevingService,
 ) {
-    fun hentTilbakekrevingIderNyModell(vedtakId: BigInteger): List<String> =
-        vedtakDokumentRepository.findTilbakekrevingIdsByVedtakId(vedtakId)
-
-    fun hentDokumentreferanserNyModell(
-        tilbakekrevingId: String,
-    ): List<VedtakDokumentreferanseDto> {
-        val autorisertTilbakekreving = tilbakekrevingService.lesTilbakekreving(
-            filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),
-            valideringContext = ValideringContext.ListJournalposter,
-        ) ?: return emptyList()
-
-        return autorisertTilbakekreving.brevHistorikk.alleSendteDokumenter()
-            .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentId) }
-    }
+    fun hentTilbakekrevingIdNyModell(vedtakId: BigInteger): String? =
+        vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(vedtakId)
 
     fun hentDokumentreferanserGammelModell(
         behandlingId: UUID,

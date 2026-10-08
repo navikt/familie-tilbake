@@ -5,7 +5,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldNotContain
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -15,7 +14,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.ApiExceptionHandler
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
@@ -98,11 +96,12 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
     private lateinit var tilgang: DokumentTilgangStub
     private lateinit var service: VedtakDokumentService
+    private lateinit var tilbakekrevingService: TilbakekrevingService
 
     @BeforeEach
     fun opprettService() {
         tilgang = DokumentTilgangStub()
-        val tilbakekrevingService =
+        tilbakekrevingService =
             applicationContext.autowireCapableBeanFactory.createBean(TilbakekrevingService::class.java)
         ReflectionTestUtils.setField(
             AopTestUtils.getUltimateTargetObject<TilbakekrevingService>(tilbakekrevingService),
@@ -115,7 +114,6 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             fagsakRepository = fagsakRepository,
             brevsporingRepository = brevsporingRepository,
             tilgangskontrollService = tilgang,
-            tilbakekrevingService = tilbakekrevingService,
         )
     }
 
@@ -130,17 +128,16 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
                 dokumentId = "dokument",
             ),
         )
-        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service)).build()
+        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service, tilbakekrevingService)).build()
 
         val response = mvc.perform(
-            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
+            get("/api/v1/dokumenter/vedtak/{vedtakId}", vedtakId)
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
         response.status shouldBe HttpStatus.OK.value()
-        val body = objectMapper.readValue<Ressurs<List<Map<String, String>>>>(response.contentAsString)
-        body.status shouldBe Ressurs.Status.SUKSESS
-        body.data.shouldNotBeNull().forSingle {
+        val body = objectMapper.readValue<List<Map<String, String>>>(response.contentAsString)
+        body.forSingle {
             it.keys shouldBe setOf("journalpostId", "dokumentInfoId")
             it["journalpostId"] shouldBe brev.journalpostId
             it["dokumentInfoId"] shouldBe brev.dokumentId
@@ -149,9 +146,21 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `GET uten vedtakId path-segment`() {
-        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service)).build()
+        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service, tilbakekrevingService)).build()
         val response = mvc.perform(
-            get("/api/dokumenter/vedtak/v1")
+            get("/api/v1/dokumenter/vedtak")
+                .accept(MediaType.APPLICATION_JSON),
+        ).andReturn().response
+
+        response.status shouldBe HttpStatus.NOT_FOUND.value()
+        response.contentAsString shouldBe ""
+    }
+
+    @Test
+    fun `GET på gammel dokumentrute`() {
+        val mvc = MockMvcBuilders.standaloneSetup(VedtakDokumentController(service, tilbakekrevingService)).build()
+        val response = mvc.perform(
+            get("/api/dokumenter/vedtak/{vedtakId}/v1", nyttDokumentVedtakId())
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -163,7 +172,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     @ValueSource(strings = [" ", "abc", "12a", "１２"])
     fun `GET med blank eller ikke-numerisk vedtakId`(vedtakId: String) {
         val response = dokumentMvc().perform(
-            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId)
+            get("/api/v1/dokumenter/vedtak/{vedtakId}", vedtakId)
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -173,7 +182,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `GET med vedtakId lengre enn 64 tegn`() {
         val response = dokumentMvc().perform(
-            get("/api/dokumenter/vedtak/{vedtakId}/v1", "0".repeat(64) + "1")
+            get("/api/v1/dokumenter/vedtak/{vedtakId}", "0".repeat(64) + "1")
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -184,7 +193,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     fun `GET med vedtakId større enn Long MAX_VALUE`() {
         val vedtakId = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)
         val response = dokumentMvc().perform(
-            get("/api/dokumenter/vedtak/{vedtakId}/v1", vedtakId.toString())
+            get("/api/v1/dokumenter/vedtak/{vedtakId}", vedtakId.toString())
                 .accept(MediaType.APPLICATION_JSON),
         ).andReturn().response
 
@@ -310,6 +319,23 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `ny modell uten sendte dokumenter`() {
+        val vedtakId = nyttDokumentVedtakId()
+        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, emptyList())
+
+        val dokumenter = somSaksbehandler {
+            hentDokumentreferanser(vedtakId)
+        }
+
+        dokumenter shouldBe emptyList()
+        tilgang.nyeTilganger.forSingle {
+            it.first shouldBe tilbakekreving.id
+            it.second shouldBe ValideringContext.ListJournalposter
+        }
+        tilgang.gamleTilganger shouldBe emptyList()
+    }
+
+    @Test
     fun `ny modell med avvist tilgang`() {
         val vedtakId = nyttDokumentVedtakId()
         opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
@@ -326,11 +352,10 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `ny modell med flere kildeoppføringer og duplikater`() {
+    fun `ny modell med flere kravgrunnlag på samme tilbakekreving og dupliserte dokumenter`() {
         val vedtakId = nyttDokumentVedtakId()
-        val førsteTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1", "2", "2"))
-        val andreTilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("2", "3"))
-        dupliserKravgrunnlag(førsteTilbakekreving.id, vedtakId)
+        val tilbakekreving = opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1", "2", "2", "3"))
+        dupliserKravgrunnlag(tilbakekreving.id, vedtakId)
 
         val dokumenter = somSaksbehandler {
             hentDokumentreferanser(vedtakId)
@@ -342,31 +367,24 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             VedtakDokumentreferanseDto("journalpost-2", "dokument-2"),
             VedtakDokumentreferanseDto("journalpost-3", "dokument-3"),
         )
-        tilgang.nyeTilganger.size shouldBe 2
-        tilgang.nyeTilganger.toSet() shouldBe setOf(
-            førsteTilbakekreving.id to ValideringContext.ListJournalposter,
-            andreTilbakekreving.id to ValideringContext.ListJournalposter,
-        )
+        tilgang.nyeTilganger.forSingle {
+            it.first shouldBe tilbakekreving.id
+            it.second shouldBe ValideringContext.ListJournalposter
+        }
         tilgang.gamleTilganger shouldBe emptyList()
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = [false, true])
-    fun `flere kildeoppføringer med avvist tilgang etter en tillatt behandling`(nyModell: Boolean) {
+    @Test
+    fun `gammel modell med flere kildeoppføringer og avvist tilgang etter en tillatt behandling`() {
         val vedtakId = nyttDokumentVedtakId()
-        if (nyModell) {
-            opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("1"))
-            opprettNyBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT, listOf("2"))
-        } else {
-            val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
-            val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
-            val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
-            kravgrunnlagRepository.insert(
-                Testdata.lagKravgrunnlag(andreBehandling.id).copy(vedtakId = vedtakId),
-            )
-            listOf(førsteBehandling, andreBehandling).forEach { behandling ->
-                brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
-            }
+        val fagsak = opprettGammelBehandling(vedtakId, Testdata.STANDARD_BRUKERIDENT)
+        val førsteBehandling = behandlingRepository.findByFagsakId(fagsak.id).single()
+        val andreBehandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+        kravgrunnlagRepository.insert(
+            Testdata.lagKravgrunnlag(andreBehandling.id).copy(vedtakId = vedtakId),
+        )
+        listOf(førsteBehandling, andreBehandling).forEach { behandling ->
+            brevsporingRepository.insert(Testdata.lagBrevsporing(behandling.id))
         }
         val tilgangsfeil = avvisTilgang(antallTillatteKontroller = 1)
 
@@ -376,16 +394,8 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
             }
         } shouldBe tilgangsfeil
 
-        if (nyModell) {
-            tilgang.nyeTilganger.size shouldBe 2
-            tilgang.nyeTilganger.forAll {
-                it.second shouldBe ValideringContext.ListJournalposter
-            }
-            tilgang.gamleTilganger shouldBe emptyList()
-        } else {
-            tilgang.gamleTilganger.size shouldBe 2
-            tilgang.nyeTilganger shouldBe emptyList()
-        }
+        tilgang.gamleTilganger.size shouldBe 2
+        tilgang.nyeTilganger shouldBe emptyList()
     }
 
     @Test
@@ -446,7 +456,8 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentDokumentreferanser(vedtakId: BigInteger): List<VedtakDokumentreferanseDto> =
-        requireNotNull(VedtakDokumentController(service).hentDokumentreferanser(vedtakId.toString()).data)
+        requireNotNull(VedtakDokumentController(service, tilbakekrevingService).dokumenterHentVedtaksdokumenter(vedtakId.toString()).body)
+            .map { VedtakDokumentreferanseDto(it.journalpostId, it.dokumentInfoId) }
 
     private fun dupliserKravgrunnlag(tilbakekrevingId: String, vedtakId: BigInteger) {
         jdbcTemplate.update(
@@ -469,7 +480,7 @@ class VedtakDokumentServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun dokumentMvc(): MockMvc =
-        MockMvcBuilders.standaloneSetup(VedtakDokumentController(service))
+        MockMvcBuilders.standaloneSetup(VedtakDokumentController(service, tilbakekrevingService))
             .setControllerAdvice(ApiExceptionHandler())
             .build()
 
