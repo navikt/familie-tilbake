@@ -1,46 +1,51 @@
 package no.nav.tilbakekreving.api
 
-import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
+import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 
-@RestController
-@RequestMapping("/api/dokumenter")
+@Component
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakDokumentController(
     private val vedtakDokumentService: VedtakDokumentService,
-) {
-    @GetMapping(
-        path = ["/vedtak/{vedtakId}/v1"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    @Operation(summary = "Hent dokumentreferanser for et vedtak")
-    fun hentDokumentreferanser(
-        @PathVariable vedtakId: String,
-    ): Ressurs<List<VedtakDokumentreferanseDto>> =
-        Ressurs.success(
-            vedtakId.tilBigInteger().let { id ->
-                val tilbakekrevingIder = vedtakDokumentService.hentTilbakekrevingIderNyModell(id)
-                val dokumentreferanser = if (tilbakekrevingIder.isNotEmpty()) {
-                    tilbakekrevingIder.flatMap(vedtakDokumentService::hentDokumentreferanserNyModell)
-                } else {
-                    vedtakDokumentService.hentBehandlingIderGammelModell(id)
-                        .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
-                }
-                dokumentreferanser.distinct()
-            },
+    private val tilbakekrevingService: TilbakekrevingService,
+) : DokumenterApi {
+    override fun dokumenterHentVedtaksdokumenter(
+        vedtakId: String,
+    ): ResponseEntity<List<VedtaksdokumentDto>> {
+        val id = vedtakId.tilBigInteger()
+        val tilbakekrevingId = vedtakDokumentService.hentTilbakekrevingIdNyModell(id)
+        if (tilbakekrevingId != null) {
+            val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
+                filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),
+                valideringContext = ValideringContext.ListJournalposter,
+            ) ?: return ResponseEntity.ok(emptyList())
+
+            return ResponseEntity.ok(
+                tilbakekreving.brevHistorikk.alleSendteDokumenter()
+                    .map { VedtaksdokumentDto(it.journalpostId, it.dokumentId) }
+                    .distinct(),
+            )
+        }
+
+        val dokumentreferanser = vedtakDokumentService.hentBehandlingIderGammelModell(id)
+            .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
+        return ResponseEntity.ok(
+            dokumentreferanser.distinct()
+                .map { VedtaksdokumentDto(it.journalpostId, it.dokumentInfoId) },
         )
+    }
 }
 
 private fun String.tilBigInteger(): BigInteger {

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.vedtak
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -15,6 +16,7 @@ import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.IncorrectResultSizeDataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
@@ -26,20 +28,26 @@ class VedtakDokumentRepositoryTest : OppslagSpringRunnerTest() {
     private lateinit var repository: VedtakDokumentRepository
 
     @Test
-    fun `ny modell returnerer distinkte tilbakekrevinger fra kravgrunnlag med samme vedtak`() {
+    fun `ny modell med flere kravgrunnlag på samme tilbakekreving og vedtak`() {
         val vedtakId = nyttDokumentVedtakId()
-        val førsteTilbakekreving = opprettNyTilbakekreving()
-        val andreTilbakekreving = opprettNyTilbakekreving()
+        val tilbakekreving = opprettNyTilbakekreving()
         val annenVedtakTilbakekreving = opprettNyTilbakekreving()
-        lagreNyttKravgrunnlag(førsteTilbakekreving, vedtakId)
-        lagreNyttKravgrunnlag(førsteTilbakekreving, vedtakId)
-        lagreNyttKravgrunnlag(andreTilbakekreving, vedtakId)
+        lagreNyttKravgrunnlag(tilbakekreving, vedtakId)
+        lagreNyttKravgrunnlag(tilbakekreving, vedtakId)
         lagreNyttKravgrunnlag(annenVedtakTilbakekreving, nyttDokumentVedtakId())
 
-        val tilbakekrevingIder = repository.findTilbakekrevingIdsByVedtakId(vedtakId)
+        repository.findTilbakekrevingIdByVedtakId(vedtakId) shouldBe tilbakekreving
+    }
 
-        tilbakekrevingIder.size shouldBe 2
-        tilbakekrevingIder.toSet() shouldBe setOf(førsteTilbakekreving, andreTilbakekreving)
+    @Test
+    fun `ny modell med ugyldig kobling til flere tilbakekrevinger for samme vedtak`() {
+        val vedtakId = nyttDokumentVedtakId()
+        lagreNyttKravgrunnlag(opprettNyTilbakekreving(), vedtakId)
+        lagreNyttKravgrunnlag(opprettNyTilbakekreving(), vedtakId)
+
+        shouldThrow<IncorrectResultSizeDataAccessException> {
+            repository.findTilbakekrevingIdByVedtakId(vedtakId)
+        }
     }
 
     @Test
@@ -62,7 +70,7 @@ class VedtakDokumentRepositoryTest : OppslagSpringRunnerTest() {
     fun `vedtak uten kravgrunnlag gir ingen treff i noen modell`() {
         val vedtakId = nyttDokumentVedtakId()
 
-        repository.findTilbakekrevingIdsByVedtakId(vedtakId) shouldBe emptyList()
+        repository.findTilbakekrevingIdByVedtakId(vedtakId) shouldBe null
         repository.findBehandlingIdsByVedtakId(vedtakId) shouldBe emptyList()
     }
 

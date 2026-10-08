@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.test.februar
@@ -92,6 +93,7 @@ class ForhåndsvarselTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
 
         forhåndsvarsel.erPåbegynt() shouldBe false
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke).uttalelsesfrist shouldBe null
     }
 
     @Test
@@ -176,6 +178,7 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
+            it.uttalelsesfrist shouldBe null
             it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
             it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
         }
@@ -191,6 +194,12 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 15.februar(2021),
+                nyFrist = null,
+                begrunnelse = null,
+            )
+            it.uttalelsesfrist shouldBe it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>().uttalelsesfrist
             it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
             it.tilbakeført shouldBe null
             it.ferdigvurdert shouldBe false
@@ -198,6 +207,22 @@ class ForhåndsvarselTest {
         forhåndsvarsel.venter(KlokkeStub(1.februar(2021))) shouldBe Venter(grunn = Venter.Grunn.BRUKERUTTALELSE, frist = 15.februar(2021))
         forhåndsvarsel.venter(KlokkeStub(16.februar(2021))) shouldBe null
         forhåndsvarsel.erFullstendig(KlokkeStub(16.februar(2021))) shouldBe false
+    }
+
+    @Test
+    fun `sendt forhåndsvarsel med utsatt uttalelsesfrist`() {
+        val forhåndsvarsel = forhåndsvarselSendtMedUttalelse("Brukeren har uttalt seg")
+
+        forhåndsvarsel.lagreFristUtsettelse(15.februar(2021), "Brukeren trenger mer tid")
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = 15.februar(2021),
+                begrunnelse = "Brukeren trenger mer tid",
+            )
+            it.uttalelsesfrist shouldBe it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>().uttalelsesfrist
+        }
     }
 
     @Test
@@ -230,6 +255,7 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.uttalelsesfrist shouldBe null
             it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
             it.tilbakeført shouldBe null
         }
