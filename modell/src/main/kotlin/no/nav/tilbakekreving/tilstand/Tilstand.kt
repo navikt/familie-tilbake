@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
@@ -16,13 +17,17 @@ import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
+import java.util.UUID
 
 internal sealed interface Tilstand {
     val tidTilPåminnelse: Duration?
     val tilbakekrevingTilstand: TilbakekrevingTilstand
     val kanEndresAvSaksbehandler: Boolean get() = false
+    val kanRevurderes: Boolean get() = false
 
     fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell
 
@@ -104,6 +109,16 @@ internal sealed interface Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun opprettRevurdering(
+        tilbakekreving: Tilbakekreving,
+        sideeffektContext: SideeffektContext,
+        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
+        behandlendeEnhet: String?,
+        revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun <T> gjørSaksbehandling(

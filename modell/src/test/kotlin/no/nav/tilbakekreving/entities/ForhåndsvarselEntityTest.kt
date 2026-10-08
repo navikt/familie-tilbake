@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.KlokkeStub
+import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.Forhåndsvarsel
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
@@ -12,7 +13,9 @@ import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Com
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import no.nav.tilbakekreving.test.februar
@@ -80,6 +83,52 @@ class ForhåndsvarselEntityTest {
         }
         gjenopprettet.tilEntity(UUID.randomUUID()).vurderingstype shouldBe ForhåndsvarselVurderingstype.MÅ_VURDERES_PÅ_NYTT
     }
+
+    @Test
+    fun `mottar nytt kravgrunnlag`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreOpprinneligFrist(31.januar(2021))
+        forhåndsvarsel.lagreFristUtsettelse(10.februar(2021), "Bruker ba om mer tid")
+        forhåndsvarsel.nyttKravgrunnlagMottatt(øktBeløp())
+
+        val gjenopprettet = forhåndsvarsel.tilEntity(UUID.randomUUID()).fraEntity()
+
+        gjenopprettet.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).uttalelsesfrist shouldBe UttalelsesfristDto(
+            opprinneligFrist = 31.januar(2021),
+            nyFrist = 10.februar(2021),
+            begrunnelse = "Bruker ba om mer tid",
+        )
+    }
+
+    @Test
+    fun `unntak etter nytt kravgrunnlag`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+        forhåndsvarsel.lagreOpprinneligFrist(31.januar(2021))
+        forhåndsvarsel.lagreFristUtsettelse(10.februar(2021), "Bruker ba om mer tid")
+        forhåndsvarsel.nyttKravgrunnlagMottatt(øktBeløp())
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            beskrivelse = "Unødvendig",
+        )
+
+        val gjenopprettet = forhåndsvarsel.tilEntity(UUID.randomUUID()).fraEntity()
+
+        gjenopprettet.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = 10.februar(2021),
+                begrunnelse = "Bruker ba om mer tid",
+            )
+        }
+    }
+
+    private fun øktBeløp() = OverordnetSammendrag(
+        fom = 1.januar(2021),
+        tom = 31.januar(2021),
+        nyttBeløp = 1500.kroner,
+        gammeltBeløp = 1000.kroner,
+    )
 
     private fun varselbrev() = Varselbrev.opprett(
         "",

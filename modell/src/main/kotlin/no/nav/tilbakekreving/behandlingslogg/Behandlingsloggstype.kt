@@ -36,6 +36,13 @@ enum class Behandlingsloggstype(
         steg = null,
     ),
 
+    REVURDERING_OPPRETTET(
+        tittel = "Revurdering av tilbakekreving opprettet",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+
     FAGSYSTEMINFO_OPPDATERT(
         tittel = "Fagsysteminfo oppdatert",
         tekst = null,

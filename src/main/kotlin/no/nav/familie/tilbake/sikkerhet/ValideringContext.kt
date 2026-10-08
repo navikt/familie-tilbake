@@ -110,6 +110,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
         handling = "Dumper en sak som JSON objekt",
     ),
+    ForvaltningHentKorrigertKravgrunnlag(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Henter korrigert kravgrunnlag",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
@@ -209,5 +214,10 @@ enum class ValideringContext(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Oppdaterer kravgrunnlag",
+    ),
+    OpprettRevurdering(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.UPDATE,
+        handling = "Oppretter revurdering",
     ),
 }

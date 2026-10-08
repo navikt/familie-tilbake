@@ -2,11 +2,6 @@ package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
-import no.nav.familie.tilbake.integration.kafka.KafkaProducer
-import no.nav.familie.tilbake.integration.pdl.PdlClient
-import no.nav.familie.tilbake.integration.pdl.internal.PdlKjønnType
-import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
-import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
@@ -16,34 +11,15 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegVilkårsvurderingDto
-import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
-import no.nav.tilbakekreving.behov.Behov
-import no.nav.tilbakekreving.behov.BrukerinfoBehov
-import no.nav.tilbakekreving.behov.FagsysteminfoBehov
-import no.nav.tilbakekreving.behov.IverksettelseBehov
-import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
-import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
-import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
-import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.bigquery.BigQueryService
-import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
-import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
 import no.nav.tilbakekreving.feil.ModellFeil
-import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
-import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
-import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
-import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
-import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
-import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
-import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
@@ -51,23 +27,17 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class TilbakekrevingService(
-    private val pdlClient: PdlClient,
-    private val iverksettService: IverksettService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
-    private val kafkaProducer: KafkaProducer,
     private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
-    private val dokdistService: DokdistClient,
     private val featureService: FeatureService,
-    private val forhåndsvarselService: ForhåndsvarselService,
-    private val vedtaksbrevService: NyVedtaksbrevService,
     private val tilgangskontrollService: TilgangskontrollService,
+    private val behovMediator: BehovMediator,
 ) {
     private val logger = TracedLogger.getLogger<TilbakekrevingService>()
 
@@ -189,7 +159,7 @@ class TilbakekrevingService(
             val tilbakekreving = it.fraEntity()
             while (observatør.harUbesvarteBehov()) {
                 try {
-                    håndterBehov(tilbakekreving, systemContext, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))
+                    behovMediator.håndterBehov(tilbakekreving, systemContext, observatør.nesteBehov(), SecureLog.Context.fra(tilbakekreving))
                 } catch (e: Exception) {
                     logger.medContext(logContext) {
                         warn("Feilet under håndtering av behov", e)
@@ -204,160 +174,6 @@ class TilbakekrevingService(
                 }
             }
             tilbakekreving.tilEntity()
-        }
-    }
-
-    private fun håndterBehov(
-        tilbakekreving: Tilbakekreving,
-        sideeffektContext: SideeffektContext,
-        behov: Behov,
-        logContext: SecureLog.Context,
-    ) {
-        when (behov) {
-            is BrukerinfoBehov -> {
-                val personinfo = pdlClient.hentPersoninfo(
-                    ident = behov.ident,
-                    fagsystem = behov.ytelse.tilFagsystemDTO(),
-                    logContext = SecureLog.Context.fra(tilbakekreving),
-                )
-                tilbakekreving.håndter(
-                    BrukerinfoHendelse(
-                        ident = personinfo.ident,
-                        fødselsdato = personinfo.fødselsdato,
-                        navn = personinfo.navn,
-                        kjønn = when (personinfo.kjønn) {
-                            PdlKjønnType.MANN -> Kjønn.MANN
-                            PdlKjønnType.KVINNE -> Kjønn.KVINNE
-                            PdlKjønnType.UKJENT -> Kjønn.UKJENT
-                        },
-                        dødsdato = personinfo.dødsdato,
-                    ),
-                    sideeffektContext,
-                )
-            }
-
-            is VarselbrevJournalføringBehov -> {
-                val journalpostResponse = forhåndsvarselService.journalførVarselbrev(
-                    varselbrevBehov = behov,
-                    logContext = logContext,
-                    features = featureService.modellFeatures,
-                )
-                if (journalpostResponse.journalpostId == null) {
-                    throw Feil(
-                        message = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpostResponse.melding}",
-                        frontendFeilmelding = "journalførin av varselbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpostResponse.melding}",
-                        logContext = SecureLog.Context.fra(tilbakekreving),
-                    )
-                }
-
-                if (journalpostResponse.dokumenter.isNullOrEmpty()) {
-                    throw Feil(
-                        message = "Response fra journalføring av varselbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpostResponse.melding}",
-                        frontendFeilmelding = "Response fra journalføring av varselbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpostResponse.melding}",
-                        logContext = SecureLog.Context.fra(tilbakekreving),
-                    )
-                }
-
-                tilbakekreving.håndter(
-                    VarselbrevJournalføringHendelse(
-                        varselbrevId = behov.info.id,
-                        journalpostId = journalpostResponse.journalpostId,
-                        dokumentInfoId = journalpostResponse.dokumenter[0].dokumentInfoId!!,
-                    ),
-                    sideeffektContext,
-                )
-            }
-
-            is VarselbrevDistribusjonBehov -> {
-                dokdistService.brevTilUtsending(
-                    behandlingId = behov.behandlingId,
-                    journalpostId = behov.journalpostId,
-                    fagsystem = behov.ytelse.tilFagsystemDTO(),
-                    distribusjonstype = Distribusjonstype.VIKTIG,
-                    distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-                    adresse = null,
-                    logContext = logContext,
-                )
-                tilbakekreving.håndter(
-                    VarselbrevDistribueringHendelse(
-                        brevId = behov.brevId,
-                        journalpostId = behov.journalpostId,
-                        dokumentInfoId = behov.dokumentInfoId,
-                    ),
-                    sideeffektContext,
-                )
-            }
-
-            is FagsysteminfoBehov -> {
-                val logContext = SecureLog.Context.utenBehandling(behov.eksternFagsakId)
-                kafkaProducer.sendKafkaEvent(
-                    kafkamelding = FagsysteminfoBehovHendelse(
-                        eksternFagsakId = behov.eksternFagsakId,
-                        kravgrunnlagReferanse = behov.eksternBehandlingId,
-                        hendelseOpprettet = LocalDateTime.now(),
-                    ),
-                    metadata = FagsysteminfoBehovHendelse.METADATA,
-                    vedtakGjelderId = behov.vedtakGjelderId,
-                    ytelse = behov.ytelse,
-                    logContext = logContext,
-                )
-            }
-
-            is IverksettelseBehov -> {
-                val iverksattVedtak = iverksettService.iverksett(behov, logContext)
-
-                tilbakekreving.håndter(
-                    IverksettelseHendelse(
-                        iverksattVedtakId = iverksattVedtak.id,
-                        behandlingId = iverksattVedtak.behandlingId,
-                        vedtakId = iverksattVedtak.vedtakId,
-                    ),
-                    sideeffektContext,
-                )
-            }
-
-            is VedtaksbrevJournalføringBehov -> {
-                val journalpost = vedtaksbrevService.journalførVedtaksbrev(behov)
-                if (journalpost.journalpostId == null) {
-                    throw Feil(
-                        message = "journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
-                        frontendFeilmelding = "journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
-                        logContext = SecureLog.Context.fra(tilbakekreving),
-                    )
-                }
-                if (journalpost.dokumenter.isNullOrEmpty()) {
-                    throw Feil(
-                        message = "Response fra journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
-                        frontendFeilmelding = "Response fra journalføring av vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
-                        logContext = SecureLog.Context.fra(tilbakekreving),
-                    )
-                }
-
-                tilbakekreving.håndter(
-                    JournalføringHendelse(
-                        brevId = behov.brevId,
-                        behandlingId = behov.behandlingId,
-                        journalpostId = journalpost.journalpostId,
-                        fagsakId = behov.fagsakId,
-                        dokumentInfoId = journalpost.dokumenter[0].dokumentInfoId!!,
-                    ),
-                    sideeffektContext,
-                )
-            }
-
-            is VedtaksbrevDistribusjonBehov -> {
-                vedtaksbrevService.distribuereVedtaksbrev(behov, logContext)
-                tilbakekreving.håndter(
-                    DistribusjonHendelse(
-                        behandlingId = behov.behandlingId,
-                        brevId = behov.brevId,
-                        fagsakId = behov.fagsakId,
-                        journalpostId = behov.journalpostId,
-                        dokumentInfoId = behov.dokumentInfoId,
-                    ),
-                    sideeffektContext,
-                )
-            }
         }
     }
 

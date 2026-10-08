@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
@@ -53,6 +54,7 @@ object KravgrunnlagMapper {
                     beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                 )
             },
+            korrigering = false,
             opprettet = klokke.nå(),
         )
         return kravgrunnlagHendelse
@@ -89,6 +91,43 @@ object KravgrunnlagMapper {
             message = "Kan ikke håndtere saker for ${kravgrunnlag.kodeFagomraade} med ny modell",
             httpStatus = HttpStatus.BAD_REQUEST,
             logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
+        )
+    }
+
+    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke): KravgrunnlagHendelse {
+        val kravgrunnlag = response.kravgrunnlag
+        return KravgrunnlagHendelse(
+            id = UUID.randomUUID(),
+            vedtakId = kravgrunnlag.vedtakId.toBigInteger(),
+            kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
+            fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
+            vedtakGjelder = mapAktør(TypeGjelderDto.valueOf(kravgrunnlag.typeGjelder), kravgrunnlag.gjelderId),
+            utbetalesTil = mapAktør(TypeGjelderDto.valueOf(kravgrunnlag.typeUtbetalesTilId), kravgrunnlag.utbetalesTilId),
+            skalBeregneRenter = kravgrunnlag.renterBeregnes,
+            ansvarligEnhet = kravgrunnlag.enhetAnsvarlig,
+            kontrollfelt = kravgrunnlag.kontrollfelt,
+            kravgrunnlagId = kravgrunnlag.kravgrunnlagId.toString(),
+            referanse = kravgrunnlag.referanse,
+            perioder = kravgrunnlag.perioder.map { periode ->
+                KravgrunnlagHendelse.Periode(
+                    id = UUID.randomUUID(),
+                    periode = periode.periodeFom til periode.periodeTom,
+                    månedligSkattebeløp = periode.belopSkattMnd,
+                    beløp = periode.posteringer.map { postering ->
+                        KravgrunnlagHendelse.Periode.Beløp(
+                            id = UUID.randomUUID(),
+                            klassekode = postering.kodeKlasse,
+                            klassetype = postering.typeKlasse,
+                            opprinneligUtbetalingsbeløp = postering.belopOpprinneligUtbetalt,
+                            nyttBeløp = postering.belopNy,
+                            tilbakekrevesBeløp = postering.belopTilbakekreves,
+                            skatteprosent = postering.skattProsent,
+                        )
+                    },
+                )
+            },
+            korrigering = true,
+            opprettet = klokke.nå(),
         )
     }
 }

@@ -81,6 +81,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
@@ -109,7 +110,7 @@ class Behandling internal constructor(
     override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
-    private val revurderingsårsak: Behandlingsårsakstype?,
+    private val revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -147,7 +148,7 @@ class Behandling internal constructor(
     override fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, context: SideeffektContext) {
-        if (oppdatertKravgrunnlag.entry == kravgrunnlag.entry) {
+        if (oppdatertKravgrunnlag.entry.kanBrukesUtenNyVurdering(kravgrunnlag.entry)) {
             kravgrunnlag = oppdatertKravgrunnlag
             nyttKravgrunnlag = null
         } else if (steg().none { it.erPåbegynt() }) {
@@ -394,7 +395,7 @@ class Behandling internal constructor(
                 )
             },
             kanHenleggeBehandling = false,
-            kanRevurderingOpprettes = true,
+            kanRevurderingOpprettes = tilstand.kanRevurderes,
             harVerge = false,
             kanEndres = tilstand.kanEndresAvSaksbehandler && kanEndres(lesContext.behandler, kanBeslutte, lesContext.klokke),
             kanSetteTilbakeTilFakta = true,
@@ -416,7 +417,10 @@ class Behandling internal constructor(
             fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
             eksternFagsakId = "TODO",
-            behandlingsårsakstype = revurderingsårsak,
+            behandlingsårsakstype = when (revurderingsårsak) {
+                TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK -> Behandlingsårsakstype.REVURDERING_ANNEN_ÅRSAK
+                null -> null
+            },
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
@@ -602,7 +606,7 @@ class Behandling internal constructor(
         kravgrunnlag.entry.valider(sporingsinformasjon())
         if (nyttKravgrunnlag != null) {
             nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
-            if (!toggles[Toggle.EndretKravgrunnlagVisning]) {
+            if (!toggles[Toggle.EndretKravgrunnlagVisning] && !nyttKravgrunnlag!!.entry.korrigering) {
                 throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagMedEndretBeløp, sporingsinformasjon())
             }
         }
@@ -941,6 +945,7 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             klokke: Klokke,
+            revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
         ): Behandling {
             val opprettet = klokke.nå()
             return Behandling(
@@ -949,7 +954,7 @@ class Behandling internal constructor(
                 opprettet = opprettet,
                 sistEndret = opprettet,
                 enhet = enhet,
-                revurderingsårsak = null,
+                revurderingsårsak = revurderingsårsak,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,

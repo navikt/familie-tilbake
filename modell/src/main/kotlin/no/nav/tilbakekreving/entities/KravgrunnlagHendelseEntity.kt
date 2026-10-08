@@ -22,6 +22,7 @@ data class KravgrunnlagHendelseEntity(
     val referanse: String,
     val perioder: List<KravgrunnlagPeriodeEntity>,
     override val opprettet: LocalDateTime,
+    val korrigering: Boolean,
 ) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
@@ -38,6 +39,7 @@ data class KravgrunnlagHendelseEntity(
             referanse = referanse,
             perioder = perioder.sortedBy { it.periode }.map { it.fraEntity() },
             opprettet = opprettet,
+            korrigering = korrigering,
         )
     }
 }

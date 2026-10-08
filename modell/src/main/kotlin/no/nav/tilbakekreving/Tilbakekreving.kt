@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
+import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -29,6 +30,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
@@ -48,6 +50,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -181,6 +184,9 @@ class Tilbakekreving internal constructor(
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            if (kravgrunnlagHendelse.korrigering && kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse) {
+                throw ModellFeil.BehandlingIkkeEndretException("Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag", sporingsinformasjon())
+            }
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
             oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext)
         }
@@ -210,10 +216,22 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
+    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: TilbakekrevingRevurderingsarsakDto, sideeffektContext: SideeffektContext) {
+        tilstand.opprettRevurdering(
+            tilbakekreving = this,
+            sideeffektContext = sideeffektContext,
+            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
+            behandlendeEnhet = hentBehandling(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
+            revurderingsårsak = revurderingsårsak,
+        )
+    }
+
     fun opprettBehandling(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         sideeffektContext: SideeffektContext,
         behandlendeEnhet: String?,
+        behandlingstype: Behandlingstype,
+        revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
     ) {
         if (bruker == null) {
             opprettBruker(kravgrunnlagHistorikk.nåværende().entry.vedtakGjelder)
@@ -221,18 +239,22 @@ class Tilbakekreving internal constructor(
         val behandlingId = UUID.randomUUID()
         val behandling = Behandling.nyBehandling(
             id = behandlingId,
-            type = Behandlingstype.TILBAKEKREVING,
+            type = behandlingstype,
             enhet = behandlendeEnhet?.let(Enhet::forKode),
             ansvarligSaksbehandler = sideeffektContext.behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
             kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
             brevHistorikk = brevHistorikk,
             klokke = sideeffektContext.klokke,
+            revurderingsårsak = revurderingsårsak,
         )
         behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(behandling)
             sideeffektContext.logg(
-                behandlingsloggstype = Behandlingsloggstype.BEHANDLING_OPPRETTET,
+                behandlingsloggstype = when (behandlingstype) {
+                    Behandlingstype.TILBAKEKREVING -> Behandlingsloggstype.BEHANDLING_OPPRETTET
+                    Behandlingstype.REVURDERING_TILBAKEKREVING -> Behandlingsloggstype.REVURDERING_OPPRETTET
+                },
                 behandlingId = behandlingId,
             )
         }
@@ -248,7 +270,7 @@ class Tilbakekreving internal constructor(
         val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
         val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse, sideeffektContext.klokke)
-        opprettBehandling(eksternBehandling, sideeffektContext, null)
+        opprettBehandling(eksternBehandling, sideeffektContext, null, Behandlingstype.TILBAKEKREVING, null)
         opprettBruker(kravgrunnlag.vedtakGjelder)
         byttTilstand(AvventerBrukerinfo, sideeffektContext)
     }
@@ -332,6 +354,13 @@ class Tilbakekreving internal constructor(
                 eksternBehandlingId = kravgrunnlag.referanse,
                 vedtakGjelderId = kravgrunnlag.vedtakGjelder.ident,
             ),
+        )
+    }
+
+    // Denne burde følge vanlig behov løype i stedet for å håndteres direkte når det skal skje automatisk.
+    fun trengerKorrigertKravgrunnlag(): KorrigertKravgrunnlagBehov {
+        return KorrigertKravgrunnlagBehov(
+            kravgrunnlagHistorikk.nåværende().entry.kravgrunnlagId,
         )
     }
 

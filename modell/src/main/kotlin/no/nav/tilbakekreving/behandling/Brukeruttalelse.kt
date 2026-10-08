@@ -14,14 +14,11 @@ class Brukeruttalelse(
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
 ) {
-    internal fun nyTilFrontendDto(etterForhåndsvarsel: Boolean): UttalelseDto {
+    internal fun nyTilFrontendDto(): UttalelseDto {
         when (uttalelseVurdering) {
             UttalelseVurdering.JA -> {
                 return UttalelseDto(
-                    harBrukerUttaltSeg = when (etterForhåndsvarsel) {
-                        true -> UttalelseVurderingDto.JA_ETTER_FORHÅNDSVARSEL
-                        else -> UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG
-                    },
+                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
                     uttalelsesdato = uttalelseInfo!!.uttalelsesdato,
                     hvorBrukerenUttalteSeg = uttalelseInfo.hvorBrukerenUttalteSeg,
                     beskrivelse = uttalelseInfo.uttalelseBeskrivelse,
@@ -29,10 +26,7 @@ class Brukeruttalelse(
             }
             UttalelseVurdering.NEI -> {
                 return UttalelseDto(
-                    harBrukerUttaltSeg = when (etterForhåndsvarsel) {
-                        true -> UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
-                        else -> UttalelseVurderingDto.UNNTAK_INGEN_UTTALELSE
-                    },
+                    harBrukerUttaltSeg = UttalelseVurderingDto.NEI,
                     beskrivelse = kommentar,
                 )
             }

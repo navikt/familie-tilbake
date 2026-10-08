@@ -33,9 +33,9 @@ class KravgrunnlagHendelse(
     private val ansvarligEnhet: String,
     private val kontrollfelt: String,
     internal val kravgrunnlagId: String,
-    // Brukes som eksternId i henting av fagsysteminfo, hva betyr det egentlig?
     val referanse: String,
     private val perioder: List<Periode>,
+    val korrigering: Boolean,
     override val opprettet: LocalDateTime,
 ) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
     fun valider(sporing: Sporing) {
@@ -83,28 +83,55 @@ class KravgrunnlagHendelse(
             referanse = referanse,
             perioder = perioder.map { it.tilEntity(id) },
             opprettet = opprettet,
+            korrigering = korrigering,
         )
     }
 
     fun hentKravgrunnlaginfoForIverksettelse(): KravgrunnlagInfo =
         KravgrunnlagInfo(kontrollfelt = kontrollfelt)
 
-    override fun equals(other: Any?): Boolean {
+    fun kanBrukesUtenNyVurdering(other: KravgrunnlagHendelse): Boolean {
         return this === other ||
-            other is KravgrunnlagHendelse &&
             this.harNokOverlapp(other) &&
             this.skalBeregneRenter == other.skalBeregneRenter &&
             this.perioder == other.perioder
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return this === other ||
+            other is KravgrunnlagHendelse &&
+            kanBrukesUtenNyVurdering(other) &&
+            vedtakId == other.vedtakId &&
+            kravstatuskode == other.kravstatuskode &&
+            fagsystemVedtaksdato == other.fagsystemVedtaksdato &&
+            vedtakGjelder == other.vedtakGjelder &&
+            utbetalesTil == other.utbetalesTil &&
+            ansvarligEnhet == other.ansvarligEnhet &&
+            kontrollfelt == other.kontrollfelt &&
+            kravgrunnlagId == other.kravgrunnlagId &&
+            referanse == other.referanse
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            vedtakId,
+            kravstatuskode,
+            fagsystemVedtaksdato,
+            vedtakGjelder,
+            utbetalesTil,
+            skalBeregneRenter,
+            ansvarligEnhet,
+            kontrollfelt,
+            kravgrunnlagId,
+            referanse,
+            perioder,
+        )
     }
 
     fun sammenlign(
         nyttKravgrunnlag: KravgrunnlagHendelse,
         sporing: Sporing,
     ): KravgrunnlagSammenligning = KravgrunnlagSammenligning(this, nyttKravgrunnlag, sporing)
-
-    override fun hashCode(): Int {
-        return Objects.hash(vedtakId, vedtakGjelder, utbetalesTil, skalBeregneRenter, kravgrunnlagId, perioder)
-    }
 
     fun harNokOverlapp(other: KravgrunnlagHendelse): Boolean = this.vedtakId == other.vedtakId ||
         this.vedtakGjelder == other.vedtakGjelder ||
@@ -146,7 +173,7 @@ class KravgrunnlagHendelse(
                 other is Periode &&
                 periode == other.periode &&
                 månedligSkattebeløp == other.månedligSkattebeløp &&
-                beløp.zip(other.beløp).all { (a, b) -> a == b }
+                beløp == other.beløp
         }
 
         override fun hashCode(): Int {

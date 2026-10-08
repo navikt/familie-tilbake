@@ -6,7 +6,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDateTime
 import java.util.UUID
@@ -18,7 +18,7 @@ data class BehandlingEntity(
     override val opprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
     val enhet: EnhetEntity?,
-    val revurderingsårsak: Behandlingsårsakstype?,
+    val revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
     var ansvarligSaksbehandler: BehandlerEntity,
     val eksternFagsakBehandlingRef: HistorikkReferanseEntity<UUID>,
     val kravgrunnlagRef: HistorikkReferanseEntity<UUID>,

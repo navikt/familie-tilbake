@@ -161,7 +161,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 behandlingId = tilbakekreving.nåværendeBehandlingId(),
                 uttalelseDto = UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL,
+                    harBrukerUttaltSeg = UttalelseVurderingDto.NEI,
                     beskrivelse = "Gadd ikke si noe",
                 ),
             )
@@ -169,7 +169,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(tilbakekreving.nåværendeBehandlingId()).body.shouldNotBeNull()
             forhåndsvarselResponse.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
             forhåndsvarselResponse.brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI_ETTER_FORHÅNDSVARSEL
+                harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI
                 beskrivelse shouldBe "Gadd ikke si noe"
             }
         }
@@ -211,7 +211,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 tilbakekreving.nåværendeBehandlingId(),
                 UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG,
+                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
                     uttalelsesdato = LocalDate.of(2021, 1, 1),
                     hvorBrukerenUttalteSeg = "Reddit",
                     beskrivelse = "Typisk reddit kommentar",
@@ -224,7 +224,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                     it.beskrivelse shouldBe "Allerede uttalet seg"
                 }
                 brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe UttalelseVurderingDto.UNNTAK_ALLEREDE_UTTALT_SEG
+                    harBrukerUttaltSeg shouldBe UttalelseVurderingDto.JA
                 }
             }
         }

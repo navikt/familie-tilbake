@@ -142,7 +142,7 @@ class ForhåndsvarselTest {
         )
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke).should {
-            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
             it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
         }
     }
@@ -260,6 +260,62 @@ class ForhåndsvarselTest {
             it.tilbakeført shouldBe null
         }
         forhåndsvarsel.erFullstendig(KlokkeStub(1.februar(2021))) shouldBe true
+    }
+
+    @Test
+    fun `nytt kravgrunnlag etter sendt forhåndsvarsel`() {
+        val forhåndsvarsel = forhåndsvarselSendtMedUttalelse("Brukeren har uttalt seg")
+
+        forhåndsvarsel.nyttKravgrunnlagMottatt(øktBeløp())
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = null,
+                begrunnelse = null,
+            )
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag etter sendt forhåndsvarsel - unntak`() {
+        val forhåndsvarsel = forhåndsvarselSendtMedUttalelse("Brukeren har uttalt seg")
+        forhåndsvarsel.nyttKravgrunnlagMottatt(øktBeløp())
+
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+            beskrivelse = "Brukeren har uttalt seg",
+        )
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = null,
+                begrunnelse = null,
+            )
+        }
+    }
+
+    @Test
+    fun `nytt kravgrunnlag etter unntak - nytt unntak`() {
+        val forhåndsvarsel = Forhåndsvarsel.opprett()
+
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
+            beskrivelse = "",
+        )
+        forhåndsvarsel.nyttKravgrunnlagMottatt(øktBeløp())
+        forhåndsvarsel.lagreForhåndsvarselUnntak(
+            begrunnelseForUnntak = BegrunnelseForUnntak.IKKE_PRAKTISK_MULIG,
+            beskrivelse = "",
+        )
+
+        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
+            it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
+            it.uttalelsesfrist shouldBe null
+        }
     }
 
     private fun forhåndsvarselSendtMedUttalelse(uttalelse: String): Forhåndsvarsel = Forhåndsvarsel.opprett().also {

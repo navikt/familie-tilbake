@@ -24,12 +24,12 @@ data class ForhåndsvarselEntity(
                     Forhåndsvarsel.VarselSendt(uttalelsesfrist.fraEntity(), brukeruttalelse, tilbakeført)
                 }
 
-                ForhåndsvarselVurderingstype.MÅ_VURDERES_PÅ_NYTT -> Forhåndsvarsel.MåVurderesPåNytt(brukeruttalelse)
+                ForhåndsvarselVurderingstype.MÅ_VURDERES_PÅ_NYTT -> Forhåndsvarsel.MåVurderesPåNytt(brukeruttalelse, uttalelsesfristEntity?.fraEntity())
                 ForhåndsvarselVurderingstype.UNNTAK -> {
                     val unntak = requireNotNull(forhåndsvarselUnntakEntity) {
                         "Forhåndsvarselunntak må finnes når vurderingstypen er unntak"
                     }
-                    unntak.fraEntity(brukeruttalelse, tilbakeført ?: unntak.tilbakeført)
+                    unntak.fraEntity(brukeruttalelse, tilbakeført ?: unntak.tilbakeført, uttalelsesfristEntity)
                 }
             },
         )
