@@ -178,7 +178,11 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
-            it.uttalelsesfrist shouldBe null
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = null,
+                begrunnelse = null,
+            )
             it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
             it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
         }
@@ -255,7 +259,11 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
-            it.uttalelsesfrist shouldBe null
+            it.uttalelsesfrist shouldBe UttalelsesfristDto(
+                opprinneligFrist = 31.januar(2021),
+                nyFrist = null,
+                begrunnelse = null,
+            )
             it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
             it.tilbakeført shouldBe null
         }
