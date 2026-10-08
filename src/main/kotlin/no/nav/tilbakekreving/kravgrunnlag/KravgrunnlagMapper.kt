@@ -46,14 +46,16 @@ object KravgrunnlagMapper {
                     message = "Mottok kravgrunnlag uten referanse hvor vi ikke har mapping fra kravgrunnlagId",
                     logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
                 ),
-            perioder = kravgrunnlag.tilbakekrevingsPeriode.map { periode ->
-                KravgrunnlagHendelse.Periode(
-                    id = UUID.randomUUID(),
-                    periode = periode.periode.fom til periode.periode.tom,
-                    månedligSkattebeløp = periode.belopSkattMnd,
-                    beløp = periode.tilbakekrevingsBelop.tilBeløp(),
-                )
-            },
+            perioder = kravgrunnlag.tilbakekrevingsPeriode
+                .sortedBy { it.periode.fom }
+                .map { periode ->
+                    KravgrunnlagHendelse.Periode(
+                        id = UUID.randomUUID(),
+                        periode = periode.periode.fom til periode.periode.tom,
+                        månedligSkattebeløp = periode.belopSkattMnd,
+                        beløp = periode.tilbakekrevingsBelop.tilBeløp(),
+                    )
+                },
             korrigering = false,
             opprettet = klokke.nå(),
         )
@@ -108,24 +110,26 @@ object KravgrunnlagMapper {
             kontrollfelt = kravgrunnlag.kontrollfelt,
             kravgrunnlagId = kravgrunnlag.kravgrunnlagId.toString(),
             referanse = kravgrunnlag.referanse,
-            perioder = kravgrunnlag.perioder.map { periode ->
-                KravgrunnlagHendelse.Periode(
-                    id = UUID.randomUUID(),
-                    periode = periode.periodeFom til periode.periodeTom,
-                    månedligSkattebeløp = periode.belopSkattMnd,
-                    beløp = periode.posteringer.map { postering ->
-                        KravgrunnlagHendelse.Periode.Beløp(
-                            id = UUID.randomUUID(),
-                            klassekode = postering.kodeKlasse,
-                            klassetype = postering.typeKlasse,
-                            opprinneligUtbetalingsbeløp = postering.belopOpprinneligUtbetalt,
-                            nyttBeløp = postering.belopNy,
-                            tilbakekrevesBeløp = postering.belopTilbakekreves,
-                            skatteprosent = postering.skattProsent,
-                        )
-                    },
-                )
-            },
+            perioder = kravgrunnlag.perioder
+                .sortedBy { it.periodeFom }
+                .map { periode ->
+                    KravgrunnlagHendelse.Periode(
+                        id = UUID.randomUUID(),
+                        periode = periode.periodeFom til periode.periodeTom,
+                        månedligSkattebeløp = periode.belopSkattMnd,
+                        beløp = periode.posteringer.map { postering ->
+                            KravgrunnlagHendelse.Periode.Beløp(
+                                id = UUID.randomUUID(),
+                                klassekode = postering.kodeKlasse,
+                                klassetype = postering.typeKlasse,
+                                opprinneligUtbetalingsbeløp = postering.belopOpprinneligUtbetalt,
+                                nyttBeløp = postering.belopNy,
+                                tilbakekrevesBeløp = postering.belopTilbakekreves,
+                                skatteprosent = postering.skattProsent,
+                            )
+                        },
+                    )
+                },
             korrigering = true,
             opprettet = klokke.nå(),
         )

@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -23,6 +24,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -412,6 +414,95 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         }
         lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single { it.periode.fraEntity() == periode }.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
         lagretBehandling.vilkårsvurderingstegEntity.vurderinger.single { it.periode.fraEntity() == nyPeriode }.tilbakeført shouldBe ÅrsakTilTilbakeføring.NyttKravgrunnlag
+    }
+
+    @Test
+    fun `nytt kravgrunnlag med ny periode før eksisterende ikke vurdert periode`() {
+        val eksisterendePeriode = 1.februar(2021) til 28.februar(2021)
+        val nyPeriode = 1.januar(2021) til 31.januar(2021)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                perioder = listOf(KravgrunnlagGenerator.standardPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner)),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendKravgrunnlagOgAvventLesing(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.234567",
+                kravStatusKode = "ENDR",
+                perioder = listOf(
+                    KravgrunnlagGenerator.standardPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner),
+                    KravgrunnlagGenerator.standardPeriode(nyPeriode, feilutbetaltBeløp = 3000.kroner),
+                ),
+            ),
+        )
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body.shouldNotBeNull {
+                vilkårsperioder.forSingle {
+                    it.vilkårsvurdering.fom shouldBe nyPeriode.fom
+                    it.vilkårsvurdering.tom shouldBe eksisterendePeriode.tom
+                    it.vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+                }
+            }
+            behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body.shouldNotBeNull {
+                map { it.periode.fom til it.periode.tom } shouldBe listOf(nyPeriode, eksisterendePeriode)
+            }
+        }
+    }
+
+    @Test
+    fun `korrigert kravgrunnlag med ny periode før eksisterende ikke vurdert periode`() {
+        val eksisterendePeriode = 1.februar(2021) til 28.februar(2021)
+        val nyPeriode = 1.januar(2021) til 31.januar(2021)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                perioder = listOf(KravgrunnlagGenerator.standardPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner)),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        oppdragRestClient.mockHentKravgrunnlag(
+            kravgrunnlagId = kravgrunnlagId.toBigInteger(),
+            perioder = listOf(
+                OppdragClientRestMock.kravgrunnlagPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner),
+                OppdragClientRestMock.kravgrunnlagPeriode(nyPeriode, feilutbetaltBeløp = 3000.kroner),
+            ),
+        )
+        ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
+            forvaltningController.korrigerKravgrunnlag(behandlingId)
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingVilkaarsvurdering(behandlingId).body.shouldNotBeNull {
+                vilkårsperioder.forSingle {
+                    it.vilkårsvurdering.fom shouldBe nyPeriode.fom
+                    it.vilkårsvurdering.tom shouldBe eksisterendePeriode.tom
+                    it.vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+                }
+            }
+            behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body.shouldNotBeNull {
+                map { it.periode.fom til it.periode.tom } shouldBe listOf(nyPeriode, eksisterendePeriode)
+            }
+        }
     }
 
     private fun opprettBehandling(periode: Datoperiode): KravgrunnlagContext {
