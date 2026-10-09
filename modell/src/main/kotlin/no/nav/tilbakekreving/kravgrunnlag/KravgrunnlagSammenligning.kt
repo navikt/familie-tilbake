@@ -36,7 +36,7 @@ class KravgrunnlagSammenligning(
                 else -> acc.dropLast(1) + sammenslått
             }
         }
-        .map(Forskjell::tilDto)
+        .flatMap(Forskjell::tilSammendrag)
         .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
         .toList()
 
@@ -117,6 +117,8 @@ class KravgrunnlagSammenligning(
 
         fun tilDto(): KravgrunnlagForskjellDto
 
+        fun tilSammendrag(): List<KravgrunnlagForskjellDto> = listOf(tilDto())
+
         data class EndretPeriode(
             override val periode: Datoperiode,
             val nyPeriode: Datoperiode?,
@@ -181,6 +183,8 @@ class KravgrunnlagSammenligning(
                 gammeltBeløp = gammeltBeløp.toInt(),
                 nyttBeløp = nyttBeløp.toInt(),
             )
+
+            override fun tilSammendrag(): List<KravgrunnlagForskjellDto> = listOfNotNull(tilDto(), etterfølgende?.tilDto())
 
             override fun slåSammenForVisning(other: Forskjell): Forskjell = when (other) {
                 is NyPeriode -> EndretPeriode(
