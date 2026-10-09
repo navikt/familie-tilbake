@@ -162,7 +162,6 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 behandlingId = tilbakekreving.nåværendeBehandlingId(),
                 uttalelseVurderingDto = IngenUttalelseDto(
-                    beskrivelse = "Gadd ikke si noe",
                     kommentar = "Gadd ikke si noe",
                 ),
             )

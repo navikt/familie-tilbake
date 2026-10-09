@@ -35,7 +35,6 @@ class Brukeruttalelse(
             UttalelseVurdering.NEI -> {
                 return IngenUttalelseDto(
                     kommentar = kommentar!!,
-                    beskrivelse = kommentar,
                 )
             }
         }
