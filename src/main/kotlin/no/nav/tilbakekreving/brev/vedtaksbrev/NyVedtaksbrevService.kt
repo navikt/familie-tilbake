@@ -79,7 +79,12 @@ class NyVedtaksbrevService(
                 underavsnitt = listOf(RentekstElementDto("")),
                 hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
             ),
-            avsnitt = vedtaksbrevInfo.perioder.map(BrevFormatterer::lagAvsnitt),
+            avsnitt = vedtaksbrevInfo.perioder.map {
+                BrevFormatterer.lagAvsnitt(
+                    periode = it,
+                    flerePerioder = vedtaksbrevInfo.perioder.size > 1,
+                )
+            },
             sistOppdatert = OffsetDateTime.now(),
             brevGjelder = vedtaksbrevInfo.brukerdata,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
@@ -191,14 +196,14 @@ class NyVedtaksbrevService(
     ): AvsnittDto {
         val lagretAvsnitt = avsnitt
             .firstOrNull { lagretAvsnitt -> lagretAvsnitt.id == periode.id }
-            ?: return BrevFormatterer.lagAvsnitt(periode)
+            ?: return BrevFormatterer.lagAvsnitt(periode, flerePerioder = avsnitt.size > 1)
         return AvsnittDto(
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
             id = lagretAvsnitt.id,
             meldingerTilSaksbehandler = periode.meldingerTilSaksbehandler
                 .forPeriodeavsnitt()
                 .map { it.melding },
-            tittel = BrevFormatterer.lagPeriodeavsnittTittel(periode.periode),
+            tittel = BrevFormatterer.lagPeriodeavsnittTittel(periode.periode, flerePerioder = avsnitt.size > 1),
             underavsnitt = lagretAvsnitt.underavsnitt.rentekst() + periode.påkrevdeVurderinger.map { påkrevd ->
                 lagretAvsnitt.påkrevdBegrunnelser
                     .singleOrNull { it.type == påkrevd.name }

@@ -28,9 +28,9 @@ object BrevFormatterer {
     val norskNumeriskDatoFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.of("nb"))
     val beløpFormat = NumberFormat.getIntegerInstance(Locale.of("nb"))
 
-    fun lagAvsnitt(periode: BegrunnetPeriode): AvsnittDto {
+    fun lagAvsnitt(periode: BegrunnetPeriode, flerePerioder: Boolean): AvsnittDto {
         return AvsnittDto(
-            tittel = lagPeriodeavsnittTittel(periode.periode),
+            tittel = lagPeriodeavsnittTittel(periode.periode, flerePerioder),
             id = periode.id,
             forklaring = Forklaringstekster.PERIODE_AVSNITT,
             meldingerTilSaksbehandler = periode.meldingerTilSaksbehandler.forPeriodeavsnitt()
@@ -41,7 +41,14 @@ object BrevFormatterer {
         )
     }
 
-    fun lagPeriodeavsnittTittel(periode: Datoperiode): String = "Dette er grunnen til at du har fått for mye utbetalt"
+    fun lagPeriodeavsnittTittel(
+        periode: Datoperiode,
+        flerePerioder: Boolean,
+    ): String =
+        when {
+            flerePerioder -> "Dette er grunnen til at du har fått for mye utbetalt i perioden ${norskNumeriskDatoFormatter.format(periode.fom)}–${norskNumeriskDatoFormatter.format(periode.tom)}"
+            else -> "Dette er grunnen til at du har fått for mye utbetalt"
+        }
 
     fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = when {
         info.skalTilbakekreves -> "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
