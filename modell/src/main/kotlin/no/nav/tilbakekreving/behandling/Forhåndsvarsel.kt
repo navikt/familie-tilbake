@@ -45,6 +45,10 @@ class Forhåndsvarsel internal constructor(
 
     fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity = vurdering.tilEntity(behandlingRef)
 
+    fun klon(): Forhåndsvarsel {
+        return Forhåndsvarsel(vurdering.klon())
+    }
+
     fun nullstillUnntakOgUttalelse() {
         vurdering = vurdering.nullstillUnntakOgUttalelse()
     }
@@ -142,6 +146,8 @@ class Forhåndsvarsel internal constructor(
         fun erForhåndsvarselSendt(): Boolean?
 
         fun tilEntity(behandlingRef: UUID): ForhåndsvarselEntity
+
+        fun klon(): Vurdering
     }
 
     internal data object IkkeVurdert : Vurdering {
@@ -190,6 +196,8 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = null,
             tilbakeført = null,
         )
+
+        override fun klon(): Vurdering = this
     }
 
     internal class VarselSendt(
@@ -272,12 +280,23 @@ class Forhåndsvarsel internal constructor(
             uttalelsesfristEntity = uttalelsesfrist.tilEntity(behandlingRef),
             tilbakeført = null,
         )
+
+        override fun klon(): Vurdering = VarselSendt(
+            uttalelsesfrist = uttalelsesfrist.klon(),
+            brukeruttalelse = brukeruttalelse?.klon(),
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+        )
     }
 
     internal class MåVurderesPåNytt(
         private val brukeruttalelse: Brukeruttalelse?,
         private var uttalelsesfrist: Uttalelsesfrist?,
     ) : Vurdering {
+        override fun klon(): Vurdering = MåVurderesPåNytt(
+            brukeruttalelse = brukeruttalelse?.klon(),
+            uttalelsesfrist = uttalelsesfrist?.klon(),
+        )
+
         override val behandlingsstatus = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
 
         override fun erFullstendig(klokke: Klokke) = false
@@ -415,6 +434,13 @@ class Forhåndsvarsel internal constructor(
             forhåndsvarselUnntakEntity = forhåndsvarselUnntak.tilEntity(behandlingRef, tilbakeført),
             uttalelsesfristEntity = uttalelsesfrist?.tilEntity(behandlingRef),
             tilbakeført = tilbakeført,
+        )
+
+        override fun klon(): Vurdering = Unntak(
+            forhåndsvarselUnntak = forhåndsvarselUnntak.klon(),
+            brukeruttalelse = brukeruttalelse?.klon(),
+            uttalelsesfrist = uttalelsesfrist?.klon(),
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
         )
     }
 }

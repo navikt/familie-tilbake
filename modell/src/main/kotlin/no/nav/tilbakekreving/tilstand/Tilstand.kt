@@ -116,7 +116,7 @@ internal sealed interface Tilstand {
         sideeffektContext: SideeffektContext,
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         behandlendeEnhet: String?,
-        revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
+        revurderingsårsak: TilbakekrevingRevurderingsarsakDto,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }

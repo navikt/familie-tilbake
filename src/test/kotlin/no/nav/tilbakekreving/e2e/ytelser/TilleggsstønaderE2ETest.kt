@@ -207,7 +207,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
             }
         }
-
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOpprettRevurdering(
                 behandlingId = behandlingId,

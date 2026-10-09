@@ -12,6 +12,15 @@ class Uttalelsesfrist(
     private var nyFrist: LocalDate?,
     private var begrunnelse: String?,
 ) {
+    fun klon(): Uttalelsesfrist {
+        return Uttalelsesfrist(
+            id = id,
+            opprinneligFrist = opprinneligFrist,
+            nyFrist = nyFrist,
+            begrunnelse = begrunnelse,
+        )
+    }
+
     fun hentFrist(): LocalDate {
         return nyFrist ?: opprinneligFrist
     }

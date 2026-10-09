@@ -11,6 +11,14 @@ class ForhåndsvarselUnntak(
     private val begrunnelseForUnntak: BegrunnelseForUnntak,
     private val beskrivelse: String,
 ) {
+    fun klon(): ForhåndsvarselUnntak {
+        return ForhåndsvarselUnntak(
+            id = id,
+            begrunnelseForUnntak = begrunnelseForUnntak,
+            beskrivelse = beskrivelse,
+        )
+    }
+
     fun skalBeholdeBrukeruttalelse(): Boolean = begrunnelseForUnntak == BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG
 
     internal fun nyTilFrontendDto(): ForhaandsvarselUnntakDto {

@@ -207,6 +207,16 @@ class Faktasteg(
         return vurdering.tilEntity(id, behandlingRef, tilbakeført, rettsgebyrÅrFraSaksbehandler)
     }
 
+    fun klon(): Faktasteg {
+        return Faktasteg(
+            id = UUID.randomUUID(),
+            brevHistorikk = brevHistorikk,
+            vurdering = vurdering.klon(),
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            _rettsgebyrÅrFraSaksbehandler = _rettsgebyrÅrFraSaksbehandler,
+        )
+    }
+
     companion object {
         fun opprett(
             eksternFagsakRevurdering: EksternFagsakRevurdering,
@@ -326,12 +336,23 @@ class Faktasteg(
             perioder = perioder.filterNot { it.id == fjernet.id }
         }
 
+        fun klon(): Vurdering {
+            return Vurdering(
+                perioder = perioder.map { it.klon() },
+                årsakTilFeilutbetaling = årsakTilFeilutbetaling,
+                uttalelse = uttalelse,
+                oppdaget = oppdaget.klon(),
+            )
+        }
+
         sealed interface Oppdaget {
             fun tilFrontendDto(): OppdagetDto
 
             fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity?
 
             fun erFullstendig(): Boolean
+
+            fun klon(): Oppdaget
 
             class Vurdering(
                 val id: UUID,
@@ -364,6 +385,15 @@ class Faktasteg(
                         faktavurderingRef = faktavurderingRef,
                     )
                 }
+
+                override fun klon(): Oppdaget {
+                    return Vurdering(
+                        id = UUID.randomUUID(),
+                        dato = this.dato,
+                        beskrivelse = this.beskrivelse,
+                        av = this.av,
+                    )
+                }
             }
 
             data object IkkeVurdert : Oppdaget {
@@ -379,6 +409,10 @@ class Faktasteg(
 
                 override fun tilEntity(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity? {
                     return null
+                }
+
+                override fun klon(): Oppdaget {
+                    return this
                 }
             }
 
@@ -455,6 +489,16 @@ class Faktasteg(
         }
 
         override fun compareTo(other: FaktaPeriode): Int = periode.compareTo(other.periode)
+
+        fun klon(): FaktaPeriode {
+            return FaktaPeriode(
+                id = this.id,
+                periode = this.periode,
+                rettsligGrunnlag = this.rettsligGrunnlag,
+                rettsligGrunnlagUnderkategori = this.rettsligGrunnlagUnderkategori,
+                endringIKravgrunnlag = this.endringIKravgrunnlag,
+            )
+        }
 
         companion object {
             fun Collection<FaktaPeriode>.fullstendigPeriode() = minOf { it.periode.fom } til maxOf { it.periode.tom }
