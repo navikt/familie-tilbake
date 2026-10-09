@@ -1,7 +1,9 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Rettsgebyr
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -256,19 +258,33 @@ class Vilkårsvurderingsteg(
 
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
+        features: FeatureToggles,
     ): List<BegrunnetPeriode> {
-        val samletPeriode = vurderinger.minOf { it.periode().fom } til vurderinger.maxOf { it.periode().tom }
         LoggerFactory.getLogger("vilkårsvurdering").info("Tilgjengelige periode id-er {}", vurderinger.map { "${it.id}=${it.periode().fom}-${it.periode().tom}" })
-        return vurderinger.firstOrNull()?.let {
-            listOf(
+        if (!features[Toggle.FlerePerioderIVedtaksbrev]) {
+            val samletPeriode = vurderinger.minOf { it.periode().fom } til vurderinger.maxOf { it.periode().tom }
+            return vurderinger.firstOrNull()?.let {
+                listOf(
+                    BegrunnetPeriode(
+                        id = it.id,
+                        periode = samletPeriode,
+                        påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+                        meldingerTilSaksbehandler = meldingerTilSaksbehandler,
+                    ),
+                )
+            } ?: emptyList()
+        }
+        return vurderinger
+            .groupBy { it.vurdering.underliggendeVurdering() }
+            .map { (vurdering, perioder) ->
+                val sammenslåttPeriode = perioder.map { it.periode() }.overordnet()
                 BegrunnetPeriode(
-                    id = it.id,
-                    periode = samletPeriode,
-                    påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
+                    id = perioder.single { it.vurdering == vurdering }.id,
+                    periode = sammenslåttPeriode,
+                    påkrevdeVurderinger = vurdering.påkrevdeVurderinger(),
                     meldingerTilSaksbehandler = meldingerTilSaksbehandler,
-                ),
-            )
-        } ?: emptyList()
+                )
+            }
     }
 
     class Vilkårsvurderingsperiode(

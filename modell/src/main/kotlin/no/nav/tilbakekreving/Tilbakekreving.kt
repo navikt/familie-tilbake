@@ -390,11 +390,12 @@ class Tilbakekreving internal constructor(
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon = behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
 
-    fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
+    fun hentVedtaksbrevInfo(behandlingId: UUID, features: FeatureToggles): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
             bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
             ytelse = eksternFagsak.ytelse,
             tilbakekrevingId = id,
+            features = features,
         )
     }
 

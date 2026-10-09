@@ -307,7 +307,7 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
+                vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId, sideeffektContext.features),
                 vedtaksresultat = hentVedtaksresultat(sideeffektContext.klokke)!!,
                 beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
             ),
@@ -499,8 +499,8 @@ class Behandling internal constructor(
         revurderingsvedtaksdato = eksternFagsakRevurdering.entry.vedtaksdato,
     )
 
-    internal fun vurdertePerioderForBrev(): List<BegrunnetPeriode> {
-        return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet())
+    internal fun vurdertePerioderForBrev(features: FeatureToggles): List<BegrunnetPeriode> {
+        return vilkårsvurderingsteg.vurdertePerioderForBrev(steg().flatMap { it.meldingerTilSaksbehandler() }.toSet(), features)
     }
 
     internal fun brevSignatur(): Signatur = Signatur(
@@ -855,13 +855,13 @@ class Behandling internal constructor(
         forhåndsvarsel.lagreOpprinneligFrist(fristForUttalelse)
     }
 
-    internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
+    internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String, features: FeatureToggles): VedtaksbrevInfo {
         val resultat = lagBeregning().oppsummer()
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
-            perioder = vurdertePerioderForBrev(),
+            perioder = vurdertePerioderForBrev(features),
             bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
             skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
             tilbakekrevingId = tilbakekrevingId,

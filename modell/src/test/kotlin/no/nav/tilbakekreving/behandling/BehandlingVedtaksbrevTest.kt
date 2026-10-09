@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -44,7 +45,7 @@ class BehandlingVedtaksbrevTest {
 
         vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvBruker)
 
-        val vurderingForPeriode = vilkårsvurdering.vurdertePerioderForBrev(emptySet()).single()
+        val vurderingForPeriode = vilkårsvurdering.vurdertePerioderForBrev(emptySet(), defaultFeatures()).single()
         vurderingForPeriode.periode shouldBe (1.januar(2021) til 31.januar(2021))
         vurderingForPeriode.meldingerTilSaksbehandler shouldBe emptySet()
         vurderingForPeriode.påkrevdeVurderinger shouldBe påkrevdeBegrunnelser
