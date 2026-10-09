@@ -127,7 +127,7 @@ class ForhåndsvarselService(
                     lagreUttalelse(
                         uttalelseVurdering = UttalelseVurdering.NEI,
                         uttalelseInfo = null,
-                        kommentar = requireNotNull(uttalelseDto.beskrivelse) {
+                        kommentar = requireNotNull(uttalelseDto.kommentar) {
                             "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
                         },
                     )
