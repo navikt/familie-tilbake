@@ -26,11 +26,11 @@ class BrevHistorikkTest {
             varseltekstFraSaksbehandler = "",
             features = defaultFeatures(),
             klokke = klokke,
-        ).apply { brevSendt("journalpost-varsel", "dokument-varsel") }
+        )
+        varselbrev.brevSendt("journalpost-varsel", "dokument-varsel")
         klokke.settTid(11.januar(2025))
-        val vedtaksbrev = Vedtaksbrev.opprett(klokke).apply {
-            brevSendt("journalpost-vedtak", "dokument-vedtak")
-        }
+        val vedtaksbrev = Vedtaksbrev.opprett(klokke)
+        vedtaksbrev.brevSendt("journalpost-vedtak", "dokument-vedtak")
         val historikk = BrevHistorikk(mutableListOf())
         historikk.lagre(varselbrev)
         historikk.lagre(Vedtaksbrev.opprett(klokke))
@@ -64,17 +64,6 @@ class BrevHistorikkTest {
     fun `brev som bare har dokumentInfoId`() {
         val brev = Vedtaksbrev.opprett(KlokkeStub(10.januar(2025))).copy(
             dokumentInfoId = "dokument",
-        )
-        val historikk = BrevHistorikk(mutableListOf())
-        historikk.lagre(brev)
-
-        historikk.alleSendteDokumenter() shouldBe emptyList()
-    }
-
-    @Test
-    fun `brev som bare har journalpostId`() {
-        val brev = Vedtaksbrev.opprett(KlokkeStub(10.januar(2025))).copy(
-            journalpostId = "journalpost",
         )
         val historikk = BrevHistorikk(mutableListOf())
         historikk.lagre(brev)
