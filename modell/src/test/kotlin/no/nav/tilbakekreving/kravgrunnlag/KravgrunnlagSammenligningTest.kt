@@ -20,6 +20,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UendretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.april
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mai
@@ -314,6 +315,68 @@ class KravgrunnlagSammenligningTest {
                 gammeltBeløp = 1000,
                 nyttBeløp = 1500,
             ),
+            UendretPeriodeDto(periode2.fom, periode2.tom, 1000),
+        )
+    }
+
+    @Test
+    fun `sammendrag - endret periode etterfulgt av flere uendrede, ny og fjernet periode`() {
+        val endretPeriode = 1.januar(2021) til 31.januar(2021)
+        val uendretPeriode1 = 1.februar(2021) til 28.februar(2021)
+        val uendretPeriode2 = 1.mars(2021) til 31.mars(2021)
+        val nyPeriode = 1.april(2021) til 30.april(2021)
+        val fjernetPeriode = 1.mai(2021) til 31.mai(2021)
+
+        val sammendrag = sammenlign(
+            nåværende = listOf(
+                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode1, ytelsesbeløp = beløp(2000.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode2, ytelsesbeløp = beløp(3000.kroner)),
+                kravgrunnlagPeriode(periode = fjernetPeriode, ytelsesbeløp = beløp(4000.kroner)),
+            ),
+            oppdatert = listOf(
+                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1500.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode1, ytelsesbeløp = beløp(2000.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode2, ytelsesbeløp = beløp(3000.kroner)),
+                kravgrunnlagPeriode(periode = nyPeriode, ytelsesbeløp = beløp(5000.kroner)),
+            ),
+        )
+
+        sammendrag shouldBe listOf(
+            EndretPeriodeDto(
+                fom = endretPeriode.fom,
+                tom = endretPeriode.tom,
+                gammelPeriode = PeriodeDto(endretPeriode.fom, endretPeriode.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 1500,
+            ),
+            UendretPeriodeDto(uendretPeriode1.fom, uendretPeriode2.tom, 5000),
+            NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 5000),
+            FjernetPeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom, 4000),
+        )
+    }
+
+    @Test
+    fun `sammendrag - utlignede beløpsendringer med etterfølgende uendret periode`() {
+        val endretPeriode1 = 1.januar(2021) til 31.januar(2021)
+        val endretPeriode2 = 1.februar(2021) til 28.februar(2021)
+        val uendretPeriode = 1.mars(2021) til 31.mars(2021)
+
+        val sammendrag = sammenlign(
+            nåværende = listOf(
+                kravgrunnlagPeriode(periode = endretPeriode1, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = endretPeriode2, ytelsesbeløp = beløp(2000.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode, ytelsesbeløp = beløp(3000.kroner)),
+            ),
+            oppdatert = listOf(
+                kravgrunnlagPeriode(periode = endretPeriode1, ytelsesbeløp = beløp(2000.kroner)),
+                kravgrunnlagPeriode(periode = endretPeriode2, ytelsesbeløp = beløp(1000.kroner)),
+                kravgrunnlagPeriode(periode = uendretPeriode, ytelsesbeløp = beløp(3000.kroner)),
+            ),
+        )
+
+        sammendrag shouldBe listOf(
+            UendretPeriodeDto(uendretPeriode.fom, uendretPeriode.tom, 3000),
         )
     }
 
