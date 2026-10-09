@@ -24,4 +24,6 @@ interface BrevsporingRepository :
     ): Boolean
 
     fun existsByBehandlingId(behandlingId: UUID): Boolean
+
+    fun findAllByBehandlingId(behandlingId: UUID): List<Brevsporing>
 }

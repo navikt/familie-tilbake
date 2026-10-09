@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import java.util.UUID
 
 class BrevHistorikk(
@@ -41,6 +42,15 @@ class BrevHistorikk(
     fun sisteVedtaksbrev(): Vedtaksbrev? {
         return historikk.filterIsInstance<Vedtaksbrev>().lastOrNull()
     }
+
+    fun alleSendteDokumenter(): List<DokumentInfoDto> =
+        historikk.mapNotNull { brev ->
+            if (brev.journalpostId == null || brev.dokumentInfoId == null) {
+                null
+            } else {
+                brev.tilFrontendDto()
+            }
+        }
 
     fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, BrevEntity, Brev> {
         return HistorikkEntity(historikk.map { it.tilEntity(tilbakekrevingId) })
