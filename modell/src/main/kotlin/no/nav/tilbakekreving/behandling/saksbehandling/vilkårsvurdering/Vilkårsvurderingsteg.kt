@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Rettsgebyr
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
@@ -13,6 +14,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
+import no.nav.tilbakekreving.bigquery.RettsligGrunnlagMapper
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
@@ -164,6 +166,16 @@ class Vilkårsvurderingsteg(
 
     override fun perioder(): Set<VilkårsvurdertPeriodeAdapter> {
         return vurderinger.toSet()
+    }
+
+    internal fun bigqueryPerioder(): List<BigQueryVilkårsvurderingsperiodeDto> = vurderinger.mapNotNull { periode ->
+        RettsligGrunnlagMapper.fraVurdering(periode.vurdering.underliggendeVurdering().vurderingstype())?.let { rettsligGrunnlag ->
+            BigQueryVilkårsvurderingsperiodeDto(
+                periodeId = periode.id,
+                periode = periode.periode(),
+                rettsligGrunnlag = rettsligGrunnlag,
+            )
+        }
     }
 
     fun tilFrontendDto(
