@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -36,15 +35,9 @@ object Avsluttet : Tilstand {
         sideeffektContext: SideeffektContext,
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         behandlendeEnhet: String?,
-        revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
+        revurderingsårsak: TilbakekrevingRevurderingsarsakDto,
     ) {
-        tilbakekreving.opprettBehandling(
-            sideeffektContext = sideeffektContext,
-            eksternFagsakRevurdering = eksternFagsakRevurdering,
-            behandlendeEnhet = behandlendeEnhet,
-            behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING,
-            revurderingsårsak = revurderingsårsak,
-        )
+        tilbakekreving.klonBehandling(revurderingsårsak, sideeffektContext)
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
 }

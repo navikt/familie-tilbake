@@ -935,6 +935,31 @@ class Behandling internal constructor(
         )
     }
 
+    fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsarsakDto, klokke: Klokke): Behandling {
+        val opprettet = klokke.nå()
+
+        val klonetBehandling = Behandling(
+            id = UUID.randomUUID(),
+            type = Behandlingstype.REVURDERING_TILBAKEKREVING,
+            opprettet = opprettet,
+            sistEndret = opprettet,
+            enhet = enhet,
+            revurderingsårsak = revurderingsårsak,
+            ansvarligSaksbehandler = ansvarligSaksbehandler,
+            eksternFagsakRevurdering = eksternFagsakRevurdering,
+            kravgrunnlag = kravgrunnlag,
+            nyttKravgrunnlag = null,
+            foreldelsesteg = foreldelsesteg.klon(),
+            faktasteg = faktasteg.klon(),
+            vilkårsvurderingsteg = vilkårsvurderingsteg.klon(),
+            foreslåVedtakSteg = foreslåVedtakSteg.klon(),
+            fatteVedtakSteg = fatteVedtakSteg.klon(),
+            forhåndsvarsel = forhåndsvarsel.klon(),
+            forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
+        )
+        return klonetBehandling
+    }
+
     companion object {
         internal fun nyBehandling(
             id: UUID,

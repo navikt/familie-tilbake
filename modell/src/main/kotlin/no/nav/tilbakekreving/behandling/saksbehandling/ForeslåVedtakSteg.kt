@@ -15,6 +15,14 @@ class ForeslåVedtakSteg(
 ) : Saksbehandlingsteg {
     override val type = Behandlingssteg.FORESLÅ_VEDTAK
 
+    fun klon(): ForeslåVedtakSteg {
+        return ForeslåVedtakSteg(
+            id = UUID.randomUUID(),
+            vurdert = vurdert,
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+        )
+    }
+
     override fun erFullstendig(klokke: Klokke): Boolean = vurdert
 
     override fun erPåbegynt(): Boolean = vurdert
