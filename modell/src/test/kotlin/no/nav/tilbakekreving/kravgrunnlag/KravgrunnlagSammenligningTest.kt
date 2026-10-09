@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UendretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -99,14 +100,16 @@ class KravgrunnlagSammenligningTest {
     }
 
     @Test
-    fun `sammendrag - ingen endringer gir tomt resultat`() {
+    fun `sammendrag - ingen endringer`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val sammendrag = sammenlign(
             nåværende = listOf(kravgrunnlagPeriode(periode = periode)),
             oppdatert = listOf(kravgrunnlagPeriode(periode = periode)),
         )
 
-        sammendrag.shouldBeEmpty()
+        sammendrag shouldBe listOf(
+            UendretPeriodeDto(periode.fom, periode.tom, 2000),
+        )
     }
 
     @Test
@@ -121,7 +124,10 @@ class KravgrunnlagSammenligningTest {
             ),
         )
 
-        sammendrag shouldBe listOf(NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 2000))
+        sammendrag shouldBe listOf(
+            UendretPeriodeDto(periode.fom, periode.tom, 2000),
+            NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 2000),
+        )
     }
 
     @Test
@@ -330,6 +336,7 @@ class KravgrunnlagSammenligningTest {
 
         sammendrag shouldBe listOf(
             NyPeriodeDto(nyPeriode1.fom, nyPeriode1.tom, 1000),
+            UendretPeriodeDto(eksisterendePeriode.fom, eksisterendePeriode.tom, 1000),
             NyPeriodeDto(nyPeriode2.fom, nyPeriode2.tom, 1000),
         )
     }
@@ -389,6 +396,7 @@ class KravgrunnlagSammenligningTest {
         )
 
         sammendrag shouldBe listOf(
+            UendretPeriodeDto(eksisterendePeriode.fom, eksisterendePeriode.tom, 1000),
             NyPeriodeDto(
                 fom = 1.mars(2021),
                 tom = 31.mai(2021),
@@ -512,6 +520,7 @@ class KravgrunnlagSammenligningTest {
         )
 
         sammendrag shouldBe listOf(
+            UendretPeriodeDto(periode1.fom, periode1.tom, 1000),
             FjernetPeriodeDto(periode2.fom, periode2.tom, 1000),
         )
     }
@@ -533,6 +542,7 @@ class KravgrunnlagSammenligningTest {
 
         sammendrag shouldBe listOf(
             FjernetPeriodeDto(periode1.fom, periode1.tom, 1000),
+            UendretPeriodeDto(periode2.fom, periode2.tom, 1000),
         )
     }
 
@@ -554,6 +564,7 @@ class KravgrunnlagSammenligningTest {
         )
 
         sammendrag shouldBe listOf(
+            UendretPeriodeDto(periode1.fom, periode1.tom, 1000),
             FjernetPeriodeDto(periode2.fom, periode3.tom, 2000),
         )
     }
@@ -577,6 +588,7 @@ class KravgrunnlagSammenligningTest {
 
         sammendrag shouldBe listOf(
             FjernetPeriodeDto(periode1.fom, periode1.tom, 1000),
+            UendretPeriodeDto(periode2.fom, periode2.tom, 1000),
             FjernetPeriodeDto(periode3.fom, periode3.tom, 1000),
         )
     }

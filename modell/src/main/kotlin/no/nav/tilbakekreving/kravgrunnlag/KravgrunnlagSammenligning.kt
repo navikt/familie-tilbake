@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.KravgrunnlagForskjellDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UendretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
@@ -35,7 +36,7 @@ class KravgrunnlagSammenligning(
                 else -> acc.dropLast(1) + sammenslått
             }
         }
-        .mapNotNull(Forskjell::tilDto)
+        .map(Forskjell::tilDto)
         .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
         .toList()
 
@@ -114,7 +115,7 @@ class KravgrunnlagSammenligning(
             foreldelsesvurderingPeriodeRef: UUID?,
         ): ForskjellEntity
 
-        fun tilDto(): KravgrunnlagForskjellDto?
+        fun tilDto(): KravgrunnlagForskjellDto
 
         data class EndretPeriode(
             override val periode: Datoperiode,
@@ -295,7 +296,11 @@ class KravgrunnlagSammenligning(
                 else -> null
             }
 
-            override fun tilDto(): KravgrunnlagForskjellDto? = null
+            override fun tilDto(): KravgrunnlagForskjellDto = UendretPeriodeDto(
+                fom = periode.fom,
+                tom = periode.tom,
+                beløp = gammeltBeløp.toInt(),
+            )
         }
     }
 
