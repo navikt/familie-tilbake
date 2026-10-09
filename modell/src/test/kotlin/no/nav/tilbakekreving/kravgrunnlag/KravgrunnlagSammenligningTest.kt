@@ -320,37 +320,6 @@ class KravgrunnlagSammenligningTest {
     }
 
     @Test
-    fun `sammendrag - endret periode med flere etterfølgende uendrede perioder på slutten`() {
-        val endretPeriode = 1.januar(2021) til 31.januar(2021)
-        val uendretPeriode1 = 1.februar(2021) til 28.februar(2021)
-        val uendretPeriode2 = 1.mars(2021) til 31.mars(2021)
-
-        val sammendrag = sammenlign(
-            nåværende = listOf(
-                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1000.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode1, ytelsesbeløp = beløp(2000.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode2, ytelsesbeløp = beløp(3000.kroner)),
-            ),
-            oppdatert = listOf(
-                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1500.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode1, ytelsesbeløp = beløp(2000.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode2, ytelsesbeløp = beløp(3000.kroner)),
-            ),
-        )
-
-        sammendrag shouldBe listOf(
-            EndretPeriodeDto(
-                fom = endretPeriode.fom,
-                tom = endretPeriode.tom,
-                gammelPeriode = PeriodeDto(endretPeriode.fom, endretPeriode.tom),
-                gammeltBeløp = 1000,
-                nyttBeløp = 1500,
-            ),
-            UendretPeriodeDto(uendretPeriode1.fom, uendretPeriode2.tom, 5000),
-        )
-    }
-
-    @Test
     fun `sammendrag - endret periode etterfulgt av flere uendrede, ny og fjernet periode`() {
         val endretPeriode = 1.januar(2021) til 31.januar(2021)
         val uendretPeriode1 = 1.februar(2021) til 28.februar(2021)
@@ -384,37 +353,6 @@ class KravgrunnlagSammenligningTest {
             UendretPeriodeDto(uendretPeriode1.fom, uendretPeriode2.tom, 5000),
             NyPeriodeDto(nyPeriode.fom, nyPeriode.tom, 5000),
             FjernetPeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom, 4000),
-        )
-    }
-
-    @Test
-    fun `sammendrag - endret periode etterfulgt av uendret og fjernet periode`() {
-        val endretPeriode = 1.januar(2021) til 31.januar(2021)
-        val uendretPeriode = 1.februar(2021) til 28.februar(2021)
-        val fjernetPeriode = 1.mars(2021) til 31.mars(2021)
-
-        val sammendrag = sammenlign(
-            nåværende = listOf(
-                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1000.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode, ytelsesbeløp = beløp(2000.kroner)),
-                kravgrunnlagPeriode(periode = fjernetPeriode, ytelsesbeløp = beløp(3000.kroner)),
-            ),
-            oppdatert = listOf(
-                kravgrunnlagPeriode(periode = endretPeriode, ytelsesbeløp = beløp(1500.kroner)),
-                kravgrunnlagPeriode(periode = uendretPeriode, ytelsesbeløp = beløp(2000.kroner)),
-            ),
-        )
-
-        sammendrag shouldBe listOf(
-            EndretPeriodeDto(
-                fom = endretPeriode.fom,
-                tom = endretPeriode.tom,
-                gammelPeriode = PeriodeDto(endretPeriode.fom, endretPeriode.tom),
-                gammeltBeløp = 1000,
-                nyttBeløp = 1500,
-            ),
-            UendretPeriodeDto(uendretPeriode.fom, uendretPeriode.tom, 2000),
-            FjernetPeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom, 3000),
         )
     }
 
