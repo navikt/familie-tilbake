@@ -26,7 +26,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
@@ -196,12 +196,12 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseDto: UttalelseDto): ResponseEntity<Unit> {
+    override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseVurderingDto: UttalelseVurderingDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.LagreBrukersuttalelse,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseDto, context))
+            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseVurderingDto, context))
         } ?: ResponseEntity.notFound().build()
     }
 

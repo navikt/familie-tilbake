@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TidligereBrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
@@ -52,7 +53,9 @@ class ForhåndsvarselEntityTest {
 
         gjenopprettet.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
-            it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg om forhåndsvarselet"
+            it.brukeruttalelse.shouldBeInstanceOf<TidligereBrukeruttalelseDto> { brukeruttalelse ->
+                brukeruttalelse.beskrivelse shouldBe "Brukeren har uttalt seg om forhåndsvarselet"
+            }
             it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
             it.ferdigvurdert shouldBe false
         }

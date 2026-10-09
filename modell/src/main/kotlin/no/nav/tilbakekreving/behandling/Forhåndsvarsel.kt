@@ -12,11 +12,10 @@ import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselVurderingstype
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
 import java.time.LocalDate
@@ -243,7 +242,10 @@ class Forhåndsvarsel internal constructor(
         override fun meldingerTilSaksbehandler(): Set<MeldingTilSaksbehandler> = brukeruttalelse?.meldingerTilSaksbehandler() ?: emptySet()
 
         override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag): Vurdering {
-            return MåVurderesPåNytt(brukeruttalelse, uttalelsesfrist)
+            return MåVurderesPåNytt(
+                brukeruttalelse = brukeruttalelse?.trengerNyVurdering(),
+                uttalelsesfrist = uttalelsesfrist,
+            )
         }
 
         override fun tilFrontendDto(varselbrev: Varselbrev?, klokke: Klokke): ForhaandsvarselResponseDto {
@@ -254,7 +256,7 @@ class Forhåndsvarsel internal constructor(
                     uttalelsesfrist = uttalelsesfrist.nyTilFrontendDto(),
                 ),
                 brukeruttalelse = brukeruttalelse?.nyTilFrontendDto()
-                    ?: UttalelseDto(harBrukerUttaltSeg = UttalelseVurderingDto.IKKE_VURDERT),
+                    ?: BrukeruttalelseIkkeVurdertDto,
                 ferdigvurdert = erFullstendig(klokke),
                 tilbakeført = trengerNyVurdering()?.frontendDto,
                 sendtVarselbrev = varselbrev.tilFrontendDto(),
@@ -390,7 +392,7 @@ class Forhåndsvarsel internal constructor(
         override fun nyttKravgrunnlagMottatt(sammendrag: OverordnetSammendrag): Vurdering {
             if (sammendrag.gammeltBeløp < sammendrag.nyttBeløp) {
                 return MåVurderesPåNytt(
-                    brukeruttalelse = brukeruttalelse,
+                    brukeruttalelse = brukeruttalelse?.trengerNyVurdering(),
                     uttalelsesfrist = uttalelsesfrist,
                 )
             }

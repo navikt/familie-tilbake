@@ -15,14 +15,15 @@ import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.brev.Dokumentmalstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngenUttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -147,7 +148,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                 it.uttalelsesfrist.nyFrist shouldBe null
                 it.uttalelsesfrist.begrunnelse shouldBe null
             }
-            forhåndsvarselResponse.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
+            forhåndsvarselResponse.brukeruttalelse!!.shouldBeInstanceOf<BrukeruttalelseIkkeVurdertDto>()
         }
     }
 
@@ -160,17 +161,16 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
 
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 behandlingId = tilbakekreving.nåværendeBehandlingId(),
-                uttalelseDto = UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.NEI,
+                uttalelseVurderingDto = IngenUttalelseDto(
                     beskrivelse = "Gadd ikke si noe",
+                    kommentar = "Gadd ikke si noe",
                 ),
             )
 
             val forhåndsvarselResponse = behandlingApiController.behandlingForhandsvarsel(tilbakekreving.nåværendeBehandlingId()).body.shouldNotBeNull()
             forhåndsvarselResponse.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-            forhåndsvarselResponse.brukeruttalelse.shouldNotBeNull {
-                harBrukerUttaltSeg shouldBe UttalelseVurderingDto.NEI
-                beskrivelse shouldBe "Gadd ikke si noe"
+            forhåndsvarselResponse.brukeruttalelse.shouldBeInstanceOf<IngenUttalelseDto> {
+                it.kommentar shouldBe "Gadd ikke si noe"
             }
         }
     }
@@ -210,8 +210,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
 
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 tilbakekreving.nåværendeBehandlingId(),
-                UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
+                BrukeruttalelseDto(
                     uttalelsesdato = LocalDate.of(2021, 1, 1),
                     hvorBrukerenUttalteSeg = "Reddit",
                     beskrivelse = "Typisk reddit kommentar",
@@ -223,9 +222,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                     it.begrunnelseForUnntak shouldBe VarslingsunntakDto.ÅPENBART_UNØDVENDIG
                     it.beskrivelse shouldBe "Allerede uttalet seg"
                 }
-                brukeruttalelse.shouldNotBeNull {
-                    harBrukerUttaltSeg shouldBe UttalelseVurderingDto.JA
-                }
+                brukeruttalelse.shouldBeInstanceOf<BrukeruttalelseDto>()
             }
         }
     }
@@ -243,8 +240,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
                 it.uttalelsesfrist.opprinneligFrist shouldBe LocalDate.now().plus(Period.ofWeeks(3))
                 it.uttalelsesfrist.nyFrist shouldBe LocalDate.of(2027, 1, 1)
             }
-            response.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
-            response.brukeruttalelse!!.harBrukerUttaltSeg shouldBe UttalelseVurderingDto.IKKE_VURDERT
+            response.brukeruttalelse.shouldBeInstanceOf<BrukeruttalelseIkkeVurdertDto>()
         }
     }
 

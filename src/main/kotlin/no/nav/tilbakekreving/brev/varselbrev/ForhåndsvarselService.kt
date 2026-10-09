@@ -26,17 +26,19 @@ import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.standardtekster.forhåndsvarsel.ForhåndsvarselTekster
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.vedtaksbrev.BrevFormatterer
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittVarselbrevDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngenUttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SectionDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
@@ -99,20 +101,12 @@ class ForhåndsvarselService(
         )
     }
 
-    fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseDto, sideeffektContext: SideeffektContext) {
-        val uttalelseVurdering = when (uttalelseDto.harBrukerUttaltSeg) {
-            UttalelseVurderingDto.JA -> UttalelseVurdering.JA
-            UttalelseVurderingDto.NEI -> UttalelseVurdering.NEI
-            UttalelseVurderingDto.IKKE_VURDERT -> throw IllegalStateException(
-                "Burde ikke være i denne tilstanden. IKKE_VURDERT er enum til frontend.",
-            )
-        }
-
-        when (uttalelseVurdering) {
-            UttalelseVurdering.JA -> {
+    fun nyLagreUttalelse(behandlingId: UUID, tilbakekreving: Tilbakekreving, uttalelseDto: UttalelseVurderingDto, sideeffektContext: SideeffektContext) {
+        when (uttalelseDto) {
+            is BrukeruttalelseDto -> {
                 tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
                     lagreUttalelse(
-                        uttalelseVurdering = uttalelseVurdering,
+                        uttalelseVurdering = UttalelseVurdering.JA,
                         uttalelseInfo = UttalelseInfo(
                             id = UUID.randomUUID(),
                             uttalelsesdato = requireNotNull(uttalelseDto.uttalelsesdato) { "Det kreves uttalelsesdato når brukeren har uttalet seg. uttalelsesdato var null" },
@@ -128,10 +122,10 @@ class ForhåndsvarselService(
                 }
             }
 
-            UttalelseVurdering.NEI -> {
+            is IngenUttalelseDto -> {
                 tilbakekreving.gjørSaksbehandling(behandlingId, sideeffektContext) {
                     lagreUttalelse(
-                        uttalelseVurdering = uttalelseVurdering,
+                        uttalelseVurdering = UttalelseVurdering.NEI,
                         uttalelseInfo = null,
                         kommentar = requireNotNull(uttalelseDto.beskrivelse) {
                             "Det kreves kommentar/beskrivelse når brukeren ikke uttalte seg. beskrivelse var null"
@@ -139,6 +133,11 @@ class ForhåndsvarselService(
                     )
                 }
             }
+
+            else -> throw ModellFeil.UgyldigOperasjonException(
+                melding = "Kan ikke lagre vurdering av type ${uttalelseDto::class.simpleName}",
+                sporing = tilbakekreving.sporingsinformasjon(),
+            )
         }
     }
 

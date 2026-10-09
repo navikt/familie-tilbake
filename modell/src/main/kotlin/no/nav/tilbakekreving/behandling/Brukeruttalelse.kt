@@ -3,7 +3,9 @@ package no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.entities.BrukeruttalelseEntity
 import no.nav.tilbakekreving.entities.UttalelseInfoEntity
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IngenUttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TidligereBrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import java.time.LocalDate
 import java.util.UUID
@@ -14,19 +16,25 @@ class Brukeruttalelse(
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
 ) {
-    internal fun nyTilFrontendDto(): UttalelseDto {
+    internal fun nyTilFrontendDto(): UttalelseVurderingDto {
         when (uttalelseVurdering) {
             UttalelseVurdering.JA -> {
-                return UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
+                return BrukeruttalelseDto(
+                    uttalelsesdato = uttalelseInfo!!.uttalelsesdato,
+                    hvorBrukerenUttalteSeg = uttalelseInfo.hvorBrukerenUttalteSeg,
+                    beskrivelse = uttalelseInfo.uttalelseBeskrivelse,
+                )
+            }
+            UttalelseVurdering.TILBAKEFØRT -> {
+                return TidligereBrukeruttalelseDto(
                     uttalelsesdato = uttalelseInfo!!.uttalelsesdato,
                     hvorBrukerenUttalteSeg = uttalelseInfo.hvorBrukerenUttalteSeg,
                     beskrivelse = uttalelseInfo.uttalelseBeskrivelse,
                 )
             }
             UttalelseVurdering.NEI -> {
-                return UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.NEI,
+                return IngenUttalelseDto(
+                    kommentar = kommentar!!,
                     beskrivelse = kommentar,
                 )
             }
@@ -50,6 +58,19 @@ class Brukeruttalelse(
     )
 
     fun meldingerTilSaksbehandler() = uttalelseVurdering.meldingerTilSaksbehandler
+
+    fun trengerNyVurdering(): Brukeruttalelse? {
+        return when (uttalelseVurdering) {
+            UttalelseVurdering.NEI -> null
+            UttalelseVurdering.JA -> Brukeruttalelse(
+                id = id,
+                kommentar = null,
+                uttalelseVurdering = UttalelseVurdering.TILBAKEFØRT,
+                uttalelseInfo = uttalelseInfo,
+            )
+            UttalelseVurdering.TILBAKEFØRT -> this
+        }
+    }
 }
 
 data class UttalelseInfo(
@@ -61,5 +82,6 @@ data class UttalelseInfo(
 
 enum class UttalelseVurdering(val meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>) {
     JA(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
+    TILBAKEFØRT(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),
     NEI(emptySet()),
 }

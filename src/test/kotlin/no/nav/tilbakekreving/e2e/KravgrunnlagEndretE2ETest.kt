@@ -20,10 +20,10 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TidligereBrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -113,8 +113,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingSendVarselbrev(context.behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
             behandlingApiController.behandlingLagreBrukersuttalelse(
                 context.behandlingId,
-                UttalelseDto(
-                    harBrukerUttaltSeg = UttalelseVurderingDto.JA,
+                BrukeruttalelseDto(
                     uttalelsesdato = 1.februar(2021),
                     hvorBrukerenUttalteSeg = "Telefon",
                     beskrivelse = "Har uttalt seg",
@@ -142,7 +141,9 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
                 tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
                 ferdigvurdert shouldBe false
                 forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
-                brukeruttalelse?.beskrivelse shouldBe "Har uttalt seg"
+                brukeruttalelse.shouldBeInstanceOf<TidligereBrukeruttalelseDto> {
+                    it.beskrivelse shouldBe "Har uttalt seg"
+                }
             }
         }
     }
