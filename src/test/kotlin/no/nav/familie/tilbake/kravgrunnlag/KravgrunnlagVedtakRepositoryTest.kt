@@ -8,11 +8,9 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 import java.util.UUID
 
-@Transactional
 class KravgrunnlagVedtakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository

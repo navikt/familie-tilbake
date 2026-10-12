@@ -84,12 +84,12 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val respons = somSaksbehandler {
+        val response = somSaksbehandler {
             vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
         }
 
-        respons.statusCode shouldBe HttpStatus.OK
-        respons.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()
+        response.statusCode shouldBe HttpStatus.OK
+        response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()
     }
 
     private fun opprettBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {
