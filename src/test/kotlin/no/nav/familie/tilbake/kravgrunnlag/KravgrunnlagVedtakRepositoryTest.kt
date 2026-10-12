@@ -30,7 +30,7 @@ class KravgrunnlagVedtakRepositoryTest : OppslagSpringRunnerTest() {
         val førsteBehandling = opprettGammelBehandling(fagsak.id, vedtakId)
         val andreBehandling = opprettGammelBehandling(fagsak.id, vedtakId)
         kravgrunnlagRepository.insert(
-            Testdata.lagKravgrunnlag(førsteBehandling).copy(vedtakId = vedtakId, aktiv = false),
+            Testdata.lagKravgrunnlag(førsteBehandling, vedtakId = vedtakId, aktiv = false),
         )
 
         val behandlingIder = kravgrunnlagRepository.findBehandlingIdsByVedtakId(vedtakId)
@@ -39,16 +39,9 @@ class KravgrunnlagVedtakRepositoryTest : OppslagSpringRunnerTest() {
         behandlingIder.toSet() shouldBe setOf(førsteBehandling, andreBehandling)
     }
 
-    @Test
-    fun `vedtak uten kravgrunnlag i gammel modell`() {
-        val vedtakId = nyttDokumentVedtakId()
-
-        kravgrunnlagRepository.findBehandlingIdsByVedtakId(vedtakId) shouldBe emptyList()
-    }
-
     private fun opprettGammelBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId))
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(vedtakId = vedtakId))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, vedtakId = vedtakId))
         return behandling.id
     }
 

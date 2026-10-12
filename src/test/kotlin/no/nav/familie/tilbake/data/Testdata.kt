@@ -285,9 +285,11 @@ object Testdata {
         fagområdekode: Fagområdekode = Fagområdekode.EFOG,
         fagsystemId: String = KravgrunnlagGenerator.nextPaddedId(6),
         kravgrunnlagId: BigInteger = BigInteger(KravgrunnlagGenerator.nextPaddedId(6)),
+        vedtakId: BigInteger = BigInteger.ZERO,
+        aktiv: Boolean = true,
     ) = Kravgrunnlag431(
         behandlingId = behandlingId,
-        vedtakId = BigInteger.ZERO,
+        vedtakId = vedtakId,
         kravstatuskode = Kravstatuskode.NYTT,
         fagområdekode = fagområdekode,
         fagsystemId = fagsystemId,
@@ -307,7 +309,7 @@ object Testdata {
         referanse = "2026-04-20-11.22.33.123456",
         eksternKravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
-        aktiv = true,
+        aktiv = aktiv,
         sperret = false,
     )
 
@@ -403,12 +405,17 @@ object Testdata {
             fritekststype = Friteksttype.FAKTA,
         )
 
-    fun lagBrevsporing(behandlingId: UUID) =
+    fun lagBrevsporing(
+        behandlingId: UUID,
+        journalpostId: String = "testverdi",
+        dokumentId: String = "testverdi",
+        brevtype: Brevtype = Brevtype.VARSEL,
+    ) =
         Brevsporing(
             behandlingId = behandlingId,
-            journalpostId = "testverdi",
-            dokumentId = "testverdi",
-            brevtype = Brevtype.VARSEL,
+            journalpostId = journalpostId,
+            dokumentId = dokumentId,
+            brevtype = brevtype,
         )
 
     fun lagVedtaksbrevbehandling(behandling: Behandling) =

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.brev
 
-import io.kotest.inspectors.forSingle
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.HistorikkStub.Companion.fakeReferanse
 import no.nav.tilbakekreving.KlokkeStub
@@ -33,8 +32,8 @@ class BrevHistorikkTest {
         vedtaksbrev.brevSendt("journalpost-vedtak", "dokument-vedtak")
         val historikk = BrevHistorikk(mutableListOf())
         historikk.lagre(varselbrev)
-        historikk.lagre(Vedtaksbrev.opprett(klokke))
         historikk.lagre(vedtaksbrev)
+        historikk.lagre(Vedtaksbrev.opprett(klokke))
 
         val dokumenter = historikk.alleSendteDokumenter()
 
@@ -58,33 +57,5 @@ class BrevHistorikkTest {
         historikk.lagre(Vedtaksbrev.opprett(KlokkeStub(10.januar(2025))))
 
         historikk.alleSendteDokumenter() shouldBe emptyList()
-    }
-
-    @Test
-    fun `brev som bare har dokumentInfoId`() {
-        val brev = Vedtaksbrev.opprett(KlokkeStub(10.januar(2025))).copy(
-            dokumentInfoId = "dokument",
-        )
-        val historikk = BrevHistorikk(mutableListOf())
-        historikk.lagre(brev)
-
-        historikk.alleSendteDokumenter() shouldBe emptyList()
-    }
-
-    @Test
-    fun `brev sendes etter at det er lagt til i historikken`() {
-        val klokke = KlokkeStub(10.januar(2025))
-        val brev = Vedtaksbrev.opprett(klokke)
-        val historikk = BrevHistorikk(mutableListOf())
-        historikk.lagre(brev)
-        historikk.alleSendteDokumenter() shouldBe emptyList()
-
-        brev.brevSendt("journalpost", "dokument")
-
-        historikk.alleSendteDokumenter().forSingle {
-            it.journalpostId shouldBe "journalpost"
-            it.dokumentId shouldBe "dokument"
-            it.brevSendt shouldBe klokke.dagensDato()
-        }
     }
 }

@@ -45,12 +45,12 @@ class VedtakDokumentE2ETest : TilbakekrevingE2EBase() {
 
         tilbakekrevVedtak(behandlingId, listOf(periode))
 
-        val respons = ContextServiceHelpers.somSaksbehandler {
+        val response = ContextServiceHelpers.somSaksbehandler {
             vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId)
         }
 
-        respons.statusCode shouldBe HttpStatus.OK
+        response.statusCode shouldBe HttpStatus.OK
         // DokarkivClientStub returnerer disse referansene ved normal journalføring.
-        respons.body.shouldNotBeNull() shouldContainExactly listOf(VedtaksdokumentDto("-1", "-2"))
+        response.body.shouldNotBeNull() shouldContainExactly listOf(VedtaksdokumentDto("-1", "-2"))
     }
 }

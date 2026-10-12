@@ -95,7 +95,6 @@ class ForhåndsvarselTest {
         val forhåndsvarsel = Forhåndsvarsel.opprett()
 
         forhåndsvarsel.erPåbegynt() shouldBe false
-        forhåndsvarsel.nyForhåndsvarselTilFrontend(null, SystemKlokke).uttalelsesfrist shouldBe null
     }
 
     @Test

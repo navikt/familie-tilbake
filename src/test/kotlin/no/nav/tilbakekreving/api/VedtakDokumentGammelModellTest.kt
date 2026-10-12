@@ -17,12 +17,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 import java.util.UUID
 
 @ActiveProfiles("ny-modell")
-@Transactional
 class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var vedtakDokumentController: VedtakDokumentController
@@ -40,7 +38,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
     @Test
-    fun `flere brev for en behandling og brev for andre behandlinger i gammel modell`() {
+    fun `flere brev for en behandling og brev for andre behandlinger`() {
         val vedtakId = nyttVedtakId()
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         val førsteBehandling = opprettBehandling(fagsak.id, vedtakId)
@@ -48,20 +46,21 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
         val annenFagsak = fagsakRepository.insert(Testdata.fagsak())
         val behandlingPåAnnenFagsak = opprettBehandling(annenFagsak.id, nyttVedtakId())
         brevsporingRepository.insert(
-            Testdata.lagBrevsporing(førsteBehandling).copy(journalpostId = "journalpost-1", dokumentId = "dokument-1"),
+            Testdata.lagBrevsporing(førsteBehandling, journalpostId = "journalpost-1", dokumentId = "dokument-1"),
         )
         brevsporingRepository.insert(
-            Testdata.lagBrevsporing(førsteBehandling).copy(
+            Testdata.lagBrevsporing(
+                førsteBehandling,
                 journalpostId = "journalpost-2",
                 dokumentId = "dokument-2",
                 brevtype = Brevtype.HENLEGGELSE,
             ),
         )
         brevsporingRepository.insert(
-            Testdata.lagBrevsporing(annenBehandling).copy(journalpostId = "journalpost-3", dokumentId = "dokument-3"),
+            Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-3", dokumentId = "dokument-3"),
         )
         brevsporingRepository.insert(
-            Testdata.lagBrevsporing(behandlingPåAnnenFagsak).copy(journalpostId = "journalpost-4", dokumentId = "dokument-4"),
+            Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
         val respons = somSaksbehandler {
@@ -76,13 +75,13 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `behandling uten brevsporing og brev for en annen behandling i gammel modell`() {
+    fun `behandling uten brevsporing og brev for en annen behandling`() {
         val vedtakId = nyttVedtakId()
         val fagsak = fagsakRepository.insert(Testdata.fagsak())
         opprettBehandling(fagsak.id, vedtakId)
         val annenBehandling = opprettBehandling(fagsak.id, nyttVedtakId())
         brevsporingRepository.insert(
-            Testdata.lagBrevsporing(annenBehandling).copy(journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
+            Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
         val respons = somSaksbehandler {
@@ -95,7 +94,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     private fun opprettBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {
         val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId))
-        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(vedtakId = vedtakId))
+        kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id, vedtakId = vedtakId))
         return behandling.id
     }
 
