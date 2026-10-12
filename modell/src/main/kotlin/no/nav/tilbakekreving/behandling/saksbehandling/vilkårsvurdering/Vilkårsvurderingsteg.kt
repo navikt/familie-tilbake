@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.Reduksjon
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurderingAdapter
 import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
-import no.nav.tilbakekreving.bigquery.RettsligGrunnlagMapper
+import no.nav.tilbakekreving.bigquery.AktsomhetsgradMapper
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
@@ -169,11 +169,11 @@ class Vilkårsvurderingsteg(
     }
 
     internal fun bigqueryPerioder(): List<BigQueryVilkårsvurderingsperiodeDto> = vurderinger.mapNotNull { periode ->
-        RettsligGrunnlagMapper.fraVurdering(periode.vurdering.underliggendeVurdering().vurderingstype())?.let { rettsligGrunnlag ->
+        AktsomhetsgradMapper.fraVurdering(periode.vurdering.underliggendeVurdering().vurderingstype())?.let { aktsomhetsgrad ->
             BigQueryVilkårsvurderingsperiodeDto(
                 periodeId = periode.id,
                 periode = periode.periode(),
-                rettsligGrunnlag = rettsligGrunnlag,
+                aktsomhetsgrad = aktsomhetsgrad,
             )
         }
     }

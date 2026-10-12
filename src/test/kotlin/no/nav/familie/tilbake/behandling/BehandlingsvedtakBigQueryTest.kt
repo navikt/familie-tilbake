@@ -18,7 +18,7 @@ import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.micrometer.TellerService
 import no.nav.familie.tilbake.micrometer.domain.MeldingstellingRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
-import no.nav.tilbakekreving.api.v1.dto.RettsligGrunnlag
+import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.bigquery.BigQueryOppsamler
 import no.nav.tilbakekreving.bigquery.grensesnittStub
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
@@ -115,7 +115,7 @@ class BehandlingsvedtakBigQueryTest {
             data.perioder.forSingle {
                 it.periodeId shouldBe periode.id
                 it.periode shouldBe periode.periode.toDatoperiode()
-                it.rettsligGrunnlag shouldBe RettsligGrunnlag.GOD_TRO
+                it.aktsomhetsgrad shouldBe Aktsomhetsgrad.GOD_TRO
             }
         }
 

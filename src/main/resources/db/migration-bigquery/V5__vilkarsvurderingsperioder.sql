@@ -6,5 +6,5 @@ CREATE TABLE `tilbakekreving_dataset.bq_vilkarsvurderingsperiode`
     periode_fom DATE,
     periode_tom DATE,
     ytelses_type STRING,
-    rettslig_grunnlag STRING
+    aktsomhetsgrad STRING
 );

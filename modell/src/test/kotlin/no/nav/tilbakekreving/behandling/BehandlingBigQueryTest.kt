@@ -7,9 +7,9 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.SideeffektContext
+import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
-import no.nav.tilbakekreving.api.v1.dto.RettsligGrunnlag
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
@@ -69,7 +69,7 @@ class BehandlingBigQueryTest {
             data.perioder.forSingle {
                 it.periodeId shouldBe periodeId
                 it.periode shouldBe periode
-                it.rettsligGrunnlag shouldBe RettsligGrunnlag.GOD_TRO
+                it.aktsomhetsgrad shouldBe Aktsomhetsgrad.GOD_TRO
             }
         }
 

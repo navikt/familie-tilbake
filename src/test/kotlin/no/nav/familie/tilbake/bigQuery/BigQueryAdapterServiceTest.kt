@@ -8,8 +8,8 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
+import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.RettsligGrunnlag
 import no.nav.tilbakekreving.bigquery.BigQueryOppsamler
 import no.nav.tilbakekreving.bigquery.grensesnittStub
 import no.nav.tilbakekreving.kontrakter.periode.Månedsperiode.Companion.til
@@ -58,8 +58,8 @@ class BigQueryAdapterServiceTest {
             it.behandlingId shouldBe behandling.id.toString()
             it.ytelse shouldBe fagsak.fagsystem.navn
             it.perioder shouldBe listOf(
-                BigQueryVilkårsvurderingsperiodeDto(første.id, første.periode.toDatoperiode(), RettsligGrunnlag.GOD_TRO),
-                BigQueryVilkårsvurderingsperiodeDto(andre.id, andre.periode.toDatoperiode(), RettsligGrunnlag.BURDE_FORSTÅTT),
+                BigQueryVilkårsvurderingsperiodeDto(første.id, første.periode.toDatoperiode(), Aktsomhetsgrad.GOD_TRO),
+                BigQueryVilkårsvurderingsperiodeDto(andre.id, andre.periode.toDatoperiode(), Aktsomhetsgrad.BURDE_FORSTÅTT),
             )
         }
         oppsamler.behandlinger.shouldBeEmpty()

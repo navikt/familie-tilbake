@@ -12,10 +12,10 @@ data class BigQueryVilkårsvurderingDataDto(
 data class BigQueryVilkårsvurderingsperiodeDto(
     val periodeId: UUID,
     val periode: Datoperiode,
-    val rettsligGrunnlag: RettsligGrunnlag,
+    val aktsomhetsgrad: Aktsomhetsgrad,
 )
 
-enum class RettsligGrunnlag {
+enum class Aktsomhetsgrad {
     GOD_TRO,
     FORSTOD,
     BURDE_FORSTÅTT,

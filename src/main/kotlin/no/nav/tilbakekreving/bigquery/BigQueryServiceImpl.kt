@@ -35,8 +35,9 @@ class BigQueryServiceImpl(
         val tidspunkt = Instant.now().toString()
         val request = InsertAllRequest.newBuilder(TableId.of(prosjektId, dataset, "bq_vilkarsvurderingsperiode"))
         bigqueryData.perioder.forEach { periode ->
+            val insertId = "${bigqueryData.behandlingId}:${periode.periodeId}"
             request.addRow(
-                "${bigqueryData.behandlingId}:${periode.periodeId}",
+                insertId,
                 mapOf(
                     "tid" to tidspunkt,
                     "behandling_id" to bigqueryData.behandlingId,
@@ -44,7 +45,7 @@ class BigQueryServiceImpl(
                     "periode_fom" to periode.periode.fom.toString(),
                     "periode_tom" to periode.periode.tom.toString(),
                     "ytelses_type" to bigqueryData.ytelse,
-                    "rettslig_grunnlag" to periode.rettsligGrunnlag.name,
+                    "aktsomhetsgrad" to periode.aktsomhetsgrad.name,
                 ),
             )
         }

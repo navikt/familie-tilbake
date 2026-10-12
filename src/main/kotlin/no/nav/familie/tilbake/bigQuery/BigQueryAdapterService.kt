@@ -7,8 +7,8 @@ import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.bigquery.AktsomhetsgradMapper
 import no.nav.tilbakekreving.bigquery.BigQueryService
-import no.nav.tilbakekreving.bigquery.RettsligGrunnlagMapper
 import no.nav.tilbakekreving.kontrakter.Varsel
 import no.nav.tilbakekreving.kontrakter.periode.til
 import org.springframework.stereotype.Service
@@ -26,14 +26,14 @@ class BigQueryAdapterService(
             .flatMap { it.perioder }
             .sortedBy { it.periode.fom }
             .mapNotNull { periode ->
-                RettsligGrunnlagMapper.fraVilkårsvurderingsresultat(
+                AktsomhetsgradMapper.fraVilkårsvurderingsresultat(
                     periode.vilkårsvurderingsresultat,
                     periode.aktsomhet?.aktsomhet,
-                )?.let { rettsligGrunnlag ->
+                )?.let { aktsomhetsgrad ->
                     BigQueryVilkårsvurderingsperiodeDto(
                         periodeId = periode.id,
                         periode = periode.periode.toDatoperiode(),
-                        rettsligGrunnlag = rettsligGrunnlag,
+                        aktsomhetsgrad = aktsomhetsgrad,
                     )
                 }
             }

@@ -21,9 +21,9 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
-import no.nav.tilbakekreving.api.v1.dto.RettsligGrunnlag
 import no.nav.tilbakekreving.applicationProps
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.test.februar
@@ -65,7 +65,7 @@ class BigQueryServiceImplTest {
                         "periode_fom" to periode.periode.fom.toString(),
                         "periode_tom" to periode.periode.tom.toString(),
                         "ytelses_type" to data.ytelse,
-                        "rettslig_grunnlag" to periode.rettsligGrunnlag.name,
+                        "aktsomhetsgrad" to periode.aktsomhetsgrad.name,
                     )
                 }
             }
@@ -95,7 +95,7 @@ class BigQueryServiceImplTest {
         val data = data()
         val response = mockk<InsertAllResponse>()
         every { response.hasErrors() } returns true
-        every { response.insertErrors } returns mapOf(1L to listOf(BigQueryError("invalid", "rettslig_grunnlag", "Ugyldig verdi")))
+        every { response.insertErrors } returns mapOf(1L to listOf(BigQueryError("invalid", "aktsomhetsgrad", "Ugyldig verdi")))
         val klient = grensesnittStub<BigQuery> { metode, _ ->
             check(metode == "insertAll")
             response
@@ -165,8 +165,8 @@ class BigQueryServiceImplTest {
             behandlingId = behandling.id.toString(),
             ytelse = fagsak.fagsystem.navn,
             perioder = listOf(
-                BigQueryVilkårsvurderingsperiodeDto(Testdata.vilkårsperiode().id, 1.januar(2021) til 31.januar(2021), RettsligGrunnlag.GOD_TRO),
-                BigQueryVilkårsvurderingsperiodeDto(Testdata.vilkårsperiode().id, 1.februar(2021) til 28.februar(2021), RettsligGrunnlag.GROVT_UAKTSOM),
+                BigQueryVilkårsvurderingsperiodeDto(Testdata.vilkårsperiode().id, 1.januar(2021) til 31.januar(2021), Aktsomhetsgrad.GOD_TRO),
+                BigQueryVilkårsvurderingsperiodeDto(Testdata.vilkårsperiode().id, 1.februar(2021) til 28.februar(2021), Aktsomhetsgrad.GROVT_UAKTSOM),
             ),
         )
     }

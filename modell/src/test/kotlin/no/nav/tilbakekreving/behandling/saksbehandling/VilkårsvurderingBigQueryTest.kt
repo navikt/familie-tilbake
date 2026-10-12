@@ -6,7 +6,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
-import no.nav.tilbakekreving.api.v1.dto.RettsligGrunnlag
+import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.eksternFagsakBehandling
@@ -36,7 +36,7 @@ class VilkårsvurderingBigQueryTest {
                 eksportert.periode.fom shouldBe it.periode.fom
                 eksportert.periode.tom shouldBe it.periode.tom
             }
-            eksportert.rettsligGrunnlag shouldBe RettsligGrunnlag.GOD_TRO
+            eksportert.aktsomhetsgrad shouldBe Aktsomhetsgrad.GOD_TRO
         }
     }
 
@@ -53,7 +53,7 @@ class VilkårsvurderingBigQueryTest {
                 eksportert.periode.fom shouldBe it.periode.fom
                 eksportert.periode.tom shouldBe it.periode.tom
             }
-            eksportert.rettsligGrunnlag shouldBe RettsligGrunnlag.GOD_TRO
+            eksportert.aktsomhetsgrad shouldBe Aktsomhetsgrad.GOD_TRO
         }
         steg.bigqueryPerioder().any { it.periodeId == sisteId } shouldBe false
     }
@@ -64,7 +64,7 @@ class VilkårsvurderingBigQueryTest {
         steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro())
         steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod())
         steg.bigqueryPerioder().shouldHaveSize(3).forAll {
-            it.rettsligGrunnlag shouldBe RettsligGrunnlag.FORSTOD
+            it.aktsomhetsgrad shouldBe Aktsomhetsgrad.FORSTOD
         }
     }
 
