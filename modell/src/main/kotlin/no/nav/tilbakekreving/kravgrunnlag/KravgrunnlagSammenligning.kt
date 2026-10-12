@@ -36,7 +36,8 @@ class KravgrunnlagSammenligning(
                 else -> acc.dropLast(1) + sammenslått
             }
         }
-        .flatMap(Forskjell::tilSammendrag)
+        .flatMap(Forskjell::medEtterfølgende)
+        .map(Forskjell::tilDto)
         .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
         .toList()
 
@@ -117,7 +118,7 @@ class KravgrunnlagSammenligning(
 
         fun tilDto(): KravgrunnlagForskjellDto
 
-        fun tilSammendrag(): List<KravgrunnlagForskjellDto> = listOf(tilDto())
+        fun medEtterfølgende() = listOf(this)
 
         data class EndretPeriode(
             override val periode: Datoperiode,
@@ -131,6 +132,8 @@ class KravgrunnlagSammenligning(
             }
 
             override fun gammeltBeløp(): BigDecimal = gammeltBeløp
+
+            override fun medEtterfølgende(): List<Forskjell> = listOfNotNull(this, etterfølgende)
 
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
@@ -183,8 +186,6 @@ class KravgrunnlagSammenligning(
                 gammeltBeløp = gammeltBeløp.toInt(),
                 nyttBeløp = nyttBeløp.toInt(),
             )
-
-            override fun tilSammendrag(): List<KravgrunnlagForskjellDto> = listOfNotNull(tilDto(), etterfølgende?.tilDto())
 
             override fun slåSammenForVisning(other: Forskjell): Forskjell = when (other) {
                 is NyPeriode -> EndretPeriode(
