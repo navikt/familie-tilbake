@@ -302,10 +302,9 @@ class ForeldelsestegTest {
         val foreldelsesteg = Foreldelsesteg.opprett(revurdering, kravgrunnlag)
         val forskjell = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
             periode = periode,
-            nyPeriode = null,
+            nyPeriode = periode,
             gammeltBeløp = 250.kroner,
             nyttBeløp = 500.kroner,
-            etterfølgende = null,
         )
 
         foreldelsesteg.periodeEndret(forskjell)
@@ -326,7 +325,6 @@ class ForeldelsestegTest {
             nyPeriode = 1.januar(2021) til 20.januar(2021),
             gammeltBeløp = 1500.kroner,
             nyttBeløp = 1000.kroner,
-            etterfølgende = null,
         )
 
         foreldelsesteg.vurderForeldelse(1.januar(2021) til 31.januar(2021), Foreldelsesteg.Vurdering.IkkeForeldet("begrunnelse"))
@@ -376,28 +374,25 @@ class ForeldelsestegTest {
         foreldelsesteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
         foreldelsesteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode2,
-                nyPeriode = null,
+                nyPeriode = periode2,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
 
         val nyEndringPeriode1 = KravgrunnlagSammenligning.Forskjell.EndretPeriode(
             periode = periode1,
-            nyPeriode = null,
+            nyPeriode = periode1,
             gammeltBeløp = 3000.kroner,
             nyttBeløp = 4000.kroner,
-            etterfølgende = null,
         )
         foreldelsesteg.nyttKravgrunnlagMottatt(
             OverordnetSammendrag(

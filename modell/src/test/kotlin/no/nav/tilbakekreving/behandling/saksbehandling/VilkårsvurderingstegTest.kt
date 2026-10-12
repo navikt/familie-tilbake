@@ -562,19 +562,17 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 250.kroner,
                 nyttBeløp = 500.kroner,
-                etterfølgende = null,
             ),
         )
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode2,
-                nyPeriode = null,
+                nyPeriode = periode2,
                 gammeltBeløp = 100.kroner,
                 nyttBeløp = 300.kroner,
-                etterfølgende = null,
             ),
         )
 
@@ -584,6 +582,47 @@ class VilkårsvurderingstegTest {
             tom = periode2.tom,
             gammeltBeløp = 350,
             nyttBeløp = 800,
+        )
+    }
+
+    @Test
+    fun `endring i kravgrunnlag - økning og reduksjon i samme vilkårsperiode`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        val kravgrunnlag = kravgrunnlag(
+            perioder = listOf(
+                kravgrunnlagPeriode(periode1),
+                kravgrunnlagPeriode(periode2),
+            ),
+        )
+        val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(
+            eksternFagsakRevurdering = eksternFagsakBehandling(),
+            kravgrunnlagHendelse = kravgrunnlag,
+        )
+
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode1,
+                nyPeriode = periode1,
+                gammeltBeløp = 250.kroner,
+                nyttBeløp = 500.kroner,
+            ),
+        )
+        vilkårsvurderingsteg.periodeEndret(
+            KravgrunnlagSammenligning.Forskjell.EndretPeriode(
+                periode = periode2,
+                nyPeriode = periode2,
+                gammeltBeløp = 500.kroner,
+                nyttBeløp = 100.kroner,
+            ),
+        )
+
+        vilkårsvurderingsteg.tilFrontendDto().shouldBeSingle().endringIKravgrunnlag shouldBe EndretPeriodeDto(
+            gammelPeriode = PeriodeDto(periode1.fom, periode2.tom),
+            fom = periode1.fom,
+            tom = periode2.tom,
+            gammeltBeløp = 750,
+            nyttBeløp = 600,
         )
     }
 
@@ -603,10 +642,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode,
-                nyPeriode = null,
+                nyPeriode = periode,
                 gammeltBeløp = 100.kroner,
                 nyttBeløp = 500.kroner,
-                etterfølgende = null,
             ),
         )
 
@@ -639,7 +677,6 @@ class VilkårsvurderingstegTest {
                 nyPeriode = nyPeriode,
                 gammeltBeløp = 1500.kroner,
                 nyttBeløp = 1000.kroner,
-                etterfølgende = null,
             ),
         )
 
@@ -673,10 +710,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 250.kroner,
                 nyttBeløp = 500.kroner,
-                etterfølgende = null,
             ),
         )
         vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
@@ -1154,19 +1190,17 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode2,
-                nyPeriode = null,
+                nyPeriode = periode2,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
 
@@ -1181,10 +1215,9 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 3000.kroner,
                 nyttBeløp = 4000.kroner,
-                etterfølgende = null,
             ),
         )
 
