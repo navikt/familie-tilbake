@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
+import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -19,6 +20,7 @@ import java.math.BigInteger
 @Validated
 class VedtakDokumentController(
     private val vedtakDokumentService: VedtakDokumentService,
+    private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val tilgangskontrollService: TilgangskontrollService,
 ) : DokumenterApi {
@@ -26,7 +28,7 @@ class VedtakDokumentController(
         vedtakId: String,
     ): ResponseEntity<List<VedtaksdokumentDto>> {
         val id = BigInteger(vedtakId)
-        val tilbakekrevingId = vedtakDokumentService.hentTilbakekrevingIdNyModell(id)
+        val tilbakekrevingId = vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(id)
         if (tilbakekrevingId != null) {
             val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
                 filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),

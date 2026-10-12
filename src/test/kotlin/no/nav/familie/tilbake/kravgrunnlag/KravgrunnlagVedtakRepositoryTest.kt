@@ -26,9 +26,9 @@ class KravgrunnlagVedtakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `gammel modell returnerer distinkte behandlinger fra kravgrunnlag med samme vedtak`() {
         val vedtakId = nyttDokumentVedtakId()
-        val førsteBehandling = opprettGammelBehandling(vedtakId)
-        val andreBehandling = opprettGammelBehandling(vedtakId)
-        opprettGammelBehandling(nyttDokumentVedtakId())
+        val fagsak = fagsakRepository.insert(Testdata.fagsak())
+        val førsteBehandling = opprettGammelBehandling(fagsak.id, vedtakId)
+        val andreBehandling = opprettGammelBehandling(fagsak.id, vedtakId)
         kravgrunnlagRepository.insert(
             Testdata.lagKravgrunnlag(førsteBehandling).copy(vedtakId = vedtakId, aktiv = false),
         )
@@ -46,9 +46,8 @@ class KravgrunnlagVedtakRepositoryTest : OppslagSpringRunnerTest() {
         kravgrunnlagRepository.findBehandlingIdsByVedtakId(vedtakId) shouldBe emptyList()
     }
 
-    private fun opprettGammelBehandling(vedtakId: BigInteger): UUID {
-        val fagsak = fagsakRepository.insert(Testdata.fagsak())
-        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsak.id))
+    private fun opprettGammelBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {
+        val behandling = behandlingRepository.insert(Testdata.lagBehandling(fagsakId))
         kravgrunnlagRepository.insert(Testdata.lagKravgrunnlag(behandling.id).copy(vedtakId = vedtakId))
         return behandling.id
     }

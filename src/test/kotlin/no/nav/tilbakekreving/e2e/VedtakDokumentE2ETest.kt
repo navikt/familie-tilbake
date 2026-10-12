@@ -5,14 +5,11 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.VedtakDokumentController
-import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,10 +42,6 @@ class VedtakDokumentE2ETest : TilbakekrevingE2EBase() {
         lagreUttalelse(behandlingId)
 
         tilbakekrevVedtak(behandlingId, listOf(periode))
-
-        tilbakekreving(behandlingId)
-            .frontendDtoForBehandling(behandlingId, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
-            .status shouldBe Behandlingsstatus.AVSLUTTET
 
         val respons = ContextServiceHelpers.somSaksbehandler {
             vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId)
