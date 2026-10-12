@@ -63,12 +63,12 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val respons = somSaksbehandler {
+        val response = somSaksbehandler {
             vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
         }
 
-        respons.statusCode shouldBe HttpStatus.OK
-        respons.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
+        response.statusCode shouldBe HttpStatus.OK
+        response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
             VedtaksdokumentDto(journalpostId = "journalpost-1", dokumentInfoId = "dokument-1"),
             VedtaksdokumentDto(journalpostId = "journalpost-2", dokumentInfoId = "dokument-2"),
         )
