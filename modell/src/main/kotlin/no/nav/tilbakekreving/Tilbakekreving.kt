@@ -188,7 +188,7 @@ class Tilbakekreving internal constructor(
                 throw ModellFeil.BehandlingIkkeEndretException("Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag", sporingsinformasjon())
             }
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværende(), sideeffektContext)
+            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(), sideeffektContext)
         }
     }
 
@@ -256,7 +256,7 @@ class Tilbakekreving internal constructor(
             enhet = behandlendeEnhet?.let(Enhet::forKode),
             ansvarligSaksbehandler = sideeffektContext.behandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
-            kravgrunnlag = kravgrunnlagHistorikk.nåværende(),
+            kravgrunnlag = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
             brevHistorikk = brevHistorikk,
             klokke = sideeffektContext.klokke,
             revurderingsårsak = revurderingsårsak,
@@ -280,7 +280,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettBehandlingUtenIntegrasjon(sideeffektContext: SideeffektContext) {
-        val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
+        val kravgrunnlag = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry
         // Å bruke kravgrunnlagreferanse er nok ikke alltid riktig her, men de fleste fagsystem bruker behandlingsid som referanse i kravgrunnlaget.
         val eksternBehandling = eksternFagsak.lagreTomBehandling(kravgrunnlag.fagsystemVedtaksdato, kravgrunnlag.referanse, sideeffektContext.klokke)
         opprettBehandling(eksternBehandling, sideeffektContext, null, Behandlingstype.TILBAKEKREVING, null)
@@ -361,7 +361,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun trengerFagsysteminfo(sideeffektContext: SideeffektContext) {
-        val kravgrunnlag = kravgrunnlagHistorikk.nåværende().entry
+        val kravgrunnlag = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry
         sideeffektContext.behovObservatør.håndter(
             eksternFagsak.fagsysteminfoBehov(
                 eksternBehandlingId = kravgrunnlag.referanse,
@@ -373,7 +373,7 @@ class Tilbakekreving internal constructor(
     // Denne burde følge vanlig behov løype i stedet for å håndteres direkte når det skal skje automatisk.
     fun trengerKorrigertKravgrunnlag(): KorrigertKravgrunnlagBehov {
         return KorrigertKravgrunnlagBehov(
-            kravgrunnlagHistorikk.nåværende().entry.kravgrunnlagId,
+            kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
         )
     }
 

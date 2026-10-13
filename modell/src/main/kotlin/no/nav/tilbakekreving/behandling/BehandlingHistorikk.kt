@@ -28,9 +28,9 @@ class BehandlingHistorikk(
         return historikk.single { it.id == id }
     }
 
-    override fun lagre(innslag: Behandling): HistorikkReferanse<UUID, Behandling> {
+    override fun <T : Behandling> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.id)
+        return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
     internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke): List<BehandlingsoppsummeringDto> {

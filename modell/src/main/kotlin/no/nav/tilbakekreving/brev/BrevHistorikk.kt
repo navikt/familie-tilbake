@@ -16,9 +16,9 @@ class BrevHistorikk(
         return historikk.single { it.id == id }
     }
 
-    override fun lagre(innslag: Brev): HistorikkReferanse<UUID, Brev> {
+    override fun <T : Brev> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.id)
+        return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, Brev> {

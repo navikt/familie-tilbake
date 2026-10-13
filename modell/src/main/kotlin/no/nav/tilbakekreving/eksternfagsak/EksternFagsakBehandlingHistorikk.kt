@@ -11,9 +11,9 @@ import java.util.UUID
 class EksternFagsakBehandlingHistorikk(
     private val historikk: MutableList<EksternFagsakRevurdering>,
 ) : Historikk<UUID, EksternFagsakRevurdering> {
-    override fun lagre(innslag: EksternFagsakRevurdering): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
+    override fun <T : EksternFagsakRevurdering> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.id)
+        return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakRevurdering> {

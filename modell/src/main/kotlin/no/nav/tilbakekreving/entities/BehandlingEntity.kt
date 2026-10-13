@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -38,7 +40,7 @@ data class BehandlingEntity(
     ): Behandling {
         val sporing = Sporing("Ukjent", id.toString())
         val eksternFagsak = eksternFagsakBehandlingHistorikk.finn(eksternFagsakBehandlingRef.id, sporing)
-        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing)
+        val kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing) as HistorikkReferanse<UUID, KravgrunnlagHendelse>
         return Behandling(
             id = id,
             type = type,
@@ -49,7 +51,7 @@ data class BehandlingEntity(
             ansvarligSaksbehandler = ansvarligSaksbehandler.fraEntity(),
             eksternFagsakRevurdering = eksternFagsak,
             kravgrunnlag = kravgrunnlag,
-            nyttKravgrunnlag = nyttKravgrunnlagRef?.id?.let { kravgrunnlagHistorikk.finn(it, sporing) },
+            nyttKravgrunnlag = nyttKravgrunnlagRef?.id?.let { kravgrunnlagHistorikk.finn(it, sporing) as HistorikkReferanse<UUID, KravgrunnlagHendelse> },
             foreldelsesteg = foreldelsestegEntity.fraEntity(),
             faktasteg = faktastegEntity.fraEntity(brevHistorikk),
             vilkårsvurderingsteg = vilkårsvurderingstegEntity.fraEntity(),

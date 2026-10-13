@@ -2,6 +2,8 @@ package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,7 +28,7 @@ data class VarselbrevEntity(
             dokumentInfoId = dokumentInfoId,
             sendtTid = sendtTid,
             ansvarligSaksbehandlerIdent = ansvarligSaksbehandlerIdent,
-            kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing),
+            kravgrunnlag = kravgrunnlagHistorikk.finn(kravgrunnlagRef.id, sporing) as HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             fristForUttalelse = fristForUttalelse ?: sendtTid.plus(Period.ofWeeks(3)),
             tekstFraSaksbehandler = tekstFraSaksbehandler,
             opprettet = opprettet,

@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.feil.Sporing
 import java.time.LocalDateTime
 
 interface Historikk<IdType, Innslag : Historikk.HistorikkInnslag<IdType>> {
-    fun lagre(innslag: Innslag): HistorikkReferanse<IdType, Innslag>
+    fun <T : Innslag> lagre(innslag: T): HistorikkReferanse<IdType, T>
 
     fun finn(id: IdType, sporing: Sporing): HistorikkReferanse<IdType, Innslag>
 
