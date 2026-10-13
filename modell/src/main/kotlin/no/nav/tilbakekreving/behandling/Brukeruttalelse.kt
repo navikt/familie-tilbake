@@ -16,6 +16,15 @@ class Brukeruttalelse(
     private val uttalelseInfo: UttalelseInfo?,
     private val kommentar: String?,
 ) {
+    fun klon(): Brukeruttalelse {
+        return Brukeruttalelse(
+            id = UUID.randomUUID(),
+            uttalelseVurdering = uttalelseVurdering,
+            uttalelseInfo = uttalelseInfo?.klon(),
+            kommentar = kommentar,
+        )
+    }
+
     internal fun nyTilFrontendDto(): UttalelseVurderingDto {
         when (uttalelseVurdering) {
             UttalelseVurdering.JA -> {
@@ -77,7 +86,16 @@ data class UttalelseInfo(
     val uttalelsesdato: LocalDate,
     val hvorBrukerenUttalteSeg: String,
     val uttalelseBeskrivelse: String,
-)
+) {
+    fun klon(): UttalelseInfo {
+        return UttalelseInfo(
+            id = UUID.randomUUID(),
+            uttalelsesdato = uttalelsesdato,
+            hvorBrukerenUttalteSeg = hvorBrukerenUttalteSeg,
+            uttalelseBeskrivelse = uttalelseBeskrivelse,
+        )
+    }
+}
 
 enum class UttalelseVurdering(val meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>) {
     JA(setOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)),

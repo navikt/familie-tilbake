@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.behandling.revurdering
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
@@ -41,10 +42,63 @@ class RevurderingTest {
         val context = saksbehandlerContext()
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val behandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
+        val opprinneligFakta = tilbakekreving.tilFeilutbetalingFrontendDto(behandling.id, context.klokke)
+        val opprinneligForhåndsvarsel = tilbakekreving.nyHentForhåndsvarselFrontendDto(behandling.id, context.klokke)
+        val opprinneligForeldelse = behandling.foreldelsestegDto.tilFrontendDto(context)
+        val opprinneligVilkår = behandling.vilkårsvurderingDto(context)
 
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.AVSLUTTET
 
         tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK, saksbehandlerContext())
+
+        val revurderingBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
+
+        val revurderingFakta = tilbakekreving.tilFeilutbetalingFrontendDto(revurderingBehandling.id, context.klokke)
+        val revurderingForhåndsvarsel = tilbakekreving.nyHentForhåndsvarselFrontendDto(revurderingBehandling.id, context.klokke)
+        val revurderingForeldelse = revurderingBehandling.foreldelsestegDto.tilFrontendDto(context)
+        val revurderingVilkår = revurderingBehandling.vilkårsvurderingDto(context)
+
+        revurderingBehandling.id shouldNotBe behandling.id
+
+        revurderingFakta shouldNotBeNull {
+            feilutbetaling shouldBe opprinneligFakta.feilutbetaling
+            tidligereVarsletBeløp shouldBe opprinneligFakta.tidligereVarsletBeløp
+            muligeRettsligGrunnlag shouldBe opprinneligFakta.muligeRettsligGrunnlag
+            perioder shouldNotBeNull {
+                size shouldBe 1
+                first().fom shouldBe opprinneligFakta.perioder.first().fom
+                first().tom shouldBe opprinneligFakta.perioder.first().tom
+                first().feilutbetaltBeløp shouldBe opprinneligFakta.perioder.first().feilutbetaltBeløp
+                first().splittbarePerioder shouldBe opprinneligFakta.perioder.first().splittbarePerioder
+                first().rettsligGrunnlag shouldBe opprinneligFakta.perioder.first().rettsligGrunnlag
+                first().endringIKravgrunnlag shouldBe opprinneligFakta.perioder.first().endringIKravgrunnlag
+            }
+            vurdering shouldBe opprinneligFakta.vurdering
+            rettsgebyrÅrFraSaksbehandler shouldBe opprinneligFakta.rettsgebyrÅrFraSaksbehandler
+            status4xRettsgebyret shouldBe opprinneligFakta.status4xRettsgebyret
+            tilbakeført shouldBe null
+        }
+
+        revurderingForhåndsvarsel shouldNotBeNull {
+            forhaandsvarselSteg shouldBe opprinneligForhåndsvarsel.forhaandsvarselSteg
+            brukeruttalelse shouldBe opprinneligForhåndsvarsel.brukeruttalelse
+            sendtVarselbrev shouldBe opprinneligForhåndsvarsel.sendtVarselbrev
+            uttalelsesfrist shouldBe opprinneligForhåndsvarsel.uttalelsesfrist
+            tilbakeført shouldBe null
+        }
+
+        revurderingForeldelse shouldNotBeNull {
+            foreldetPerioder shouldBe opprinneligForeldelse.foreldetPerioder
+        }
+
+        revurderingVilkår shouldNotBeNull {
+            vilkårsperioder.size shouldBe opprinneligVilkår.vilkårsperioder.size
+            vilkårsperioder.first().vilkårsvurdering.fom shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.fom
+            vilkårsperioder.first().vilkårsvurdering.tom shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.tom
+            vilkårsperioder.first().feilutbetaltBeløp shouldBe opprinneligVilkår.vilkårsperioder.first().feilutbetaltBeløp
+            vilkårsperioder.first().vilkårsvurdering.valg shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.valg
+            tilbakeført shouldBe null
+        }
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
             type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
@@ -74,7 +128,7 @@ class RevurderingTest {
         val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse).apply {
             gjørSaksbehandling(nåværendeBehandlingId(), saksbehandlerContext) {
                 lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
-                lagreUttalelse(UttalelseVurdering.JA, null, "")
+                lagreUttalelse(UttalelseVurdering.NEI, null, "")
                 vurderFakta(faktastegVurdering())
                 vurderForeldelse(1.januar(2021) til 31.januar(2021), foreldelseVurdering())
                 vurderVilkår(

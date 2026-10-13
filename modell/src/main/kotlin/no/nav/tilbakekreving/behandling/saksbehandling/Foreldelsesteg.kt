@@ -226,6 +226,15 @@ class Foreldelsesteg(
             oppdagelsesdato = (vurdering as? Vurdering.Tilleggsfrist)?.oppdaget,
         )
 
+        fun klon(): Foreldelseperiode {
+            return Foreldelseperiode(
+                id = UUID.randomUUID(),
+                periode = this.periode,
+                _vurdering = this._vurdering,
+                endringIKravgrunnlag = this.endringIKravgrunnlag,
+            )
+        }
+
         companion object {
             fun opprett(
                 periode: Datoperiode,
@@ -377,6 +386,14 @@ class Foreldelsesteg(
                 HjemmelForTilbakekreving.FORELDELSESLOVEN_3,
             )
         }
+    }
+
+    fun klon(): Foreldelsesteg {
+        return Foreldelsesteg(
+            id = UUID.randomUUID(),
+            vurdertePerioder = this.vurdertePerioder.map { it.klon() },
+            tilbakeført = null,
+        )
     }
 
     companion object {

@@ -25,6 +25,14 @@ class FatteVedtakSteg internal constructor(
     override val type: Behandlingssteg = Behandlingssteg.FATTE_VEDTAK
     val ansvarligBeslutter: Behandler? get() = _ansvarligBeslutter
 
+    fun klon(): FatteVedtakSteg {
+        return FatteVedtakSteg(
+            id = UUID.randomUUID(),
+            vurderteSteg = vurderteSteg.map { it.klon() },
+            _ansvarligBeslutter = _ansvarligBeslutter,
+        )
+    }
+
     override fun erFullstendig(klokke: Klokke): Boolean = vurderteSteg.all { it.erFerdigvurdert() }
 
     override fun erPåbegynt(): Boolean = vurderteSteg.any { it.erFerdigvurdert() }
@@ -81,6 +89,14 @@ class FatteVedtakSteg internal constructor(
         private val steg: Behandlingssteg,
         private var vurdering: Vurdering,
     ) : FrontendDto<Totrinnsstegsinfo> {
+        fun klon(): VurdertSteg {
+            return VurdertSteg(
+                id = UUID.randomUUID(),
+                steg = steg,
+                vurdering = vurdering,
+            )
+        }
+
         fun erFor(steg: Behandlingssteg): Boolean {
             return this.steg == steg
         }
