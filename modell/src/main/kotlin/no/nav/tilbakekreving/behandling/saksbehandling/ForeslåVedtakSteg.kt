@@ -19,7 +19,7 @@ class ForeslåVedtakSteg(
         return ForeslåVedtakSteg(
             id = UUID.randomUUID(),
             vurdert = vurdert,
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
         )
     }
 

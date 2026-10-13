@@ -392,7 +392,7 @@ class Foreldelsesteg(
         return Foreldelsesteg(
             id = UUID.randomUUID(),
             vurdertePerioder = this.vurdertePerioder.map { it.klon() },
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
         )
     }
 

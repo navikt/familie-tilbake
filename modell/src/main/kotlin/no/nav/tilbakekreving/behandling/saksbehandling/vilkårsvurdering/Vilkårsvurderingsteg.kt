@@ -51,7 +51,7 @@ class Vilkårsvurderingsteg(
         return Vilkårsvurderingsteg(
             id = UUID.randomUUID(),
             vurderinger = vurderinger.map { it.klon() },
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
         )
     }
 
@@ -288,7 +288,7 @@ class Vilkårsvurderingsteg(
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
                 _vurdering = _vurdering,
                 endringIKravgrunnnlag = endringIKravgrunnnlag,
-                tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+                tilbakeført = null,
             )
         }
 

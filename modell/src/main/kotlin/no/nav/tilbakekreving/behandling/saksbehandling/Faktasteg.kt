@@ -212,7 +212,7 @@ class Faktasteg(
             id = UUID.randomUUID(),
             brevHistorikk = brevHistorikk,
             vurdering = vurdering.klon(),
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
             _rettsgebyrÅrFraSaksbehandler = _rettsgebyrÅrFraSaksbehandler,
         )
     }

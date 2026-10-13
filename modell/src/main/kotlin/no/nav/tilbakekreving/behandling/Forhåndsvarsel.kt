@@ -286,7 +286,7 @@ class Forhåndsvarsel internal constructor(
         override fun klon(): Vurdering = VarselSendt(
             uttalelsesfrist = uttalelsesfrist.klon(),
             brukeruttalelse = brukeruttalelse?.klon(),
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
         )
     }
 
@@ -442,7 +442,7 @@ class Forhåndsvarsel internal constructor(
             forhåndsvarselUnntak = forhåndsvarselUnntak.klon(),
             brukeruttalelse = brukeruttalelse?.klon(),
             uttalelsesfrist = uttalelsesfrist?.klon(),
-            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
+            tilbakeført = null,
         )
     }
 }

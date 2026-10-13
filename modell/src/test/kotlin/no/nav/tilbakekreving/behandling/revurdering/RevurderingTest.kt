@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.nåværendeBehandlingId
@@ -77,8 +76,7 @@ class RevurderingTest {
             vurdering shouldBe opprinneligFakta.vurdering
             rettsgebyrÅrFraSaksbehandler shouldBe opprinneligFakta.rettsgebyrÅrFraSaksbehandler
             status4xRettsgebyret shouldBe opprinneligFakta.status4xRettsgebyret
-            tilbakeført shouldNotBe opprinneligFakta.tilbakeført
-            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
+            tilbakeført shouldBe null
         }
 
         revurderingForhåndsvarsel shouldNotBeNull {
@@ -86,8 +84,7 @@ class RevurderingTest {
             brukeruttalelse shouldBe opprinneligForhåndsvarsel.brukeruttalelse
             sendtVarselbrev shouldBe opprinneligForhåndsvarsel.sendtVarselbrev
             uttalelsesfrist shouldBe opprinneligForhåndsvarsel.uttalelsesfrist
-            tilbakeført shouldNotBe opprinneligForhåndsvarsel.tilbakeført
-            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
+            tilbakeført shouldBe null
         }
 
         revurderingForeldelse shouldNotBeNull {
@@ -100,8 +97,7 @@ class RevurderingTest {
             vilkårsperioder.first().vilkårsvurdering.tom shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.tom
             vilkårsperioder.first().feilutbetaltBeløp shouldBe opprinneligVilkår.vilkårsperioder.first().feilutbetaltBeløp
             vilkårsperioder.first().vilkårsvurdering.valg shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.valg
-            tilbakeført shouldNotBe opprinneligVilkår.tilbakeført
-            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
+            tilbakeført shouldBe null
         }
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
