@@ -938,7 +938,7 @@ class Behandling internal constructor(
     fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsarsakDto, klokke: Klokke): Behandling {
         val opprettet = klokke.nå()
 
-        val klonetBehandling = Behandling(
+        return Behandling(
             id = UUID.randomUUID(),
             type = Behandlingstype.REVURDERING_TILBAKEKREVING,
             opprettet = opprettet,
@@ -957,7 +957,6 @@ class Behandling internal constructor(
             forhåndsvarsel = forhåndsvarsel.klon(),
             forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
         )
-        return klonetBehandling
     }
 
     companion object {

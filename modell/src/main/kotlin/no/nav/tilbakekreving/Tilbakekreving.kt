@@ -227,10 +227,10 @@ class Tilbakekreving internal constructor(
     }
 
     fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsarsakDto, sideeffektContext: SideeffektContext) {
-        val behandling = behandlingHistorikk.nåværende().entry
-        val klonetBehandling = behandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
+        val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
+        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
 
-        behandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+        klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(klonetBehandling)
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.REVURDERING_OPPRETTET,
