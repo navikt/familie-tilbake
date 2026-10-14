@@ -3,8 +3,8 @@ package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Rettsgebyr
-import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
