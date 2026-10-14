@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -128,4 +129,23 @@ interface BehandlingRepository :
     fun finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato: LocalDate): List<Behandling>
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
+
+    // language=PostgreSQL
+    @Query(
+        """
+            SELECT ba.type AS type, COUNT(*) AS antall
+            FROM behandlingsarsak ba
+            JOIN behandling b ON ba.behandling_id = b.id
+            WHERE b.type = 'REVURDERING_TILBAKEKREVING'
+              AND ba.opprettet_tid >= :fraDato
+            GROUP BY ba.type
+            ORDER BY antall DESC
+        """,
+    )
+    fun hentRevurderingerPerÅrsak(fraDato: LocalDateTime = LocalDateTime.of(2025, 1, 1, 0, 0)): List<RevurderingÅrsakStatistikk>
+
+    data class RevurderingÅrsakStatistikk(
+        val type: Behandlingsårsakstype,
+        val antall: Long,
+    )
 }
