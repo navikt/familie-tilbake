@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.IverksettService
 import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
@@ -69,7 +70,14 @@ class IverksettelseService(
             log.medContext(logContext) {
                 info("Iverksetter vedtak med REST-endepunkt (gammel modell)")
             }
-            val kvittering = oppdragRestClient.iverksettVedtak(request)
+            val kvittering = try {
+                oppdragRestClient.iverksettVedtak(request)
+            } catch (e: UnexpectedResponseException) {
+                log.medContext(logContext) {
+                    warn("Feilet under iverksettelse av vedtak, status={}, response {}", e.statusCode, e.response, e)
+                }
+                throw e
+            }
             IverksettService.validerIverksettelse(kvittering, logContext)
             iverksettRepository.lagreIverksattVedtak(
                 IverksattVedtak(
