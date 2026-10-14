@@ -30,6 +30,14 @@ sealed class ModellFeil(
             melding,
             sporing,
         )
+
+    class TjenesteUtilgjengeligException(
+        sporing: Sporing,
+    ) : ModellFeil(
+            "Fryseperiode 9. oktober kl. 16:00–19. oktober kl. 08:00",
+            "Skatteetaten avvikler PAK og migrerer til Innfri. I denne perioden er det ikke mulig å sende vedtak til beslutter i Tilbakeløsningen.",
+            sporing,
+        )
 }
 
 data class Sporing(

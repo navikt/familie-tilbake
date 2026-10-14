@@ -226,6 +226,19 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsarsakDto, sideeffektContext: SideeffektContext) {
+        val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
+        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
+
+        klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            behandlingHistorikk.lagre(klonetBehandling)
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.REVURDERING_OPPRETTET,
+                behandlingId = klonetBehandling.id,
+            )
+        }
+    }
+
     fun opprettBehandling(
         eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
         sideeffektContext: SideeffektContext,
@@ -377,11 +390,12 @@ class Tilbakekreving internal constructor(
 
     fun hentBehandlingsinformasjon(): Behandlingsinformasjon = behandlingHistorikk.nåværende().entry.hentBehandlingsinformasjon()
 
-    fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
+    fun hentVedtaksbrevInfo(behandlingId: UUID, features: FeatureToggles): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
             bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
             ytelse = eksternFagsak.ytelse,
             tilbakekrevingId = id,
+            features = features,
         )
     }
 

@@ -8,18 +8,16 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.Forskjell
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
-import no.nav.tilbakekreving.test.mars
 import org.junit.jupiter.api.Test
 
 class EndretPeriodeTest {
     @Test
-    fun `slår ikke sammen endret og uendret periode`() {
+    fun `endret periode og uendret periode`() {
         val endret = Forskjell.EndretPeriode(
             periode = 1.januar(2021) til 31.januar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
         )
         val uendret = Forskjell.UendretPeriode(
             periode = 1.februar(2021) til 28.februar(2021),
@@ -27,61 +25,84 @@ class EndretPeriodeTest {
             nyttBeløp = 200.kroner,
         )
 
-        val resultat = endret.slåSammen(uendret).shouldBeInstanceOf<Forskjell.EndretPeriode>()
-        resultat.periode shouldBe (1.januar(2021) til 31.januar(2021))
-        resultat.nyPeriode shouldBe null
-        resultat.gammeltBeløp shouldBe 100.kroner
-        resultat.nyttBeløp shouldBe 150.kroner
+        endret.slåSammen(uendret).shouldBeNull()
     }
 
     @Test
-    fun `slår sammen med uendret periode i mellom`() {
-        val endret = Forskjell.EndretPeriode(
+    fun `endring av beløp`() {
+        val høyereBeløp = Forskjell.EndretPeriode(
             periode = 1.januar(2021) til 31.januar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
+        )
+        val lavereBeløp = Forskjell.EndretPeriode(
+            periode = 1.februar(2021) til 28.februar(2021),
+            nyPeriode = 1.februar(2021) til 28.februar(2021),
+            gammeltBeløp = 200.kroner,
+            nyttBeløp = 100.kroner,
         )
 
-        val resultat = endret
-            .slåSammen(
-                Forskjell.UendretPeriode(
-                    periode = 1.februar(2021) til 28.februar(2021),
-                    gammeltBeløp = 200.kroner,
-                    nyttBeløp = 200.kroner,
-                ),
-            )
-            ?.slåSammen(
-                Forskjell.EndretPeriode(
-                    periode = 1.mars(2021) til 31.mars(2021),
-                    nyPeriode = null,
-                    gammeltBeløp = 100.kroner,
-                    nyttBeløp = 150.kroner,
-                    etterfølgende = null,
-                ),
-            ).shouldBeInstanceOf<Forskjell.EndretPeriode>()
-        resultat.periode shouldBe (1.januar(2021) til 31.mars(2021))
-        resultat.nyPeriode shouldBe null
-        resultat.gammeltBeløp shouldBe 400.kroner
-        resultat.nyttBeløp shouldBe 500.kroner
+        høyereBeløp.slåSammen(lavereBeløp).shouldBeNull()
+    }
+
+    @Test
+    fun `lavere beløp etterfulgt av endret dato`() {
+        val lavereBeløp = Forskjell.EndretPeriode(
+            periode = 1.januar(2021) til 31.januar(2021),
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
+            gammeltBeløp = 200.kroner,
+            nyttBeløp = 100.kroner,
+        )
+        val endretPeriode = Forskjell.EndretPeriode(
+            periode = 1.februar(2021) til 28.februar(2021),
+            nyPeriode = 1.februar(2021) til 14.februar(2021),
+            gammeltBeløp = 100.kroner,
+            nyttBeløp = 100.kroner,
+        )
+
+        val resultat = lavereBeløp.slåSammen(endretPeriode).shouldBeInstanceOf<Forskjell.EndretPeriode>()
+        resultat.periode shouldBe (1.januar(2021) til 28.februar(2021))
+        resultat.nyPeriode shouldBe (1.januar(2021) til 14.februar(2021))
+        resultat.gammeltBeløp shouldBe 300.kroner
+        resultat.nyttBeløp shouldBe 200.kroner
+    }
+
+    @Test
+    fun `endret dato etterfulgt av økning i beløp`() {
+        val endretPeriode = Forskjell.EndretPeriode(
+            periode = 1.januar(2021) til 31.januar(2021),
+            nyPeriode = 10.januar(2021) til 31.januar(2021),
+            gammeltBeløp = 100.kroner,
+            nyttBeløp = 100.kroner,
+        )
+        val øktBeløp = Forskjell.EndretPeriode(
+            periode = 1.februar(2021) til 28.februar(2021),
+            nyPeriode = 1.februar(2021) til 28.februar(2021),
+            gammeltBeløp = 100.kroner,
+            nyttBeløp = 150.kroner,
+        )
+
+        val resultat = endretPeriode.slåSammen(øktBeløp).shouldBeInstanceOf<Forskjell.EndretPeriode>()
+        resultat.periode shouldBe (1.januar(2021) til 28.februar(2021))
+        resultat.nyPeriode shouldBe (10.januar(2021) til 28.februar(2021))
+        resultat.gammeltBeløp shouldBe 200.kroner
+        resultat.nyttBeløp shouldBe 250.kroner
     }
 
     @Test
     fun `slår sammen perioder hvor siste periode har ny tom dato`() {
         val endret = Forskjell.EndretPeriode(
             periode = 1.januar(2021) til 31.januar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
         )
         val other = Forskjell.EndretPeriode(
             periode = 1.februar(2021) til 28.februar(2021),
             nyPeriode = 1.februar(2021) til 14.februar(2021),
             gammeltBeløp = 200.kroner,
             nyttBeløp = 250.kroner,
-            etterfølgende = null,
         )
 
         val resultat = endret.slåSammen(other).shouldBeInstanceOf<Forskjell.EndretPeriode>()
@@ -98,14 +119,12 @@ class EndretPeriodeTest {
             nyPeriode = 10.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
         )
         val other = Forskjell.EndretPeriode(
             periode = 1.februar(2021) til 28.februar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.februar(2021) til 28.februar(2021),
             gammeltBeløp = 200.kroner,
             nyttBeløp = 250.kroner,
-            etterfølgende = null,
         )
 
         val resultat = endret.slåSammen(other).shouldBeInstanceOf<Forskjell.EndretPeriode>()
@@ -119,22 +138,20 @@ class EndretPeriodeTest {
     fun `slår sammen perioder uten endring i datoer`() {
         val endret = Forskjell.EndretPeriode(
             periode = 1.januar(2021) til 31.januar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
         )
         val other = Forskjell.EndretPeriode(
             periode = 1.februar(2021) til 28.februar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.februar(2021) til 28.februar(2021),
             gammeltBeløp = 200.kroner,
             nyttBeløp = 250.kroner,
-            etterfølgende = null,
         )
 
         val resultat = endret.slåSammen(other).shouldBeInstanceOf<Forskjell.EndretPeriode>()
         resultat.periode shouldBe (1.januar(2021) til 28.februar(2021))
-        resultat.nyPeriode.shouldBeNull()
+        resultat.nyPeriode shouldBe (1.januar(2021) til 28.februar(2021))
         resultat.gammeltBeløp shouldBe 300.kroner
         resultat.nyttBeløp shouldBe 400.kroner
     }
@@ -143,10 +160,9 @@ class EndretPeriodeTest {
     fun `slår ikke sammen ulike typer forskjell`() {
         val endret = Forskjell.EndretPeriode(
             periode = 1.januar(2021) til 31.januar(2021),
-            nyPeriode = null,
+            nyPeriode = 1.januar(2021) til 31.januar(2021),
             gammeltBeløp = 100.kroner,
             nyttBeløp = 150.kroner,
-            etterfølgende = null,
         )
         val other = Forskjell.NyPeriode(
             periode = 1.februar(2021) til 28.februar(2021),

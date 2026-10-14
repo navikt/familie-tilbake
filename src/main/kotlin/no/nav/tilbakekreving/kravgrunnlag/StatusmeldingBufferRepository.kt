@@ -27,6 +27,29 @@ class StatusmeldingBufferRepository(
         }.singleOrNull() ?: false
     }
 
+    fun erSperret(fagsystemId: String): Boolean {
+        return jdbcTemplate.query(
+            """
+            SELECT EXISTS(
+                SELECT 1
+                FROM statusmelding_buffer sm
+                WHERE sm.fagsystem_id = ?
+                  AND sm.status = 'SPER'
+                  AND sm.mottatt > '2026-09-02'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM kravgrunnlag_buffer kg
+                      WHERE kg.fagsystem_id = sm.fagsystem_id
+                        AND kg.mottatt > sm.mottatt
+                  )
+            ) AS is_sperret;
+            """.trimIndent(),
+            fagsystemId,
+        ) { rs, _ ->
+            rs.getBoolean("is_sperret")
+        }.singleOrNull() ?: false
+    }
+
     data class Entity(
         val statusmelding: String,
         val fagsystemId: String,

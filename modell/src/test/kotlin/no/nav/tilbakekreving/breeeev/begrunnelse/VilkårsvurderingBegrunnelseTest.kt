@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -37,7 +38,7 @@ class VilkårsvurderingBegrunnelseTest {
 
         vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), vurdering)
 
-        val vurderinger = vilkårsvurdering.vurdertePerioderForBrev(emptySet())
+        val vurderinger = vilkårsvurdering.vurdertePerioderForBrev(emptySet(), defaultFeatures())
         vurderinger shouldHaveSize 1
         vurderinger.single().påkrevdeVurderinger shouldBe forventedeBegrunnelser
     }

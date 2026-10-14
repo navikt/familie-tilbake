@@ -10,7 +10,10 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
@@ -26,7 +29,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
@@ -51,6 +54,7 @@ class BehandlingApiController(
     private val nyVedtaksbrevService: NyVedtaksbrevService,
     private val forhåndsvarselService: ForhåndsvarselService,
     private val safService: SafService,
+    private val featureService: FeatureService,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
@@ -92,22 +96,14 @@ class BehandlingApiController(
         return ResponseEntity.ok(
             nyVedtaksbrevService.hentVedtaksbrevData(
                 UUID.fromString(behandlingId),
-                tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId)),
+                tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId), featureService.modellFeatures),
                 beslutter,
             ),
         )
     }
 
     override fun behandlingForeslaaVedtak(behandlingId: UUID): ResponseEntity<Unit> {
-        return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
-            valideringContext = ValideringContext.ForeslåVedtak,
-        ) { tilbakekreving, context ->
-            tilbakekreving.gjørSaksbehandling(behandlingId, context) {
-                foreslåVedtak()
-            }
-            ResponseEntity.ok(Unit)
-        } ?: ResponseEntity.notFound().build()
+        throw ModellFeil.TjenesteUtilgjengeligException(Sporing("Ukjent", behandlingId.toString()))
     }
 
     override fun behandlingOppdaterVedtaksbrev(behandlingId: UUID, vedtaksbrevRedigerbareDataUpdateDto: VedtaksbrevRedigerbareDataUpdateDto): ResponseEntity<VedtaksbrevRedigerbareDataDto> {
@@ -120,7 +116,7 @@ class BehandlingApiController(
             nyVedtaksbrevService.oppdaterVedtaksbrevData(
                 behandlingId = behandlingId,
                 data = vedtaksbrevRedigerbareDataUpdateDto,
-                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
+                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId, featureService.modellFeatures),
             ),
         )
     }
@@ -196,12 +192,12 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseDto: UttalelseDto): ResponseEntity<Unit> {
+    override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseVurderingDto: UttalelseVurderingDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.LagreBrukersuttalelse,
         ) { tilbakekreving, context ->
-            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseDto, context))
+            ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseVurderingDto, context))
         } ?: ResponseEntity.notFound().build()
     }
 

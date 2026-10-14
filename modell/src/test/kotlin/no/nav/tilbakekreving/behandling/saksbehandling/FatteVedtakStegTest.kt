@@ -241,7 +241,6 @@ class FatteVedtakStegTest {
                 nyPeriode = 1.januar(2021) til 20.januar(2021),
                 gammeltBeløp = 1500.kroner,
                 nyttBeløp = 1000.kroner,
-                etterfølgende = null,
             ),
         )
 

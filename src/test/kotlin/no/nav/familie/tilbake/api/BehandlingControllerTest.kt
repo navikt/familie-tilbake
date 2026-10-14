@@ -17,12 +17,15 @@ import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegFatteVedtaksstegDtoTest
+import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -160,7 +163,8 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `Saksbehandler med beslutterrolle kan godkjenne vedtak`() {
+    @Disabled
+    fun `Saksbehandler med beslutterrolle kan ikke godkjenne eget vedtak`() {
         val behandlingId = opprettTestdata(
             saksbehandler = SAKSBEHANDLER_IDENT,
             behandlingStatus = Behandlingsstatus.FATTER_VEDTAK,
@@ -171,6 +175,28 @@ class BehandlingControllerTest : OppslagSpringRunnerTest() {
         }
         feil.httpStatus shouldBe HttpStatus.BAD_REQUEST
         feil.message shouldBe "ansvarlig beslutter kan ikke være samme som ansvarlig saksbehandler"
+    }
+
+    @Test
+    fun `Fatte vedtak på gammel modell er utilgjengelig i vedlikeholdsperioden`() {
+        val behandlingId = opprettTestdata("Z99999", Behandlingsstatus.FATTER_VEDTAK, Behandlingsstegstatus.KLAR)
+        val feil = shouldThrow<ModellFeil.TjenesteUtilgjengeligException> {
+            utførFatteVedtakssteg(behandlingId, grupper = listOf("eb123"))
+        }
+        feil.tittel shouldBe "Fryseperiode 9. oktober kl. 16:00–19. oktober kl. 08:00"
+        feil.melding shouldBe "Skatteetaten avvikler PAK og migrerer til Innfri. I denne perioden er det ikke mulig å sende vedtak til beslutter i Tilbakeløsningen."
+    }
+
+    @Test
+    fun `Foreslå vedtak på gammel modell er utilgjengelig i vedlikeholdsperioden`() {
+        val behandlingId = opprettTestdata(SAKSBEHANDLER_IDENT, Behandlingsstatus.UTREDES, Behandlingsstegstatus.KLAR)
+        val feil = shouldThrow<ModellFeil.TjenesteUtilgjengeligException> {
+            somSaksbehandler(ident = SAKSBEHANDLER_IDENT, grupper = listOf("es123")) {
+                behandlingController.utførBehandlingssteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+            }
+        }
+        feil.tittel shouldBe "Fryseperiode 9. oktober kl. 16:00–19. oktober kl. 08:00"
+        feil.melding shouldBe "Skatteetaten avvikler PAK og migrerer til Innfri. I denne perioden er det ikke mulig å sende vedtak til beslutter i Tilbakeløsningen."
     }
 
     private fun flyttBehandlingTilFakta(

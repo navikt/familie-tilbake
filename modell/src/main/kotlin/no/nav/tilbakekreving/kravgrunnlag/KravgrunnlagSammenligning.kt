@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.KravgrunnlagForskjellDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UendretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import java.math.BigDecimal
@@ -35,8 +36,7 @@ class KravgrunnlagSammenligning(
                 else -> acc.dropLast(1) + sammenslått
             }
         }
-        .mapNotNull(Forskjell::tilDto)
-        .filter { it !is EndretPeriodeDto || it.gammeltBeløp != it.nyttBeløp }
+        .map(Forskjell::tilDto)
         .toList()
 
     internal fun oppdaterSteg(steg: List<EndretKravgrunnlagObservatør>) {
@@ -77,10 +77,9 @@ class KravgrunnlagSammenligning(
                 nyPeriode.feilutbetaltYtelsesbeløp().toInt() != eksisterendePeriode.feilutbetaltYtelsesbeløp().toInt() ||
                     nyPeriode.periode() != eksisterendePeriode.periode() -> Forskjell.EndretPeriode(
                     periode = eksisterendePeriode.periode(),
-                    nyPeriode = nyPeriode.periode().takeIf { it != eksisterendePeriode.periode() },
+                    nyPeriode = nyPeriode.periode(),
                     gammeltBeløp = eksisterendePeriode.feilutbetaltYtelsesbeløp(),
                     nyttBeløp = nyPeriode.feilutbetaltYtelsesbeløp(),
-                    etterfølgende = null,
                 )
 
                 else -> Forskjell.UendretPeriode(
@@ -114,20 +113,21 @@ class KravgrunnlagSammenligning(
             foreldelsesvurderingPeriodeRef: UUID?,
         ): ForskjellEntity
 
-        fun tilDto(): KravgrunnlagForskjellDto?
+        fun tilDto(): KravgrunnlagForskjellDto
 
         data class EndretPeriode(
             override val periode: Datoperiode,
-            val nyPeriode: Datoperiode?,
+            val nyPeriode: Datoperiode,
             val gammeltBeløp: BigDecimal,
             override val nyttBeløp: BigDecimal,
-            private val etterfølgende: UendretPeriode?,
         ) : Forskjell {
             override fun oppdater(steg: EndretKravgrunnlagObservatør) {
                 steg.periodeEndret(this)
             }
 
             override fun gammeltBeløp(): BigDecimal = gammeltBeløp
+
+            private fun kanSlåsSammenMed(other: EndretPeriode) = (nyttBeløp - gammeltBeløp) * (other.nyttBeløp - other.gammeltBeløp) >= BigDecimal.ZERO
 
             override fun tilEntity(
                 faktavurderingPeriodeRef: UUID?,
@@ -141,53 +141,39 @@ class KravgrunnlagSammenligning(
                     foreldelsesvurderingPeriodeRef = foreldelsesvurderingPeriodeRef,
                     type = ForskjellType.JustertBeløp,
                     originalPeriode = DatoperiodeEntity(periode.fom, periode.tom),
-                    nyPeriode = nyPeriode?.let { DatoperiodeEntity(it.fom, it.tom) },
+                    nyPeriode = DatoperiodeEntity(nyPeriode.fom, nyPeriode.tom),
                     gammeltBeløp = gammeltBeløp,
                     nyttBeløp = nyttBeløp,
                 )
             }
 
-            override fun slåSammen(other: Forskjell): Forskjell? {
-                return when (other) {
-                    is UendretPeriode -> EndretPeriode(
-                        periode = periode,
-                        nyPeriode = nyPeriode,
-                        gammeltBeløp = gammeltBeløp,
-                        nyttBeløp = nyttBeløp,
-                        etterfølgende = etterfølgende?.slåSammen(other) ?: other,
-                    )
-
-                    is EndretPeriode -> EndretPeriode(
-                        periode = this.periode.fom til other.periode.tom,
-                        nyPeriode = when {
-                            nyPeriode != null -> nyPeriode.fom til (other.nyPeriode?.tom ?: other.periode.tom)
-                            other.nyPeriode != null -> periode.fom til other.nyPeriode.tom
-                            else -> null
-                        },
-                        gammeltBeløp = this.gammeltBeløp + other.gammeltBeløp + (etterfølgende?.gammeltBeløp ?: BigDecimal.ZERO),
-                        nyttBeløp = this.nyttBeløp + other.nyttBeløp + (etterfølgende?.nyttBeløp ?: BigDecimal.ZERO),
-                        etterfølgende = null,
-                    )
-
-                    else -> null
-                }
+            override fun slåSammen(other: Forskjell): Forskjell? = when {
+                other is EndretPeriode && kanSlåsSammenMed(other) -> slåSammenEndring(other)
+                else -> null
             }
 
+            private fun slåSammenEndring(other: EndretPeriode): Forskjell = EndretPeriode(
+                periode = this.periode.fom til other.periode.tom,
+                nyPeriode = this.nyPeriode.fom til other.nyPeriode.tom,
+                gammeltBeløp = this.gammeltBeløp + other.gammeltBeløp,
+                nyttBeløp = this.nyttBeløp + other.nyttBeløp,
+            )
+
             override fun tilDto(): KravgrunnlagForskjellDto = EndretPeriodeDto(
-                fom = nyPeriode?.fom ?: periode.fom,
-                tom = nyPeriode?.tom ?: periode.tom,
+                fom = nyPeriode.fom,
+                tom = nyPeriode.tom,
                 gammelPeriode = PeriodeDto(periode.fom, periode.tom),
                 gammeltBeløp = gammeltBeløp.toInt(),
                 nyttBeløp = nyttBeløp.toInt(),
             )
 
             override fun slåSammenForVisning(other: Forskjell): Forskjell = when (other) {
+                is EndretPeriode -> slåSammenEndring(other)
                 is NyPeriode -> EndretPeriode(
                     periode = periode,
-                    nyPeriode = (nyPeriode?.fom ?: periode.fom) til other.periode.tom,
+                    nyPeriode = nyPeriode.fom til other.periode.tom,
                     gammeltBeløp = gammeltBeløp,
                     nyttBeløp = nyttBeløp + other.nyttBeløp,
-                    etterfølgende = null,
                 )
 
                 else -> super.slåSammenForVisning(other)
@@ -295,7 +281,11 @@ class KravgrunnlagSammenligning(
                 else -> null
             }
 
-            override fun tilDto(): KravgrunnlagForskjellDto? = null
+            override fun tilDto(): KravgrunnlagForskjellDto = UendretPeriodeDto(
+                fom = periode.fom,
+                tom = periode.tom,
+                beløp = gammeltBeløp.toInt(),
+            )
         }
     }
 

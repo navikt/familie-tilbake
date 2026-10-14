@@ -606,7 +606,6 @@ class FaktaStegTest {
             nyPeriode = 1.januar(2021) til 20.januar(2021),
             gammeltBeløp = 1500.kroner,
             nyttBeløp = 1000.kroner,
-            etterfølgende = null,
         )
         faktasteg.periodeEndret(forskjell)
 
@@ -647,19 +646,17 @@ class FaktaStegTest {
         faktasteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
         faktasteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode2,
-                nyPeriode = null,
+                nyPeriode = periode2,
                 gammeltBeløp = 2000.kroner,
                 nyttBeløp = 3000.kroner,
-                etterfølgende = null,
             ),
         )
 
@@ -674,10 +671,9 @@ class FaktaStegTest {
         faktasteg.periodeEndret(
             KravgrunnlagSammenligning.Forskjell.EndretPeriode(
                 periode = periode1,
-                nyPeriode = null,
+                nyPeriode = periode1,
                 gammeltBeløp = 3000.kroner,
                 nyttBeløp = 4000.kroner,
-                etterfølgende = null,
             ),
         )
 

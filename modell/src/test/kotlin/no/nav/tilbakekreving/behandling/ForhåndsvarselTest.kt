@@ -13,9 +13,11 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselErSendtDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselUnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TidligereBrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning.OverordnetSammendrag
@@ -177,8 +179,9 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<IkkeVurdertDto>()
-            it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
-            it.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+            it.brukeruttalelse.shouldBeInstanceOf<TidligereBrukeruttalelseDto> { brukeruttalelse ->
+                brukeruttalelse.beskrivelse shouldBe "Brukeren har uttalt seg"
+            }
         }
         forhåndsvarsel.erFullstendig(KlokkeStub(1.februar(2021))) shouldBe false
     }
@@ -192,7 +195,9 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-            it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
+            it.brukeruttalelse.shouldBeInstanceOf<TidligereBrukeruttalelseDto> { brukeruttalelse ->
+                brukeruttalelse.beskrivelse shouldBe "Brukeren har uttalt seg"
+            }
             it.tilbakeført shouldBe null
             it.ferdigvurdert shouldBe false
         }
@@ -212,7 +217,9 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(varselbrev(), KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselErSendtDto>()
-            it.brukeruttalelse?.beskrivelse shouldBe "Ny uttalelse"
+            it.brukeruttalelse.shouldBeInstanceOf<BrukeruttalelseDto> { brukeruttalelse ->
+                brukeruttalelse.beskrivelse shouldBe "Ny uttalelse"
+            }
             it.tilbakeført shouldBe null
             it.ferdigvurdert shouldBe true
         }
@@ -231,7 +238,9 @@ class ForhåndsvarselTest {
 
         forhåndsvarsel.nyForhåndsvarselTilFrontend(null, KlokkeStub(1.februar(2021))).should {
             it.forhaandsvarselSteg.shouldBeInstanceOf<ForhaandsvarselUnntakDto>()
-            it.brukeruttalelse?.beskrivelse shouldBe "Brukeren har uttalt seg"
+            it.brukeruttalelse.shouldBeInstanceOf<TidligereBrukeruttalelseDto> { brukeruttalelse ->
+                brukeruttalelse.beskrivelse shouldBe "Brukeren har uttalt seg"
+            }
             it.tilbakeført shouldBe null
         }
         forhåndsvarsel.erFullstendig(KlokkeStub(1.februar(2021))) shouldBe true
