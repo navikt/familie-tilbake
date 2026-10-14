@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegsinfoDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatDto
 import no.nav.tilbakekreving.api.v1.dto.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
@@ -523,15 +524,32 @@ class Behandling internal constructor(
         callback: Behandling.() -> T,
     ): T {
         val statusFør = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
+        val vedtakGodkjentFør = kanUtbetales(sideeffektContext.klokke)
         val result = callback()
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
         sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
+        sendVilkårsvurderingHvisVedtakBleGodkjent(vedtakGodkjentFør, sideeffektContext, ytelse)
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
         }
         return result
+    }
+
+    private fun sendVilkårsvurderingHvisVedtakBleGodkjent(
+        vedtakGodkjentFør: Boolean,
+        sideeffektContext: SideeffektContext,
+        ytelse: Ytelse,
+    ) {
+        if (vedtakGodkjentFør || !kanUtbetales(sideeffektContext.klokke)) return
+        sideeffektContext.bigQueryService.lagreVilkårsvurdering(
+            BigQueryVilkårsvurderingDataDto(
+                behandlingId = id.toString(),
+                ytelse = ytelse.hentYtelsesnavn(Språkkode.NB),
+                perioder = vilkårsvurderingsteg.bigqueryPerioder(),
+            ),
+        )
     }
 
     private fun oppdaterAutomatiskeBehandlinger(sideeffektContext: SideeffektContext) {

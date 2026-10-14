@@ -3,7 +3,11 @@ package no.nav.familie.tilbake.bigQuery
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
+import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
+import no.nav.tilbakekreving.bigquery.AktsomhetsgradMapper
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.kontrakter.Varsel
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -14,7 +18,34 @@ class BigQueryAdapterService(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val bigQueryService: BigQueryService,
     private val fagsakRepository: FagsakRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
+    fun lagreVilkårsvurdering(behandling: Behandling) {
+        val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
+        val perioder = vilkårsvurderingRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
+            .flatMap { it.perioder }
+            .sortedBy { it.periode.fom }
+            .mapNotNull { periode ->
+                AktsomhetsgradMapper.fraVilkårsvurderingsresultat(
+                    periode.vilkårsvurderingsresultat,
+                    periode.aktsomhet?.aktsomhet,
+                )?.let { aktsomhetsgrad ->
+                    BigQueryVilkårsvurderingsperiodeDto(
+                        periodeId = periode.id,
+                        periode = periode.periode.toDatoperiode(),
+                        aktsomhetsgrad = aktsomhetsgrad,
+                    )
+                }
+            }
+        bigQueryService.lagreVilkårsvurdering(
+            BigQueryVilkårsvurderingDataDto(
+                behandlingId = behandling.id.toString(),
+                ytelse = fagsak.fagsystem.navn,
+                perioder = perioder,
+            ),
+        )
+    }
+
     fun oppdaterBigQuery(
         behandling: Behandling,
         harTilleggsfrist: Boolean?,

@@ -41,6 +41,7 @@ class BehandlingsvedtakService(
             )
         val oppdatertBehandling = behandlingRepository.update(behandling.copy(resultater = setOf(behandlingsresultat)))
         bigQueryAdapterService.oppdaterBigQuery(oppdatertBehandling, null, null)
+        bigQueryAdapterService.lagreVilkårsvurdering(oppdatertBehandling)
 
         tellerService.tellVedtak(behandlingsresultatstype, behandling)
     }
