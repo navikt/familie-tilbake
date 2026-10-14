@@ -25,7 +25,6 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
@@ -419,22 +418,6 @@ class ForvaltningController(
                 .copy(institusjon = Institusjon(orgnummer)),
         )
     }
-
-    @Operation(summary = "Henter antall revurderinger per årsak")
-    @GetMapping(
-        path = ["/revurderinger-per-arsak"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun hentRevurderingerPerÅrsak(): Ressurs<List<RevurderingÅrsak>> {
-        return Ressurs.success(
-            behandlingRepository.hentRevurderingerPerÅrsak().map {
-                RevurderingÅrsak(
-                    type = it.type,
-                    antall = it.antall,
-                )
-            },
-        )
-    }
 }
 
 data class Behandlingsinfo(
@@ -453,9 +436,4 @@ data class Kravgrunnlagsinfo(
     val mottattXmlId: UUID?,
     val eksternId: String,
     val opprettetTid: LocalDateTime,
-)
-
-data class RevurderingÅrsak(
-    val type: Behandlingsårsakstype,
-    val antall: Long,
 )
