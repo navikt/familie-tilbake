@@ -422,19 +422,24 @@ class ForvaltningController(
         )
     }
 
-    @Operation(summary = "Teller antall vilkårsperioder med resultat FORSTO_BURDE_FORSTÅTT fra 2024 til i dag")
+    @Operation(summary = "Teller antall vilkårsperioder med resultat FORSTO_BURDE_FORSTÅTT for hvert år i 2024, 2025 og 2026")
     @GetMapping(
         path = ["/vilkarsvurderingsperiode/antall-forsto-burde-forstatt"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentAntallVilkårsperioderMedForstoBurdeForstått(): Ressurs<Long> {
-        val antall = vilkårsvurderingRepository.countByVilkårsvurderingsresultatAndFomBetween(
-            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT.name,
-            fraOgMed = LocalDate.of(2024, 1, 1),
-            tilOgMed = LocalDate.now(),
-        )
+    fun hentAntallVilkårsperioderMedForstoBurdeForstått(): Ressurs<Map<Int, Long>> {
+        val antallPerÅr = (2024..2026).associateWith { år ->
+            val fraOgMed = LocalDate.of(år, 1, 1)
+            val tilOgMed = LocalDate.of(år, 12, 31)
 
-        return Ressurs.success(antall)
+            vilkårsvurderingRepository.countByVilkårsvurderingsresultatAndFomBetween(
+                vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT.name,
+                fraOgMed = fraOgMed,
+                tilOgMed = tilOgMed,
+            )
+        }
+
+        return Ressurs.success(antallPerÅr)
     }
 }
 
