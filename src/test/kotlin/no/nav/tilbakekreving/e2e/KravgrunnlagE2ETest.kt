@@ -31,6 +31,7 @@ import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub
 import no.nav.tilbakekreving.integrasjoner.KafkaProducerStub.Companion.finnKafkamelding
@@ -234,7 +235,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                     KravgrunnlagHendelse(
                         id = UUID.randomUUID(),
                         vedtakId = KravgrunnlagGenerator.nextPaddedId(6).toBigInteger(),
-                        kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+                        kravstatuskode = Kravstatuskode.NY,
                         fagsystemVedtaksdato = LocalDate.now(),
                         vedtakGjelder = Aktør.Person(brukerIdent),
                         utbetalesTil = Aktør.Person(brukerIdent),
