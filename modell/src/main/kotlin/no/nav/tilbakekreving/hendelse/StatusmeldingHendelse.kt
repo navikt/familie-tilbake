@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.feil.Sporing
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse.Kravstatuskode
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID

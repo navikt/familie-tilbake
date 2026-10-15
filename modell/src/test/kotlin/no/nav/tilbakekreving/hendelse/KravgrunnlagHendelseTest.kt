@@ -148,7 +148,7 @@ class KravgrunnlagHendelseTest {
 
     @Test
     fun `kravgrunnlag med ulik kravstatuskode`() {
-        val a = standardKravgrunnlag(kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY)
+        val a = standardKravgrunnlag(kravstatuskode = Kravstatuskode.NY)
         val b = standardKravgrunnlag()
 
         a.harNokOverlapp(b) shouldBe true
@@ -253,7 +253,7 @@ class KravgrunnlagHendelseTest {
 
         private fun standardKravgrunnlag(
             vedtakId: BigInteger = this.vedtakId,
-            kravstatuskode: KravgrunnlagHendelse.Kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.ENDRET,
+            kravstatuskode: Kravstatuskode = Kravstatuskode.ENDRET,
             fagsystemVedtaksdato: LocalDate = 1.februar(2021),
             vedtakGjelder: Aktør = bruker,
             utbetalesTil: Aktør = bruker,

@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -63,7 +64,7 @@ fun kravgrunnlag(
     utbetalesTil: Aktør = Aktør.Person(bruker().ident),
     perioder: List<KravgrunnlagHendelse.Periode> = listOf(kravgrunnlagPeriode()),
     vedtakId: BigInteger = BigInteger(128, Random()),
-    kravstatuskode: KravgrunnlagHendelse.Kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+    kravstatuskode: Kravstatuskode = Kravstatuskode.NY,
     kontrollfelt: String = UUID.randomUUID().toString(),
     referanse: String = UUID.randomUUID().toString(),
     kravgrunnlagId: String = UUID.randomUUID().toString(),

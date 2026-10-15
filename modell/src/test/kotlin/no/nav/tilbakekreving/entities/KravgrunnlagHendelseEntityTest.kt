@@ -2,7 +2,7 @@ package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.bruker
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -19,7 +19,7 @@ class KravgrunnlagHendelseEntityTest {
             id = UUID.randomUUID(),
             tilbakekrevingId = UUID.randomUUID().toString(),
             vedtakId = BigInteger.ONE,
-            kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.NY,
+            kravstatuskode = Kravstatuskode.NY,
             fagsystemVedtaksdato = null,
             vedtakGjelder = AktørEntity(AktørType.Person, bruker().ident),
             utbetalesTil = AktørEntity(AktørType.Person, bruker().ident),

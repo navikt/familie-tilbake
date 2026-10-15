@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse.Kravstatuskode
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import java.sql.ResultSet
 import java.util.UUID
 

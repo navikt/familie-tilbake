@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.entities
 
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse.Kravstatuskode
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -32,7 +33,7 @@ object KravgrunnlagMapper {
         val kravgrunnlagHendelse = KravgrunnlagHendelse(
             id = UUID.randomUUID(),
             vedtakId = kravgrunnlag.vedtakId,
-            kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
+            kravstatuskode = Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
             fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
             vedtakGjelder = mapAktør(kravgrunnlag.typeGjelderId, kravgrunnlag.vedtakGjelderId),
             utbetalesTil = mapAktør(kravgrunnlag.typeUtbetId, kravgrunnlag.utbetalesTilId),
@@ -101,7 +102,7 @@ object KravgrunnlagMapper {
         return KravgrunnlagHendelse(
             id = UUID.randomUUID(),
             vedtakId = kravgrunnlag.vedtakId.toBigInteger(),
-            kravstatuskode = KravgrunnlagHendelse.Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
+            kravstatuskode = Kravstatuskode.forOppdragKode(kravgrunnlag.kodeStatusKrav),
             fagsystemVedtaksdato = kravgrunnlag.datoVedtakFagsystem,
             vedtakGjelder = mapAktør(TypeGjelderDto.valueOf(kravgrunnlag.typeGjelder), kravgrunnlag.gjelderId),
             utbetalesTil = mapAktør(TypeGjelderDto.valueOf(kravgrunnlag.typeUtbetalesTilId), kravgrunnlag.utbetalesTilId),
