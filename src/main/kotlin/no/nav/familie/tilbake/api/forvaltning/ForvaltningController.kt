@@ -18,6 +18,7 @@ import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
+import no.nav.familie.tilbake.vilkårsvurdering.VilkårsvurderingRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.BehovMediator
 import no.nav.tilbakekreving.FagsystemUtil
@@ -26,6 +27,7 @@ import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
@@ -64,6 +66,7 @@ class ForvaltningController(
     private val fagsakRepository: FagsakRepository,
     private val behovMediator: BehovMediator,
     private val behandlingRepository: BehandlingRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -417,6 +420,21 @@ class ForvaltningController(
             fagsakRepository.finnFagsakForBehandlingId(behandlingId)
                 .copy(institusjon = Institusjon(orgnummer)),
         )
+    }
+
+    @Operation(summary = "Teller antall vilkårsperioder med resultat FORSTO_BURDE_FORSTÅTT fra 2024 til i dag")
+    @GetMapping(
+        path = ["/vilkarsvurderingsperiode/antall-forsto-burde-forstatt"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentAntallVilkårsperioderMedForstoBurdeForstått(): Ressurs<Long> {
+        val antall = vilkårsvurderingRepository.countByVilkårsvurderingsresultatAndFomBetween(
+            vilkårsvurderingsresultat = Vilkårsvurderingsresultat.FORSTO_BURDE_FORSTÅTT.name,
+            fraOgMed = LocalDate.of(2024, 1, 1),
+            tilOgMed = LocalDate.now(),
+        )
+
+        return Ressurs.success(antall)
     }
 }
 
