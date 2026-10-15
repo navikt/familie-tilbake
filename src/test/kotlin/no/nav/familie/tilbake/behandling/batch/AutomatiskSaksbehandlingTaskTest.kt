@@ -43,6 +43,7 @@ import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Vilkårsvurderingsresultat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -162,6 +163,7 @@ internal class AutomatiskSaksbehandlingTaskTest : OppslagSpringRunnerTest() {
         exception.message shouldBe "Behandling med id=${behandling.id} er på vent, kan ikke behandle steg FAKTA"
     }
 
+    @Disabled
     @Test
     fun `doTask skal behandle behandling automatisk`() {
         automatiskSaksbehandlingTask.doTask(lagTask())

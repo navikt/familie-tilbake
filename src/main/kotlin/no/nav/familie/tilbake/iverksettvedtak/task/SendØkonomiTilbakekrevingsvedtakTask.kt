@@ -11,6 +11,8 @@ import no.nav.familie.tilbake.iverksettvedtak.IverksettelseService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import org.springframework.stereotype.Service
@@ -35,6 +37,7 @@ class SendØkonomiTilbakekrevingsvedtakTask(
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
+        throw ModellFeil.TjenesteUtilgjengeligException(Sporing(logContext.fagsystemId ?: "ukjent", logContext.behandlingId))
         log.medContext(logContext) {
             info("SendØkonomiTilbakekrevingsvedtakTask prosesserer med id={}", task.id)
         }
