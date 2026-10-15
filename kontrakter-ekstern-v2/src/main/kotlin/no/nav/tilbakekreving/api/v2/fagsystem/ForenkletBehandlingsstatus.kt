@@ -6,5 +6,6 @@ enum class ForenkletBehandlingsstatus {
     VENTER,
     TIL_BEHANDLING,
     TIL_GODKJENNING,
+    SPERRET,
     AVSLUTTET,
 }

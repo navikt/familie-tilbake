@@ -28,6 +28,7 @@ internal sealed interface Tilstand {
     val tilbakekrevingTilstand: TilbakekrevingTilstand
     val kanEndresAvSaksbehandler: Boolean get() = false
     val kanRevurderes: Boolean get() = false
+    val erSperret: Boolean get() = false
 
     fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell
 

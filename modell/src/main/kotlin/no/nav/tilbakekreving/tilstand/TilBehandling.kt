@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -49,14 +48,5 @@ object TilBehandling : Tilstand {
                 }
             }
         }
-    }
-
-    override fun håndter(
-        tilbakekreving: Tilbakekreving,
-        kravgrunnlag: KravgrunnlagHendelse,
-        sideeffektContext: SideeffektContext,
-    ) {
-        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
-        tilbakekreving.trengerFagsysteminfo(sideeffektContext)
     }
 }

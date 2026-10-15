@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -266,6 +267,24 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
     journalpostId = "123",
     dokumentInfoId = "321",
 )
+
+fun sperrStatusmelding(
+    vedtakId: BigInteger,
+    vedtakGjelder: Aktør,
+    referanse: String,
+    kodeFagomraade: String,
+    fagsystemId: String,
+): StatusmeldingHendelse =
+    StatusmeldingHendelse(
+        id = UUID.randomUUID(),
+        opprettet = LocalDateTime.now(),
+        vedtakId = vedtakId,
+        kravstatuskode = Kravstatuskode.SPERRET,
+        vedtakGjelder = vedtakGjelder,
+        referanse = referanse,
+        kodeFagomraade = kodeFagomraade,
+        fagsystemId = fagsystemId,
+    )
 
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
 

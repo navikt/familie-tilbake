@@ -9,10 +9,12 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import no.nav.tilbakekreving.typer.v1.JaNeiDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import org.springframework.http.HttpStatus
@@ -23,7 +25,7 @@ object KravgrunnlagMapper {
         return OpprettTilbakekrevingHendelse(
             eksternFagsak = OpprettTilbakekrevingHendelse.EksternFagsak(
                 eksternId = kravgrunnlag.fagsystemId,
-                ytelse = ytelseFor(kravgrunnlag),
+                ytelse = ytelseFor(kravgrunnlag.kodeFagomraade, kravgrunnlag.fagsystemId),
             ),
             opprettelsesvalg = Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
         )
@@ -63,6 +65,23 @@ object KravgrunnlagMapper {
         return kravgrunnlagHendelse
     }
 
+    fun tilStatusmeldingHendelse(kravOgVedtakstatus: KravOgVedtakstatus, klokke: Klokke): StatusmeldingHendelse {
+        return StatusmeldingHendelse(
+            id = UUID.randomUUID(),
+            vedtakId = kravOgVedtakstatus.vedtakId,
+            kravstatuskode = Kravstatuskode.forOppdragKode(kravOgVedtakstatus.kodeStatusKrav),
+            vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
+            referanse = kravOgVedtakstatus.referanse
+                ?: throw Feil(
+                    message = "Mottok statusmelding uten referanse",
+                    logContext = SecureLog.Context.utenBehandling(kravOgVedtakstatus.fagsystemId),
+                ),
+            opprettet = klokke.nå(),
+            kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
+            fagsystemId = kravOgVedtakstatus.fagsystemId,
+        )
+    }
+
     private fun mapAktør(
         typeGjelder: TypeGjelderDto,
         gjelderId: String,
@@ -85,15 +104,15 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun ytelseFor(kravgrunnlag: DetaljertKravgrunnlagDto) = when (kravgrunnlag.kodeFagomraade) {
+    fun ytelseFor(kodeFagomraade: String, fagsystemId: String) = when (kodeFagomraade) {
         "TILLST", "TILLSTDR", "TILLSTBO", "TILLSTFL", "TILLSTLM", "TILLSTPB", "TILLSTRA", "TILLSTRO", "TILLISTRS" -> Ytelse.Tilleggsstønad
         "AAP" -> Ytelse.Arbeidsavklaringspenger
         "TILTPENG" -> Ytelse.Tiltakspenger
         "DP" -> Ytelse.Dagpenger
         else -> throw Feil(
-            message = "Kan ikke håndtere saker for ${kravgrunnlag.kodeFagomraade} med ny modell",
+            message = "Kan ikke håndtere saker for $kodeFagomraade med ny modell",
             httpStatus = HttpStatus.BAD_REQUEST,
-            logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
+            logContext = SecureLog.Context.utenBehandling(fagsystemId),
         )
     }
 

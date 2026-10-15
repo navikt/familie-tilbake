@@ -131,6 +131,7 @@ object BehandlingMapper {
             saksbehandlingstype = behandling.saksbehandlingstype,
             erNyModell = false,
             innloggetRolle = innloggetSaksbehandlerRolle,
+            erSperret = false,
         )
     }
 
@@ -245,6 +246,10 @@ object BehandlingMapper {
             Behandlingsstatus.DISTRIUBER_VEDTAK,
             -> {
                 throw IllegalArgumentException("DISTRIUBER_VEDTAK er til ny modell!")
+            }
+            Behandlingsstatus.SPERRET,
+            -> {
+                throw IllegalArgumentException("SPERRET er til ny modell!")
             }
         }
 

@@ -429,6 +429,7 @@ class Behandling internal constructor(
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
             innloggetRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
+            erSperret = tilstand.erSperret,
         )
     }
 

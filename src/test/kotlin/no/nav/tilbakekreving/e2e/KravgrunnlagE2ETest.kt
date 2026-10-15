@@ -258,9 +258,19 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `statuskode som ikke er støttet blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val referanse = KravgrunnlagGenerator.nextPaddedId(4)
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId, referanse = referanse))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                referanse = referanse,
+                kodeStatusKrav = "SPER",
+            ),
+        )
 
         sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
 
@@ -491,6 +501,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        val referanse = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
@@ -499,12 +510,22 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 perioder = listOf(
                     KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
                 ),
+                referanse = referanse,
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
+
+        sendStatusmelding(
+            StatusmeldingGenerator.forTilleggsstønader(
+                vedtakId = vedtakId,
+                fagsystemId = fagsystemId,
+                referanse = referanse,
+                kodeStatusKrav = "SPER",
+            ),
+        )
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
@@ -541,6 +562,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        val referanse = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
@@ -549,6 +571,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 perioder = listOf(
                     KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
                 ),
+                referanse = referanse,
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
@@ -560,6 +583,15 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
+
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forTilleggsstønader(
+                vedtakId = vedtakId,
+                fagsystemId = fagsystemId,
+                referanse = referanse,
+                kodeStatusKrav = "SPER",
+            ),
+        )
 
         val kontrollfelt = "2025-12-24-11.12.13.234567"
         sendKravgrunnlagOgAvventLesing(
@@ -586,6 +618,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        val referanse = KravgrunnlagGenerator.nextPaddedId(4)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
@@ -594,6 +627,7 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                 perioder = listOf(
                     KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
                 ),
+                referanse = referanse,
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
@@ -606,6 +640,15 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             )
         }
 
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forTilleggsstønader(
+                vedtakId = vedtakId,
+                fagsystemId = fagsystemId,
+                referanse = referanse,
+                kodeStatusKrav = "SPER",
+            ),
+        )
+
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
@@ -617,6 +660,15 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                     KravgrunnlagGenerator.standardPeriode(1.januar(2021) til 31.januar(2021)),
                     KravgrunnlagGenerator.standardPeriode(1.februar(2021) til 28.februar(2021)),
                 ),
+            ),
+        )
+
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forTilleggsstønader(
+                vedtakId = vedtakId,
+                fagsystemId = fagsystemId,
+                referanse = referanse,
+                kodeStatusKrav = "SPER",
             ),
         )
 

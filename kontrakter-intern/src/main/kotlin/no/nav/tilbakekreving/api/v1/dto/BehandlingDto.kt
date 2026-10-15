@@ -46,6 +46,7 @@ data class BehandlingDto(
     val erNyModell: Boolean,
     val innloggetRolle: BehandlerRolle,
     val endretKravgrunnlag: EndretKravgrunnlag?,
+    val erSperret: Boolean,
 )
 
 data class BehandlingsstegsinfoDto(
