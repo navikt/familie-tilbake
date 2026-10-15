@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
@@ -45,7 +46,7 @@ class BehandlingEntityTest {
                 url = "http://localhost:8080",
                 opprettet = LocalDateTime.now(),
             ),
-        )
+        ) as HistorikkReferanse<UUID, EksternFagsakRevurdering>
         // Lagre et nytt innslag så vi er sikker på at det riktige plukkes opp, ikke det nyeste
         fagsakBehandlingHistorikk.lagre(EksternFagsakRevurdering.Ukjent(UUID.randomUUID(), UUID.randomUUID().toString(), null, opprettet = LocalDateTime.now()))
 

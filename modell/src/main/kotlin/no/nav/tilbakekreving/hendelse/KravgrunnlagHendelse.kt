@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
-import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import java.math.BigDecimal
@@ -24,21 +23,21 @@ import java.util.UUID
 
 class KravgrunnlagHendelse(
     override val id: UUID,
-    private val vedtakId: BigInteger,
-    private val kravstatuskode: Kravstatuskode,
-    internal val fagsystemVedtaksdato: LocalDate?,
-    val vedtakGjelder: Aktør,
+    override val vedtakId: BigInteger,
+    override val kravstatuskode: Kravstatuskode,
+    val fagsystemVedtaksdato: LocalDate?,
+    override val vedtakGjelder: Aktør,
     private val utbetalesTil: Aktør,
     private val skalBeregneRenter: Boolean,
     private val ansvarligEnhet: String,
     private val kontrollfelt: String,
-    internal val kravgrunnlagId: String,
-    val referanse: String,
+    val kravgrunnlagId: String,
+    override val referanse: String,
     private val perioder: List<Periode>,
     val korrigering: Boolean,
     override val opprettet: LocalDateTime,
-) : Historikk.HistorikkInnslag<UUID>, KravgrunnlagAdapter {
-    fun valider(sporing: Sporing) {
+) : KravHendelse, KravgrunnlagAdapter {
+    override fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson, sporing)
         }

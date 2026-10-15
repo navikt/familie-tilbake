@@ -14,16 +14,16 @@ import java.util.UUID
 data class Behandlingslogg(
     private val historikk: MutableList<LoggInnslag>,
 ) : Historikk<UUID, LoggInnslag> {
-    override fun lagre(innslag: LoggInnslag): HistorikkReferanse<UUID, LoggInnslag> {
+    override fun <T : LoggInnslag> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         if (innslag.behandlingsloggstype.type == Historikkinnslagstype.AUTOMATISK_VURDERING) {
             val eksisterende = historikk.lastOrNull { it.behandlingsloggstype == innslag.behandlingsloggstype }
             if (eksisterende != null) {
                 eksisterende.sistOppdatert = innslag.opprettetTid
-                return HistorikkReferanse(this, eksisterende.id)
+                return HistorikkReferanse(this, eksisterende.id) as HistorikkReferanse<UUID, T>
             }
         }
         historikk.add(innslag)
-        return HistorikkReferanse(this, innslag.id)
+        return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, LoggInnslag> {
