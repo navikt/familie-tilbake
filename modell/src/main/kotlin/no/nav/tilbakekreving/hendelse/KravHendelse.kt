@@ -14,6 +14,4 @@ sealed interface KravHendelse : Historikk.HistorikkInnslag<UUID> {
     val referanse: String?
 
     fun valider(sporing: Sporing)
-
-    fun skalOppretteNySak(): Boolean = false
 }

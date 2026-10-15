@@ -51,7 +51,7 @@ class KravgrunnlagHendelse(
         }
     }
 
-    override fun skalOppretteNySak() = kravstatuskode == Kravstatuskode.NY
+    fun skalOppretteNySak() = kravstatuskode == Kravstatuskode.NY
 
     fun totaltBeløpFor(
         periode: Datoperiode,
