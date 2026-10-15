@@ -40,6 +40,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -55,8 +56,10 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.Avsluttet
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
+import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -176,6 +179,25 @@ class Tilbakekreving internal constructor(
     fun håndter(påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, påminnelse, sideeffektContext)
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
+    }
+
+    fun håndter(hendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        // tilstand.håndter(this, hendelse, sideeffektContext)
+
+        val behandlingsloggstype = when (hendelse.kravgrunnlagBortfalt()) {
+            true -> {
+                byttTilstand(Avsluttet, sideeffektContext)
+                Behandlingsloggstype.STATUSMELDING_AVSL_MOTTATT
+            }
+            false -> {
+                byttTilstand(Sperret, sideeffektContext)
+                Behandlingsloggstype.STATUSMELDING_SPER_MOTTATT
+            }
+        }
+        sideeffektContext.logg(
+            behandlingsloggstype = behandlingsloggstype,
+            behandlingId = null,
+        )
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {

@@ -14,6 +14,7 @@ class KravgrunnlagMediator(
     private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val applicationProperties: ApplicationProperties,
+    private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
 ) {
     @Scheduled(fixedRate = 1000L)
     fun lesKravgrunnlag() {
@@ -25,13 +26,29 @@ class KravgrunnlagMediator(
                     tilbakekreving.håndter(kravgrunnlagHendelse, sideeffektContext)
                 }
             } else {
-                val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag).tilFagsystemDTO()
+                val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag.kodeFagomraade, kravgrunnlag.fagsystemId).tilFagsystemDTO()
                 tilbakekrevingService.hentOgLagreTilbakekreving(
                     filter = TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem),
                     validerScope = false,
                 ) { tilbakekreving, context ->
                     tilbakekreving.håndter(kravgrunnlagHendelse, context(Behandler.Vedtaksløsning))
                 }
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 1000L)
+    fun lesStatusmelding() {
+        statusmeldingBufferRepository.konsumerStatusmelding { entity ->
+            val statusmelding = KravgrunnlagUtil.unmarshalStatusmelding(entity.statusmelding)
+            val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, SystemKlokke)
+
+            val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
+            tilbakekrevingService.hentOgLagreTilbakekreving(
+                filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),
+                validerScope = false,
+            ) { tilbakekreving, context ->
+                tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
             }
         }
     }

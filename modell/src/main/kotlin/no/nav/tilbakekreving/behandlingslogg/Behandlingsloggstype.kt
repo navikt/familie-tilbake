@@ -22,6 +22,18 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    STATUSMELDING_AVSL_MOTTATT(
+        tittel = "Kravet er bortfal i økonomi",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    STATUSMELDING_SPER_MOTTATT(
+        tittel = "Kravet er sperret av økonomi",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     TILBAKEKREVING_OPPRETTET(
         tittel = "Tilbakekreving opprettet",
         tekst = null,

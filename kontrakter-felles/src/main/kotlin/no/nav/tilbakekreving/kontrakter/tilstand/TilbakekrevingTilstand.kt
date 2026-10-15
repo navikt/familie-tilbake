@@ -12,4 +12,5 @@ enum class TilbakekrevingTilstand {
     JOURNALFØR_VEDTAK,
     DISTRIUBER_VEDTAK,
     AVSLUTTET,
+    SPERRET,
 }

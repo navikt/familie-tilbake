@@ -9,6 +9,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class KravgrunnlagListener(
@@ -31,6 +32,7 @@ class KravgrunnlagListener(
             }
             statusmeldingBufferRepository.lagre(
                 StatusmeldingBufferRepository.Entity(
+                    statusmeldingId = UUID.randomUUID(),
                     statusmelding = meldingXML,
                     fagsystemId = statusmelding.fagsystemId,
                     vedtakId = statusmelding.vedtakId.toString(),

@@ -15,6 +15,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.query
+import java.util.UUID
 
 class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
@@ -60,6 +61,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         val dto = KravgrunnlagUtil.unmarshalStatusmelding(statusmelding)
         statusmeldingBufferRepository.lagre(
             StatusmeldingBufferRepository.Entity(
+                statusmeldingId = UUID.randomUUID(),
                 statusmelding = statusmelding,
                 fagsystemId = dto.fagsystemId,
                 vedtakId = dto.vedtakId.toString(),

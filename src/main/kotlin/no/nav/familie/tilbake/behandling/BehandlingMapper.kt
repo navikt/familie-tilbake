@@ -246,6 +246,10 @@ object BehandlingMapper {
             -> {
                 throw IllegalArgumentException("DISTRIUBER_VEDTAK er til ny modell!")
             }
+            Behandlingsstatus.SPERRET,
+            -> {
+                throw IllegalArgumentException("SPERRET er til ny modell!")
+            }
         }
 
     private fun mapÅrsak(behandling: Behandling): no.nav.tilbakekreving.kontrakter.Behandlingsårsakstype? {

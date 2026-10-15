@@ -59,6 +59,13 @@ enum class BehandlingsstatusModell(
             return ForenkletBehandlingsstatus.TIL_GODKJENNING
         }
     },
+    SPERRET(
+        gammelFrontendDTO = Behandlingsstatus.SPERRET,
+    ) {
+        override fun forenkletStatus(ytelse: Ytelse, features: FeatureToggles): ForenkletBehandlingsstatus {
+            return ForenkletBehandlingsstatus.SPERRET
+        }
+    },
     AVSLUTTET(
         gammelFrontendDTO = Behandlingsstatus.AVSLUTTET,
     ) {

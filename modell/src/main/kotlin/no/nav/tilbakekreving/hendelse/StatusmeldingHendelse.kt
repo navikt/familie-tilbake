@@ -13,6 +13,10 @@ data class StatusmeldingHendelse(
     override val kravstatuskode: Kravstatuskode,
     override val vedtakGjelder: Aktør,
     override val referanse: String?,
+    val kodeFagomraade: String,
+    val fagsystemId: String,
 ) : KravHendelse {
     override fun valider(sporing: Sporing) = Unit
+
+    fun kravgrunnlagBortfalt() = kravstatuskode == Kravstatuskode.AVSLUTTET
 }

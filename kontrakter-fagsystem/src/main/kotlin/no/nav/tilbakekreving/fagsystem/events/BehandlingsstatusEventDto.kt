@@ -6,5 +6,6 @@ enum class BehandlingsstatusEventDto {
     VENTER,
     TIL_BEHANDLING,
     TIL_GODKJENNING,
+    SPERRET,
     AVSLUTTET,
 }
