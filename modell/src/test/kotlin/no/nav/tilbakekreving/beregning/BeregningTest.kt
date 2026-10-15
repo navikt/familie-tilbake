@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.beregning
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
@@ -26,6 +27,7 @@ import no.nav.tilbakekreving.beregning.adapter.VilkårsvurdertPeriodeAdapter
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultatsperiode
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
@@ -1237,6 +1239,207 @@ class BeregningTest {
                 klassekode = "BATR",
             ),
         )
+    }
+
+    @Test
+    fun `fordeling av beløp i behold over flere perioder`() {
+        val beregning = Beregning(
+            beregnRenter = false,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.mars(2021)).medVurdering(forårsaketAvNav().godTro(1000500.kroner)),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(500.kroner, originaltUtbetaltBeløp = 500.kroner),
+                1.februar(2021) til 28.februar(2021) medBeløp beløp(1000.kroner, originaltUtbetaltBeløp = 1000.kroner),
+                1.mars(2021) til 31.mars(2021) medBeløp beløp(999000.kroner, originaltUtbetaltBeløp = 999000.kroner),
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        val delperioder = beregning.beregn()
+        beregning.oppsummer().totaltTilbakekrevesBeløpMedRenterUtenSkatt shouldBe 1000500.kroner
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 500.kroner,
+            feilutbetaltBeløp = 500.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 500.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 500.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 1000.kroner,
+            feilutbetaltBeløp = 1000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 1000.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 1000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[2].shouldMatch(
+            periode = 1.mars(2021) til 31.mars(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 999000.kroner,
+            feilutbetaltBeløp = 999000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 999000.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 999000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+    }
+
+    @Test
+    fun `fordeling av halv krone ved deler i behold og reduksjon`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.januar(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = DelerIBehold(
+                            beløp = 1501.kroner,
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Ja(
+                                        prosentdelReduksjon = 50,
+                                    ),
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "begrunnelse",
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1000.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        val delperioder = beregning.beregn()
+        beregning.oppsummer().totaltTilbakekrevesBeløpMedRenterUtenSkatt shouldBe 750.kroner
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 750.kroner,
+            feilutbetaltBeløp = 1000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 750.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+    }
+
+    @Test
+    fun `fordeling av halv krone over flere måneder ved deler i behold og reduksjon`() {
+        val beregning = Beregning(
+            beregnRenter = true,
+            tilbakekrevLavtBeløp = true,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.mars(2021)).medVurdering(
+                    GodTro(
+                        beløpIBehold = DelerIBehold(
+                            beløp = 1501.kroner,
+                            annetBegrunnelse = null,
+                            begrunnelse = "beløpIBehold begrunnelse",
+                            kanUnnlates4XRettsgebyr = SkalIkkeUnnlates(
+                                reduksjonMomenter = ReduksjonGodTro(
+                                    begrunnelse = "reduksjon begrunnelse",
+                                    grunner = setOf(RelevantMomentGodTro.Annet("Annet begrunnelse")),
+                                    skalReduseres = SkalReduseres.Ja(
+                                        prosentdelReduksjon = 50,
+                                    ),
+                                ),
+                            ),
+                        ),
+                        begrunnelseForGodTro = "begrunnelseForGodTro",
+                        begrunnelse = "begrunnelse",
+                    ),
+                ),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medTilbakekrevesBeløp 1000.kroner,
+                1.februar(2021) til 28.februar(2021) medTilbakekrevesBeløp 1000.kroner,
+                1.mars(2021) til 31.mars(2021) medTilbakekrevesBeløp 1000.kroner,
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+        val delperioder = beregning.beregn()
+        beregning.oppsummer().totaltTilbakekrevesBeløpMedRenterUtenSkatt shouldBe 750.kroner
+        delperioder[0].shouldMatch(
+            periode = 1.januar(2021) til 31.januar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 250.kroner,
+            feilutbetaltBeløp = 1000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[1].shouldMatch(
+            periode = 1.februar(2021) til 28.februar(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 250.kroner,
+            feilutbetaltBeløp = 1000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+        delperioder[2].shouldMatch(
+            periode = 1.mars(2021) til 31.mars(2021),
+            renter = 0.kroner,
+            tilbakekrevesBruttoMedRenter = 250.kroner,
+            feilutbetaltBeløp = 1000.kroner,
+            BeregnetBeløp(
+                tilbakekrevesBrutto = 250.kroner,
+                skatt = 0.kroner,
+                utbetaltYtelsesbeløp = 20000.kroner,
+                klassekode = "BATR",
+            ),
+        )
+    }
+
+    @Test
+    fun `prøver å beregne tilbakekreving med høyere beløp enn feilutbetalt`() {
+        val beregning = Beregning(
+            beregnRenter = false,
+            tilbakekrevLavtBeløp = false,
+            vilkårsvurdering = vurdering(
+                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().godTro(2000.kroner)),
+            ),
+            foreldetPerioder = emptyList(),
+            kravgrunnlag = perioder(
+                1.januar(2021) til 31.januar(2021) medBeløp beløp(1000.kroner, originaltUtbetaltBeløp = 1000.kroner),
+            ),
+            sporing = Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+        )
+
+        val exception = shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            beregning.beregn()
+        }
+        exception.message shouldBe "Beregnet høyere beløp som tilbakekreves enn det som var feilutbetalt. Beregnet 2000 i perioden 2021-01-01 - 2021-01-31"
     }
 
     fun perioder(

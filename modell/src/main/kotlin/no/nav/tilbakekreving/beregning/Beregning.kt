@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.beregning.delperiode.Foreldet
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelRentebeløp
 import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelSkattebeløp
-import no.nav.tilbakekreving.beregning.delperiode.Vilkårsvurdert.Utbetalingsperiode.Companion.fordelTilbakekrevingsbeløp
 import no.nav.tilbakekreving.beregning.delperiode.Vurderingsperiode
 import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.feil.ModellFeil
@@ -23,7 +22,7 @@ class Beregning(
     vilkårsvurdering: VilkårsvurderingAdapter,
     foreldetPerioder: List<Datoperiode>,
     kravgrunnlag: KravgrunnlagAdapter,
-    sporing: Sporing,
+    private val sporing: Sporing,
 ) {
     init {
         kravgrunnlag.perioder().forEach { kravgrunnlagsperiode ->
@@ -58,10 +57,19 @@ class Beregning(
     private val allePerioder get() = (foreldetUtbetalinger + vilkårsvurderteUtbetalinger).sortedBy { it.periode.fom }
 
     fun beregn(): List<Delperiode<out Delperiode.Beløp>> {
-        vilkårsvurderteUtbetalinger.flatMap { it.delperioder }
-            .fordelTilbakekrevingsbeløp()
+        vilkårsvurderteUtbetalinger.forEach { it.fordelTilbakekrevingsbeløp() }
+        val vilkårsvurdertePerioder = vilkårsvurderteUtbetalinger.flatMap { it.delperioder }
             .fordelRentebeløp()
             .fordelSkattebeløp()
+
+        vilkårsvurdertePerioder.forEach { delperiode ->
+            delperiode.beløp().filter { it.tilbakekreverMerEnnFeilutbetalt() }.forEach { beløp ->
+                throw ModellFeil.UgyldigOperasjonException(
+                    "Beregnet høyere beløp som tilbakekreves enn det som var feilutbetalt. Beregnet ${beløp.tilbakekrevesBrutto()} i perioden ${delperiode.periode.fom} - ${delperiode.periode.tom}",
+                    sporing,
+                )
+            }
+        }
 
         return allePerioder.flatMap { it.delperioder }
     }

@@ -327,7 +327,7 @@ object Testdata {
     private fun vilkårsvurderingAktsomhet() = VilkårsvurderingAktsomhet(
         aktsomhet = Aktsomhet.GROV_UAKTSOMHET,
         ileggRenter = true,
-        andelTilbakekreves = BigDecimal("123.11"),
+        andelTilbakekreves = BigDecimal("100.00"),
         manueltSattBeløp = null,
         begrunnelse = "testverdi",
         særligeGrunnerTilReduksjon = true,

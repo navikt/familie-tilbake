@@ -6,20 +6,20 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 inline fun <reified T> Iterable<*>.fordel(
+    totalbeløp: BigDecimal,
     crossinline verdi: T.() -> BigDecimal,
     crossinline periode: T.() -> Datoperiode,
-    avrunding: RoundingMode,
     økAvrunding: T.() -> Unit,
 ) {
-    val overflødigeKronerEtterAvrunding = filterIsInstance<T>().sumOf { it.verdi().fraksjon() }
-        .setScale(0, avrunding)
-        .toInt()
+    val verdier = filterIsInstance<T>()
+    val heleKroner = verdier.sumOf { it.verdi().setScale(0, RoundingMode.DOWN) }
+    val overflødigeKroner = totalbeløp.subtract(heleKroner).intValueExact()
 
     val høyesteFraksjon = compareByDescending<T> { it.verdi().fraksjon() }
         .thenBy { it.periode().fom }
 
-    filterIsInstance<T>()
+    verdier
         .sortedWith(høyesteFraksjon)
-        .take(overflødigeKronerEtterAvrunding)
+        .take(overflødigeKroner)
         .forEach { it.økAvrunding() }
 }

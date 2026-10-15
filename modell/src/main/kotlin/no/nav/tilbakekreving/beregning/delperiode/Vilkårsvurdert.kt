@@ -17,11 +17,11 @@ class Vilkårsvurdert(
     kravgrunnlagPerioder: List<KravgrunnlagPeriodeAdapter>,
 ) : Vurderingsperiode<JusterbartBeløp, Vilkårsvurdert.Utbetalingsperiode> {
     override val periode get() = vurdering.periode()
+    private val totaltFeilutbetaltBeløp = kravgrunnlagPerioder.sumOf { it.beløpTilbakekreves().sumOf { beløp -> beløp.tilbakekrevesBeløp() } }
     override val delperioder: List<Utbetalingsperiode> = kravgrunnlagPerioder.map { kravgrunnlagPeriode ->
         val delperiode = requireNotNull(kravgrunnlagPeriode.periode().snitt(vurdering.periode())) {
             "Finner ingen kravgrunnlagsperiode som er dekket av vilkårsvurderingsperioden ${vurdering.periode()}, kravgrunnlagsperiode=${kravgrunnlagPeriode.periode()}"
         }
-        val totaltFeilutbetaltBeløp = kravgrunnlagPerioder.sumOf { it.beløpTilbakekreves().sumOf { beløp -> beløp.tilbakekrevesBeløp() } }
         Utbetalingsperiode(
             periode = delperiode,
             beløp = kravgrunnlagPeriode.beløpTilbakekreves().map { beløp ->
@@ -30,13 +30,20 @@ class Vilkårsvurdert(
                     periode = delperiode,
                     beløpTilbakekreves = beløp,
                     reduksjon = vurdering.reduksjon(),
-                    andelAvBeløp = beløp.tilbakekrevesBeløp().divide(totaltFeilutbetaltBeløp, 6, RoundingMode.HALF_DOWN),
+                    totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
                 )
             },
             kravgrunnlagPeriode = kravgrunnlagPeriode,
             beregnRenter = beregnRenter,
             vurdering = vurdering,
         )
+    }
+
+    fun fordelTilbakekrevingsbeløp() {
+        val totaltTilbakekrevingsbeløp = vurdering.reduksjon()
+            .beregn(totaltFeilutbetaltBeløp)
+            .setScale(0, RoundingMode.HALF_DOWN)
+        delperioder.flatMap { it.beløp }.fordelTilbakekrevingsbeløp(totaltTilbakekrevingsbeløp)
     }
 
     override fun beregningsresultat(): Beregningsresultatsperiode {
@@ -87,12 +94,9 @@ class Vilkårsvurdert(
         override fun harRenter(): Boolean = beregnRenter && vurdering.renter()
 
         companion object {
-            fun <T : Iterable<Utbetalingsperiode>> T.fordelTilbakekrevingsbeløp(): T = apply {
-                filterIsInstance<Utbetalingsperiode>().flatMap { it.beløp }.fordelTilbakekrevingsbeløp()
-            }
-
             fun <T : Iterable<Utbetalingsperiode>> T.fordelRentebeløp(): T = apply {
-                fordel(Utbetalingsperiode::rentebeløp, Utbetalingsperiode::periode, RoundingMode.DOWN) {
+                val totaltRentebeløp = sumOf { it.rentebeløp }.setScale(0, RoundingMode.DOWN)
+                fordel(totaltRentebeløp, Utbetalingsperiode::rentebeløp, Utbetalingsperiode::periode) {
                     rentebeløpAvrunding = BigDecimal.ONE
                 }
             }
