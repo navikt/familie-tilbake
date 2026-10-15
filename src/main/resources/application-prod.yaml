@@ -59,6 +59,9 @@ tilbakekreving:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
     - QA.P_TILTAKSPENGER.KRAVGRUNNLAG
+  toggles:
+    ny-modell:
+      EndretKravgrunnlagVisning: true
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   tilgangsstyring:
