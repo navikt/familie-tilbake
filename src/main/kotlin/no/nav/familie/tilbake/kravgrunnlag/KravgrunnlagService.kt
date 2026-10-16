@@ -35,6 +35,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagValidator
 import no.nav.tilbakekreving.kravgrunnlag.PeriodeValidator
+import no.nav.tilbakekreving.kravgrunnlag.ValidationResult
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -89,8 +90,20 @@ class KravgrunnlagService(
             info("Håndterer kravgrunnlag fagsystem=$fagsystem, eksternFagId=$fagsystemId, behandlingId=${behandling?.id}, ytelsestype=$ytelsestype, eksternKravgrunnlagId=${kravgrunnlag.kravgrunnlagId}")
         }
 
-        KravgrunnlagValidator.valider(kravgrunnlag, PeriodeValidator.MånedsperiodeValidator)
-            .throwOnError(logContext)
+        val resultat = KravgrunnlagValidator.valider(kravgrunnlag, PeriodeValidator.MånedsperiodeValidator)
+        if (resultat is ValidationResult.Feil) {
+            log.medContext(logContext) {
+                error(
+                    "Feilet validering av kravgrunnlag med id={}, vedtakId={}, fagområde={}, feil={}",
+                    kravgrunnlag.kravgrunnlagId,
+                    kravgrunnlag.vedtakId,
+                    kravgrunnlag.kodeFagomraade,
+                    resultat.failures.joinToString(", ") { it.melding },
+                )
+            }
+        }
+
+        resultat.throwOnError(logContext)
 
         if (behandling == null) {
             mottattXmlService.arkiverEksisterendeGrunnlag(kravgrunnlag)
