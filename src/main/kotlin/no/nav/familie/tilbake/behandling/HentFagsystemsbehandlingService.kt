@@ -33,6 +33,23 @@ class HentFagsystemsbehandlingService(
         }
     }
 
+    fun sendForespørselPåNytt(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        eksternId: String,
+    ) {
+        val eksisterendeRequestSendt = requestSendtRepository.findByEksternFagsakIdAndYtelsestypeAndEksternId(
+            eksternFagsakId = eksternFagsakId,
+            ytelsestype = ytelsestype,
+            eksternId = eksternId,
+        ) ?: return
+        kafkaProducer.sendHentFagsystemsbehandlingRequest(
+            requestId = eksisterendeRequestSendt.id,
+            request = HentFagsystemsbehandlingRequest(eksternFagsakId, ytelsestype.tilDTO(), eksternId),
+            logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
+        )
+    }
+
     private fun opprettOgSendHentFagsystembehandlingRequest(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,

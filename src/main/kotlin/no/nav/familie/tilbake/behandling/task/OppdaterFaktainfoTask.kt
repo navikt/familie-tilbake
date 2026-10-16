@@ -41,6 +41,9 @@ class OppdaterFaktainfoTask(
                     eksternId,
                 ),
             )
+        if (requestSendt.respons == null) {
+            hentFagsystemsbehandlingService.sendForespørselPåNytt(eksternFagsakId, ytelsestype, eksternId)
+        }
         // kaster exception inntil respons-en har mottatt
         val hentFagsystemsbehandlingRespons =
             requireNotNull(requestSendt.respons) {

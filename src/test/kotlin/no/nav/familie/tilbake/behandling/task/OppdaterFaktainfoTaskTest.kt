@@ -3,7 +3,11 @@ package no.nav.familie.tilbake.behandling.task
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -55,6 +59,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
         fagsak = fagsakRepository.insert(Testdata.fagsak())
         behandling = Testdata.lagBehandling(fagsakId = fagsak.id)
         behandlingRepository.insert(behandling)
+        clearMocks(mockKafkaProducer)
     }
 
     @Test
@@ -87,6 +92,7 @@ internal class OppdaterFaktainfoTaskTest : OppslagSpringRunnerTest() {
                 ytelsestype = fagsak.ytelsestype,
             ),
         )
+        every { mockKafkaProducer.sendHentFagsystemsbehandlingRequest(any(), any(), any()) } just runs
         val exception = shouldThrow<RuntimeException> { oppdaterFaktainfoTask.doTask(lagTask()) }
         exception.message shouldBe "HentFagsystemsbehandlingRespons er ikke mottatt fra fagsystem for " +
             "eksternFagsakId=${fagsak.eksternFagsakId},ytelsestype=${fagsak.ytelsestype},eksternId=1." +
