@@ -7,9 +7,11 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigInteger
 import java.time.LocalDate
@@ -64,6 +67,7 @@ class ForvaltningController(
     private val fagsakRepository: FagsakRepository,
     private val behovMediator: BehovMediator,
     private val behandlingRepository: BehandlingRepository,
+    private val kravgrunnlagRepository: KravgrunnlagRepository,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -399,6 +403,33 @@ class ForvaltningController(
                 TilbakekrevingFilter.fagsakEllerTilbakekrevingId(fagsystemId, fagsystem),
             ),
         )
+    }
+
+    @Operation(summary = "Hent URL for ytelser i gammel modell")
+    @GetMapping(
+        path = ["/behandling-url"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun lagBehandlingUrl(
+        @RequestParam(required = false) vedtakId: BigInteger?,
+        @RequestParam(required = false) vedtakGjelderId: String?,
+        @RequestParam(required = false) fagsystemId: String?,
+    ): Ressurs<List<String>> {
+        val behandlingIder = kravgrunnlagRepository.findBehandlingIdsByVedtakIdOrGjelderVedtakIdOrFagsystemId(vedtakId, vedtakGjelderId, fagsystemId)
+        behandlingIder.forEach {
+            tilgangskontrollService.validerTilgangBehandlingID(
+                behandlingId = it,
+                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+                auditLoggerEvent = AuditLoggerEvent.NONE,
+                handling = "Hent URL til behandling",
+            )
+        }
+        val urler = behandlingIder.map { behandlingId ->
+            val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
+            val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandlingId)
+            "${applicationProperties.frontendUrl}/fagsystem/${fagsak.fagsystem.name}/fagsak/${fagsak.eksternFagsakId}/behandling/${behandling.eksternBrukId}/fakta"
+        }
+        return Ressurs.success(urler)
     }
 
     @PostMapping("/bytt-institusjon/{behandlingId}")

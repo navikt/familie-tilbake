@@ -29,5 +29,13 @@ interface KravgrunnlagRepository :
     @Query("SELECT DISTINCT behandling_id FROM kravgrunnlag431 WHERE vedtak_id = CAST(:vedtakId AS BIGINT) AND behandling_id IS NOT NULL")
     fun findBehandlingIdsByVedtakId(vedtakId: BigInteger): List<UUID>
 
+    @Query(
+        """
+        SELECT DISTINCT behandling_id FROM kravgrunnlag431
+        WHERE vedtak_id = CAST(:vedtakId AS BIGINT) OR gjelder_vedtak_id = :vedtakGjelderId OR fagsystem_id = :fagsystemId
+        """,
+    )
+    fun findBehandlingIdsByVedtakIdOrGjelderVedtakIdOrFagsystemId(vedtakId: BigInteger?, vedtakGjelderId: String?, fagsystemId: String?): List<UUID>
+
     fun findByEksternKravgrunnlagIdAndAktivIsTrue(eksternKravgrunnlagId: BigInteger): Kravgrunnlag431?
 }
