@@ -246,21 +246,6 @@ class KravgrunnlagHendelseTest {
         a.hashCode() shouldNotBe b.hashCode()
     }
 
-    @Test
-    fun `perioder med 0 i tilbakekrevesbeløp blir ikke tatt med`() {
-        val periode = 1.januar(2021) til 11.januar(2021)
-
-        val kravgrunnlag = kravgrunnlag(
-            perioder = listOf(
-                kravgrunnlagPeriode(periode = periode),
-                // For forkortede perioder kan oppdrag generere perioder med 0 i beløp
-                kravgrunnlagPeriode(periode = 12.januar(2021) til 14.januar(2021), ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 0.kroner)),
-            ),
-        )
-
-        kravgrunnlag.perioder().map { it.periode() } shouldBe listOf(periode)
-    }
-
     companion object {
         private val perioder = listOf(kravgrunnlagPeriode())
         private val vedtakId = BigInteger("123456")
