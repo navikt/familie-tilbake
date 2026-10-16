@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.kravgrunnlag
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.UtenforScope
@@ -829,5 +830,25 @@ class KravgrunnlagSammenligningTest {
         sammendrag.tom shouldBe 28.februar(2021)
         sammendrag.gammeltBeløp.compareTo(2000.kroner) shouldBe 0
         sammendrag.nyttBeløp.compareTo(BigDecimal.ZERO) shouldBe 0
+    }
+
+    @Test
+    fun `endret kravgrunnlag som forkorter perioden med tre dager`() {
+        val forskjeller = KravgrunnlagSammenligning(
+            originaltKravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = 1.januar(2021) til 14.januar(2021)))),
+            nyttKravgrunnlag = kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = 1.januar(2021) til 11.januar(2021)),
+                    // For forkortede perioder kan oppdrag generere perioder med 0 i beløp
+                    kravgrunnlagPeriode(periode = 12.januar(2021) til 14.januar(2021), ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 0.kroner)),
+                ),
+            ),
+            sporing = Sporing("", ""),
+        ).resultat()
+
+        forskjeller.shouldBeSingle().shouldBeInstanceOf<KravgrunnlagSammenligning.Forskjell.EndretPeriode>().should {
+            it.periode shouldBe (1.januar(2021) til 14.januar(2021))
+            it.nyPeriode shouldBe (1.januar(2021) til 11.januar(2021))
+        }
     }
 }

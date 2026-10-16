@@ -33,10 +33,12 @@ class KravgrunnlagHendelse(
     private val kontrollfelt: String,
     val kravgrunnlagId: String,
     override val referanse: String,
-    private val perioder: List<Periode>,
+    perioder: List<Periode>,
     val korrigering: Boolean,
     override val opprettet: LocalDateTime,
 ) : KravHendelse, KravgrunnlagAdapter {
+    private val perioder = perioder.filter { it.feilutbetaltYtelsesbeløp() > BigDecimal.ZERO }
+
     override fun valider(sporing: Sporing) {
         if (vedtakGjelder !is Aktør.Person || utbetalesTil !is Aktør.Person) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagIkkePerson, sporing)

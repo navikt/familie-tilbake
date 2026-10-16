@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.prosent
 import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.test.januar
@@ -34,14 +36,36 @@ class KravgrunnlagHendelseEntityTest {
                     kravgrunnlagId = UUID.randomUUID(),
                     periode = periode2,
                     månedligSkattebeløp = BigDecimal.ZERO,
-                    beløp = emptyList(),
+                    beløp = listOf(
+                        BeløpEntity(
+                            id = UUID.randomUUID(),
+                            kravgrunnlagPeriodeId = UUID.randomUUID(),
+                            klassekode = "BATR",
+                            klassetype = "YTEL",
+                            opprinneligUtbetalingsbeløp = 1000.kroner,
+                            nyttBeløp = 500.kroner,
+                            tilbakekrevesBeløp = 500.kroner,
+                            skatteprosent = 0.prosent,
+                        ),
+                    ),
                 ),
                 KravgrunnlagPeriodeEntity(
                     id = UUID.randomUUID(),
                     kravgrunnlagId = UUID.randomUUID(),
                     periode = periode1,
                     månedligSkattebeløp = BigDecimal.ZERO,
-                    beløp = emptyList(),
+                    beløp = listOf(
+                        BeløpEntity(
+                            id = UUID.randomUUID(),
+                            kravgrunnlagPeriodeId = UUID.randomUUID(),
+                            klassekode = "BATR",
+                            klassetype = "YTEL",
+                            opprinneligUtbetalingsbeløp = 1000.kroner,
+                            nyttBeløp = 500.kroner,
+                            tilbakekrevesBeløp = 500.kroner,
+                            skatteprosent = 0.prosent,
+                        ),
+                    ),
                 ),
             ),
             korrigering = false,

@@ -463,4 +463,63 @@ class KravgrunnlagEndretE2ETest {
                     .vilkårsvurdering.endringIKravgrunnlag.shouldBeNull()
             }
     }
+
+    @Test
+    fun `endret kravgrunnlag som forkorter perioden med tre dager etter vurdert fakta`() {
+        val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
+        val saksbehandlerContext = saksbehandlerContext(features = features)
+        val systemContext = systemContext(features = features)
+        val periode = 1.januar(2021) til 14.januar(2021)
+        val forkortetPeriode = 1.januar(2021) til 11.januar(2021)
+        val gjenståendePeriode = 12.januar(2021) til 14.januar(2021)
+
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode = periode))),
+            context = systemContext,
+        )
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
+        }
+
+        tilbakekreving.håndter(
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(periode = forkortetPeriode),
+                    // For forkortede perioder kan oppdrag generere perioder med 0 i beløp
+                    kravgrunnlagPeriode(periode = gjenståendePeriode, ytelsesbeløp = ytelsesbeløp(tilbakekrevesBeløp = 0.kroner)),
+                ),
+            ),
+            systemContext,
+        )
+
+        tilbakekreving.frontendDtoForBehandling(
+            tilbakekreving.nåværendeBehandlingId(),
+            saksbehandlerContext,
+            true,
+            BehandlerRolle.SAKSBEHANDLER,
+        ).endretKravgrunnlag.shouldNotBeNull {
+            endringer shouldBe listOf(
+                EndretPeriodeDto(
+                    fom = forkortetPeriode.fom,
+                    tom = forkortetPeriode.tom,
+                    gammelPeriode = PeriodeDto(
+                        fom = periode.fom,
+                        tom = periode.tom,
+                    ),
+                    nyttBeløp = 2000,
+                    gammeltBeløp = 2000,
+                ),
+            )
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId()).should {
+            it.feilutbetaltePerioder shouldHaveSize 1
+            it.feilutbetaltePerioder[0].periode shouldBe forkortetPeriode
+        }
+    }
 }
