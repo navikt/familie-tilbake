@@ -30,7 +30,6 @@ import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
@@ -45,7 +44,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     private lateinit var oppdragRestClient: OppdragClientRestMock
 
     @Test
-    @Disabled("Midlertidig deaktivert etter at særhåndtering av foreslå/fatte vedtak ble fjernet fra TilbakekrevingE2EBase")
     fun `kravgrunnlag fører til sak klar til behandling`() {
         val fnr = Random.nextLong(0, 31129999999).toString().padStart(11, '0')
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -172,7 +170,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     }
 
     @Test
-    @Disabled("Midlertidig deaktivert etter at særhåndtering av foreslå/fatte vedtak ble fjernet fra TilbakekrevingE2EBase")
     fun `revurdering av vedtak med full utbetaling fører til ny behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
@@ -227,7 +224,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
     }
 
     @Test
-    @Disabled("Midlertidig deaktivert etter at særhåndtering av foreslå/fatte vedtak ble fjernet fra TilbakekrevingE2EBase")
     fun `underkjenning av vedtak skal tilbakeføre behandling til tidligere steg`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(

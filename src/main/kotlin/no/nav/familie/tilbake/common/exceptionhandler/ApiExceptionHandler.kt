@@ -63,7 +63,6 @@ class ApiExceptionHandler {
             is ModellFeil.UtenforScopeException -> HttpStatus.METHOD_NOT_ALLOWED
             is ModellFeil.IngenTilgangException -> HttpStatus.FORBIDDEN
             is ModellFeil.BehandlingIkkeEndretException -> HttpStatus.CONFLICT
-            is ModellFeil.TjenesteUtilgjengeligException -> HttpStatus.SERVICE_UNAVAILABLE
         }
         return ResponseEntity.status(status).body(ErrorDto(feil.tittel, feil.melding))
     }
