@@ -466,6 +466,8 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         }
         lagreUttalelse(behandlingId, "Bruker har uttalt seg :)")
 
+        sendStatusmelding(StatusmeldingGenerator.forTilleggsstønader(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "SPER"))
+
         val kontrollfelt = "2025-12-24-11.12.13.234567"
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
