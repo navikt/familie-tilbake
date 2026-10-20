@@ -188,7 +188,7 @@ class Tilbakekreving internal constructor(
                 Behandlingsloggstype.STATUSMELDING_AVSL_MOTTATT
             }
             false -> {
-                byttTilstand(Sperret, sideeffektContext)
+                tilstand.håndter(this, hendelse, sideeffektContext)
                 Behandlingsloggstype.STATUSMELDING_SPER_MOTTATT
             }
         }

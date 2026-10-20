@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderin
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 import java.util.UUID
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 
 internal sealed interface Tilstand {
     val tidTilPåminnelse: Duration?
@@ -110,6 +111,14 @@ internal sealed interface Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: StatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke StatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun opprettRevurdering(
