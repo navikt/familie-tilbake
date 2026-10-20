@@ -225,4 +225,34 @@ class KravgrunnlagSammenligningNyPeriodeTest {
             ),
         )
     }
+
+    @Test
+    fun `sammendrag - periode splittes i to perioder`() {
+        val eksisterendePeriode = 1.januar(2021) til 12.januar(2021)
+        val førsteDel = 1.januar(2021) til 6.januar(2021)
+        val andreDel = 7.januar(2021) til 12.januar(2021)
+
+        val sammendrag = sammendrag(
+            nåværende = listOf(eksisterendePeriode to 1000.kroner),
+            oppdatert = listOf(
+                førsteDel to 400.kroner,
+                andreDel to 800.kroner,
+            ),
+        )
+
+        sammendrag shouldBe listOf(
+            EndretPeriodeDto(
+                fom = førsteDel.fom,
+                tom = førsteDel.tom,
+                gammelPeriode = PeriodeDto(eksisterendePeriode.fom, eksisterendePeriode.tom),
+                gammeltBeløp = 1000,
+                nyttBeløp = 400,
+            ),
+            NyPeriodeDto(
+                fom = andreDel.fom,
+                tom = andreDel.tom,
+                beløp = 800,
+            ),
+        )
+    }
 }

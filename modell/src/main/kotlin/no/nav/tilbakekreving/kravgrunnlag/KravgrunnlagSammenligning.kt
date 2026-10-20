@@ -72,6 +72,11 @@ class KravgrunnlagSammenligning(
         forskjeller += nyttKravgrunnlag.perioder().map { nyPeriode ->
             val eksisterendePeriode = originaltKravgrunnlag.perioder()
                 .firstOrNull { nyPeriode.periode().overlapper(it.periode()) }
+                ?.takeIf { original ->
+                    nyttKravgrunnlag.perioder()
+                        .map { it.periode() }
+                        .first { it.overlapper(original.periode()) } == nyPeriode.periode()
+                }
             when {
                 eksisterendePeriode == null -> Forskjell.NyPeriode(nyPeriode.periode(), nyPeriode.feilutbetaltYtelsesbeløp())
                 nyPeriode.feilutbetaltYtelsesbeløp().toInt() != eksisterendePeriode.feilutbetaltYtelsesbeløp().toInt() ||

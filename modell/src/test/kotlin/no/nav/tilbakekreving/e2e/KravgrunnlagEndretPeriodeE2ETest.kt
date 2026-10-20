@@ -1,10 +1,12 @@
 package no.nav.tilbakekreving.e2e
 
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Toggle
@@ -20,6 +22,8 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatu
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FjernetPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.lesContext
@@ -109,6 +113,119 @@ class KravgrunnlagEndretPeriodeE2ETest {
             it shouldHaveSize 2
             it.single { vilkårsperiode -> vilkårsperiode.vilkårsvurdering.fom == periode.fom }.vilkårsvurdering.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
             it.single { vilkårsperiode -> vilkårsperiode.vilkårsvurdering.fom == nyPeriode.fom }.vilkårsvurdering.tilbakeført shouldBe ArsakTilTilbakeforingDto.NyttKravgrunnlag
+        }
+    }
+
+    @Test
+    fun `kravgrunnlag som splitter periode`() {
+        val saksbehandlerContext = saksbehandlerContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val systemContext = systemContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val periode = 1.januar(2021) til 12.januar(2021)
+        val førsteDel = 1.januar(2021) til 6.januar(2021)
+        val andreDel = 7.januar(2021) til 12.januar(2021)
+
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlagMedBeløp(periode to 1200.kroner),
+            context = systemContext,
+        )
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderVilkår(periode, forårsaketAvBruker().uaktsomt())
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlagMedBeløp(
+            førsteDel to 400.kroner,
+            andreDel to 800.kroner,
+        )
+        tilbakekreving.håndter(oppdatertKravgrunnlag, systemContext)
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId()).should {
+            it.feilutbetaltePerioder shouldHaveSize 2
+            it.feilutbetaltePerioder[0].periode shouldBe førsteDel
+            it.feilutbetaltePerioder[1].periode shouldBe andreDel
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(førsteDel, andreDel)))
+        }
+
+        tilbakekreving.nåværendeBehandling().foreldelsestegDto.tilFrontendDto(saksbehandlerContext).should {
+            it.foreldetPerioder shouldHaveSize 2
+            it.foreldetPerioder[0].periode shouldBe førsteDel
+            it.foreldetPerioder[1].periode shouldBe andreDel
+        }
+
+        tilbakekreving.nåværendeBehandling().vilkårsvurderingDto(lesContext(klokke = KlokkeStub(1.januar(2022)))).vilkårsperioder.should {
+            it shouldHaveSize 2
+            it[0].vilkårsvurdering.fom shouldBe førsteDel.fom
+            it[0].vilkårsvurdering.tom shouldBe førsteDel.tom
+            it[1].vilkårsvurdering.fom shouldBe andreDel.fom
+            it[1].vilkårsvurdering.tom shouldBe andreDel.tom
+        }
+    }
+
+    @Test
+    fun `kravgrunnlag som splitter ikke vurdert periode`() {
+        val saksbehandlerContext = saksbehandlerContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val systemContext = systemContext(features = features, klokke = KlokkeStub(1.januar(2022)))
+        val periode = 1.januar(2021) til 12.januar(2021)
+        val førsteDel = 1.januar(2021) til 6.januar(2021)
+        val andreDel = 7.januar(2021) til 12.januar(2021)
+
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlagMedBeløp(periode to 1200.kroner),
+            context = systemContext,
+        )
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(periode)))
+            lagreForhåndsvarselUnntak(BegrunnelseForUnntak.UKJENT_ADRESSE_ELLER_URIMELIG_ETTERSPORING, "")
+        }
+
+        val oppdatertKravgrunnlag = kravgrunnlagMedBeløp(
+            førsteDel to 400.kroner,
+            andreDel to 800.kroner,
+        )
+        tilbakekreving.håndter(oppdatertKravgrunnlag, systemContext)
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        tilbakekreving.faktastegFrontendDto(tilbakekreving.nåværendeBehandlingId()).should {
+            it.feilutbetaltePerioder shouldHaveSize 2
+            it.feilutbetaltePerioder[0].periode shouldBe førsteDel
+            it.feilutbetaltePerioder[1].periode shouldBe andreDel
+        }
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            vurderFakta(faktastegVurdering(perioder = listOf(førsteDel, andreDel)))
+        }
+
+        tilbakekreving.nåværendeBehandling().foreldelsestegDto.tilFrontendDto(saksbehandlerContext).should {
+            it.foreldetPerioder shouldHaveSize 2
+            it.foreldetPerioder[0].periode shouldBe førsteDel
+            it.foreldetPerioder[1].periode shouldBe andreDel
+        }
+
+        tilbakekreving.nåværendeBehandling().vilkårsvurderingDto(lesContext(klokke = KlokkeStub(1.januar(2022)))).vilkårsperioder.forSingle {
+            it.vilkårsvurdering.fom shouldBe førsteDel.fom
+            it.vilkårsvurdering.tom shouldBe andreDel.tom
+            it.vilkårsvurdering.valg.shouldBeInstanceOf<VilkaarsvurderingIkkeVurdertDto>()
+        }
+
+        tilbakekreving.nåværendeBehandling().hentVilkårsvurderingsperioder().should {
+            it[0].periode shouldBe PeriodeDto(førsteDel.fom, førsteDel.tom)
+            it[1].periode shouldBe PeriodeDto(andreDel.fom, andreDel.tom)
         }
     }
 
