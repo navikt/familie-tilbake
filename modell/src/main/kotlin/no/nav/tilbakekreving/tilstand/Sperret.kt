@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -15,7 +16,7 @@ object Sperret : Tilstand {
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SPERRET
     override val erSperret: Boolean = true
 
-    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.SPERRET
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
     }
@@ -30,5 +31,16 @@ object Sperret : Tilstand {
         tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
         tilbakekreving.trengerFagsysteminfo(sideeffektContext)
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
+            // Egen PR
+            // tilbakekreving.byttTilstand(Avsluttet, sideeffektContext)
+            return
+        }
+        if (statusmeldingHendelse.erKravgrunnlagEndret()) {
+            tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+        }
     }
 }

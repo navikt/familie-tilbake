@@ -15,6 +15,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -22,7 +23,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderin
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 import java.util.UUID
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 
 internal sealed interface Tilstand {
     val tidTilPåminnelse: Duration?

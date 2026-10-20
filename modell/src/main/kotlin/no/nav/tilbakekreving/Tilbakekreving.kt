@@ -58,7 +58,6 @@ import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
-import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -181,21 +180,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(hendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        val behandlingsloggstype = when (hendelse.kravgrunnlagBortfalt()) {
-            true -> {
-                // ToDo i egen PR: skal vi bare avslutte tilbakekrevingen?
-                // byttTilstand(Avsluttet, sideeffektContext)
-                Behandlingsloggstype.STATUSMELDING_AVSL_MOTTATT
-            }
-            false -> {
-                tilstand.håndter(this, hendelse, sideeffektContext)
-                Behandlingsloggstype.STATUSMELDING_SPER_MOTTATT
-            }
-        }
-        sideeffektContext.logg(
-            behandlingsloggstype = behandlingsloggstype,
-            behandlingId = null,
-        )
+        tilstand.håndter(this, hendelse, sideeffektContext)
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {

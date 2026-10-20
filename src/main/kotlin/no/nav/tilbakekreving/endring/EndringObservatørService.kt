@@ -136,7 +136,6 @@ class EndringObservatørService(
             ForenkletBehandlingsstatus.VENTER -> BehandlingsstatusEventDto.VENTER
             ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL -> BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL
             ForenkletBehandlingsstatus.TIL_GODKJENNING -> BehandlingsstatusEventDto.TIL_GODKJENNING
-            ForenkletBehandlingsstatus.SPERRET -> BehandlingsstatusEventDto.SPERRET
             ForenkletBehandlingsstatus.AVSLUTTET -> BehandlingsstatusEventDto.AVSLUTTET
         }
 

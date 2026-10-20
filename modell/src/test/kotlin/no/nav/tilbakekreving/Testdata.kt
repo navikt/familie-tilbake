@@ -268,22 +268,16 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
     dokumentInfoId = "321",
 )
 
-fun sperrStatusmelding(
-    vedtakId: BigInteger,
-    vedtakGjelder: Aktør,
-    referanse: String,
-    kodeFagomraade: String,
-    fagsystemId: String,
-): StatusmeldingHendelse =
+fun sperrStatusmelding(): StatusmeldingHendelse =
     StatusmeldingHendelse(
         id = UUID.randomUUID(),
         opprettet = LocalDateTime.now(),
-        vedtakId = vedtakId,
+        vedtakId = 1234.toBigInteger(),
         kravstatuskode = Kravstatuskode.SPERRET,
-        vedtakGjelder = vedtakGjelder,
-        referanse = referanse,
-        kodeFagomraade = kodeFagomraade,
-        fagsystemId = fagsystemId,
+        vedtakGjelder = Aktør.Person("12345678901"),
+        referanse = "0",
+        kodeFagomraade = "BA",
+        fagsystemId = "123",
     )
 
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId

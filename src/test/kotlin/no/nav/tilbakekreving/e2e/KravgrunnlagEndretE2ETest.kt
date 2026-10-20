@@ -58,28 +58,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `henting av patchet kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-
-        val context = opprettBehandling(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandling(periode)
         oppdragRestClient.mockHentKravgrunnlag(
             kravgrunnlagId = context.kravgrunnlagId.toBigInteger(),
             perioder = listOf(OppdragClientRestMock.kravgrunnlagPeriode(periode, feilutbetaltBeløp = 4000.kroner)),
@@ -112,40 +91,11 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `henting av uendret kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-
-        val context = opprettBehandling(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
+        val context = opprettBehandling(periode)
 
         ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
             forvaltningController.korrigerKravgrunnlag(context.behandlingId)
         }
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
 
         shouldThrow<ModellFeil.BehandlingIkkeEndretException> {
             ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
@@ -157,17 +107,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `endret kravgrunnlag etter sendt forhåndsvarsel`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandling(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
+        val context = opprettBehandling(periode)
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSendVarselbrev(context.behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
@@ -180,15 +120,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
 
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
@@ -220,21 +151,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `endring i kravgrunnlag for fakta periode`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(periode, vedtakId, fagsystemId, kravgrunnlagId, referanse)
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -262,27 +179,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `endring i kravgrunnlag for vilkårsvurderingsperiode`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -311,28 +208,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `fakta periode holder på siste endring i kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -346,16 +222,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
         }
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -383,27 +249,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `vilkårsvurderingsperiode holder på siste endring i kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -417,16 +263,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
         }
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -454,26 +290,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `fakta periode fjerner endring i kravgrunnlag når den settes til null`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -516,27 +333,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `vilkårsvurderingsperiode fjerner endret av kravgrunnlag når den settes til null`() {
         val periode = 1.januar(2021) til 31.januar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -579,26 +376,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
     fun `ny periode i kravgrunnlag lagres i faktasteg, foreldelse og vilkårsvurdering`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         val nyPeriode = 1.februar(2021) til 28.februar(2021)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-        val context = opprettBehandlingMedUnntak(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
+        val context = opprettBehandlingMedUnntak(periode)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = context.fagsystemId,
@@ -646,28 +424,16 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
-
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
                 kravgrunnlagId = kravgrunnlagId,
-                referanse = referanse,
                 perioder = listOf(KravgrunnlagGenerator.standardPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner)),
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
 
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
@@ -704,13 +470,11 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
-        val referanse = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
                 kravgrunnlagId = kravgrunnlagId,
-                referanse = referanse,
                 perioder = listOf(KravgrunnlagGenerator.standardPeriode(eksisterendePeriode, feilutbetaltBeløp = 3000.kroner)),
             ),
         )
@@ -724,16 +488,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
                 OppdragClientRestMock.kravgrunnlagPeriode(nyPeriode, feilutbetaltBeløp = 3000.kroner),
             ),
         )
-
-        sendStatusmelding(
-            StatusmeldingGenerator.forTilleggsstønader(
-                vedtakId = vedtakId,
-                fagsystemId = fagsystemId,
-                referanse = referanse,
-                kodeStatusKrav = "SPER",
-            ),
-        )
-
         ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
             forvaltningController.korrigerKravgrunnlag(behandlingId)
         }
@@ -752,20 +506,16 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         }
     }
 
-    private fun opprettBehandling(
-        periode: Datoperiode,
-        vedtakId: String,
-        fagsystemId: String,
-        kravgrunnlagId: String,
-        referanse: String,
-    ): KravgrunnlagContext {
+    private fun opprettBehandling(periode: Datoperiode): KravgrunnlagContext {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
         sendKravgrunnlagOgAvventLesing(
             KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
                 vedtakId = vedtakId,
                 kravgrunnlagId = kravgrunnlagId,
                 perioder = listOf(KravgrunnlagGenerator.standardPeriode(periode, feilutbetaltBeløp = 3000.kroner)),
-                referanse = referanse,
             ),
         )
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
@@ -776,7 +526,6 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
                 BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
             )
         }
-
         return KravgrunnlagContext(
             behandlingId = behandlingId,
             fagsystemId = fagsystemId,
@@ -785,20 +534,8 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         )
     }
 
-    private fun opprettBehandlingMedUnntak(
-        periode: Datoperiode,
-        vedtakId: String,
-        fagsystemId: String,
-        kravgrunnlagId: String,
-        referanse: String,
-    ): KravgrunnlagContext {
-        val context = opprettBehandling(
-            periode = periode,
-            vedtakId = vedtakId,
-            fagsystemId = fagsystemId,
-            kravgrunnlagId = kravgrunnlagId,
-            referanse = referanse,
-        )
+    private fun opprettBehandlingMedUnntak(periode: Datoperiode): KravgrunnlagContext {
+        val context = opprettBehandling(periode)
 
         lagreUttalelse(context.behandlingId)
         utførSteg(context.behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering(periode))

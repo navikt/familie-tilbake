@@ -10,5 +10,4 @@ enum class Behandlingsstatus(
     UTREDES("UTRED"),
     JOURNALFØR_VEDTAK("JVED"),
     DISTRIUBER_VEDTAK("DVED"),
-    SPERRET("SPER"),
 }

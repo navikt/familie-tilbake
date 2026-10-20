@@ -7,10 +7,11 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 
 object TilBehandling : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofDays(1)
@@ -36,10 +37,6 @@ object TilBehandling : Tilstand {
         tilbakekreving.oppdaterFagsysteminfo(fagsysteminfo, sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        tilbakekreving.byttTilstand(Sperret, sideeffektContext)
-    }
-
     override fun <T> gjørSaksbehandling(
         tilbakekreving: Tilbakekreving,
         behandling: Behandling,
@@ -53,5 +50,27 @@ object TilBehandling : Tilstand {
                 }
             }
         }
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        kravgrunnlag: KravgrunnlagHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
+        tilbakekreving.trengerFagsysteminfo(sideeffektContext)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: StatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
+            // Egen PR
+            // tilbakekreving.byttTilstand(Avsluttet, sideeffektContext)
+            return
+        }
+        tilbakekreving.byttTilstand(Sperret, sideeffektContext)
     }
 }

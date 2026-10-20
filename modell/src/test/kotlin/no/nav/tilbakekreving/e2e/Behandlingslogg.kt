@@ -4,15 +4,11 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
-import no.nav.tilbakekreving.bruker
 import no.nav.tilbakekreving.brukerinfoHendelse
-import no.nav.tilbakekreving.eksternFagsak
-import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -24,36 +20,20 @@ import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
-import no.nav.tilbakekreving.sperrStatusmelding
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.test.skalUnnlates
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 import java.time.LocalDate
-import java.util.Random
 import java.util.UUID
 
 class Behandlingslogg {
     @Test
     fun `lagring av behandlingslogg i historikken`() {
         val behandlingslogg = Behandlingslogg(mutableListOf())
-        val vedtakId = BigInteger(128, Random())
-        val vedtakGjelder = Aktør.Person(bruker().ident)
-        val referanse = UUID.randomUUID().toString()
-        val eksternFagsak = eksternFagsak(ytelse = Ytelse.Tilleggsstønad)
-        val kravgrunnlag = kravgrunnlag(
-            vedtakId = vedtakId,
-            vedtakGjelder = vedtakGjelder,
-            referanse = referanse,
-            perioder = listOf(
-                kravgrunnlagPeriode(3.januar(2021) til 3.januar(2021)),
-                kravgrunnlagPeriode(1.februar(2021) til 1.februar(2021)),
-            ),
-        )
-        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(eksternFagsak)
+        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
         val tilbakekreving = Tilbakekreving.opprett(
             id = UUID.randomUUID().toString(),
             opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse,
@@ -61,10 +41,14 @@ class Behandlingslogg {
         )
 
         tilbakekreving.håndter(
-            kravgrunnlag,
+            kravgrunnlag(
+                perioder = listOf(
+                    kravgrunnlagPeriode(3.januar(2021) til 3.januar(2021)),
+                    kravgrunnlagPeriode(1.februar(2021) til 1.februar(2021)),
+                ),
+            ),
             systemContext(behandlingslogg = behandlingslogg),
         )
-
         tilbakekreving.håndter(
             fagsysteminfoHendelse(
                 utvidPerioder = listOf(
@@ -112,16 +96,6 @@ class Behandlingslogg {
             lagreVilkårsvurdering(delbarPerioder.first().periodeId, forårsaketAvBruker().uaktsomt(unnlates = skalUnnlates()))
         }
 
-        val sperrStatusmelding = sperrStatusmelding(
-            vedtakId = vedtakId,
-            vedtakGjelder = vedtakGjelder,
-            referanse = referanse,
-            kodeFagomraade = "TILLST",
-            fagsystemId = eksternFagsak.eksternId,
-        )
-
-        tilbakekreving.håndter(sperrStatusmelding, systemContext(behandlingslogg = behandlingslogg))
-
         tilbakekreving.håndter(
             kravgrunnlag(
                 perioder = listOf(
@@ -144,7 +118,6 @@ class Behandlingslogg {
             "Varselbrev journalført",
             "Foreldelse vurdert",
             "Vilkår vurdert",
-            "Kravet er sperret av økonomisystemet",
             "Nytt kravgrunnlag mottatt",
         )
         val forhåndsvarsel = behandlingslogg.tilFrontend().filter { it.tittel == "Forhåndsvarsel sendt" }.shouldHaveSize(1)

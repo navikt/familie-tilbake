@@ -72,6 +72,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
@@ -384,7 +385,7 @@ class Behandling internal constructor(
             },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = false,
+            erBehandlingPåVent = tilstand.erSperret,
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
                 val sammenligning = kravgrunnlag.entry.sammenlign(nyttKravgrunnlag.entry, sporingsinformasjon())
                 EndretKravgrunnlag(
@@ -406,12 +407,14 @@ class Behandling internal constructor(
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.GRUNNLAG,
                         Behandlingsstegstatus.AUTOUTFØRT,
+                        venteårsak = if (tilstand.erSperret) Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI else null,
                     ),
                 ),
                 steg().klarTilVisning(lesContext.klokke).map {
                     BehandlingsstegsinfoDto(
                         it.type,
                         it.behandlingsstegstatus(steg().klarTilVisning(lesContext.klokke), lesContext.klokke),
+                        venteårsak = if (tilstand.erSperret) Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI else null,
                     )
                 },
             ).flatten(),
@@ -429,7 +432,6 @@ class Behandling internal constructor(
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
             innloggetRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
-            erSperret = tilstand.erSperret,
         )
     }
 

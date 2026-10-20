@@ -19,4 +19,6 @@ data class StatusmeldingHendelse(
     override fun valider(sporing: Sporing) = Unit
 
     fun kravgrunnlagBortfalt() = kravstatuskode == Kravstatuskode.AVSLUTTET
+
+    fun erKravgrunnlagEndret() = kravstatuskode == Kravstatuskode.ENDRET
 }
