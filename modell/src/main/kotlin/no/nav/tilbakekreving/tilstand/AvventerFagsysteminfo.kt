@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -26,6 +27,10 @@ object AvventerFagsysteminfo : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
         tilbakekreving.trengerFagsysteminfo(sideeffektContext)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, kravgrunnlag: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
     }
 
     override fun håndter(
