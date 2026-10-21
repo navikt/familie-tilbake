@@ -3,15 +3,15 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
+import no.nav.tilbakekreving.UtenforScope
+import no.nav.tilbakekreving.feil.ModellFeil
 
 object IverksettVedtak : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
@@ -34,7 +34,8 @@ object IverksettVedtak : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
         if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
+            tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfaltIIverksettelse, tilbakekreving.sporingsinformasjon())
         }
         tilbakekreving.byttTilstand(Sperret, sideeffektContext)
     }

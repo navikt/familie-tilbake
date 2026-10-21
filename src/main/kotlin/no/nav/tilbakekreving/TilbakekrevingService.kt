@@ -99,10 +99,6 @@ class TilbakekrevingService(
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
         if (validerScope) {
-            if (statusmeldingBufferRepository.erAnnullert(tilbakekreving.eksternFagsak.eksternId)) {
-                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
-            }
-
             tilbakekreving.validerInnenforScope(featureService.modellFeatures)
         }
         return tilbakekreving
