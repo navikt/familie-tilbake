@@ -218,6 +218,17 @@ class KravgrunnlagSammenligning(
             }
 
             override fun tilDto(): KravgrunnlagForskjellDto = NyPeriodeDto(periode.fom, periode.tom, nyttBeløp.toInt())
+
+            override fun slåSammenForVisning(other: Forskjell): Forskjell = when (other) {
+                is EndretPeriode -> EndretPeriode(
+                    periode = other.periode,
+                    nyPeriode = periode.fom til other.nyPeriode.tom,
+                    gammeltBeløp = other.gammeltBeløp,
+                    nyttBeløp = nyttBeløp + other.nyttBeløp,
+                )
+
+                else -> super.slåSammenForVisning(other)
+            }
         }
 
         data class FjernetPeriode(override val periode: Datoperiode, val beløp: BigDecimal) : Forskjell {
