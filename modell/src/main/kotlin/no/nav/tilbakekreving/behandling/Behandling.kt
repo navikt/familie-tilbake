@@ -351,7 +351,7 @@ class Behandling internal constructor(
     private fun skalBesluttes(klokke: Klokke): Boolean {
         return steg()
             .takeWhile { it.type != Behandlingssteg.FATTE_VEDTAK }
-            .all { it.erFullstendig(klokke) }
+            .all { it.erKlar(klokke) }
     }
 
     internal fun førsteUfullstendigeSteg(klokke: Klokke) = steg().firstOrNull { !it.erKlar(klokke) }

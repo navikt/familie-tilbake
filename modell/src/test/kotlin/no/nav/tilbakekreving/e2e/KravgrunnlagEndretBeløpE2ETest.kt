@@ -40,6 +40,32 @@ class KravgrunnlagEndretBeløpE2ETest {
     private val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
 
     @Test
+    fun `nytt kravgrunnlag etter at behandling er sendt til beslutning`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val saksbehandlerContext = saksbehandlerContext(features = features)
+        val tilbakekreving = tilbakekrevingTilBehandling(kravgrunnlag = kravgrunnlagMedBeløp(periode to 2000.kroner))
+        tilbakekreving.vurderAlleSteg(saksbehandlerContext, periode)
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            foreslåVedtak()
+        }
+
+        tilbakekreving.håndter(kravgrunnlagMedBeløp(periode to 1500.kroner), systemContext(features = features))
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext) {
+            brukNyesteKravgrunnlag()
+        }
+
+        val behandlingDto = tilbakekreving.frontendDtoForBehandling(
+            behandlingId = tilbakekreving.nåværendeBehandlingId(),
+            sideeffektContext = saksbehandlerContext,
+            kanBeslutte = true,
+            behandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+        )
+
+        behandlingDto.kanEndres shouldBe true
+    }
+
+    @Test
     fun `endret kravgrunnlag med høyere beløp etter påbegynt vurdering`() {
         val periode = 1.januar(2021) til 31.januar(2021)
 
