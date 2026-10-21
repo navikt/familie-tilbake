@@ -72,21 +72,21 @@ class IntegrasjonerClient(
             .build()
             .toUri()
 
-    private fun patchOppgaveUri(oppgave: Oppgave) =
+    private fun patchOppgaveUri(oppgaveId: String) =
         UriComponentsBuilder
             .fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgave.id!!.toString(), "oppdater")
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId, "oppdater")
             .build()
             .toUri()
 
     private fun tilordneOppgaveNyEnhetUri(
-        oppgaveId: Long,
+        oppgaveId: String,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
         nullstillTilordnetRessurs: Boolean,
     ) = UriComponentsBuilder
         .fromUri(integrasjonerConfig.integrasjonUri)
-        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "enhet", nyEnhet)
+        .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId, "enhet", nyEnhet)
         .queryParam("fjernMappeFraOppgave", fjernMappeFraOppgave)
         .queryParam("nullstillTilordnetRessurs", nullstillTilordnetRessurs)
         .build()
@@ -99,10 +99,10 @@ class IntegrasjonerClient(
             .build()
             .toUri()
 
-    private fun ferdigstillOppgaveUri(oppgaveId: Long) =
+    private fun ferdigstillOppgaveUri(oppgaveId: String) =
         UriComponentsBuilder
             .fromUri(integrasjonerConfig.integrasjonUri)
-            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId.toString(), "ferdigstill")
+            .pathSegment(IntegrasjonerConfig.PATH_OPPGAVE, oppgaveId, "ferdigstill")
             .build()
             .toUri()
 
@@ -151,12 +151,20 @@ class IntegrasjonerClient(
             .toUri()
 
     fun arkiver(arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
-        val response = postForEntity<Ressurs<ArkiverDokumentResponse>>(arkiverUri, arkiverDokumentRequest)
+        val response = postForEntity<Ressurs<ArkiverDokumentResponse>>(
+            uri = arkiverUri,
+            endepunkt = arkiverUri.path,
+            payload = arkiverDokumentRequest,
+        )
         return response.getDataOrThrow()
     }
 
     fun sendFil(fil: Fil) {
-        putForEntity<Any>(sftpUri, fil)
+        putForEntity<Any>(
+            uri = sftpUri,
+            endepunkt = sftpUri.path,
+            payload = fil,
+        )
     }
 
     fun distribuerJournalpost(
@@ -175,56 +183,93 @@ class IntegrasjonerClient(
                 distribusjonstidspunkt,
                 manuellAdresse,
             )
-        return postForEntity<Ressurs<String>>(distribuerUri, request).getDataOrThrow()
+        return postForEntity<Ressurs<String>>(
+            uri = distribuerUri,
+            endepunkt = distribuerUri.path,
+            payload = request,
+        ).getDataOrThrow()
     }
 
     fun hentDokument(
         dokumentInfoId: String,
         journalpostId: String,
-    ): ByteArray = getForEntity<Ressurs<ByteArray>>(hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+    ): ByteArray = getForEntity<Ressurs<ByteArray>>(
+        uri = hentJournalpostHentDokumentUri(journalpostId, dokumentInfoId),
+        endepunkt = hentJournalpostHentDokumentUri("{journalpostId}", "{dokumentInfoId}").path,
+    ).getDataOrThrow()
 
-    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon = getForEntity<Ressurs<Organisasjon>>(hentOrganisasjonUri(organisasjonsnummer)).getDataOrThrow()
+    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon = getForEntity<Ressurs<Organisasjon>>(
+        uri = hentOrganisasjonUri(organisasjonsnummer),
+        endepunkt = hentOrganisasjonUri("{organisasjonsnummer}").path,
+    ).getDataOrThrow()
 
     fun validerOrganisasjon(organisasjonsnummer: String): Boolean =
         try {
-            getForEntity<Ressurs<Boolean>>(validerOrganisasjonUri(organisasjonsnummer)).data == true
+            getForEntity<Ressurs<Boolean>>(
+                uri = validerOrganisasjonUri(organisasjonsnummer),
+                endepunkt = validerOrganisasjonUri("{organisasjonsnummer}").path,
+            ).data == true
         } catch (e: Exception) {
             log.error("Organisasjonsnummeret $organisasjonsnummer er ikke gyldig. Feiler med ${e.message}")
             false
         }
 
-    fun hentSaksbehandler(id: String): Saksbehandler = getForEntity<Ressurs<Saksbehandler>>(hentSaksbehandlerUri(id)).getDataOrThrow()
+    fun hentSaksbehandler(id: String): Saksbehandler = getForEntity<Ressurs<Saksbehandler>>(
+        uri = hentSaksbehandlerUri(id),
+        endepunkt = hentSaksbehandlerUri("{id}").path,
+    ).getDataOrThrow()
 
-    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse = postForEntity<Ressurs<OppgaveResponse>>(opprettOppgaveUri, opprettOppgave).getDataOrThrow()
+    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse = postForEntity<Ressurs<OppgaveResponse>>(
+        uri = opprettOppgaveUri,
+        endepunkt = opprettOppgaveUri.path,
+        payload = opprettOppgave,
+    ).getDataOrThrow()
 
-    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        val uri = patchOppgaveUri(patchOppgave)
-        return patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave).getDataOrThrow()
-    }
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse = patchForEntity<Ressurs<OppgaveResponse>>(
+        uri = patchOppgaveUri(patchOppgave.id!!.toString()),
+        endepunkt = patchOppgaveUri("{oppgaveId}").path,
+        payload = patchOppgave,
+    ).getDataOrThrow()
 
     internal fun tilordneOppgaveNyEnhet(
         oppgaveId: Long,
         nyEnhet: String,
         fjernMappeFraOppgave: Boolean,
         nullstillTilordnetRessurs: Boolean,
-    ): OppgaveResponse {
-        val uri = tilordneOppgaveNyEnhetUri(oppgaveId, nyEnhet, fjernMappeFraOppgave, nullstillTilordnetRessurs)
-        return patchForEntity<Ressurs<OppgaveResponse>>(uri, "", HttpHeaders().medContentTypeJsonUTF8()).getDataOrThrow()
-    }
+    ): OppgaveResponse = patchForEntity<Ressurs<OppgaveResponse>>(
+        uri = tilordneOppgaveNyEnhetUri(oppgaveId.toString(), nyEnhet, fjernMappeFraOppgave, nullstillTilordnetRessurs),
+        endepunkt = tilordneOppgaveNyEnhetUri("{oppgaveId}", "{nyEnhet}", fjernMappeFraOppgave, nullstillTilordnetRessurs).path,
+        payload = "",
+        httpHeaders = HttpHeaders().medContentTypeJsonUTF8(),
+    ).getDataOrThrow()
 
-    fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = postForEntity<Ressurs<FinnOppgaveResponseDto>>(finnoppgaverUri, finnOppgaveRequest).getDataOrThrow()
+    fun finnOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = postForEntity<Ressurs<FinnOppgaveResponseDto>>(
+        uri = finnoppgaverUri,
+        endepunkt = finnoppgaverUri.path,
+        payload = finnOppgaveRequest,
+    ).getDataOrThrow()
 
     fun ferdigstillOppgave(oppgaveId: Long) {
-        patchForEntity<Ressurs<OppgaveResponse>>(ferdigstillOppgaveUri(oppgaveId), "")
+        patchForEntity<Ressurs<OppgaveResponse>>(
+            uri = ferdigstillOppgaveUri(oppgaveId.toString()),
+            endepunkt = ferdigstillOppgaveUri("{oppgaveId}").path,
+            payload = "",
+        )
     }
 
     @Cacheable("mappeCache")
     fun finnMapper(enhet: String): List<MappeDto> {
-        val respons = getForEntity<Ressurs<List<MappeDto>>>(finnMapperUri(enhet))
+        val respons = getForEntity<Ressurs<List<MappeDto>>>(
+            uri = finnMapperUri(enhet),
+            endepunkt = finnMapperUri("{enhetNr}").path,
+        )
         return respons.getDataOrThrow()
     }
 
-    fun hentNavkontor(enhetsId: String): NavKontorEnhet = getForEntity<Ressurs<NavKontorEnhet>>(hentNavkontorUri(enhetsId)).getDataOrThrow()
+    fun hentNavkontor(enhetsId: String): NavKontorEnhet = getForEntity<Ressurs<NavKontorEnhet>>(
+        uri = hentNavkontorUri(enhetsId),
+        endepunkt = hentNavkontorUri("{enhetsId}").path,
+    ).getDataOrThrow()
 
     fun hentJournalposterForBruker(
         journalposterForBrukerRequest: JournalposterForBrukerRequest,
@@ -238,7 +283,11 @@ class IntegrasjonerClient(
             )
         }
 
-        return postForEntity<Ressurs<List<Journalpost>>>(hentJournalpostUri(), journalposterForBrukerRequest).getDataOrThrow()
+        return postForEntity<Ressurs<List<Journalpost>>>(
+            uri = hentJournalpostUri(),
+            endepunkt = hentJournalpostUri().path,
+            payload = journalposterForBrukerRequest,
+        ).getDataOrThrow()
     }
 }
 

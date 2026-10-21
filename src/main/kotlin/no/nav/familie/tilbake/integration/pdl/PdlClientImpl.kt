@@ -47,6 +47,7 @@ class PdlClientImpl(
         val response: PdlHentPersonResponse<PdlPerson> =
             postForEntity(
                 pdlConfig.pdlUri,
+                pdlConfig.pdlUri.path,
                 pdlPersonRequest,
                 httpHeaders(mapTilTema(fagsystem)),
             )
@@ -95,6 +96,7 @@ class PdlClientImpl(
         val response =
             postForEntity<PdlHentIdenterResponse>(
                 pdlConfig.pdlUri,
+                pdlConfig.pdlUri.path,
                 pdlPersonRequest,
                 httpHeaders(mapTilTema(fagsystem)),
             )
@@ -128,6 +130,7 @@ class PdlClientImpl(
         val pdlResponse =
             postForEntity<PdlBolkResponse<PdlAdressebeskyttelsePerson>>(
                 pdlConfig.pdlUri,
+                pdlConfig.pdlUri.path,
                 pdlRequest,
                 httpHeaders(mapTilTema(fagsystem)),
             )

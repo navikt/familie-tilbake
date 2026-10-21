@@ -1,5 +1,4 @@
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.familie.tilbake.http.RessursException
@@ -22,42 +21,50 @@ import java.util.concurrent.TimeUnit
 
 abstract class AbstractPingableRestClient(
     val operations: RestOperations,
-    metricsPrefix: String,
+    private val metricsPrefix: String,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
     protected val log: Logger = LoggerFactory.getLogger(this::class.java)
-    private val responstid: Timer = Metrics.timer("$metricsPrefix.tid")
-    private val responsSuccess: Counter = Metrics.counter("$metricsPrefix.response", "status", "success")
-    private val responsFailure: Counter = Metrics.counter("$metricsPrefix.response", "status", "failure")
 
     inline fun <reified T : Any> getForEntity(
         uri: URI,
+        endepunkt: String,
         httpHeaders: HttpHeaders? = null,
-    ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.GET, HttpEntity(null, httpHeaders)) }
+    ): T = executeMedMetrics(uri, endepunkt, HttpMethod.GET) { operations.exchange<T>(uri, HttpMethod.GET, HttpEntity(null, httpHeaders)) }
 
     inline fun <reified T : Any> postForEntity(
         uri: URI,
+        endepunkt: String,
         payload: Any,
         httpHeaders: HttpHeaders? = null,
-    ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.POST, HttpEntity(payload, httpHeaders)) }
+    ): T = executeMedMetrics(uri, endepunkt, HttpMethod.POST) { operations.exchange<T>(uri, HttpMethod.POST, HttpEntity(payload, httpHeaders)) }
 
     inline fun <reified T : Any> putForEntity(
         uri: URI,
+        endepunkt: String,
         payload: Any,
         httpHeaders: HttpHeaders? = null,
-    ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.PUT, HttpEntity(payload, httpHeaders)) }
+    ): T = executeMedMetrics(uri, endepunkt, HttpMethod.PUT) { operations.exchange<T>(uri, HttpMethod.PUT, HttpEntity(payload, httpHeaders)) }
 
     inline fun <reified T : Any> patchForEntity(
         uri: URI,
+        endepunkt: String,
         payload: Any,
         httpHeaders: HttpHeaders? = null,
-    ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.PATCH, HttpEntity(payload, httpHeaders)) }
+    ): T = executeMedMetrics(uri, endepunkt, HttpMethod.PATCH) { operations.exchange<T>(uri, HttpMethod.PATCH, HttpEntity(payload, httpHeaders)) }
 
     inline fun <reified T : Any> deleteForEntity(
         uri: URI,
+        endepunkt: String,
         payload: Any? = null,
         httpHeaders: HttpHeaders? = null,
-    ): T = executeMedMetrics(uri) { operations.exchange<T>(uri, HttpMethod.DELETE, HttpEntity(payload, httpHeaders)) }
+    ): T = executeMedMetrics(uri, endepunkt, HttpMethod.DELETE) { operations.exchange<T>(uri, HttpMethod.DELETE, HttpEntity(payload, httpHeaders)) }
+
+    private fun countResponse(
+        endepunkt: String,
+        method: HttpMethod,
+        status: String,
+    ) = Metrics.counter("$metricsPrefix.response", "endepunkt", endepunkt, "method", method.name(), "status", status).increment()
 
     private fun <T : Any> validerOgPakkUt(
         response: ResponseEntity<T>,
@@ -73,28 +80,35 @@ abstract class AbstractPingableRestClient(
 
     fun <T : Any> executeMedMetrics(
         uri: URI,
+        endepunkt: String,
+        method: HttpMethod,
         function: () -> ResponseEntity<T>,
     ): T {
         try {
             val startTime = System.nanoTime()
             val responseEntity = function.invoke()
-            responstid.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
-            responsSuccess.increment()
+            Timer
+                .builder("$metricsPrefix.tid")
+                .tags("endepunkt", endepunkt, "method", method.name())
+                .publishPercentileHistogram()
+                .register(Metrics.globalRegistry)
+                .record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+            countResponse(endepunkt, method, "success")
             return validerOgPakkUt(responseEntity, uri)
         } catch (e: RestClientResponseException) {
-            responsFailure.increment()
+            countResponse(endepunkt, method, "failure")
             secureLogger.warn("RestClientResponseException ved kall mot uri={}", uri.toString(), e)
             lesRessurs(e)?.let { throw RessursException(it, e) } ?: throw e
         } catch (e: HttpClientErrorException) {
-            responsFailure.increment()
+            countResponse(endepunkt, method, "failure")
             secureLogger.warn("HttpClientErrorException ved kall mot uri={}", uri.toString(), e)
             lesRessurs(e)?.let { throw RessursException(it, e) } ?: throw e
         } catch (e: ResourceAccessException) {
-            responsFailure.increment()
+            countResponse(endepunkt, method, "failure")
             secureLogger.warn("ResourceAccessException ved kall mot uri={}", uri.toString(), e)
             throw e
         } catch (e: Exception) {
-            responsFailure.increment()
+            countResponse(endepunkt, method, "failure")
             secureLogger.warn("Feil ved kall mot uri={}", uri.toString(), e)
             throw RuntimeException("Feil ved kall mot uri=$uri", e)
         }

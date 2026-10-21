@@ -55,6 +55,7 @@ class DefaultOppdragClient(
         try {
             return postForEntity<Ressurs<FeilutbetalingerFraSimulering>>(
                 uri = hentFeilutbetalingerFraSimuleringUri,
+                endepunkt = hentFeilutbetalingerFraSimuleringUri.path,
                 payload = request,
             ).getDataOrThrow()
         } catch (exception: Exception) {
