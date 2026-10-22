@@ -5,8 +5,10 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -15,6 +17,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -28,6 +31,7 @@ internal sealed interface Tilstand {
     val tilbakekrevingTilstand: TilbakekrevingTilstand
     val kanEndresAvSaksbehandler: Boolean get() = false
     val kanRevurderes: Boolean get() = false
+    val erSperret: Boolean get() = false
 
     fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell
 
@@ -111,6 +115,14 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke DistribusjonHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: StatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke StatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
     fun opprettRevurdering(
         tilbakekreving: Tilbakekreving,
         sideeffektContext: SideeffektContext,
@@ -119,6 +131,10 @@ internal sealed interface Tilstand {
         revurderingsårsak: TilbakekrevingRevurderingsarsakDto,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun venter(klokke: Klokke, sporing: Sporing): Venter? {
+        return null
     }
 
     fun <T> gjørSaksbehandling(

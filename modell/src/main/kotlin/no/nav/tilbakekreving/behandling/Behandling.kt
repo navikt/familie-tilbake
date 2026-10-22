@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VenterDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -72,6 +73,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
@@ -364,6 +366,7 @@ class Behandling internal constructor(
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean, behandlerRolle: BehandlerRolle): BehandlingDto {
+        val venter = tilstand.venter(lesContext.klokke, sporingsinformasjon())
         return BehandlingDto(
             eksternBrukId = id,
             behandlingId = id,
@@ -384,7 +387,13 @@ class Behandling internal constructor(
             },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = false,
+            erBehandlingPåVent = venter != null,
+            venter = venter?.let { venter ->
+                VenterDto(
+                    grunn = Venteårsak.valueOf(venter.grunn.name),
+                    frist = venter.frist,
+                )
+            },
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
                 val sammenligning = kravgrunnlag.entry.sammenlign(nyttKravgrunnlag.entry, sporingsinformasjon())
                 EndretKravgrunnlag(

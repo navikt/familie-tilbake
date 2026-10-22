@@ -131,6 +131,7 @@ object BehandlingMapper {
             saksbehandlingstype = behandling.saksbehandlingstype,
             erNyModell = false,
             innloggetRolle = innloggetSaksbehandlerRolle,
+            venter = null,
         )
     }
 

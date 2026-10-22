@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
+import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.repository.NyBehandlingRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.test.FellesTestdata
@@ -38,6 +39,9 @@ import java.util.concurrent.locks.ReentrantLock
 
 @ActiveProfiles("ny-modell")
 open class TilbakekrevingE2EBase : E2EBase() {
+    @Autowired
+    private lateinit var statusmeldingBufferRepository: StatusmeldingBufferRepository
+
     @Autowired
     protected lateinit var behandlingRepository: NyBehandlingRepository
 
@@ -78,14 +82,40 @@ open class TilbakekrevingE2EBase : E2EBase() {
         )
     }
 
-    fun sendKravgrunnlagOgAvventLesing(kravgrunnlag: String) {
+    fun sendKravgrunnlagOgAvventLesing(kravgrunnlag: String, forventetAntallUleste: Int = 0) {
         val dto = KravgrunnlagUtil.unmarshalKravgrunnlag(kravgrunnlag)
         sendKravgrunnlag(kravgrunnlag)
         readLock.withLock {
             kravgrunnlagMediator.lesKravgrunnlag()
         }
 
-        tellUlesteKravgrunnlag(dto.kravgrunnlagId.toString()) shouldBe 0
+        tellUlesteKravgrunnlag(dto.kravgrunnlagId.toString()) shouldBe forventetAntallUleste
+    }
+
+    fun sendStatusmelding(
+        statusmelding: String,
+        forventetAntallUleste: Int = 0,
+    ) {
+        val dto = KravgrunnlagUtil.unmarshalStatusmelding(statusmelding)
+        statusmeldingBufferRepository.lagre(
+            StatusmeldingBufferRepository.Entity(
+                id = UUID.randomUUID(),
+                statusmelding = statusmelding,
+                fagsystemId = dto.fagsystemId,
+                vedtakId = dto.vedtakId.toString(),
+                status = dto.kodeStatusKrav,
+            ),
+        )
+        readLock.withLock {
+            kravgrunnlagMediator.lesStatusmelding()
+        }
+        tellUlesteStatusmeldinger(dto.fagsystemId) shouldBe forventetAntallUleste
+    }
+
+    private fun tellUlesteStatusmeldinger(fagsystemId: String): Int {
+        return jdbcTemplate.query("SELECT count(1) AS antall FROM statusmelding_buffer WHERE lest=false AND fagsystem_id=?;", fagsystemId) { rs, _ ->
+            rs.getInt("antall")
+        }.single()
     }
 
     fun behandlingIdFor(

@@ -40,6 +40,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -176,6 +177,11 @@ class Tilbakekreving internal constructor(
     fun håndter(påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, påminnelse, sideeffektContext)
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
+    }
+
+    fun håndter(hendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        kravgrunnlagHistorikk.lagre(hendelse)
+        tilstand.håndter(this, hendelse, sideeffektContext)
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {

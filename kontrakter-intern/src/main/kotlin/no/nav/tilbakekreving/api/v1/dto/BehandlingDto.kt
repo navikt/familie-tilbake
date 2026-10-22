@@ -28,6 +28,7 @@ data class BehandlingDto(
     val ansvarligSaksbehandler: String,
     val ansvarligBeslutter: String? = null,
     val erBehandlingPåVent: Boolean,
+    val venter: VenterDto?,
     val kanHenleggeBehandling: Boolean,
     val kanRevurderingOpprettes: Boolean = false,
     val harVerge: Boolean,
@@ -53,4 +54,9 @@ data class BehandlingsstegsinfoDto(
     val behandlingsstegstatus: Behandlingsstegstatus,
     val venteårsak: Venteårsak? = null,
     val tidsfrist: LocalDate? = null,
+)
+
+data class VenterDto(
+    val grunn: Venteårsak,
+    val frist: LocalDate,
 )

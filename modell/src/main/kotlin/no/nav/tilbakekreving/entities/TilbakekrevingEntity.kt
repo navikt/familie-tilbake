@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.tilstand.DistribuerVedtak
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.JournalførVedtak
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
+import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import java.time.LocalDateTime
@@ -78,6 +79,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.TIL_BEHANDLING -> TilBehandling
                 TilbakekrevingTilstand.JOURNALFØR_VEDTAK -> JournalførVedtak
                 TilbakekrevingTilstand.DISTRIUBER_VEDTAK -> DistribuerVedtak
+                TilbakekrevingTilstand.SPERRET -> Sperret
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },
         )
