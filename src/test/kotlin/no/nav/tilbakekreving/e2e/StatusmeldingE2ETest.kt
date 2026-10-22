@@ -29,7 +29,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     fun `statusmelding lagres i buffer for senere behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
 
         val antallKravgrunnlag = jdbcTemplate.query(
             "SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=?;",
@@ -47,7 +47,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kodeStatusKrav = "SPER"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.hentBehandling(behandlingId = behandlingId).shouldNotBeNull {
@@ -70,8 +70,8 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kodeStatusKrav = "SPER"))
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kodeStatusKrav = "ENDR"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "ENDR", fagområde = "TILLST"))
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.hentBehandling(behandlingId = behandlingId).shouldNotBeNull {
@@ -93,7 +93,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
 
         val exception = shouldThrow<ModellFeil.UtenforScopeException> {
             behandlingController.hentBehandling(behandlingId)
