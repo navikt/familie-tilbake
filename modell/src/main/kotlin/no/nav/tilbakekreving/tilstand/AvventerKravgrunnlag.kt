@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -28,4 +29,10 @@ object AvventerKravgrunnlag : Tilstand {
         tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
         tilbakekreving.byttTilstand(AvventerFagsysteminfo, sideeffektContext)
     }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: StatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {}
 }

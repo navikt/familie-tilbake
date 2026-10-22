@@ -3,9 +3,11 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -67,9 +69,7 @@ object TilBehandling : Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            // Egen PR
-            // tilbakekreving.byttTilstand(Avsluttet, sideeffektContext)
-            return
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
         }
         tilbakekreving.byttTilstand(Sperret, sideeffektContext)
     }

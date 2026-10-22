@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
+import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
@@ -36,21 +37,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class StatusmeldingSperrTest {
-    @Test
-    fun `sperrStatusmelding feiler når tilstanden er før AvventerBrukerinfo`() {
-        val context = saksbehandlerContext()
-        val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context).apply {
-            håndter(kravgrunnlag(), context)
-        }
-        shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            tilbakekreving.håndter(
-                sperrStatusmelding(),
-                systemContext(),
-            )
-        }
-    }
-
     @Test
     fun `sperrStatusmelding feiler etter at behandlingen er iverksatt`() {
         val periode = 1.januar(2025) til 31.januar(2025)
@@ -83,26 +69,25 @@ class StatusmeldingSperrTest {
     }
 
     @Test
-    fun `sperrStatusmelding blokkerer behandlingen når den er i AvventerBrukerinfo`() {
+    fun `sperrStatusmelding sperrer først når tilstanden er AvventerBrukerinfo`() {
         val context = saksbehandlerContext()
         val opprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse()
-        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context)
-
-        tilbakekreving.apply {
+        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context).apply {
             håndter(kravgrunnlag(), context)
-            håndter(fagsysteminfoHendelse(), context)
         }
-
-        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
         tilbakekreving.håndter(
             sperrStatusmelding(),
             systemContext(),
         )
+        tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
 
+        tilbakekreving.apply {
+            håndter(fagsysteminfoHendelse(), context)
+        }
+        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
         tilbakekreving.apply {
             håndter(brukerinfoHendelse(), context)
         }
-
         tilbakekreving.tilstand shouldBe Sperret
     }
 
