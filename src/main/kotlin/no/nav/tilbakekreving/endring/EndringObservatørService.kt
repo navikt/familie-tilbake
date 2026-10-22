@@ -109,6 +109,7 @@ class EndringObservatørService(
                         VenterEventDto(
                             grunn = when (it.grunn) {
                                 Venter.Grunn.BRUKERUTTALELSE -> VentegrunnEventDto.AVVENTER_BRUKERUTTALELSE
+                                Venter.Grunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI -> VentegrunnEventDto.AVVENTER_OPPDATERING_FRA_ØKONOMI
                             },
                             gjennoptas = it.frist,
                             gjenopptas = it.frist,

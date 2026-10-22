@@ -8,5 +8,6 @@ data class Venter(
 ) {
     enum class Grunn {
         BRUKERUTTALELSE,
+        SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI,
     }
 }

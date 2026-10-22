@@ -28,6 +28,7 @@ import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -107,8 +108,9 @@ class StatusmeldingSperrTest {
         ).shouldNotBeNull {
             kanEndres shouldBe false
             erBehandlingPåVent shouldBe true
-            behandlingsstegsinfo.forEach {
-                it.venteårsak shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+            venter shouldNotBeNull {
+                grunn shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+                frist shouldBe LocalDate.now().plusDays(1)
             }
         }
     }

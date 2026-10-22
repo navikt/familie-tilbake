@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.FaktaFeilutbetalingDto
 import no.nav.tilbakekreving.api.v1.dto.TotrinnsvurderingDto
+import no.nav.tilbakekreving.api.v1.dto.VenterDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertForeldelseDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
@@ -365,6 +366,7 @@ class Behandling internal constructor(
     }
 
     internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean, behandlerRolle: BehandlerRolle): BehandlingDto {
+        val venter = tilstand.venter(lesContext.klokke, sporingsinformasjon())
         return BehandlingDto(
             eksternBrukId = id,
             behandlingId = id,
@@ -385,7 +387,13 @@ class Behandling internal constructor(
             },
             ansvarligSaksbehandler = ansvarligSaksbehandler.ident,
             ansvarligBeslutter = fatteVedtakSteg.ansvarligBeslutter?.ident,
-            erBehandlingPåVent = tilstand.erSperret,
+            erBehandlingPåVent = venter != null,
+            venter = venter?.let { venter ->
+                VenterDto(
+                    grunn = Venteårsak.valueOf(venter.grunn.name),
+                    frist = venter.frist,
+                )
+            },
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
                 val sammenligning = kravgrunnlag.entry.sammenlign(nyttKravgrunnlag.entry, sporingsinformasjon())
                 EndretKravgrunnlag(
@@ -407,14 +415,12 @@ class Behandling internal constructor(
                     BehandlingsstegsinfoDto(
                         Behandlingssteg.GRUNNLAG,
                         Behandlingsstegstatus.AUTOUTFØRT,
-                        venteårsak = if (tilstand.erSperret) Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI else null,
                     ),
                 ),
                 steg().klarTilVisning(lesContext.klokke).map {
                     BehandlingsstegsinfoDto(
                         it.type,
                         it.behandlingsstegstatus(steg().klarTilVisning(lesContext.klokke), lesContext.klokke),
-                        venteårsak = if (tilstand.erSperret) Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI else null,
                     )
                 },
             ).flatten(),

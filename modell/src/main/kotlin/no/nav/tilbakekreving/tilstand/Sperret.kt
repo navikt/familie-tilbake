@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.behandling.saksbehandling.Venter
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
@@ -42,5 +44,12 @@ object Sperret : Tilstand {
         if (statusmeldingHendelse.erKravgrunnlagEndret()) {
             tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
         }
+    }
+
+    override fun venter(klokke: Klokke, sporing: Sporing): Venter {
+        return Venter(
+            grunn = Venter.Grunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI,
+            frist = klokke.dagensDato().plusDays(1),
+        )
     }
 }

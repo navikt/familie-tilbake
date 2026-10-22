@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.query
+import java.time.LocalDate
 
 class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
@@ -53,8 +54,9 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
                 data!!.status shouldBe Behandlingsstatus.UTREDES
                 data.kanEndres shouldBe false
                 data.erBehandlingPåVent shouldBe true
-                data.behandlingsstegsinfo.forEach {
-                    it.venteårsak shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+                data.venter shouldNotBeNull {
+                    grunn shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+                    frist shouldBe LocalDate.now().plusDays(1)
                 }
             }
         }
