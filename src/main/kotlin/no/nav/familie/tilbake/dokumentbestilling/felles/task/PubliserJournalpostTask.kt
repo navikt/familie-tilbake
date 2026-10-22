@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.Fagsystem
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -34,10 +34,10 @@ class PubliserJournalpostTask(
     private val taskService: TracableTaskService,
     private val featureService: FeatureService,
     private val dokdistClient: DokdistClient,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<PubliserJournalpostTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val logContext = task.logContext()
         log.medContext(logContext) { info("{} prosesserer med id={}", PubliserJournalpostTask::class.simpleName, task.id) }
 

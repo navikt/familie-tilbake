@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.kravgrunnlag.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service
 )
 class BehandleKravgrunnlagTask(
     private val kravgrunnlagService: KravgrunnlagService,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         kravgrunnlagService.håndterMottattKravgrunnlag(task.payload, task.id, task.metadata, task.logContext())
     }
 

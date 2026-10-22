@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -10,6 +9,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kravgrunnlag.HentKravgrunnlagService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import org.springframework.stereotype.Service
@@ -27,11 +27,11 @@ class HentKravgrunnlagTask(
     private val hentKravgrunnlagService: HentKravgrunnlagService,
     private val stegService: StegService,
     private val logService: LogService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<HentKravgrunnlagService>()
 
     @Transactional
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {

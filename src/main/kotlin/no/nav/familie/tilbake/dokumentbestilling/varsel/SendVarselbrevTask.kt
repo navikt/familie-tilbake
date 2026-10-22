@@ -1,10 +1,10 @@
 package no.nav.familie.tilbake.dokumentbestilling.varsel
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,8 +18,8 @@ import java.util.UUID
 class SendVarselbrevTask(
     private val varselbrevService: VarselbrevService,
     private val behandlingRepository: BehandlingRepository,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         varselbrevService.sendVarselbrev(behandling)

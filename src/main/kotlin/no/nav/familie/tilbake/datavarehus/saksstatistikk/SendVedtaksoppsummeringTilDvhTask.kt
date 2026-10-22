@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.datavarehus.saksstatistikk
 
 import jakarta.validation.Validation
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.vedtak.Vedtaksoppsummering
@@ -10,6 +9,7 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -22,11 +22,11 @@ class SendVedtaksoppsummeringTilDvhTask(
     private val vedtaksoppsummeringService: VedtaksoppsummeringService,
     private val kafkaProducer: KafkaProducer,
     private val logService: LogService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val validator = Validation.buildDefaultValidatorFactory().validator
     private val log = TracedLogger.getLogger<SendVedtaksoppsummeringTilDvhTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {

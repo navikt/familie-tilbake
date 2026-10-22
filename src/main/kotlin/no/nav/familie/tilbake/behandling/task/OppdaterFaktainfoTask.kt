@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingService
@@ -9,6 +8,7 @@ import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,10 +21,10 @@ import org.springframework.stereotype.Service
 class OppdaterFaktainfoTask(
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
     private val behandlingService: BehandlingService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<OppdaterFaktainfoTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val eksternFagsakId = task.metadata.getProperty("eksternFagsakId")
         val logContext = SecureLog.Context.utenBehandling(eksternFagsakId)
         log.medContext(logContext) {

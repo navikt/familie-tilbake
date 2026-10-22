@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -10,6 +9,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -27,10 +27,10 @@ class LagOppgaveTask(
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgavePrioritetService: OppgavePrioritetService,
     private val behandlingRepository: BehandlingRepository,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<LagOppgaveTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val logContext = task.logContext()
         log.medContext(logContext) { info("LagOppgaveTask prosesserer med id={}", task.id) }
         val oppgavetype = Oppgavetype.valueOf(task.metadata.getProperty("oppgavetype"))

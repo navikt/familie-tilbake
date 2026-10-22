@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -9,6 +8,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -25,8 +25,8 @@ class FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveTask(
     val fagsakRepository: FagsakRepository,
     val oppgaveService: OppgaveService,
     val oppgavePrioritetService: OppgavePrioritetService,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         val logContext = task.logContext()
         val payload = objectMapper.readValue(task.payload, FerdigstillEksisterendeOppgaverOgOpprettNyBehandleSakOppgaveDto::class.java)
         val behandling = behandlingRepository.findByIdOrThrow(payload.behandlingId)

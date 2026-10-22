@@ -1,11 +1,11 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,10 +18,10 @@ import java.util.UUID
 )
 class FerdigstillOppgaveTask(
     private val oppgaveService: OppgaveService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<FerdigstillOppgaveTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         log.medContext(task.logContext()) { info("FerdigstillOppgaveTask prosesserer med id={}", task.id) }
         val oppgavetype =
             if (task.metadata.containsKey("oppgavetype")) {

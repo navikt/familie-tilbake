@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.avstemming.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.avstemming.domain.Avstemmingsfil
@@ -11,6 +10,7 @@ import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.integration.familie.IntegrasjonerClient
 import no.nav.familie.tilbake.kontrakter.Fil
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.avstemmingMediator.AvstemmingMediator
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
@@ -32,13 +32,13 @@ class AvstemmingTask(
     private val avstemmingsfilRepository: AvstemmingsfilRepository,
     private val integrasjonerClient: IntegrasjonerClient,
     private val environment: Environment,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val applikasjon = "familie-tilbake"
     private val logger = LoggerFactory.getLogger(AvstemmingTask::class.java)
 
     private val miljø = if (environment.activeProfiles.contains("prod")) "p" else "q"
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val dato = LocalDate.parse(task.payload)
         val batchRun = TYPE + "-" + UUID.randomUUID()
         logger.info("Kjører avstemming for {} i batch {}", dato, batchRun)

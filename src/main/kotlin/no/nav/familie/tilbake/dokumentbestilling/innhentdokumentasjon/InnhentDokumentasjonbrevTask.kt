@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.innhentdokumentasjon
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.familie.tilbake.oppgave.OppgaveTaskService
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import org.springframework.stereotype.Service
@@ -32,8 +32,8 @@ class InnhentDokumentasjonbrevTask(
     private val innhentDokumentasjonBrevService: InnhentDokumentasjonbrevService,
     private val behandlingskontrollService: BehandlingskontrollService,
     private val oppgaveTaskService: OppgaveTaskService,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         val taskdata: InnhentDokumentasjonbrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         val fritekst: String = taskdata.fritekst

@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.kontrakter.oppgave.FinnOppgaveRequest
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,10 +27,10 @@ class FinnGammelBehandlingUtenOppgaveTask(
     private val integrasjonerClient: IntegrasjonerClient,
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<FinnGammelBehandlingUtenOppgaveTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val dto =
             objectMapper.readValue(task.payload, FinnGammelBehandlingUtenOppgaveDto::class.java)
 

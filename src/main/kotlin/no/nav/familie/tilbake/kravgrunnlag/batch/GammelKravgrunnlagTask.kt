@@ -1,12 +1,12 @@
 package no.nav.familie.tilbake.kravgrunnlag.batch
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.HentFagsystemsbehandlingService
 import no.nav.familie.tilbake.common.exceptionhandler.UkjentravgrunnlagFeil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -21,11 +21,11 @@ import java.util.UUID
 class GammelKravgrunnlagTask(
     private val gammelKravgrunnlagService: GammelKravgrunnlagService,
     private val hentFagsystemsbehandlingService: HentFagsystemsbehandlingService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<GammelKravgrunnlagService>()
 
     @Transactional
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val mottattXmlId = UUID.fromString(task.payload)
         val mottattXml = gammelKravgrunnlagService.hentFrakobletKravgrunnlagNullable(mottattXmlId)
         if (mottattXml == null) {

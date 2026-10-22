@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling.batch
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -13,6 +12,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagService
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -30,10 +30,10 @@ class AutomatiskSaksbehandlingTask(
     private val kravgrunnlagService: KravgrunnlagService,
     private val behandlingRepository: BehandlingRepository,
     private val logService: LogService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<AutomatiskSaksbehandlingTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val logContext = logService.contextFraBehandling(behandling.id)

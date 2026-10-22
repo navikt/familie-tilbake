@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.behandling.batch
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -17,6 +16,7 @@ import no.nav.familie.tilbake.kontrakter.oppgave.OppgavePrioritet
 import no.nav.familie.tilbake.kontrakter.oppgave.Oppgavetype
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.familie.tilbake.oppgave.OppgaveService
 import no.nav.tilbakekreving.api.v1.dto.HenleggelsesbrevFritekstDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
@@ -39,10 +39,10 @@ class RyddBehandlingUtenKravgrunnlagTask(
     private val brevSporingService: BrevsporingService,
     private val logService: LogService,
     private val oppgaveService: OppgaveService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<RyddBehandlingUtenKravgrunnlagTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val logContext = logService.contextFraBehandling(behandlingId)
         log.medContext(logContext) {

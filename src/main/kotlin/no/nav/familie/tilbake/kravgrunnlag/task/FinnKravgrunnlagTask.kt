@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.kravgrunnlag.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -12,6 +11,7 @@ import no.nav.familie.tilbake.kravgrunnlag.KravvedtakstatusService
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -30,10 +30,10 @@ class FinnKravgrunnlagTask(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val kravgrunnlagService: KravgrunnlagService,
     private val kravvedtakstatusService: KravvedtakstatusService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<FinnKravgrunnlagTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(behandlingId)
         val fagsak = fagsakRepository.findByIdOrThrow(behandling.fagsakId)

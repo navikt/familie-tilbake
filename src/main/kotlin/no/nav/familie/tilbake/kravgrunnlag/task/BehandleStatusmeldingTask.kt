@@ -1,9 +1,9 @@
 package no.nav.familie.tilbake.kravgrunnlag.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.kravgrunnlag.KravvedtakstatusService
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service
 )
 class BehandleStatusmeldingTask(
     private val kravvedtakstatusService: KravvedtakstatusService,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         kravvedtakstatusService.håndterMottattStatusmelding(task.payload, task.id, task.metadata)
     }
 

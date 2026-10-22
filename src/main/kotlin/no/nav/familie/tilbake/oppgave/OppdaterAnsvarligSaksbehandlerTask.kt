@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.oppgave
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -8,6 +7,7 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -22,10 +22,10 @@ class OppdaterAnsvarligSaksbehandlerTask(
     private val oppgaveService: OppgaveService,
     private val behandlingRepository: BehandlingRepository,
     private val oppgavePrioritetService: OppgavePrioritetService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<OppdaterAnsvarligSaksbehandlerTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         val logContext = task.logContext()
         log.medContext(logContext) { info("OppdaterSaksbehandlerPåOppgaveTask prosesserer med id={}", task.id) }
         val behandlingId = UUID.fromString(task.payload)

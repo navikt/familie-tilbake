@@ -1,6 +1,5 @@
 package no.nav.familie.tilbake.dokumentbestilling.felles.task
 
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -14,6 +13,7 @@ import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.TilbakekrevingHistorikkinnslagstype
 import no.nav.familie.tilbake.log.SecureLog.Context.Companion.logContext
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.Brevmottager
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -32,10 +32,10 @@ class LagreBrevsporingTask(
     private val historikkService: HistorikkService,
     private val behandlingRepository: BehandlingRepository,
     private val behandlingService: BehandlingService,
-) : AsyncTaskStep {
+) : AsyncTaskStepMedMetrics() {
     private val log = TracedLogger.getLogger<LagreBrevsporingTask>()
 
-    override fun doTask(task: Task) {
+    override fun doTaskWithMetrics(task: Task) {
         log.medContext(task.logContext()) { info("{} prosesserer med id={}", LagreBrevsporingTask::class.simpleName, task.id) }
         val behandlingId = UUID.fromString(task.payload)
         val dokumentId = task.metadata.getProperty("dokumentId")

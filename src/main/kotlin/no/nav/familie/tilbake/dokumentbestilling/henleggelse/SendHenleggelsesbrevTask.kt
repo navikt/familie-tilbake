@@ -1,7 +1,6 @@
 package no.nav.familie.tilbake.dokumentbestilling.henleggelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.tilbake.behandling.BehandlingRepository
@@ -9,6 +8,7 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.PropertyName
 import no.nav.familie.tilbake.kontrakter.objectMapper
+import no.nav.familie.tilbake.micrometer.AsyncTaskStepMedMetrics
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.Properties
@@ -24,8 +24,8 @@ import java.util.UUID
 class SendHenleggelsesbrevTask(
     private val henleggelsesbrevService: HenleggelsesbrevService,
     private val behandlingRepository: BehandlingRepository,
-) : AsyncTaskStep {
-    override fun doTask(task: Task) {
+) : AsyncTaskStepMedMetrics() {
+    override fun doTaskWithMetrics(task: Task) {
         val taskdata: SendBrevTaskdata = objectMapper.readValue(task.payload)
         val behandling = behandlingRepository.findByIdOrThrow(taskdata.behandlingId)
         henleggelsesbrevService.sendHenleggelsebrev(behandling.id, taskdata.fritekst)
