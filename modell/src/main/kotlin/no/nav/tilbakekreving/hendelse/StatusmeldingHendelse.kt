@@ -21,4 +21,6 @@ data class StatusmeldingHendelse(
     fun kravgrunnlagBortfalt() = kravstatuskode == Kravstatuskode.AVSLUTTET
 
     fun erKravgrunnlagEndret() = kravstatuskode == Kravstatuskode.ENDRET
+
+    fun erKravgrunnlagSperret() = kravstatuskode == Kravstatuskode.SPERRET
 }

@@ -180,6 +180,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(hendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        kravgrunnlagHistorikk.lagre(hendelse)
         tilstand.håndter(this, hendelse, sideeffektContext)
     }
 
