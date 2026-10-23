@@ -8,7 +8,8 @@ import java.util.UUID
 data class EksternFagsakEntity(
     val id: UUID,
     val tilbakekrevingRef: String,
-    val eksternId: String,
+    val eksternId: String?,
+    val eksternIdFraOppdrag: String,
     val ytelseEntity: YtelseEntity,
     val behandlinger: HistorikkEntity<UUID, EksternFagsakBehandlingEntity, EksternFagsakRevurdering>,
 ) {
@@ -19,6 +20,7 @@ data class EksternFagsakEntity(
         return EksternFagsak(
             id = id,
             eksternId = eksternId,
+            eksternIdFraOppdrag = eksternIdFraOppdrag,
             ytelse = ytelseEntity.fraEntity(),
             behandlinger = eksternFagsakBehandlingHistorikk,
         )

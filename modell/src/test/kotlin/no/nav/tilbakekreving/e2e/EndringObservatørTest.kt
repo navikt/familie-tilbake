@@ -172,8 +172,8 @@ class EndringObservatørTest {
             fatteVedtak(godkjenning())
         }
         tilbakekreving.håndter(iverksettelse(), systemContext(endringObservatør, behovObservatør = behovOppsamler))
-        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
-        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, tilbakekreving.eksternFagsak.eksternId()), systemContext(endringObservatør, behovObservatør = behovOppsamler))
+        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, tilbakekreving.eksternFagsak.eksternId()), systemContext(endringObservatør, behovObservatør = behovOppsamler))
         endringObservatør.behandlingEndretEventsFor(fagsakId).map { it.behandlingsstatus } shouldBe listOf(
             ForenkletBehandlingsstatus.OPPRETTET,
             ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL,
@@ -236,8 +236,8 @@ class EndringObservatørTest {
             fatteVedtak(godkjenning())
         }
         tilbakekreving.håndter(iverksettelse(), systemContext(endringObservatør, behovObservatør = behovOppsamler))
-        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
-        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId), systemContext(endringObservatør, behovObservatør = behovOppsamler))
+        tilbakekreving.håndter(journalføring((behovOppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId()), systemContext(endringObservatør, behovObservatør = behovOppsamler))
+        tilbakekreving.håndter(distribusjon((behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId, fagsakId = tilbakekreving.eksternFagsak.eksternId()), systemContext(endringObservatør, behovObservatør = behovOppsamler))
 
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().forrigeBehandlingsstatus shouldBe ForenkletBehandlingsstatus.TIL_GODKJENNING
         endringObservatør.behandlingEndretEventsFor(fagsakId).last().behandlingsstatus shouldBe ForenkletBehandlingsstatus.AVSLUTTET

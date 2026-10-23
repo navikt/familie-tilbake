@@ -101,7 +101,7 @@ class ForhåndsvarselServiceTest : TilbakekrevingE2EBase() {
             dokumentController.bestillBrev(bestillBrevDto)
         }
 
-        val tilbakekrevingEtterVarselbrev = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val tilbakekrevingEtterVarselbrev = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId())
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
             dokumentInfoId shouldBe "-2"

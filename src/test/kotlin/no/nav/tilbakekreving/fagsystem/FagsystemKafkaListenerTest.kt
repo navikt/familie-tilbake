@@ -54,6 +54,7 @@ class FagsystemKafkaListenerTest {
         oppsamler.finnHendelser("123456") shouldBe listOf(
             FagsysteminfoSvarHendelse(
                 eksternFagsakId = "123456",
+                overstyrtEksternFagsakId = null,
                 hendelseOpprettet = LocalDateTime.of(2025, 1, 13, 12, 30, 45, 0),
                 mottaker = FagsysteminfoSvarHendelse.MottakerDto(
                     ident = Testdata.STANDARD_BRUKERIDENT,

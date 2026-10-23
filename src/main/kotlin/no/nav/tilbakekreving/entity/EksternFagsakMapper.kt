@@ -23,6 +23,12 @@ object EksternFagsakMapper : Entity<EksternFagsakEntity, UUID, UUID>(
     val eksternId = field(
         "ekstern_id",
         EksternFagsakEntity::eksternId,
+        FieldConverter.StringConverter,
+    )
+
+    val eksternIdFraOppdrag = field(
+        "ekstern_id_fra_oppdrag",
+        EksternFagsakEntity::eksternIdFraOppdrag,
         FieldConverter.StringConverter.required(),
     )
     val ytelse = field(
@@ -36,6 +42,7 @@ object EksternFagsakMapper : Entity<EksternFagsakEntity, UUID, UUID>(
             id = resultSet[id],
             tilbakekrevingRef = resultSet[tilbakekrevingRef],
             eksternId = resultSet[eksternId],
+            eksternIdFraOppdrag = resultSet[eksternIdFraOppdrag],
             ytelseEntity = YtelseEntity(
                 type = resultSet[ytelse],
             ),

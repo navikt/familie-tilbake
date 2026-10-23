@@ -47,6 +47,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
             Ytelse.Tilleggsstønad,
             FagsysteminfoSvarHendelse(
                 eksternFagsakId = fagsystemId,
+                overstyrtEksternFagsakId = null,
                 hendelseOpprettet = LocalDateTime.now(),
                 mottaker = MottakerDto(
                     ident = Testdata.TESTBRUKER,

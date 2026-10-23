@@ -12,6 +12,7 @@ data class FagsysteminfoSvarHendelse(
     val revurdering: RevurderingDto,
     val utvidPerioder: List<UtvidetPeriodeDto>?,
     val behandlendeEnhet: String?,
+    val overstyrtEksternFagsakId: String?,
 ) : KafkameldingFraFagsystem {
     data class MottakerDto(
         val ident: String,

@@ -90,7 +90,7 @@ class JournalførVedtakTest {
         )
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
-            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId),
+            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId()),
             systemContext(),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak

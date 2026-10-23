@@ -43,7 +43,7 @@ class JournalpostController(
                     behandlingId = behandlingId,
                     journalpostId = journalpostId,
                     dokumentInfoId = dokumentInfoId,
-                    tilbakekreving.eksternFagsak.eksternId,
+                    tilbakekreving.eksternFagsak.eksternId(),
                 ),
                 "OK",
             )

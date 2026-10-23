@@ -104,7 +104,7 @@ class FrontendE2ETest {
                 journalpostId = "123",
                 dokumentInfoId = "321",
                 behandlingId = UUID.randomUUID(),
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
             ),
             systemContext(behovObservatør = behovOppsamler),
         )
@@ -113,7 +113,7 @@ class FrontendE2ETest {
             DistribusjonHendelse(
                 behandlingId = UUID.randomUUID(),
                 brevId = (behovOppsamler.behovListe.last() as VedtaksbrevDistribusjonBehov).brevId,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
                 journalpostId = "123",
                 dokumentInfoId = "321",
             ),

@@ -23,6 +23,7 @@ object Testdata {
         årsakTilFeilutbetaling: String? = "ingen",
     ) = FagsysteminfoSvarHendelse(
         eksternFagsakId = fagsystemId,
+        overstyrtEksternFagsakId = null,
         hendelseOpprettet = LocalDateTime.now(),
         mottaker = FagsysteminfoSvarHendelse.MottakerDto(
             ident = Testdata.STANDARD_BRUKERIDENT,

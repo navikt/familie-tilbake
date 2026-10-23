@@ -94,7 +94,7 @@ data class Varselbrev(
         id = id,
         brukerinfo = bruker.hentBrukerinfo(),
         forhåndsvarselinfo = forhåndsvarselinfo,
-        eksternFagsakId = eksternFagsak.eksternId,
+        eksternFagsakId = eksternFagsak.eksternId(),
         ytelseType = eksternFagsak.ytelse.tilYtelseDTO(),
         hjemlerForTilbakekreving = eksternFagsak.forhåndsvarselHjemlerForTilbakekreving(),
         varsletDato = sendtTid,

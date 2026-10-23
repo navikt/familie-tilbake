@@ -77,6 +77,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
             ytelse = Ytelse.Tilleggsstønad,
             fagsysteminfo = FagsysteminfoSvarHendelse(
                 eksternFagsakId = fagsystemId,
+                overstyrtEksternFagsakId = null,
                 hendelseOpprettet = LocalDateTime.now(),
                 mottaker = MottakerDto(
                     Testdata.TESTBRUKER,

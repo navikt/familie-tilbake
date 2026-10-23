@@ -45,7 +45,7 @@ class DistribuerVedtaTest {
                 journalpostId = "123",
                 dokumentInfoId = "321",
                 behandlingId = UUID.randomUUID(),
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
             ),
             systemContext(),
         )
@@ -59,13 +59,13 @@ class DistribuerVedtaTest {
         val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
         val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
         tilbakekreving.håndter(
-            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId),
+            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId()),
             systemContext(),
         )
         tilbakekreving.håndter(
             distribusjon(
                 brevId = brevId,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
             ),
             systemContext(),
         )
@@ -81,7 +81,7 @@ class DistribuerVedtaTest {
         tilbakekreving.håndter(
             journalføring(
                 brevId,
-                fagsakId = tilbakekreving.eksternFagsak.eksternId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
             ),
             systemContext(behovObservatør = oppsamler),
         )

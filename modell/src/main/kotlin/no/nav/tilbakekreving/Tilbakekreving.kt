@@ -209,7 +209,7 @@ class Tilbakekreving internal constructor(
 
     fun sporingsinformasjon(behandlingId: UUID? = null): Sporing {
         return Sporing(
-            eksternFagsak.eksternId,
+            eksternFagsak.eksternId(),
             behandlingId?.toString() ?: if (behandlingHistorikk.harBehandling()) {
                 behandlingHistorikk.nåværende().entry.id.toString()
             } else {
@@ -337,7 +337,7 @@ class Tilbakekreving internal constructor(
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,
             bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
-            fagsakId = eksternFagsak.eksternId,
+            fagsakId = eksternFagsak.eksternId(),
             tilbakekrevingId = id,
         )
     }
@@ -348,7 +348,7 @@ class Tilbakekreving internal constructor(
                 journalpostId = brevHistorikk.sisteVarselbrev()!!.journalpostId!!,
                 ytelse = eksternFagsak.ytelse,
                 brevId = brevHistorikk.sisteVarselbrev()!!.id,
-                fagsakId = eksternFagsak.eksternId,
+                fagsakId = eksternFagsak.eksternId(),
                 dokumentInfoId = brevHistorikk.sisteVarselbrev()!!.dokumentInfoId!!,
             ),
         )
@@ -360,7 +360,7 @@ class Tilbakekreving internal constructor(
                 journalpostId = brevHistorikk.nåværende().entry.journalpostId!!,
                 brevId = brevHistorikk.nåværende().entry.id,
                 fagsystem = eksternFagsak.ytelse.tilFagsystemDTO(),
-                fagsakId = eksternFagsak.eksternId,
+                fagsakId = eksternFagsak.eksternId(),
                 dokumentInfoId = brevHistorikk.nåværende().entry.dokumentInfoId!!,
             ),
         )
@@ -387,7 +387,7 @@ class Tilbakekreving internal constructor(
         val nåværendeBehandling = behandlingHistorikk.nåværende().entry
         nåværendeBehandling.sendVedtakIverksatt(
             forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
-            eksternFagsystemId = eksternFagsak.eksternId,
+            eksternFagsystemId = eksternFagsak.eksternId(),
             ytelse = eksternFagsak.ytelse,
             endringObservatør = endringObservatør,
             ansvarligEnhet = nåværendeBehandling.hentBehandlingsinformasjon().enhet?.kode,
@@ -448,7 +448,7 @@ class Tilbakekreving internal constructor(
     }
 
     private fun tilbakekrevingSakId(): String = when {
-        eksternFagsak.ytelse.brukerEksternFagsakIdForUrl -> eksternFagsak.eksternId
+        eksternFagsak.ytelse.brukerEksternFagsakIdForUrl -> eksternFagsak.eksternId()
         else -> id
     }
 
@@ -479,7 +479,7 @@ class Tilbakekreving internal constructor(
             sideeffektContext.endringObservatør.behandlingsstatusOppdatert(
                 behandlingId = behandlingId,
                 forrigeBehandlingId = behandlingHistorikk.forrige()?.entry?.id,
-                eksternFagsystemId = eksternFagsak.eksternId,
+                eksternFagsystemId = eksternFagsak.eksternId(),
                 eksternBehandlingId = eksternBehandlingId,
                 ytelse = eksternFagsak.ytelse,
                 tilstand = tilstand.tilbakekrevingTilstand,
@@ -498,7 +498,7 @@ class Tilbakekreving internal constructor(
                 EndringObservatør.BehandlingEndret(
                     behandlingId = behandlingId,
                     vedtakGjelderId = bruker?.aktør?.ident ?: "Ukjent",
-                    eksternFagsakId = eksternFagsak.eksternId,
+                    eksternFagsakId = eksternFagsak.eksternId(),
                     ytelse = eksternFagsak.ytelse,
                     eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
                     sakOpprettet = opprettet,
@@ -585,6 +585,7 @@ class Tilbakekreving internal constructor(
                 eksternFagsak = EksternFagsak(
                     id = UUID.randomUUID(),
                     eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                    eksternIdFraOppdrag = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
                     ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
                     behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),
                 ),

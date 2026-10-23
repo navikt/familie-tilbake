@@ -103,7 +103,7 @@ class ForhåndsvarselE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSendVarselbrev(tilbakekreving.nåværendeBehandlingId(), SendForhaandsvarselDto("Tekst fra saksbehandler"))
         }
-        val tilbakekrevingEtterVarselbrev = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId)
+        val tilbakekrevingEtterVarselbrev = tilbakekreving(FagsystemDTO.TS, tilbakekreving.eksternFagsak.eksternId())
         tilbakekrevingEtterVarselbrev!!.brevHistorikk.sisteVarselbrev() shouldNotBeNull {
             journalpostId shouldBe "-1"
             tilForhåndsvarselDto().tekstFraSaksbehandler shouldBe "Tekst fra saksbehandler"

@@ -13,13 +13,16 @@ import java.util.UUID
 
 class EksternFagsak(
     private val id: UUID,
-    val eksternId: String,
+    private val eksternId: String?,
+    private val eksternIdFraOppdrag: String,
     internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
 ) {
+    fun eksternId(): String = eksternId ?: eksternIdFraOppdrag
+
     fun tilFrontendDto(): EksternFagsakDto {
         return EksternFagsakDto(
-            eksternId = eksternId,
+            eksternId = eksternId(),
             ytelsestype = ytelse.tilYtelseDTO(),
             fagsystem = ytelse.tilFagsystemDTO(),
         )
@@ -66,7 +69,7 @@ class EksternFagsak(
         vedtakGjelderId: String,
     ): FagsysteminfoBehov {
         return FagsysteminfoBehov(
-            eksternFagsakId = eksternId,
+            eksternFagsakId = eksternId(),
             eksternBehandlingId = eksternBehandlingId,
             vedtakGjelderId = vedtakGjelderId,
             ytelse = ytelse,
@@ -77,6 +80,7 @@ class EksternFagsak(
         return EksternFagsakEntity(
             id = id,
             tilbakekrevingRef = tilbakekrevingId,
+            eksternIdFraOppdrag = eksternIdFraOppdrag,
             eksternId = eksternId,
             ytelseEntity = ytelse.tilEntity(),
             behandlinger = behandlinger.tilEntity(id),
