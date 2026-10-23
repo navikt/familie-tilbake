@@ -32,15 +32,17 @@ import no.nav.tilbakekreving.endring.EndringObservatør
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -179,7 +181,17 @@ class Tilbakekreving internal constructor(
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
     }
 
-    fun håndter(hendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+    fun håndter(hendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        kravgrunnlagHistorikk.lagre(hendelse)
+        tilstand.håndter(this, hendelse, sideeffektContext)
+    }
+
+    fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        kravgrunnlagHistorikk.lagre(hendelse)
+        tilstand.håndter(this, hendelse, sideeffektContext)
+    }
+
+    fun håndter(hendelse: SperretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
         kravgrunnlagHistorikk.lagre(hendelse)
         tilstand.håndter(this, hendelse, sideeffektContext)
     }

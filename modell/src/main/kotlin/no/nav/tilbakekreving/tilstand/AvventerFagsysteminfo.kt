@@ -5,10 +5,12 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -49,11 +51,23 @@ object AvventerFagsysteminfo : Tilstand {
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        statusmeldingHendelse: StatusmeldingHendelse,
+        statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
-        }
+        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: SperretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: EndretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
     }
 }

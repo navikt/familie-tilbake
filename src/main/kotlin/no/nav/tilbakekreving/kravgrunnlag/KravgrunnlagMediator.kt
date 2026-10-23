@@ -4,6 +4,9 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.scheduling.annotation.Scheduled
@@ -48,7 +51,17 @@ class KravgrunnlagMediator(
                 filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),
                 validerScope = false,
             ) { tilbakekreving, context ->
-                tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
+                when (statusmeldingHendelse) {
+                    is EndretStatusmeldingHendelse -> {
+                        tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
+                    }
+                    is SperretStatusmeldingHendelse -> {
+                        tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
+                    }
+                    is AvsluttetStatusmeldingHendelse -> {
+                        tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
+                    }
+                }
             }
         }
     }

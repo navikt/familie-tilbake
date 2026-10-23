@@ -6,21 +6,50 @@ import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class StatusmeldingHendelse(
+sealed interface StatusmeldingHendelse : KravHendelse {
+    override val vedtakId: BigInteger
+    override val kravstatuskode: Kravstatuskode
+    override val vedtakGjelder: Aktør
+    override val referanse: String?
+    val kodeFagomraade: String
+    val fagsystemId: String
+}
+
+data class EndretStatusmeldingHendelse(
     override val id: UUID,
     override val opprettet: LocalDateTime,
     override val vedtakId: BigInteger,
     override val kravstatuskode: Kravstatuskode,
     override val vedtakGjelder: Aktør,
     override val referanse: String?,
-    val kodeFagomraade: String,
-    val fagsystemId: String,
-) : KravHendelse {
+    override val kodeFagomraade: String,
+    override val fagsystemId: String,
+) : KravHendelse, StatusmeldingHendelse {
     override fun valider(sporing: Sporing) = Unit
+}
 
-    fun kravgrunnlagBortfalt() = kravstatuskode == Kravstatuskode.AVSLUTTET
+data class SperretStatusmeldingHendelse(
+    override val id: UUID,
+    override val opprettet: LocalDateTime,
+    override val vedtakId: BigInteger,
+    override val kravstatuskode: Kravstatuskode,
+    override val vedtakGjelder: Aktør,
+    override val referanse: String?,
+    override val kodeFagomraade: String,
+    override val fagsystemId: String,
+) : KravHendelse, StatusmeldingHendelse {
+    override fun valider(sporing: Sporing) = Unit
+}
 
-    fun erKravgrunnlagEndret() = kravstatuskode == Kravstatuskode.ENDRET
-
-    fun erKravgrunnlagSperret() = kravstatuskode == Kravstatuskode.SPERRET
+data class AvsluttetStatusmeldingHendelse(
+    override val id: UUID,
+    override val opprettet: LocalDateTime,
+    override val vedtakId: BigInteger,
+    override val kravstatuskode: Kravstatuskode,
+    override val vedtakGjelder: Aktør,
+    override val referanse: String?,
+    override val kodeFagomraade: String,
+    override val fagsystemId: String,
+) : KravHendelse, StatusmeldingHendelse {
+    override fun valider(sporing: Sporing) = Unit
 }
