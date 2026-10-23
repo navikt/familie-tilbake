@@ -3,11 +3,9 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
-import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
@@ -38,11 +36,13 @@ object Sperret : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
-        }
-        if (statusmeldingHendelse.erKravgrunnlagEndret()) {
-            tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+        when {
+            statusmeldingHendelse.kravgrunnlagBortfalt() -> {
+                tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+            }
+            statusmeldingHendelse.erKravgrunnlagEndret() -> {
+                tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+            }
         }
     }
 

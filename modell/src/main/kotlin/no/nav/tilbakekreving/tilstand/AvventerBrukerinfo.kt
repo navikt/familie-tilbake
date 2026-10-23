@@ -45,5 +45,9 @@ object AvventerBrukerinfo : Tilstand {
         tilbakekreving: Tilbakekreving,
         statusmeldingHendelse: StatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
-    ) {}
+    ) {
+        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
+            tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+        }
+    }
 }

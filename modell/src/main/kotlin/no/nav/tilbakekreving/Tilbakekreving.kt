@@ -564,6 +564,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun validerInnenforScope(toggles: FeatureToggles) {
+        tilstand.validerInnenforScope(this)
         if (behandlingHistorikk.harBehandling()) {
             behandlingHistorikk.nåværende().entry.validerInnenforScope(toggles)
         }

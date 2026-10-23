@@ -13,4 +13,5 @@ enum class TilbakekrevingTilstand {
     DISTRIUBER_VEDTAK,
     AVSLUTTET,
     SPERRET,
+    KRAVGRUNNLAG_BORTFALT,
 }

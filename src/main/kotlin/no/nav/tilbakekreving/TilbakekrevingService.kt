@@ -17,12 +17,10 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
-import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandler.Behandler
@@ -34,7 +32,6 @@ class TilbakekrevingService(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val bigQueryService: BigQueryService,
     private val endringObservatørService: EndringObservatørService,
-    private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
     private val featureService: FeatureService,
     private val tilgangskontrollService: TilgangskontrollService,
     private val behovMediator: BehovMediator,
@@ -99,10 +96,6 @@ class TilbakekrevingService(
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 
         if (validerScope) {
-            if (statusmeldingBufferRepository.erAnnullert(tilbakekreving.eksternFagsak.eksternId)) {
-                throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
-            }
-
             tilbakekreving.validerInnenforScope(featureService.modellFeatures)
         }
         return tilbakekreving

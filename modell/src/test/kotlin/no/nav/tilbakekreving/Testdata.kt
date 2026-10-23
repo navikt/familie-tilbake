@@ -280,6 +280,18 @@ fun sperrStatusmelding(): StatusmeldingHendelse =
         fagsystemId = "123",
     )
 
+fun bortfaltStatusmelding(): StatusmeldingHendelse =
+    StatusmeldingHendelse(
+        id = UUID.randomUUID(),
+        opprettet = LocalDateTime.now(),
+        vedtakId = 1234.toBigInteger(),
+        kravstatuskode = Kravstatuskode.AVSLUTTET,
+        vedtakGjelder = Aktør.Person("12345678901"),
+        referanse = "0",
+        kodeFagomraade = "BA",
+        fagsystemId = "123",
+    )
+
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
 
 fun Tilbakekreving.nåværendeBehandling() = hentBehandling(nåværendeBehandlingId())

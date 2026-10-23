@@ -133,6 +133,8 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
+    fun validerInnenforScope(tilbakekreving: Tilbakekreving) {}
+
     fun venter(klokke: Klokke, sporing: Sporing): Venter? {
         return null
     }
