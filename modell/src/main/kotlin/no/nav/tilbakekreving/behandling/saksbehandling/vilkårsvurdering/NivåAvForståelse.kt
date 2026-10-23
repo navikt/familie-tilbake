@@ -74,7 +74,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
                 aktsomhetEtterUtbetaling = AktsomhetDTO.FORSETT,
-                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.FORSTOD_ELLER_BURDE_FORSTÅTT,
                 særligeGrunner = null,
                 beløpUnnlatesUnder4Rettsgebyr = VurdertUtbetaling.JaNeiVurdering.Nei,
             )
@@ -151,7 +151,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = null,
                 aktsomhetEtterUtbetaling = grad.aktsomhet,
-                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.IKKE_FORÅRSAKET_AV_BRUKER,
+                forårsaketAvBruker = VurdertUtbetaling.ForårsaketAvBruker.FORSTOD_ELLER_BURDE_FORSTÅTT,
                 særligeGrunner = reduksjonSærligeGrunner?.oppsummerVurdering(),
                 beløpUnnlatesUnder4Rettsgebyr = kanUnnlates4XRettsgebyr.oppsummering(),
             )
