@@ -84,9 +84,9 @@ tilbakekreving:
       tp:
         veileder: [] # Tiltakspenger har ikke veileder-tilgang ennå
         saksbehandler:
-          - "6c6ce2e8-b2e2-4c4b-8194-215c8e27a5c7" # 0000-GA-Tiltakspenger-Saksbehandler
+          - "651186df-f798-4537-84ab-3da8bd0a7a4a" # 0000-GA-Tiltakspenger-tilbakekreving
         beslutter:
-          - "de518927-f657-4f37-9a64-14fdfd968dd2" # 0000-GA-Tiltakspenger-Beslutter
+          - "651186df-f798-4537-84ab-3da8bd0a7a4a" # 0000-GA-Tiltakspenger-tilbakekreving
   bigQuery:
     prosjektId: tilbake-prod-d235
     dataset: tilbakekreving_dataset
