@@ -42,20 +42,11 @@ class StatusmeldingBufferRepository(
         }
     }
 
-    fun erAnnullert(fagsystemId: String): Boolean {
-        return jdbcTemplate.query(
-            "SELECT COUNT(1) as count FROM statusmelding_buffer WHERE fagsystem_id=? AND status='AVSL';",
-            fagsystemId,
-        ) { rs, _ ->
-            rs.getInt("count") > 0
-        }.singleOrNull() ?: false
-    }
-
-    object Mapper : RowMapper<StatusmeldingBufferRepository.Entity> {
+    object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
             rowNum: Int,
-        ): StatusmeldingBufferRepository.Entity {
+        ): Entity {
             return Entity(
                 UUID.fromString(rs.getString("id")),
                 rs.getString("statusmelding"),

@@ -34,7 +34,8 @@ object IverksettVedtak : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
         if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
+            tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfaltIIverksettelse, tilbakekreving.sporingsinformasjon())
         }
         tilbakekreving.byttTilstand(Sperret, sideeffektContext)
     }

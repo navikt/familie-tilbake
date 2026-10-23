@@ -1,13 +1,10 @@
 package no.nav.tilbakekreving.e2e
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
-import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -86,18 +83,19 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     }
 
     @Test
-    fun `annullert kravgrunnlag blokkerer behandling`() {
+    fun `avsl statusmelding avslutter behandlingen`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
         sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"), forventetAntallUleste = 1)
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
 
-        val exception = shouldThrow<ModellFeil.UtenforScopeException> {
-            behandlingController.hentBehandling(behandlingId)
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingController.hentBehandling(behandlingId = behandlingId).shouldNotBeNull {
+                data!!.status shouldBe Behandlingsstatus.AVSLUTTET
+            }
         }
-        exception.utenforScope shouldBe UtenforScope.KravgrunnlagBortfalt
     }
 }

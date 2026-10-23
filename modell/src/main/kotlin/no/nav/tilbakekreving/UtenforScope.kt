@@ -13,9 +13,9 @@ enum class UtenforScope(val tittel: String, val feilmelding: String) {
         tittel = "Kravgrunnlaget er endret",
         feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi det har kommet endringer i feilutbetalingen/perioden fra fagsystemet eller økonomisystemet. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
     ),
-    KravgrunnlagBortfalt(
-        tittel = "Kravgrunnlaget er bortfalt",
-        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi kravgrunnlaget kan være avsluttet i økonomisystemet.",
+    KravgrunnlagBortfaltIIverksettelse(
+        tittel = "Kravgrunnlaget er bortfalt mens iverksettelse pågår",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi kravgrunnlaget kan være avsluttet i økonomisystemet mens iverksettelse pågår. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
     ),
     KravgrunnlagMedFærrePerioder(
         tittel = "Kravgrunnlaget er endret",
