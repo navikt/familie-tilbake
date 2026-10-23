@@ -147,7 +147,7 @@ class TilbakekrevingRepository(
 
     fun hentTilbakekrevingerForPåminnelse(): List<TilbakekrevingForPåminnelse> {
         return jdbcTemplate.query(
-            """SELECT tbk.id, ef.ekstern_id, ef.ytelse
+            """SELECT tbk.id, ef.ekstern_id_fra_oppdrag, ef.ytelse
 FROM tilbakekreving tbk
          LEFT JOIN tilbakekreving_ekstern_fagsak ef ON tbk.id = ef.tilbakekreving_ref
 WHERE tbk.neste_påminnelse < ?;""",
@@ -155,7 +155,7 @@ WHERE tbk.neste_påminnelse < ?;""",
         ) { rs, _ ->
             TilbakekrevingForPåminnelse(
                 rs.getString("id"),
-                rs.getString("ekstern_id"),
+                rs.getString("ekstern_id_fra_oppdrag"),
                 rs.getString("ytelse"),
             )
         }.toList()

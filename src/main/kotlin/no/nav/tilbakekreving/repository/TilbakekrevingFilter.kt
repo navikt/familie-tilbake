@@ -43,7 +43,7 @@ sealed interface TilbakekrevingFilter {
 
         override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC;",
+                "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id_fra_oppdrag=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC;",
                 mapper,
                 fagsakId,
                 ytelse(),
@@ -52,7 +52,7 @@ sealed interface TilbakekrevingFilter {
 
         override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
-                "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC FOR UPDATE;",
+                "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id_fra_oppdrag=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC FOR UPDATE;",
                 mapper,
                 fagsakId,
                 ytelse(),

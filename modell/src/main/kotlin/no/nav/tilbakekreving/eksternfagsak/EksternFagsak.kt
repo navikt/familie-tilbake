@@ -69,7 +69,7 @@ class EksternFagsak(
         vedtakGjelderId: String,
     ): FagsysteminfoBehov {
         return FagsysteminfoBehov(
-            eksternFagsakId = eksternId(),
+            eksternFagsakId = eksternIdFraOppdrag,
             eksternBehandlingId = eksternBehandlingId,
             vedtakGjelderId = vedtakGjelderId,
             ytelse = ytelse,
