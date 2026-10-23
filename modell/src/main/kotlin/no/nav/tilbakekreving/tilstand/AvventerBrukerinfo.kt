@@ -33,9 +33,17 @@ object AvventerBrukerinfo : Tilstand {
         tilbakekreving.bruker!!.oppdater(brukerinfo)
 
         val sisteKravHendelse = tilbakekreving.kravgrunnlagHistorikk.nåværende().entry
-        if (sisteKravHendelse is StatusmeldingHendelse && sisteKravHendelse.erKravgrunnlagSperret()) {
-            tilbakekreving.byttTilstand(Sperret, sideeffektContext)
-            return
+        if (sisteKravHendelse is StatusmeldingHendelse) {
+            when {
+                sisteKravHendelse.erKravgrunnlagSperret() -> {
+                    tilbakekreving.byttTilstand(Sperret, sideeffektContext)
+                    return
+                }
+                sisteKravHendelse.kravgrunnlagBortfalt() -> {
+                    tilbakekreving.byttTilstand(Avsluttet, sideeffektContext)
+                    return
+                }
+            }
         }
         // todo her kan vi bytte til SendVarselbrev tilstand når Automatisk varselbrev er på plass
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
