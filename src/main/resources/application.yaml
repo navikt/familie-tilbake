@@ -53,6 +53,10 @@ spring:
   aop:
     auto: true
     proxy-target-class: true
+  task:
+    scheduling:
+      pool:
+        size: 5
 
 springdoc:
   packages-to-scan:
