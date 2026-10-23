@@ -9,15 +9,17 @@ import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -117,10 +119,26 @@ internal sealed interface Tilstand {
 
     fun håndter(
         tilbakekreving: Tilbakekreving,
-        statusmeldingHendelse: StatusmeldingHendelse,
+        statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        throw ModellFeil.UgyldigOperasjonException("Forventet ikke StatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke AvsluttetStatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: EndretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke EndretStatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: SperretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke SperretStatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun opprettRevurdering(

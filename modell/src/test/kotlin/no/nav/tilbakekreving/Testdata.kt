@@ -13,15 +13,17 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
@@ -268,8 +270,8 @@ fun distribusjon(brevId: UUID, fagsakId: String): DistribusjonHendelse = Distrib
     dokumentInfoId = "321",
 )
 
-fun sperrStatusmelding(): StatusmeldingHendelse =
-    StatusmeldingHendelse(
+fun sperrStatusmelding(): SperretStatusmeldingHendelse =
+    SperretStatusmeldingHendelse(
         id = UUID.randomUUID(),
         opprettet = LocalDateTime.now(),
         vedtakId = 1234.toBigInteger(),
@@ -280,12 +282,24 @@ fun sperrStatusmelding(): StatusmeldingHendelse =
         fagsystemId = "123",
     )
 
-fun bortfaltStatusmelding(): StatusmeldingHendelse =
-    StatusmeldingHendelse(
+fun bortfaltStatusmelding(): AvsluttetStatusmeldingHendelse =
+    AvsluttetStatusmeldingHendelse(
         id = UUID.randomUUID(),
         opprettet = LocalDateTime.now(),
         vedtakId = 1234.toBigInteger(),
         kravstatuskode = Kravstatuskode.AVSLUTTET,
+        vedtakGjelder = Aktør.Person("12345678901"),
+        referanse = "0",
+        kodeFagomraade = "BA",
+        fagsystemId = "123",
+    )
+
+fun endretStatusmelding(): EndretStatusmeldingHendelse =
+    EndretStatusmeldingHendelse(
+        id = UUID.randomUUID(),
+        opprettet = LocalDateTime.now(),
+        vedtakId = 1234.toBigInteger(),
+        kravstatuskode = Kravstatuskode.ENDRET,
         vedtakGjelder = Aktør.Person("12345678901"),
         referanse = "0",
         kodeFagomraade = "BA",

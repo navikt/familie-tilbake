@@ -5,9 +5,11 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -30,12 +32,27 @@ object IverksettVedtak : Tilstand {
         tilbakekreving.sendVedtakIverksatt(sideeffektContext.endringObservatør)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (statusmeldingHendelse.kravgrunnlagBortfalt()) {
-            tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
-            return
-        }
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: SperretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
         tilbakekreving.byttTilstand(Sperret, sideeffektContext)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: EndretStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
     }
 
     override fun håndter(

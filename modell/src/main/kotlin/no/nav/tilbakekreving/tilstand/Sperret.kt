@@ -7,9 +7,11 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
 import no.nav.tilbakekreving.feil.Sporing
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
 
@@ -35,15 +37,15 @@ object Sperret : Tilstand {
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: StatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        when {
-            statusmeldingHendelse.kravgrunnlagBortfalt() -> {
-                tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
-            }
-            statusmeldingHendelse.erKravgrunnlagEndret() -> {
-                tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
-            }
-        }
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+        tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: SperretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
     }
 
     override fun venter(klokke: Klokke, sporing: Sporing): Venter {

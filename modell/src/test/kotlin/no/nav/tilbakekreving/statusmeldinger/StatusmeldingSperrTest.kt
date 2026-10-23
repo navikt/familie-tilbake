@@ -3,18 +3,16 @@ package no.nav.tilbakekreving.statusmeldinger
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.e2e.kravgrunnlagMedBeløp
+import no.nav.tilbakekreving.endretStatusmelding
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtak
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
-import no.nav.tilbakekreving.hendelse.Kravstatuskode
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -33,7 +31,6 @@ import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 class StatusmeldingSperrTest {
@@ -161,16 +158,7 @@ class StatusmeldingSperrTest {
         }
 
         tilbakekreving.håndter(
-            StatusmeldingHendelse(
-                id = UUID.randomUUID(),
-                opprettet = LocalDateTime.now(),
-                vedtakId = 1234.toBigInteger(),
-                kravstatuskode = Kravstatuskode.ENDRET,
-                vedtakGjelder = Aktør.Person("12345678901"),
-                referanse = "0",
-                kodeFagomraade = "BA",
-                fagsystemId = "123",
-            ),
+            endretStatusmelding(),
             systemContext(),
         )
 
@@ -201,16 +189,7 @@ class StatusmeldingSperrTest {
         )
 
         tilbakekreving.håndter(
-            StatusmeldingHendelse(
-                id = UUID.randomUUID(),
-                opprettet = LocalDateTime.now(),
-                vedtakId = 1234.toBigInteger(),
-                kravstatuskode = Kravstatuskode.ENDRET,
-                vedtakGjelder = Aktør.Person("12345678901"),
-                referanse = "0",
-                kodeFagomraade = "BA",
-                fagsystemId = "123",
-            ),
+            endretStatusmelding(),
             systemContext(),
         )
 

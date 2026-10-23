@@ -6,9 +6,12 @@ import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.aktør.Aktør
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.HentKravgrunnlagDetaljerResponseDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -66,20 +69,45 @@ object KravgrunnlagMapper {
     }
 
     fun tilStatusmeldingHendelse(kravOgVedtakstatus: KravOgVedtakstatus, klokke: Klokke): StatusmeldingHendelse {
-        return StatusmeldingHendelse(
-            id = UUID.randomUUID(),
-            vedtakId = kravOgVedtakstatus.vedtakId,
-            kravstatuskode = Kravstatuskode.forOppdragKode(kravOgVedtakstatus.kodeStatusKrav),
-            vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
-            referanse = kravOgVedtakstatus.referanse
-                ?: throw Feil(
-                    message = "Mottok statusmelding uten referanse",
+        return when (kravOgVedtakstatus.kodeStatusKrav) {
+            Kravstatuskode.ENDRET.oppdragKode -> EndretStatusmeldingHendelse(
+                id = UUID.randomUUID(),
+                vedtakId = kravOgVedtakstatus.vedtakId,
+                kravstatuskode = Kravstatuskode.ENDRET,
+                vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
+                referanse = kravOgVedtakstatus.referanse,
+                opprettet = klokke.nå(),
+                kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
+                fagsystemId = kravOgVedtakstatus.fagsystemId,
+            )
+            Kravstatuskode.SPERRET.oppdragKode -> SperretStatusmeldingHendelse(
+                id = UUID.randomUUID(),
+                vedtakId = kravOgVedtakstatus.vedtakId,
+                kravstatuskode = Kravstatuskode.SPERRET,
+                vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
+                referanse = kravOgVedtakstatus.referanse,
+                opprettet = klokke.nå(),
+                kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
+                fagsystemId = kravOgVedtakstatus.fagsystemId,
+            )
+            Kravstatuskode.AVSLUTTET.oppdragKode -> AvsluttetStatusmeldingHendelse(
+                id = UUID.randomUUID(),
+                vedtakId = kravOgVedtakstatus.vedtakId,
+                kravstatuskode = Kravstatuskode.AVSLUTTET,
+                vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
+                referanse = kravOgVedtakstatus.referanse,
+                opprettet = klokke.nå(),
+                kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
+                fagsystemId = kravOgVedtakstatus.fagsystemId,
+            )
+
+            else -> {
+                throw Feil(
+                    message = "Mottok statusmelding som ikke støttes enda: ${kravOgVedtakstatus.kodeStatusKrav}",
                     logContext = SecureLog.Context.utenBehandling(kravOgVedtakstatus.fagsystemId),
-                ),
-            opprettet = klokke.nå(),
-            kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
-            fagsystemId = kravOgVedtakstatus.fagsystemId,
-        )
+                )
+            }
+        }
     }
 
     private fun mapAktør(
