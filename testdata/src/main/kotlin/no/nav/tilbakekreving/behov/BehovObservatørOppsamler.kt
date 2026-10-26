@@ -42,6 +42,10 @@ class BehovObservatørOppsamler() : BehovObservatør {
         behovListe.add(behov)
     }
 
+    override fun håndter(behov: InfobrevJournalføringBehov) {
+        behovListe.add(behov)
+    }
+
     fun journalføringEventFor(): VarselbrevJournalføringHendelse {
         return VarselbrevJournalføringHendelse(
             journalpostId = "",

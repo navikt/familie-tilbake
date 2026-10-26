@@ -15,7 +15,6 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.avventerBehandling
 import no.nav.tilbakekreving.e2e.kanBehandle
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -37,9 +36,6 @@ import java.time.LocalDate
 import kotlin.random.Random
 
 class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     private lateinit var oppdragRestClient: OppdragClientRestMock
 

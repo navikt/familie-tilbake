@@ -10,6 +10,7 @@ tilbakekreving:
   toggles:
     ny-modell:
       EndretKravgrunnlagVisning: true
+      KravBortfalt: true
   tilgangsstyring:
     ts:
       grupper:

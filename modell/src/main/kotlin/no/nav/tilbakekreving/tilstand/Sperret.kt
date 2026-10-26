@@ -47,7 +47,15 @@ object Sperret : Tilstand {
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
 
-    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        if (sideeffektContext.features[Toggle.KravBortfalt]) {
+            tilbakekreving.byttTilstand(JournalførInfobrevForBortfaltKrav, sideeffektContext)
+            return
+        }
         tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
     }
 

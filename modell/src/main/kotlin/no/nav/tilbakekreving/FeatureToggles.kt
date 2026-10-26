@@ -26,6 +26,7 @@ enum class Toggle(val default: Boolean) {
     ForhandsvarselTypst(default = false),
     EndretKravgrunnlagVisning(default = false),
     SperretStatusmelding(default = true),
+    KravBortfalt(default = false),
 }
 
 enum class FagsystemToggle(val default: Boolean)

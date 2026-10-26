@@ -17,7 +17,6 @@ import no.nav.tilbakekreving.api.v1.dto.SkalUnnlates
 import no.nav.tilbakekreving.api.v1.dto.VilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
 import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
@@ -62,9 +61,6 @@ import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
 class BehandlingE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     private lateinit var kafkaProducer: KafkaProducerStub
 

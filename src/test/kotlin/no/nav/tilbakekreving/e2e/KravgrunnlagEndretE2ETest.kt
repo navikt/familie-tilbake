@@ -16,7 +16,6 @@ import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.entities.FaktastegEntity
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
@@ -43,9 +42,6 @@ import java.util.UUID
     properties = ["tilbakekreving.toggles.nyModell.EndretKravgrunnlagVisning=true"],
 )
 class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     lateinit var forvaltningController: ForvaltningController
 

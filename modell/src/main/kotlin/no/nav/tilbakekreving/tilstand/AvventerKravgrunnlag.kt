@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.tilstand
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
@@ -37,6 +38,10 @@ object AvventerKravgrunnlag : Tilstand {
         statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
+        if (sideeffektContext.features[Toggle.KravBortfalt]) {
+            tilbakekreving.byttTilstand(JournalførInfobrevForBortfaltKrav, sideeffektContext)
+            return
+        }
         tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
     }
 

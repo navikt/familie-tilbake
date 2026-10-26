@@ -18,3 +18,10 @@ data class VedtaksbrevInfo(
     val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
     val beregnerSkatt: Boolean,
 )
+
+data class InfobrevData(
+    val brukerdata: BrevmottakerDto,
+    val ytelse: YtelseDto,
+    val bunntekster: Set<String>,
+    val tilbakekrevingId: String,
+)

@@ -5,7 +5,6 @@ import no.nav.familie.tilbake.api.FagsakController
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
@@ -13,9 +12,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class DagpengerE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     lateinit var fagsakController: FagsakController
 

@@ -15,7 +15,7 @@ enum class UtenforScope(val tittel: String, val feilmelding: String) {
     ),
     KravgrunnlagBortfalt(
         tittel = "Kravgrunnlaget er bortfalt",
-        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi kravgrunnlaget kan være avsluttet i økonomisystemet.",
+        feilmelding = "Tilbakekrevingen kan ikke behandles videre fordi kravgrunnlaget kan være avsluttet i økonomisystemet etter sendt varselbrev eller under iverksetting. Tilbakeløsningen har ikke støtte for å håndtere slike endringer enda, men vi jobber med å få dette på plass.",
     ),
     KravgrunnlagSperret(
         tittel = "Kravgrunnlaget er sperret",
