@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.entities.BortfaltKravbrevEntity
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
@@ -35,6 +36,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         resultSet: ResultSet,
         varselbrevEntity: VarselbrevEntity?,
         vedtaksbrevEntity: VedtaksbrevEntity?,
+        bortfaltKravbrevEntity: BortfaltKravbrevEntity?,
     ): BrevEntity {
         return BrevEntity(
             id = resultSet[id],
@@ -42,6 +44,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             brevtype = resultSet[brevType],
             varselbrevEntity = varselbrevEntity,
             vedtaksbrevEntity = vedtaksbrevEntity,
+            bortfaltKravbrevEntity = bortfaltKravbrevEntity,
             opprettet = resultSet[opprettet],
         )
     }
@@ -135,6 +138,39 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
                 journalpostId = resultSet[journalpostId],
                 dokumentInfoId = resultSet[dokumentInfoId],
                 sendtTid = resultSet[sendtTid]!!,
+            )
+        }
+    }
+
+    object BortfaltKravbrevEntityMapper : Entity<BortfaltKravbrevEntity, UUID, UUID>(
+        "tilbakekreving_bortfalt_kravbrev",
+        BortfaltKravbrevEntity::id,
+        FieldConverter.UUIDConverter.required(),
+    ) {
+        val sendtTid = field(
+            "sendt_tid",
+            BortfaltKravbrevEntity::sendtTid,
+            FieldConverter.LocalDateConverter.required(),
+        )
+
+        val journalpostId = field(
+            "journalpost_id",
+            BortfaltKravbrevEntity::journalpostId,
+            FieldConverter.StringConverter,
+        )
+
+        val dokumentInfoId = field(
+            "dokument_info_id",
+            BortfaltKravbrevEntity::dokumentInfoId,
+            FieldConverter.StringConverter,
+        )
+
+        fun map(resultSet: ResultSet): BortfaltKravbrevEntity {
+            return BortfaltKravbrevEntity(
+                id = resultSet[id],
+                journalpostId = resultSet[journalpostId],
+                dokumentInfoId = resultSet[dokumentInfoId],
+                sendtTid = resultSet[sendtTid],
             )
         }
     }

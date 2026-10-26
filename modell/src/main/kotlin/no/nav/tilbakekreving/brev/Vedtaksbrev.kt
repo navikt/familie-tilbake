@@ -32,6 +32,7 @@ data class Vedtaksbrev(
                 dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,
             ),
+            bortfaltKravbrevEntity = null,
             opprettet = opprettet,
         )
     }

@@ -43,6 +43,10 @@ class BrevHistorikk(
         return historikk.filterIsInstance<Vedtaksbrev>().lastOrNull()
     }
 
+    fun sisteBortfaltKravbrev(): BortfaltKravbrev? {
+        return historikk.filterIsInstance<BortfaltKravbrev>().lastOrNull()
+    }
+
     fun alleSendteDokumenter(): List<DokumentInfoDto> =
         historikk.mapNotNull { brev ->
             if (brev.journalpostId == null || brev.dokumentInfoId == null) {

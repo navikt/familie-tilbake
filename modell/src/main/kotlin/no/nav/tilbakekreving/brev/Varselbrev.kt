@@ -81,6 +81,7 @@ data class Varselbrev(
                 tekstFraSaksbehandler = tekstFraSaksbehandler,
             ),
             vedtaksbrevEntity = null,
+            bortfaltKravbrevEntity = null,
             opprettet = opprettet,
         )
     }
