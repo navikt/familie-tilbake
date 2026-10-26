@@ -8,9 +8,9 @@ import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
 import no.nav.tilbakekreving.entities.HistorikkEntity
-import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
+import no.nav.tilbakekreving.entities.KravHendelseEntity
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.KravHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.sql.ResultSet
 import java.util.UUID
@@ -45,7 +45,7 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
         resultSet: ResultSet,
         eksternFagsak: EksternFagsakEntity,
         behandlingHistorikk: HistorikkEntity<UUID, BehandlingEntity, Behandling>,
-        kravgrunnlagHistorikk: HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse>,
+        kravgrunnlagHistorikk: HistorikkEntity<UUID, KravHendelseEntity, KravHendelse>,
         brevHistorikk: HistorikkEntity<UUID, BrevEntity, Brev>,
         bruker: BrukerEntity?,
     ): TilbakekrevingEntity {

@@ -1,9 +1,12 @@
 package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.BeløpEntity
+import no.nav.tilbakekreving.entities.KravHendelseEntity
+import no.nav.tilbakekreving.entities.KravStatusmeldingEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
+import no.nav.tilbakekreving.entity.KravStatusmeldingMapper
 import no.nav.tilbakekreving.entity.KravgrunnlagBeløpMapper
 import no.nav.tilbakekreving.entity.KravgrunnlagHendelseMapper
 import no.nav.tilbakekreving.entity.KravgrunnlagPeriodeMapper
@@ -16,16 +19,31 @@ import java.util.UUID
 class NyKravgrunnlagRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun lagre(kravgrunnlagHendelser: List<KravgrunnlagHendelseEntity>) {
-        for (kravgrunnlag in kravgrunnlagHendelser) {
-            KravgrunnlagHendelseMapper.insertQuery(jdbcTemplate, kravgrunnlag)
-            lagrePerioder(kravgrunnlag.perioder)
+    fun lagre(kravHendelser: List<KravHendelseEntity>) {
+        for (kravHendelse in kravHendelser) {
+            when (kravHendelse) {
+                is KravgrunnlagHendelseEntity -> {
+                    KravgrunnlagHendelseMapper.insertQuery(jdbcTemplate, kravHendelse)
+                    lagrePerioder(kravHendelse.perioder)
+                }
+                is KravStatusmeldingEntity -> KravStatusmeldingMapper.insertQuery(jdbcTemplate, kravHendelse)
+            }
         }
     }
 
-    fun hentKravgrunnlag(tilbakekrevingId: String): List<KravgrunnlagHendelseEntity> {
+    fun hentKravHendelser(tilbakekrevingId: String): List<KravHendelseEntity> {
+        return hentKravgrunnlag(tilbakekrevingId) + hentStatusmeldinger(tilbakekrevingId)
+    }
+
+    private fun hentKravgrunnlag(tilbakekrevingId: String): List<KravgrunnlagHendelseEntity> {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_kravgrunnlag WHERE tilbakekreving_id=?", tilbakekrevingId) { resultSet, _ ->
             KravgrunnlagHendelseMapper.map(resultSet, hentPerioder(resultSet[KravgrunnlagHendelseMapper.id]))
+        }
+    }
+
+    private fun hentStatusmeldinger(tilbakekrevingId: String): List<KravStatusmeldingEntity> {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_id=?", tilbakekrevingId) { resultSet, _ ->
+            KravStatusmeldingMapper.map(resultSet)
         }
     }
 

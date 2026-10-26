@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.entities.KravHendelseEntity
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import java.math.BigInteger
@@ -13,6 +14,8 @@ sealed interface KravHendelse : Historikk.HistorikkInnslag<UUID> {
     val referanse: String?
 
     fun valider(sporing: Sporing)
+
+    fun tilEntity(tilbakekrevingId: String): KravHendelseEntity
 }
 
 enum class Kravstatuskode(

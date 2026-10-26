@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -99,5 +100,24 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
             behandlingController.hentBehandling(behandlingId)
         }
         exception.utenforScope shouldBe UtenforScope.KravgrunnlagBortfalt
+    }
+
+    @Test
+    fun `statusmeldinger i historikken`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
+
+        val tilbakekrevingId = tilbakekreving(behandlingId).id
+        val kravstatuskoder = jdbcTemplate.query(
+            "SELECT kravstatuskode FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_id=?;",
+            tilbakekrevingId.toLong(),
+        ) { rs, _ -> rs.getString("kravstatuskode") }
+
+        kravstatuskoder shouldBe listOf(Kravstatuskode.SPERRET.name)
     }
 }

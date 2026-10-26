@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class KravgrunnlagHendelseEntity(
     override val id: UUID,
-    val tilbakekrevingId: String,
+    override val tilbakekrevingId: String,
     val vedtakId: BigInteger,
     val kravstatuskode: Kravstatuskode,
     val fagsystemVedtaksdato: LocalDate?,
@@ -23,8 +23,8 @@ data class KravgrunnlagHendelseEntity(
     val perioder: List<KravgrunnlagPeriodeEntity>,
     override val opprettet: LocalDateTime,
     val korrigering: Boolean,
-) : HistorikkInnslagEntity<UUID> {
-    fun fraEntity(): KravgrunnlagHendelse {
+) : KravHendelseEntity() {
+    override fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
             id = id,
             vedtakId = vedtakId,

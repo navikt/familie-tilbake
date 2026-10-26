@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.hendelse
 
 import no.nav.tilbakekreving.aktør.Aktør
+import no.nav.tilbakekreving.entities.KravStatusmeldingEntity
 import no.nav.tilbakekreving.feil.Sporing
 import java.math.BigInteger
 import java.time.LocalDateTime
@@ -13,6 +14,20 @@ sealed interface StatusmeldingHendelse : KravHendelse {
     override val referanse: String?
     val kodeFagomraade: String
     val fagsystemId: String
+
+    override fun tilEntity(tilbakekrevingId: String): KravStatusmeldingEntity {
+        return KravStatusmeldingEntity(
+            id = id,
+            tilbakekrevingId = tilbakekrevingId,
+            vedtakId = vedtakId,
+            kravstatuskode = kravstatuskode,
+            vedtakGjelder = vedtakGjelder.tilEntity(),
+            referanse = referanse,
+            kodeFagomraade = kodeFagomraade,
+            fagsystemId = fagsystemId,
+            opprettet = opprettet,
+        )
+    }
 }
 
 data class EndretStatusmeldingHendelse(

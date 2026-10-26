@@ -1,7 +1,7 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.tilbakekreving.entities.HistorikkEntity
-import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
+import no.nav.tilbakekreving.entities.KravHendelseEntity
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravHendelse
@@ -49,9 +49,9 @@ class KravgrunnlagHistorikk(
         ) as HistorikkReferanse<UUID, KravgrunnlagHendelse>
     }
 
-    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse> {
+    fun tilEntity(tilbakekrevingId: String): HistorikkEntity<UUID, KravHendelseEntity, KravHendelse> {
         return HistorikkEntity(
-            historikk.filterIsInstance<KravgrunnlagHendelse>().map { it.tilEntity(tilbakekrevingId) },
+            historikk.map { it.tilEntity(tilbakekrevingId) },
         )
     }
 }

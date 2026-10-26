@@ -66,7 +66,7 @@ class KravgrunnlagHendelse(
         return perioder
     }
 
-    fun tilEntity(tilbakekrevingId: String): KravgrunnlagHendelseEntity {
+    override fun tilEntity(tilbakekrevingId: String): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
             id = id,
             tilbakekrevingId = tilbakekrevingId,

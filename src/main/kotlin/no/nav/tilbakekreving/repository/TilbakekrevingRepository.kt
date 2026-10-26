@@ -51,7 +51,7 @@ class TilbakekrevingRepository(
             resultSet = resultSet,
             eksternFagsak = eksternFagsakRepository.hentEksternFagsak(id),
             behandlingHistorikk = HistorikkEntity(behandlingRepository.hentBehandlinger(id)),
-            kravgrunnlagHistorikk = HistorikkEntity(kravgrunnlagRepository.hentKravgrunnlag(id)),
+            kravgrunnlagHistorikk = HistorikkEntity(kravgrunnlagRepository.hentKravHendelser(id)),
             brevHistorikk = HistorikkEntity(brevRepository.hentBrev(id)),
             bruker = brukerRepository.hentBruker(id),
         )

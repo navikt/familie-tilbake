@@ -7,7 +7,7 @@ import no.nav.tilbakekreving.behandling.BehandlingHistorikk
 import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.KravHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.tilstand.Avsluttet
@@ -31,7 +31,7 @@ data class TilbakekrevingEntity(
     val nåværendeTilstand: TilbakekrevingTilstand,
     val eksternFagsak: EksternFagsakEntity,
     val behandlingHistorikkEntities: HistorikkEntity<UUID, BehandlingEntity, Behandling>,
-    val kravgrunnlagHistorikkEntities: HistorikkEntity<UUID, KravgrunnlagHendelseEntity, KravgrunnlagHendelse>,
+    val kravgrunnlagHistorikkEntities: HistorikkEntity<UUID, KravHendelseEntity, KravHendelse>,
     val brevHistorikkEntities: HistorikkEntity<UUID, BrevEntity, Brev>,
     val opprettet: LocalDateTime,
     val nestePåminnelse: LocalDateTime?,
