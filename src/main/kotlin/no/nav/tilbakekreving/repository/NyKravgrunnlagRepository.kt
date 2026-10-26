@@ -42,7 +42,7 @@ class NyKravgrunnlagRepository(
     }
 
     private fun hentStatusmeldinger(tilbakekrevingId: String): List<KravStatusmeldingEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_id=?", tilbakekrevingId) { resultSet, _ ->
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_ref=?", tilbakekrevingId) { resultSet, _ ->
             KravStatusmeldingMapper.map(resultSet)
         }
     }

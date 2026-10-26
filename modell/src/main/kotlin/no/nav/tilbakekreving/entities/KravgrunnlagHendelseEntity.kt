@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class KravgrunnlagHendelseEntity(
     override val id: UUID,
-    override val tilbakekrevingId: String,
+    override val tilbakekrevingRef: String,
     val vedtakId: BigInteger,
     val kravstatuskode: Kravstatuskode,
     val fagsystemVedtaksdato: LocalDate?,

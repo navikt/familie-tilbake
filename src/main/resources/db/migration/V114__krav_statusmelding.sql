@@ -1,6 +1,6 @@
 CREATE TABLE tilbakekreving_krav_statusmelding(
     id UUID NOT NULL PRIMARY KEY,
-    tilbakekreving_id INT NOT NULL REFERENCES tilbakekreving(id),
+    tilbakekreving_ref INT NOT NULL REFERENCES tilbakekreving(id),
     vedtak_id BIGINT NOT NULL,
     kravstatuskode VARCHAR(128) NOT NULL,
     vedtak_gjelder_type VARCHAR(128) NOT NULL,
@@ -11,4 +11,4 @@ CREATE TABLE tilbakekreving_krav_statusmelding(
     opprettet TIMESTAMP NOT NULL
 );
 
-CREATE INDEX ON tilbakekreving_krav_statusmelding(tilbakekreving_id);
+CREATE INDEX ON tilbakekreving_krav_statusmelding(tilbakekreving_ref);

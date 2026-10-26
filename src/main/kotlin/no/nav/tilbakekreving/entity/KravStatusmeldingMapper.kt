@@ -12,9 +12,9 @@ object KravStatusmeldingMapper : Entity<KravStatusmeldingEntity, UUID, UUID>(
     KravStatusmeldingEntity::id,
     FieldConverter.UUIDConverter.required(),
 ) {
-    val tilbakekrevingId = field(
-        "tilbakekreving_id",
-        KravStatusmeldingEntity::tilbakekrevingId,
+    val tilbakekrevingRef = field(
+        "tilbakekreving_ref",
+        KravStatusmeldingEntity::tilbakekrevingRef,
         FieldConverter.NumericId,
     )
     val vedtakId = field(
@@ -61,7 +61,7 @@ object KravStatusmeldingMapper : Entity<KravStatusmeldingEntity, UUID, UUID>(
     fun map(resultSet: ResultSet): KravStatusmeldingEntity {
         return KravStatusmeldingEntity(
             id = resultSet[id],
-            tilbakekrevingId = resultSet[tilbakekrevingId],
+            tilbakekrevingRef = resultSet[tilbakekrevingRef],
             vedtakId = resultSet[vedtakId],
             kravstatuskode = resultSet[kravstatuskode],
             vedtakGjelder = AktørEntity(

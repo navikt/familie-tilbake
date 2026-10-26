@@ -15,7 +15,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
 ) {
     val tilbakekrevingId = field(
         "tilbakekreving_id",
-        KravgrunnlagHendelseEntity::tilbakekrevingId,
+        KravgrunnlagHendelseEntity::tilbakekrevingRef,
         FieldConverter.NumericId,
     )
     val vedtakId = field(
@@ -96,7 +96,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
     ): KravgrunnlagHendelseEntity {
         return KravgrunnlagHendelseEntity(
             id = resultSet[id],
-            tilbakekrevingId = resultSet[tilbakekrevingId],
+            tilbakekrevingRef = resultSet[tilbakekrevingId],
             vedtakId = resultSet[vedtakId],
             kravstatuskode = resultSet[kravstatuskode],
             fagsystemVedtaksdato = resultSet[fagsystemVedtaksdato],

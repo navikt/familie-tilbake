@@ -11,7 +11,7 @@ import java.util.UUID
 
 data class KravStatusmeldingEntity(
     override val id: UUID,
-    override val tilbakekrevingId: String,
+    override val tilbakekrevingRef: String,
     val vedtakId: BigInteger,
     val kravstatuskode: Kravstatuskode,
     val vedtakGjelder: AktørEntity,

@@ -18,7 +18,7 @@ sealed interface StatusmeldingHendelse : KravHendelse {
     override fun tilEntity(tilbakekrevingId: String): KravStatusmeldingEntity {
         return KravStatusmeldingEntity(
             id = id,
-            tilbakekrevingId = tilbakekrevingId,
+            tilbakekrevingRef = tilbakekrevingId,
             vedtakId = vedtakId,
             kravstatuskode = kravstatuskode,
             vedtakGjelder = vedtakGjelder.tilEntity(),

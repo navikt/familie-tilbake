@@ -114,7 +114,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
 
         val tilbakekrevingId = tilbakekreving(behandlingId).id
         val kravstatuskoder = jdbcTemplate.query(
-            "SELECT kravstatuskode FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_id=?;",
+            "SELECT kravstatuskode FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_ref=?;",
             tilbakekrevingId.toLong(),
         ) { rs, _ -> rs.getString("kravstatuskode") }
 

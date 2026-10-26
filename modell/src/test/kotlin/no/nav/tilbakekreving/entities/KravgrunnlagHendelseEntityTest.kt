@@ -17,7 +17,7 @@ class KravgrunnlagHendelseEntityTest {
         val periode2 = DatoperiodeEntity(15.januar(2021), 20.januar(2021))
         val entity = KravgrunnlagHendelseEntity(
             id = UUID.randomUUID(),
-            tilbakekrevingId = UUID.randomUUID().toString(),
+            tilbakekrevingRef = UUID.randomUUID().toString(),
             vedtakId = BigInteger.ONE,
             kravstatuskode = Kravstatuskode.NY,
             fagsystemVedtaksdato = null,
