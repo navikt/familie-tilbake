@@ -40,11 +40,11 @@ class KravgrunnlagMediator(
         }
     }
 
-    @Scheduled(fixedRate = 1000L)
+//    @Scheduled(fixedRate = 1000L)
     fun lesStatusmelding() {
         statusmeldingBufferRepository.konsumerStatusmelding { entity ->
             val statusmelding = KravgrunnlagUtil.unmarshalStatusmelding(entity.statusmelding)
-            val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, SystemKlokke)
+            val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, entity.id, SystemKlokke.nå())
 
             val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
             tilbakekrevingService.hentOgLagreTilbakekreving(
@@ -62,6 +62,22 @@ class KravgrunnlagMediator(
                         tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
                     }
                 }
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 1000L)
+    fun lagreGamleStatusmeldinger() {
+        statusmeldingBufferRepository.konsumerStatusmeldingerPåNytt { entity, mottatt ->
+            val statusmelding = KravgrunnlagUtil.unmarshalStatusmelding(entity.statusmelding)
+            val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, entity.id, mottatt)
+
+            val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
+            tilbakekrevingService.hentOgLagreTilbakekreving(
+                filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),
+                validerScope = false,
+            ) { tilbakekreving, _ ->
+                tilbakekreving.lagreStatusmelding(statusmeldingHendelse)
             }
         }
     }

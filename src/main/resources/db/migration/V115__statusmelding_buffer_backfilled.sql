@@ -1,0 +1,1 @@
+ALTER TABLE statusmelding_buffer ADD COLUMN backfilled BOOLEAN NOT NULL DEFAULT FALSE;

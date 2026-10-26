@@ -21,6 +21,7 @@ import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import no.nav.tilbakekreving.typer.v1.JaNeiDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import org.springframework.http.HttpStatus
+import java.time.LocalDateTime
 import java.util.UUID
 
 object KravgrunnlagMapper {
@@ -68,35 +69,39 @@ object KravgrunnlagMapper {
         return kravgrunnlagHendelse
     }
 
-    fun tilStatusmeldingHendelse(kravOgVedtakstatus: KravOgVedtakstatus, klokke: Klokke): StatusmeldingHendelse {
+    fun tilStatusmeldingHendelse(
+        kravOgVedtakstatus: KravOgVedtakstatus,
+        id: UUID,
+        opprettet: LocalDateTime,
+    ): StatusmeldingHendelse {
         return when (kravOgVedtakstatus.kodeStatusKrav) {
             Kravstatuskode.ENDRET.oppdragKode -> EndretStatusmeldingHendelse(
-                id = UUID.randomUUID(),
+                id = id,
                 vedtakId = kravOgVedtakstatus.vedtakId,
                 kravstatuskode = Kravstatuskode.ENDRET,
                 vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
                 referanse = kravOgVedtakstatus.referanse,
-                opprettet = klokke.nå(),
+                opprettet = opprettet,
                 kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
                 fagsystemId = kravOgVedtakstatus.fagsystemId,
             )
             Kravstatuskode.SPERRET.oppdragKode -> SperretStatusmeldingHendelse(
-                id = UUID.randomUUID(),
+                id = id,
                 vedtakId = kravOgVedtakstatus.vedtakId,
                 kravstatuskode = Kravstatuskode.SPERRET,
                 vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
                 referanse = kravOgVedtakstatus.referanse,
-                opprettet = klokke.nå(),
+                opprettet = opprettet,
                 kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
                 fagsystemId = kravOgVedtakstatus.fagsystemId,
             )
             Kravstatuskode.AVSLUTTET.oppdragKode -> AvsluttetStatusmeldingHendelse(
-                id = UUID.randomUUID(),
+                id = id,
                 vedtakId = kravOgVedtakstatus.vedtakId,
                 kravstatuskode = Kravstatuskode.AVSLUTTET,
                 vedtakGjelder = mapAktør(kravOgVedtakstatus.typeGjelderId, kravOgVedtakstatus.vedtakGjelderId),
                 referanse = kravOgVedtakstatus.referanse,
-                opprettet = klokke.nå(),
+                opprettet = opprettet,
                 kodeFagomraade = kravOgVedtakstatus.kodeFagomraade,
                 fagsystemId = kravOgVedtakstatus.fagsystemId,
             )

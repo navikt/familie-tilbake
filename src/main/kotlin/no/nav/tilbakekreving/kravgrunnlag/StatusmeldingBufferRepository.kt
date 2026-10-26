@@ -4,10 +4,10 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.collections.forEach
 
@@ -37,6 +37,23 @@ class StatusmeldingBufferRepository(
             } catch (e: Exception) {
                 log.medContext(SecureLog.Context.utenBehandling(it.fagsystemId)) {
                     error("Feilet under konsumering av statusmelding, statusmeldingId={}", it.id, e)
+                }
+            }
+        }
+    }
+
+    @Transactional
+    fun konsumerStatusmeldingerPåNytt(callback: (entity: Entity, mottatt: LocalDateTime) -> Unit) {
+        val statusmelding = jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE lest=true AND NOT backfilled ORDER BY mottatt FOR UPDATE LIMIT 5;") { rs, rowNum ->
+            Mapper.mapRow(rs, rowNum) to rs.getTimestamp("mottatt").toLocalDateTime()
+        }
+        statusmelding.forEach { (entity, mottatt) ->
+            try {
+                callback(entity, mottatt)
+                jdbcTemplate.update("UPDATE statusmelding_buffer SET backfilled=true WHERE id=?;", entity.id)
+            } catch (e: Exception) {
+                log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
+                    error("Feilet under re-konsumering av statusmelding, statusmeldingId={}", entity.id, e)
                 }
             }
         }
