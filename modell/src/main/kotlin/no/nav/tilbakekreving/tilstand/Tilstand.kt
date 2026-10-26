@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
@@ -151,7 +152,7 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
-    fun validerInnenforScope(tilbakekreving: Tilbakekreving) {}
+    fun validerInnenforScope(tilbakekreving: Tilbakekreving, toggles: FeatureToggles) {}
 
     fun venter(klokke: Klokke, sporing: Sporing): Venter? {
         return null

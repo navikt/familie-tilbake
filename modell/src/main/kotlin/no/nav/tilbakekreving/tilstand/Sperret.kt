@@ -1,11 +1,15 @@
 package no.nav.tilbakekreving.tilstand
 
+import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
@@ -19,6 +23,12 @@ object Sperret : Tilstand {
     override val tidTilPåminnelse: Duration? = null
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.SPERRET
     override val erSperret: Boolean = true
+
+    override fun validerInnenforScope(tilbakekreving: Tilbakekreving, toggles: FeatureToggles) {
+        if (!toggles[Toggle.SperretStatusmelding]) {
+            throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagSperret, tilbakekreving.sporingsinformasjon())
+        }
+    }
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
