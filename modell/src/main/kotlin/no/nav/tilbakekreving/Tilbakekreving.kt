@@ -182,18 +182,21 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(hendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        kravgrunnlagHistorikk.lagre(hendelse)
-        tilstand.håndter(this, hendelse, sideeffektContext)
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+            tilstand.håndter(this, hendelse, sideeffektContext)
+        }
     }
 
     fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        kravgrunnlagHistorikk.lagre(hendelse)
-        tilstand.håndter(this, hendelse, sideeffektContext)
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+            tilstand.håndter(this, hendelse, sideeffektContext)
+        }
     }
 
     fun håndter(hendelse: SperretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        kravgrunnlagHistorikk.lagre(hendelse)
-        tilstand.håndter(this, hendelse, sideeffektContext)
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+            tilstand.håndter(this, hendelse, sideeffektContext)
+        }
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {

@@ -50,6 +50,9 @@ class KravgrunnlagMediator(
             val statusmelding = KravgrunnlagUtil.unmarshalStatusmelding(entity.statusmelding)
             val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, entity.id, mottatt)
 
+            log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
+                info("Leser statusmelding, status={}", entity.status)
+            }
             val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
             tilbakekrevingService.hentOgLagreTilbakekreving(
                 filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),

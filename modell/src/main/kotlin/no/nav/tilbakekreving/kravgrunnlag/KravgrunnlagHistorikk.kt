@@ -35,6 +35,16 @@ class KravgrunnlagHistorikk(
         return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
+    fun lagreKronologisk(innslag: KravHendelse): Boolean {
+        val indeks = historikk.indexOfFirst { it.opprettet > innslag.opprettet }
+        if (indeks != -1) {
+            historikk.add(indeks, innslag)
+            return false
+        }
+        lagre(innslag)
+        return true
+    }
+
     override fun nåværende(): HistorikkReferanse<UUID, KravHendelse> {
         return HistorikkReferanse(this, historikk.last().id)
     }
