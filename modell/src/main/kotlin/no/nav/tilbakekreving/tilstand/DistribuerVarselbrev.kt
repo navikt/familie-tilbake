@@ -36,7 +36,6 @@ object DistribuerVarselbrev : Tilstand {
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
     }
 
     override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {

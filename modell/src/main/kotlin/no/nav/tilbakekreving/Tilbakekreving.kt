@@ -357,6 +357,10 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun opprettInfobrev(klokke: Klokke) {
+        // todo()
+    }
+
     fun trengerInfobrevJournalføring(sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.trengerInfobrevJournalføring(
             sideeffektContext = sideeffektContext,

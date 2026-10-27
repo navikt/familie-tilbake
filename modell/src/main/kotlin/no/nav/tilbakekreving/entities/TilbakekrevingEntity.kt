@@ -82,7 +82,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.JOURNALFØR_VEDTAK -> JournalførVedtak
                 TilbakekrevingTilstand.DISTRIUBER_VEDTAK -> DistribuerVedtak
                 TilbakekrevingTilstand.SPERRET -> Sperret
-                TilbakekrevingTilstand.JOURNALFØR_VEDTAK_FOR_BORTFALT_KRAV -> JournalførInfobrevForBortfaltKrav
+                TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV -> JournalførInfobrevForBortfaltKrav
                 TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT -> KravgrunnlagBortfalt
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },

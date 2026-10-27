@@ -43,6 +43,14 @@ enum class BehandlingsstatusModell(
             return ForenkletBehandlingsstatus.TIL_GODKJENNING
         }
     },
+    JOURNALFØRER_INFOBREV(
+        gammelFrontendDTO = Behandlingsstatus.JOURNALFØRER_INFOBREV,
+        relevantForFagsystem = false,
+    ) {
+        override fun forenkletStatus(ytelse: Ytelse, features: FeatureToggles): ForenkletBehandlingsstatus {
+            return ForenkletBehandlingsstatus.TIL_GODKJENNING
+        }
+    },
     DISTRIUBERER_VEDTAK(
         gammelFrontendDTO = Behandlingsstatus.DISTRIUBER_VEDTAK,
         relevantForFagsystem = false,

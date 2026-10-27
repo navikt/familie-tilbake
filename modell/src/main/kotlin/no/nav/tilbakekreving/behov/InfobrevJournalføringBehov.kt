@@ -12,5 +12,5 @@ class InfobrevJournalføringBehov(
     val bruker: Brukerinfo,
     val fagsakId: String,
     val journalførendeEnhet: String,
-    val vedtaksbrevInfo: InfobrevData,
+    val infobrevData: InfobrevData,
 ) : Behov

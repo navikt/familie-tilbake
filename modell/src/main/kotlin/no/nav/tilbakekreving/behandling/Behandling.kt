@@ -336,7 +336,7 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                vedtaksbrevInfo = hentInfobrevData(bruker, ytelse, tilbakekrevingId),
+                infobrevData = hentInfobrevData(bruker, ytelse, tilbakekrevingId),
             ),
         )
     }
