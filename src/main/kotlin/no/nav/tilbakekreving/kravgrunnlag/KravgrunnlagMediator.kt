@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
+import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
@@ -19,6 +21,8 @@ class KravgrunnlagMediator(
     private val applicationProperties: ApplicationProperties,
     private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
 ) {
+    private val log = TracedLogger.getLogger<KravgrunnlagMediator>()
+
     @Scheduled(fixedRate = 1000L)
     fun lesKravgrunnlag() {
         kravgrunnlagBufferRepository.konsumerKravgrunnlag { entity ->
@@ -72,6 +76,9 @@ class KravgrunnlagMediator(
             val statusmelding = KravgrunnlagUtil.unmarshalStatusmelding(entity.statusmelding)
             val statusmeldingHendelse = KravgrunnlagMapper.tilStatusmeldingHendelse(statusmelding, entity.id, mottatt)
 
+            log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
+                info("Migrerer inn statusmelding, status={}", entity.status)
+            }
             val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
             tilbakekrevingService.hentOgLagreTilbakekreving(
                 filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),
