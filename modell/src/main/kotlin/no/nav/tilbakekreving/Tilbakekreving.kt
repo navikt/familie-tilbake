@@ -43,6 +43,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -182,21 +183,26 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(hendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse) && fikkStatusmeldingEtterAvsluttet(sideeffektContext, hendelse)) {
             tilstand.håndter(this, hendelse, sideeffektContext)
         }
     }
 
     fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse) && fikkStatusmeldingEtterAvsluttet(sideeffektContext, hendelse)) {
             tilstand.håndter(this, hendelse, sideeffektContext)
         }
     }
 
     fun håndter(hendelse: SperretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
+        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse) && fikkStatusmeldingEtterAvsluttet(sideeffektContext, hendelse)) {
             tilstand.håndter(this, hendelse, sideeffektContext)
         }
+    }
+
+    private fun fikkStatusmeldingEtterAvsluttet(sideeffektContext: SideeffektContext, statusmeldingHendelse: StatusmeldingHendelse): Boolean {
+        val avsluttetTid = sideeffektContext.behandlingslogg.avsluttetTid() ?: return true
+        return avsluttetTid <= statusmeldingHendelse.opprettet
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {
