@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
@@ -44,10 +43,6 @@ data class Behandlingslogg(
     override fun nåværende(): HistorikkReferanse<UUID, LoggInnslag> {
         return HistorikkReferanse(this, historikk.last().id)
     }
-
-    internal fun avsluttetTid(): LocalDateTime? = historikk
-        .firstOrNull { it.behandlingsloggstype == Behandlingsloggstype.BEHANDLING_AVSLUTTET }
-        ?.opprettet
 
     fun tilFrontend(): List<LogginnslagDto> {
         return historikk.map {
