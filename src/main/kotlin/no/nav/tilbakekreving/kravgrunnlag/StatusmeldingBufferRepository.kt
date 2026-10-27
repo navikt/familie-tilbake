@@ -28,32 +28,17 @@ class StatusmeldingBufferRepository(
     }
 
     @Transactional
-    fun konsumerStatusmelding(callback: (Entity) -> Unit) {
-        val statusmelding = jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE lest=false ORDER BY mottatt FOR UPDATE LIMIT 5;", Mapper)
-        statusmelding.forEach {
-            try {
-                callback(it)
-                jdbcTemplate.update("UPDATE statusmelding_buffer SET lest=true WHERE id=?;", it.id)
-            } catch (e: Exception) {
-                log.medContext(SecureLog.Context.utenBehandling(it.fagsystemId)) {
-                    error("Feilet under konsumering av statusmelding, statusmeldingId={}", it.id, e)
-                }
-            }
-        }
-    }
-
-    @Transactional
-    fun konsumerStatusmeldingerPåNytt(callback: (entity: Entity, mottatt: LocalDateTime) -> Unit) {
-        val statusmelding = jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE lest=true AND NOT backfilled ORDER BY mottatt FOR UPDATE LIMIT 5;") { rs, rowNum ->
+    fun konsumerStatusmelding(callback: (entity: Entity, mottatt: LocalDateTime) -> Unit) {
+        val statusmelding = jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE lest=false ORDER BY mottatt FOR UPDATE LIMIT 5;") { rs, rowNum ->
             Mapper.mapRow(rs, rowNum) to rs.getTimestamp("mottatt").toLocalDateTime()
         }
         statusmelding.forEach { (entity, mottatt) ->
             try {
                 callback(entity, mottatt)
-                jdbcTemplate.update("UPDATE statusmelding_buffer SET backfilled=true WHERE id=?;", entity.id)
+                jdbcTemplate.update("UPDATE statusmelding_buffer SET lest=true WHERE id=?;", entity.id)
             } catch (e: Exception) {
                 log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
-                    error("Feilet under re-konsumering av statusmelding, statusmeldingId={}", entity.id, e)
+                    error("Feilet under konsumering av statusmelding, statusmeldingId={}", entity.id, e)
                 }
             }
         }

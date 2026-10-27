@@ -43,7 +43,6 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
-import no.nav.tilbakekreving.hendelse.StatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
@@ -195,10 +194,6 @@ class Tilbakekreving internal constructor(
     fun håndter(hendelse: SperretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
         kravgrunnlagHistorikk.lagre(hendelse)
         tilstand.håndter(this, hendelse, sideeffektContext)
-    }
-
-    fun lagreStatusmelding(hendelse: StatusmeldingHendelse) {
-        kravgrunnlagHistorikk.lagre(hendelse)
     }
 
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {
