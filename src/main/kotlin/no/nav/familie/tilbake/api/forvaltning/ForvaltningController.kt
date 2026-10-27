@@ -7,7 +7,6 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
-import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -256,41 +255,6 @@ class ForvaltningController(
             handling = "Henter ikke arkiverte kravgrunnlag",
         )
         return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
-    }
-
-    @Operation(summary = "Hent statusmeldinger fra buffer")
-    @GetMapping(
-        path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/statusmelding-buffer"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun hentStatusmeldingerFraBuffer(
-        @PathVariable fagsystem: FagsystemDTO,
-        @PathVariable eksternFagsakId: String,
-    ): Ressurs<List<StatusmeldingBufferRepository.StatusmeldingFraBuffer>> {
-        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
-            fagsystem = fagsystem,
-            eksternFagsakId = eksternFagsakId,
-            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-            auditLoggerEvent = AuditLoggerEvent.NONE,
-            handling = "Henter statusmeldinger fra buffer",
-        )
-        return Ressurs.success(statusmeldingBufferRepository.hentStatusmeldingFraBuffer(eksternFagsakId))
-    }
-
-    @Operation(summary = "Hent alle statusmeldinger fra buffer som ikke er lagret")
-    @GetMapping(
-        path = ["/statusmelding-buffer/ikke-lagret"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun hentStatusmeldingerFraBufferSomIkkeErLagret(): Ressurs<List<StatusmeldingBufferRepository.StatusmeldingFraBuffer>> {
-        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
-            throw ForbiddenError(
-                message = "Innlogget bruker uten rolle ${Behandlerrolle.FORVALTER} har ikke tilgang til å hente statusmeldinger fra buffer som ikke er lagret",
-                frontendFeilmelding = "Du trenger rollen ${Behandlerrolle.FORVALTER} for å hente statusmeldinger fra buffer som ikke er lagret",
-                logContext = SecureLog.Context.tom(),
-            )
-        }
-        return Ressurs.success(statusmeldingBufferRepository.finnManglendeStatusmeldinger())
     }
 
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")

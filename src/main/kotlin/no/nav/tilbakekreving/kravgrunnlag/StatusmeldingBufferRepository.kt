@@ -44,63 +44,11 @@ class StatusmeldingBufferRepository(
         }
     }
 
-    fun hentStatusmeldingFraBuffer(eksternFagsakId: String): List<StatusmeldingFraBuffer> {
-        return jdbcTemplate.query(
-            """
-            SELECT sb.id, sb.fagsystem_id, sb.lest, sb.status, sb.mottatt, ks.id IS NOT NULL AS lagret
-            FROM statusmelding_buffer sb
-            LEFT JOIN tilbakekreving_krav_statusmelding ks ON ks.id = sb.id
-            WHERE sb.fagsystem_id = ?
-            ORDER BY sb.mottatt;
-            """.trimIndent(),
-            StatusmeldingFraBufferMapper,
-            eksternFagsakId,
-        )
-    }
-
-    fun finnManglendeStatusmeldinger(): List<StatusmeldingFraBuffer> {
-        return jdbcTemplate.query(
-            """
-            SELECT sb.id, sb.fagsystem_id, sb.lest, sb.status, sb.mottatt, FALSE AS lagret
-            FROM statusmelding_buffer sb
-            LEFT JOIN tilbakekreving_krav_statusmelding ks ON ks.id = sb.id
-            WHERE ks.id IS NULL
-            ORDER BY sb.mottatt;
-            """.trimIndent(),
-            StatusmeldingFraBufferMapper,
-        )
-    }
-
-    private object StatusmeldingFraBufferMapper : RowMapper<StatusmeldingFraBuffer> {
+    object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
             rowNum: Int,
-        ): StatusmeldingFraBuffer {
-            return StatusmeldingFraBuffer(
-                id = UUID.fromString(rs.getString("id")),
-                fagsystemId = rs.getString("fagsystem_id"),
-                lest = rs.getBoolean("lest"),
-                status = rs.getString("status"),
-                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
-                lagret = rs.getBoolean("lagret"),
-            )
-        }
-    }
-
-    data class StatusmeldingFraBuffer(
-        val id: UUID,
-        val fagsystemId: String,
-        val lest: Boolean,
-        val status: String,
-        val mottatt: LocalDateTime,
-        val lagret: Boolean,
-    )
-
-    object Mapper : RowMapper<StatusmeldingBufferRepository.Entity> {
-        override fun mapRow(
-            rs: ResultSet,
-            rowNum: Int,
-        ): StatusmeldingBufferRepository.Entity {
+        ): Entity {
             return Entity(
                 UUID.fromString(rs.getString("id")),
                 rs.getString("statusmelding"),
