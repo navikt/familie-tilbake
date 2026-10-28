@@ -13,61 +13,61 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
       - name: Deploy familie-tilbake-kafka-manager til dev
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-dev.yml
       - name: Deploy familie-tilbake-kafka-manager til prod
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .github/kafka-manager/familie-tilbake-kafka-manager-prod.yml
       - name: Deploy dvh_sak_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/dvh_sak_topic.yaml
       - name: Deploy dvh_vedtak_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/dvh_vedtak_topic.yaml
       - name: Deploy hentfagsystemsbehandling_request_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/hentfagsystemsbehandling_request_topic.yaml
           ENVIRONMENT: dev-gcp:tilbake
       - name: Deploy hentfagsystemsbehandling_respons_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/kafka/hentfagsystemsbehandling_respons_topic.yaml
           ENVIRONMENT: dev-gcp:tilbake
       - name: Deploy dvh_sak_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/dvh_sak_topic_prod.yaml
       - name: Deploy dvh_vedtak_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/dvh_vedtak_topic_prod.yaml
       - name: Deploy hentfagsystemsbehandling_request_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/hentfagsystemsbehandling_request_topic_prod.yaml
           ENVIRONMENT: prod-gcp:tilbake
       - name: Deploy hentfagsystemsbehandling_respons_topic
-        uses: nais/deploy/actions/deploy@v2
+        uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/hentfagsystemsbehandling_respons_topic_prod.yaml
