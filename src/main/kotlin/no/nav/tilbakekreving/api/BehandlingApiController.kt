@@ -43,6 +43,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.UUID
+import no.nav.tilbakekreving.config.ApplicationProperties
 
 @Component
 @ProtectedWithClaims(issuer = "azuread")
@@ -51,6 +52,8 @@ class BehandlingApiController(
     private val nyVedtaksbrevService: NyVedtaksbrevService,
     private val forhåndsvarselService: ForhåndsvarselService,
     private val safService: SafService,
+    private val applicationProperties: ApplicationProperties,
+
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
@@ -320,13 +323,14 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<String> {
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
+            tilbakekreving.opprettRevurdering(behandlingId, revurderingDto.revurderingsarsak, context)
             ResponseEntity.ok(
-                tilbakekreving.opprettRevurdering(behandlingId, revurderingDto.revurderingsarsak, context),
+                tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)
             )
         } ?: ResponseEntity.notFound().build()
     }
