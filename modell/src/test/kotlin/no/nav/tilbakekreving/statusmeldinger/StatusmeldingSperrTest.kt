@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtak
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
@@ -26,6 +27,8 @@ import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
+import no.nav.tilbakekreving.tilstand.DistribuerVarselbrev
+import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
@@ -204,5 +207,39 @@ class StatusmeldingSperrTest {
             erBehandlingPåVent shouldBe false
             venter shouldBe null
         }
+    }
+
+    @Test
+    fun `sperrStatusmelding feiler når behandlingen er i SEND_VARSELBREV`() {
+        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021))))
+        }
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler", saksbehandlerContext())
+        tilbakekreving.tilstand shouldBe SendVarselbrev
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.håndter(sperrStatusmelding(), systemContext())
+        }.message shouldBe "Forventet ikke SperretStatusmeldingHendelse i SEND_VARSELBREV"
+    }
+
+    @Test
+    fun `sperrStatusmelding feiler når behandlingen er i DISTRIUBER_VARSELBREV`() {
+        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021))))
+        }
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler", saksbehandlerContext())
+        tilbakekreving.håndter(VarselbrevJournalføringHendelse(tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id, "123456789", "1234"), systemContext())
+
+        tilbakekreving.tilstand shouldBe DistribuerVarselbrev
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.håndter(sperrStatusmelding(), systemContext())
+        }.message shouldBe "Forventet ikke SperretStatusmeldingHendelse i DISTRIUBER_VARSELBREV"
     }
 }

@@ -9,8 +9,10 @@ import no.nav.tilbakekreving.bortfaltStatusmelding
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.e2e.kravgrunnlagMedBeløp
 import no.nav.tilbakekreving.fagsysteminfoHendelse
+import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtak
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
@@ -24,8 +26,10 @@ import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
+import no.nav.tilbakekreving.tilstand.DistribuerVarselbrev
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
+import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
@@ -134,5 +138,39 @@ class StatusmeldingBortfaltTest {
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekreving.validerInnenforScope(defaultFeatures())
         }.utenforScope shouldBe UtenforScope.KravgrunnlagBortfalt
+    }
+
+    @Test
+    fun `bortfalt kravgrunnlag feiler når behandlingen er i SEND_VARSELBREV`() {
+        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021))))
+        }
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler", saksbehandlerContext())
+        tilbakekreving.tilstand shouldBe SendVarselbrev
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
+        }.message shouldBe "Forventet ikke AvsluttetStatusmeldingHendelse i SEND_VARSELBREV"
+    }
+
+    @Test
+    fun `bortfalt kravgrunnlag feiler når behandlingen er i DISTRIUBER_VARSELBREV`() {
+        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext()) {
+            vurderFakta(faktastegVurdering(perioder = listOf(1.januar(2021) til 31.januar(2021))))
+        }
+        tilbakekreving.sendVarselbrev(tilbakekreving.nåværendeBehandlingId(), "Tekst fra saksbehandler", saksbehandlerContext())
+        tilbakekreving.håndter(VarselbrevJournalføringHendelse(tilbakekreving.brevHistorikk.sisteVarselbrev()!!.id, "123456789", "1234"), systemContext())
+
+        tilbakekreving.tilstand shouldBe DistribuerVarselbrev
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
+        }.message shouldBe "Forventet ikke AvsluttetStatusmeldingHendelse i DISTRIUBER_VARSELBREV"
     }
 }
