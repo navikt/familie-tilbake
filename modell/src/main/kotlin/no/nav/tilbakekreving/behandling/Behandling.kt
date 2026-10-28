@@ -336,7 +336,12 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                infobrevData = hentInfobrevData(bruker, ytelse, tilbakekrevingId),
+                infobrevData =  InfobrevData(
+                    brukerdata = bruker.brevmeta(),
+                    ytelse = ytelse.brevmeta(),
+                    bunntekster = KravBortfaltTekster.finnTekster(ytelse, bruker.språkkode ?: Språkkode.NB),
+                    tilbakekrevingId = tilbakekrevingId,
+                ),
             ),
         )
     }
@@ -922,15 +927,6 @@ class Behandling internal constructor(
                 foreldelsesteg.hjemlerForTilbakekreving() +
                 vilkårsvurderingsteg.hjemlerForTilbakekreving(),
             beregnerSkatt = ytelse.beregnerSkatt,
-        )
-    }
-
-    internal fun hentInfobrevData(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): InfobrevData {
-        return InfobrevData(
-            brukerdata = bruker.brevmeta(),
-            ytelse = ytelse.brevmeta(),
-            bunntekster = KravBortfaltTekster.finnTekster(ytelse, bruker.språkkode ?: Språkkode.NB),
-            tilbakekrevingId = tilbakekrevingId,
         )
     }
 
