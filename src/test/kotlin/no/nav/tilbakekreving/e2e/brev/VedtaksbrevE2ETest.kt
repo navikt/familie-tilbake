@@ -28,12 +28,14 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
+import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
@@ -253,6 +255,82 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.size shouldBe 1
         }
+    }
+
+    @Test
+    fun `ulike vurderinger gir egne avsnitt i vedtaksbrevet`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                perioder = listOf(
+                    standardPeriode(1.januar(2021) til 31.januar(2021)),
+                    standardPeriode(1.februar(2021) til 28.februar(2021)),
+                ),
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(behandlingId, uttalelse = "")
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        utførSteg(
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagIkkeForeldetVurdering(
+                1.januar(2021) til 31.januar(2021),
+                1.februar(2021) til 28.februar(2021),
+            ),
+        )
+        val perioder = tilbakekreving(behandlingId).hentBehandling(behandlingId).hentVilkårsvurderingsperioder()
+        val januarId = perioder[0].periodeId
+        val februarId = perioder[1].periodeId
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingSplittPeriode(behandlingId, SplittPeriodeDto(februarId))
+        }
+        håndterVilkårsvurdering(
+            ident = SAKSBEHANDLER_IDENT,
+            behandlingId = behandlingId,
+            vurderinger = arrayOf(
+                forårsaketAvBruker().uaktsomt(skalIkkeUnnlates(), ingenReduksjon()).copy(periode = 1.januar(2021) til 31.januar(2021)),
+                forårsaketAvNav().godTro(beløpIBehold = null).copy(periode = 1.februar(2021) til 28.februar(2021)),
+            ),
+        )
+
+        val avsnitt = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt
+        }
+
+        val meldinger = listOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE)
+        avsnitt shouldBe listOf(
+            AvsnittDto(
+                tittel = "Dette er grunnen til at du har fått for mye utbetalt i perioden 1. januar 2021 til 31. januar 2021",
+                forklaring = Forklaringstekster.PERIODE_AVSNITT,
+                meldingerTilSaksbehandler = listOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE.melding),
+                id = januarId,
+                underavsnitt = listOf(
+                    RentekstElementDto(tekst = ""),
+                    VilkårsvurderingBegrunnelse.TILBAKEKREVES.tilDto(meldinger),
+                    VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR.tilDto(meldinger),
+                    VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tilDto(meldinger),
+                ),
+            ),
+            AvsnittDto(
+                tittel = "Dette er grunnen til at du har fått for mye utbetalt i perioden 1. februar 2021 til 28. februar 2021",
+                forklaring = Forklaringstekster.PERIODE_AVSNITT,
+                meldingerTilSaksbehandler = listOf(MeldingTilSaksbehandler.BEGRUNN_BRUKERS_UTTALELSE.melding),
+                id = februarId,
+                underavsnitt = listOf(
+                    RentekstElementDto(tekst = ""),
+                    VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD.tilDto(meldinger),
+                ),
+            ),
+        )
     }
 
     companion object {

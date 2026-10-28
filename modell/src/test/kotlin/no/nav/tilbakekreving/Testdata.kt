@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.behandling.Enhet
 import no.nav.tilbakekreving.behandling.saksbehandling.Faktasteg
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
+import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -30,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.bruker.Kjønn
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsestype
 import no.nav.tilbakekreving.kontrakter.faktaomfeilutbetaling.Hendelsesundertype
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.test.FellesTestdata
@@ -309,6 +311,11 @@ fun endretStatusmelding(): EndretStatusmeldingHendelse =
 fun Tilbakekreving.nåværendeBehandlingId() = hentBehandlingsinformasjon().behandlingId
 
 fun Tilbakekreving.nåværendeBehandling() = hentBehandling(nåværendeBehandlingId())
+
+fun Vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode: Datoperiode): UUID =
+    hentVilkårsvurderingsperioder()
+        .single { it.periode == PeriodeDto(periode.fom, periode.tom) }
+        .periodeId
 
 fun Tilbakekreving.vilkårsvurderingsperiodeId(periode: Datoperiode): UUID =
     nåværendeBehandling()

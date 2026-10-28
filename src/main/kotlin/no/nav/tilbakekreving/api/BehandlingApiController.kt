@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
-import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
@@ -52,7 +51,6 @@ class BehandlingApiController(
     private val nyVedtaksbrevService: NyVedtaksbrevService,
     private val forhåndsvarselService: ForhåndsvarselService,
     private val safService: SafService,
-    private val featureService: FeatureService,
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
@@ -94,7 +92,7 @@ class BehandlingApiController(
         return ResponseEntity.ok(
             nyVedtaksbrevService.hentVedtaksbrevData(
                 UUID.fromString(behandlingId),
-                tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId), featureService.modellFeatures),
+                tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId)),
                 beslutter,
             ),
         )
@@ -122,7 +120,7 @@ class BehandlingApiController(
             nyVedtaksbrevService.oppdaterVedtaksbrevData(
                 behandlingId = behandlingId,
                 data = vedtaksbrevRedigerbareDataUpdateDto,
-                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId, featureService.modellFeatures),
+                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
             ),
         )
     }

@@ -1,9 +1,7 @@
 package no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering
 
-import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.Rettsgebyr
-import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingDto
 import no.nav.tilbakekreving.api.v1.dto.VurdertVilkårsvurderingsperiodeDto
@@ -270,22 +268,8 @@ class Vilkårsvurderingsteg(
 
     fun vurdertePerioderForBrev(
         meldingerTilSaksbehandler: Set<MeldingTilSaksbehandler>,
-        features: FeatureToggles,
     ): List<BegrunnetPeriode> {
         LoggerFactory.getLogger("vilkårsvurdering").info("Tilgjengelige periode id-er {}", vurderinger.map { "${it.id}=${it.periode().fom}-${it.periode().tom}" })
-        if (!features[Toggle.FlerePerioderIVedtaksbrev]) {
-            val samletPeriode = vurderinger.minOf { it.periode().fom } til vurderinger.maxOf { it.periode().tom }
-            return vurderinger.firstOrNull()?.let {
-                listOf(
-                    BegrunnetPeriode(
-                        id = it.id,
-                        periode = samletPeriode,
-                        påkrevdeVurderinger = it.vurdering.påkrevdeVurderinger(),
-                        meldingerTilSaksbehandler = meldingerTilSaksbehandler,
-                    ),
-                )
-            } ?: emptyList()
-        }
         return vurderinger
             .groupBy { it.vurdering.underliggendeVurdering() }
             .map { (vurdering, perioder) ->

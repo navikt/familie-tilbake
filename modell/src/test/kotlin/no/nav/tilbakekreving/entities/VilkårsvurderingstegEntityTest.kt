@@ -12,7 +12,6 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.behandling.saksbehandling.ÅrsakTilTilbakeføring
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
-import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForstoDto
@@ -47,7 +46,7 @@ class VilkårsvurderingstegEntityTest {
             it.copy(vurderinger = it.vurderinger.reversed())
         }
 
-        vilkårsvurderingFør.vurdertePerioderForBrev(emptySet(), defaultFeatures()) shouldBe entity.fraEntity().vurdertePerioderForBrev(emptySet(), defaultFeatures())
+        vilkårsvurderingFør.vurdertePerioderForBrev(emptySet()) shouldBe entity.fraEntity().vurdertePerioderForBrev(emptySet())
     }
 
     @Test

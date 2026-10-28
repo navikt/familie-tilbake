@@ -46,7 +46,7 @@ object BrevFormatterer {
         flerePerioder: Boolean,
     ): String =
         when {
-            flerePerioder -> "Dette er grunnen til at du har fått for mye utbetalt i perioden ${norskNumeriskDatoFormatter.format(periode.fom)}–${norskNumeriskDatoFormatter.format(periode.tom)}"
+            flerePerioder -> "Dette er grunnen til at du har fått for mye utbetalt i perioden ${dateFormatter.format(periode.fom)} til ${dateFormatter.format(periode.tom)}"
             else -> "Dette er grunnen til at du har fått for mye utbetalt"
         }
 

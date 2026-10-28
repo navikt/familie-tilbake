@@ -10,7 +10,6 @@ tilbakekreving:
   toggles:
     ny-modell:
       EndretKravgrunnlagVisning: true
-      FlerePerioderIVedtaksbrev: true
   tilgangsstyring:
     ts:
       grupper:

@@ -51,6 +51,7 @@ import no.nav.tilbakekreving.test.prosentReduksjon
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
+import no.nav.tilbakekreving.vilkårsvurderingsperiodeId
 import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -917,9 +918,7 @@ class VilkårsvurderingstegTest {
             eksternFagsakBehandling(),
             kravgrunnlag,
         )
-        val vurdertPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(vurdertPeriode.fom, vurdertPeriode.tom) }
-            .periodeId
+        val vurdertPeriodeId = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(vurdertPeriode)
         vilkårsvurderingsteg.vurder(vurdertPeriodeId, forårsaketAvNav().godTro(beløpIBehold = null))
 
         vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
@@ -984,9 +983,7 @@ class VilkårsvurderingstegTest {
         )
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro(beløpIBehold = null))
-        val fjernetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
-            .periodeId
+        val fjernetPeriodeId = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(fjernetPeriode)
         vilkårsvurderingsteg.splittVilkårsvurdering(fjernetPeriodeId)
         vilkårsvurderingsteg.vurder(fjernetPeriodeId, forårsaketAvBruker().uaktsomt(skalUnnlates()))
 
@@ -1016,9 +1013,7 @@ class VilkårsvurderingstegTest {
         )
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }
-            .periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
         vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt(skalUnnlates()))
 
@@ -1051,9 +1046,7 @@ class VilkårsvurderingstegTest {
         )
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvBruker().uaktsomt())
-        val splittetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
-            .periodeId
+        val splittetPeriodeId = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(fjernetPeriode)
         vilkårsvurderingsteg.splittVilkårsvurdering(splittetPeriodeId)
 
         vilkårsvurderingsteg.vurder(splittetPeriodeId, forårsaketAvNav().godTro())
@@ -1090,9 +1083,7 @@ class VilkårsvurderingstegTest {
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(eksternFagsakBehandling(), kravgrunnlag)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro())
 
-        val fjernetPeriodeId = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(fjernetPeriode.fom, fjernetPeriode.tom) }
-            .periodeId
+        val fjernetPeriodeId = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(fjernetPeriode)
         vilkårsvurderingsteg.splittVilkårsvurdering(fjernetPeriodeId)
         vilkårsvurderingsteg.vurder(fjernetPeriodeId, forårsaketAvBruker().uaktsomt())
 
@@ -1129,9 +1120,7 @@ class VilkårsvurderingstegTest {
         val vilkårsvurderingsteg = Vilkårsvurderingsteg.opprett(revurdering, kravgrunnlag)
         vilkårsvurderingsteg.vurder(fjernetPeriode, forårsaketAvNav().godTro(beløpIBehold = null))
 
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder()
-            .single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }
-            .periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
         vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt(skalUnnlates()))
 
@@ -1273,7 +1262,7 @@ class VilkårsvurderingstegTest {
             eksternFagsakBehandling(),
             kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode1), kravgrunnlagPeriode(periode2))),
         )
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }.periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
         vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt())
@@ -1297,7 +1286,7 @@ class VilkårsvurderingstegTest {
             eksternFagsakBehandling(),
             kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode1), kravgrunnlagPeriode(periode2))),
         )
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }.periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
         vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt())
@@ -1320,7 +1309,7 @@ class VilkårsvurderingstegTest {
             eksternFagsakBehandling(),
             kravgrunnlag(perioder = listOf(kravgrunnlagPeriode(periode1), kravgrunnlagPeriode(periode2))),
         )
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }.periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
         vilkårsvurderingsteg.vurder(periode2Id, forårsaketAvBruker().uaktsomt())
@@ -1354,7 +1343,7 @@ class VilkårsvurderingstegTest {
             ),
         )
         vilkårsvurderingsteg.vurder(periode1, forårsaketAvNav().godTro(beløpIBehold = null))
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(periode2.fom, periode2.tom) }.periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(periode2)
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
 
         vilkårsvurderingsteg.nyttKravgrunnlagMottatt(OverordnetSammendrag(periode1.fom, periode3.tom, 2000.kroner, 3000.kroner))
@@ -1424,7 +1413,7 @@ class VilkårsvurderingstegTest {
         vilkårsvurderingsteg.vurder(periode, forårsaketAvNav().godTro())
         vilkårsvurderingsteg.nyPeriode(KravgrunnlagSammenligning.Forskjell.NyPeriode(nyPeriode, 2000.kroner))
 
-        val periode2Id = vilkårsvurderingsteg.hentVilkårsvurderingsperioder().single { it.periode == PeriodeDto(nyPeriode.fom, nyPeriode.tom) }.periodeId
+        val periode2Id = vilkårsvurderingsteg.vilkårsvurderingsperiodeId(nyPeriode)
         vilkårsvurderingsteg.splittVilkårsvurdering(periode2Id)
 
         vilkårsvurderingsteg.tilFrontendDto().should {
