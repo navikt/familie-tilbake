@@ -8,7 +8,6 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
@@ -30,9 +29,6 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
     @Autowired
     lateinit var vedtaksbrevDataRepository: VedtaksbrevDataRepository
-
-    @Autowired
-    lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
     private val expectedSignatur = SignaturDto(
         enhetNavn = "NAV Arbeid og Ytelser",

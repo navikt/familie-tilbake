@@ -8,7 +8,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.entity.FieldConverter
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.events.BehandlingEndretEventDto
 import no.nav.tilbakekreving.fagsystem.events.BehandlingsstatusEventDto
@@ -29,9 +28,6 @@ import org.springframework.jdbc.core.query
 import java.time.LocalDateTime
 
 class PåminnelseE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
 

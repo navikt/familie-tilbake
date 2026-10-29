@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.UttalelseInfo
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -53,6 +54,9 @@ open class TilbakekrevingE2EBase : E2EBase() {
 
     @Autowired
     protected lateinit var tilbakekrevingService: TilbakekrevingService
+
+    @Autowired
+    lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
     @Autowired
     protected lateinit var pdlClient: PdlClientMock

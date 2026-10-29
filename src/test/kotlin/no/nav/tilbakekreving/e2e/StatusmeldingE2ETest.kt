@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.UtenforScope
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
@@ -20,9 +19,6 @@ import org.springframework.jdbc.core.query
 import java.time.LocalDate
 
 class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     private lateinit var statusmeldingBufferRepository: StatusmeldingBufferRepository
 

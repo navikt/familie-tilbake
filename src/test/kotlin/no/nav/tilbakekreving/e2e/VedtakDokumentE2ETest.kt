@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.VedtakDokumentController
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -19,9 +18,6 @@ import org.springframework.http.HttpStatus
 class VedtakDokumentE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var vedtakDokumentController: VedtakDokumentController
-
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
 
     @Test
     @Disabled("Midlertidig deaktivert etter at særhåndtering av foreslå/fatte vedtak ble fjernet fra TilbakekrevingE2EBase")

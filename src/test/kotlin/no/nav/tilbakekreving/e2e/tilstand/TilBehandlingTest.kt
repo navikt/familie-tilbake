@@ -11,7 +11,6 @@ import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.e2e.kanBehandle
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -21,15 +20,11 @@ import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 class TilBehandlingTest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Test
     fun `Mottar fagsysteminfo når sak er klar til saksbehandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)

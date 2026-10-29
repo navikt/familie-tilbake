@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
 import no.nav.tilbakekreving.tilstand.DistribuerVarselbrev
 import no.nav.tilbakekreving.tilstand.DistribuerVedtak
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
+import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.JournalførVedtak
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
@@ -81,6 +82,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.JOURNALFØR_VEDTAK -> JournalførVedtak
                 TilbakekrevingTilstand.DISTRIUBER_VEDTAK -> DistribuerVedtak
                 TilbakekrevingTilstand.SPERRET -> Sperret
+                TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV -> JournalførInfobrevForBortfaltKrav
                 TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT -> KravgrunnlagBortfalt
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
             },

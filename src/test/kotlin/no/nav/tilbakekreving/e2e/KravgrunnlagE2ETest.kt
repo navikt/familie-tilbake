@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.NyKlassekode
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Companion.medFeilutbetaling
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
-import no.nav.tilbakekreving.fagsystem.FagsystemIntegrasjonService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -66,9 +65,6 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
-    @Autowired
-    private lateinit var fagsystemIntegrasjonService: FagsystemIntegrasjonService
-
     @Autowired
     private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
 

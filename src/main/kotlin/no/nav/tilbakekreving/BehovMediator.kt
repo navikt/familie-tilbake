@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
@@ -198,6 +199,7 @@ class BehovMediator(
                 )
             }
             is KorrigertKravgrunnlagBehov -> korrigerKravgrunnlag(behov, tilbakekreving, sideeffektContext)
+            is InfobrevJournalføringBehov -> TODO() // venter på brev
         }
     }
 

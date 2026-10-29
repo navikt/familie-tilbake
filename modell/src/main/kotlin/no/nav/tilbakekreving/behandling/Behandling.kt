@@ -41,6 +41,7 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
+import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
@@ -49,10 +50,12 @@ import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.InfobrevData
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.breeeev.standardtekster.bortfaltKravgrunnlag.KravBortfaltTekster
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Varselbrev
 import no.nav.tilbakekreving.brev.VarselbrevInfo
@@ -313,6 +316,32 @@ class Behandling internal constructor(
                 vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 vedtaksresultat = hentVedtaksresultat(sideeffektContext.klokke)!!,
                 beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
+            ),
+        )
+    }
+
+    internal fun trengerInfobrevJournalføring(
+        sideeffektContext: SideeffektContext,
+        brevId: UUID,
+        ytelse: Ytelse,
+        bruker: Bruker,
+        fagsakId: String,
+        tilbakekrevingId: String,
+    ) {
+        sideeffektContext.behovObservatør.håndter(
+            InfobrevJournalføringBehov(
+                brevId = brevId,
+                behandlingId = id,
+                ytelse = ytelse,
+                bruker = bruker.hentBrukerinfo(),
+                fagsakId = fagsakId,
+                journalførendeEnhet = enhet!!.kode,
+                infobrevData = InfobrevData(
+                    brukerdata = bruker.brevmeta(),
+                    ytelse = ytelse.brevmeta(),
+                    bunntekster = KravBortfaltTekster.finnTekster(ytelse, bruker.språkkode ?: Språkkode.NB),
+                    tilbakekrevingId = tilbakekrevingId,
+                ),
             ),
         )
     }

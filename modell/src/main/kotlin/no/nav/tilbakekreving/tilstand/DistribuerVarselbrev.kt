@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
@@ -30,5 +31,8 @@ object DistribuerVarselbrev : Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
+    }
+
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
     }
 }

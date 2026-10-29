@@ -357,6 +357,21 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun opprettInfobrev(klokke: Klokke) {
+        // todo()
+    }
+
+    fun trengerInfobrevJournalføring(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.trengerInfobrevJournalføring(
+            sideeffektContext = sideeffektContext,
+            brevId = brevHistorikk.nåværende().entry.id,
+            ytelse = eksternFagsak.ytelse,
+            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
+            fagsakId = eksternFagsak.eksternId(),
+            tilbakekrevingId = id,
+        )
+    }
+
     fun trengerVarselbrevDistribusjon(sideeffektContext: SideeffektContext) {
         sideeffektContext.behovObservatør.håndter(
             behandlingHistorikk.nåværende().entry.lagVarselbrevDistribusjonBehov(

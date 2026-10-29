@@ -39,7 +39,6 @@ object Start : Tilstand {
         statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
     }
 
     override fun håndter(
