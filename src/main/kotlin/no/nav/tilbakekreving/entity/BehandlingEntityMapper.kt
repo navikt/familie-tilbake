@@ -11,9 +11,9 @@ import no.nav.tilbakekreving.entities.ForeldelsesstegEntity
 import no.nav.tilbakekreving.entities.ForeslåVedtakStegEntity
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
+import no.nav.tilbakekreving.entities.TilbakekrevingRevurderingEntity
 import no.nav.tilbakekreving.entities.VilkårsvurderingstegEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import java.sql.ResultSet
 import java.util.UUID
 
@@ -41,11 +41,6 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         column = "sist_endret",
         getter = BehandlingEntity::sistEndret,
         converter = FieldConverter.LocalDateTimeConverter.required(),
-    )
-    val årsak = field(
-        column = "revurderingsårsak",
-        getter = BehandlingEntity::revurderingsårsak,
-        converter = FieldConverter.EnumConverter.of<TilbakekrevingRevurderingsarsakDto>(),
     )
 
     val eksternFagsakBehandlingId = field(
@@ -104,6 +99,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
         foreslåVedtak: ForeslåVedtakStegEntity,
         fatteVedtak: FatteVedtakStegEntity,
         forhåndsvarselEntity: ForhåndsvarselEntity,
+        tilbakekrevingRevurderingEntity: TilbakekrevingRevurderingEntity?,
     ): BehandlingEntity {
         return BehandlingEntity(
             id = resultSet[id],
@@ -114,7 +110,7 @@ object BehandlingEntityMapper : Entity<BehandlingEntity, UUID, UUID>(
             enhet = resultSet[enhetId]?.let {
                 EnhetEntity(kode = it, navn = resultSet[enhetNavn]!!)
             },
-            revurderingsårsak = resultSet[årsak],
+            revurderingsårsak = tilbakekrevingRevurderingEntity,
             ansvarligSaksbehandler = BehandlerEntity(type = resultSet[ansvarligSaksbehandlerType], ident = resultSet[ansvarligSaksbehandlerIdent]),
             eksternFagsakBehandlingRef = HistorikkReferanseEntity(resultSet[eksternFagsakBehandlingId]),
             kravgrunnlagRef = HistorikkReferanseEntity(resultSet[kravgrunnlagId]),

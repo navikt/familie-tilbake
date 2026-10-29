@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -47,6 +48,7 @@ data class BehandlingDto(
     val erNyModell: Boolean,
     val innloggetRolle: BehandlerRolle,
     val endretKravgrunnlag: EndretKravgrunnlag?,
+    val tilbakekrevingRevurdering: TilbakekrevingRevurderingDto?,
 )
 
 data class BehandlingsstegsinfoDto(

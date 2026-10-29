@@ -8,17 +8,26 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsakType
+import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
+import no.nav.tilbakekreving.config.ApplicationProperties
+import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentTypeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FeilutbetaltBelopEndretDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForeldelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.OpprettRevurderingResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
@@ -26,6 +35,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelseVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevTekstDto
@@ -43,7 +53,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.UUID
-import no.nav.tilbakekreving.config.ApplicationProperties
 
 @Component
 @ProtectedWithClaims(issuer = "azuread")
@@ -53,7 +62,6 @@ class BehandlingApiController(
     private val forhåndsvarselService: ForhåndsvarselService,
     private val safService: SafService,
     private val applicationProperties: ApplicationProperties,
-
 ) : BehandlingApi {
     override fun behandlingFakta(behandlingId: String): ResponseEntity<FaktaOmFeilutbetalingDto> {
         val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
@@ -323,14 +331,38 @@ class BehandlingApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
-    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<String> {
+    override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<OpprettRevurderingResponseDto> {
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
-            tilbakekreving.opprettRevurdering(behandlingId, revurderingDto.revurderingsarsak, context)
+            val revurderingsårsak = revurderingDto.revurderingsarsak.let {
+                when (it) {
+                    is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
+                        årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
+                        årsakType = TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET,
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
+                        årsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE,
+                        vedtakOmgjortAv = null,
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
+                        årsakType = TilbakekrevingRevurderingsårsakType.UTEN_KLAGE,
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                }
+            }
+            tilbakekreving.opprettRevurdering(behandlingId, revurderingsårsak, context)
             ResponseEntity.ok(
-                tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)
+                OpprettRevurderingResponseDto(tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
             )
         } ?: ResponseEntity.notFound().build()
     }

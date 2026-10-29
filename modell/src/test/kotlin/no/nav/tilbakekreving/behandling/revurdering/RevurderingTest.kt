@@ -9,7 +9,10 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsakType
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
@@ -22,7 +25,6 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
@@ -49,7 +51,15 @@ class RevurderingTest {
 
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.AVSLUTTET
 
-        tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK, saksbehandlerContext())
+        tilbakekreving.opprettRevurdering(
+            tilbakekreving.nåværendeBehandlingId(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
 
         val revurderingBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
 
@@ -117,7 +127,15 @@ class RevurderingTest {
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER).kanRevurderingOpprettes shouldBe false
         shouldThrow<ModellFeil.UgyldigOperasjonException> {
-            tilbakekreving.opprettRevurdering(tilbakekreving.nåværendeBehandlingId(), TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK, saksbehandlerContext())
+            tilbakekreving.opprettRevurdering(
+                tilbakekreving.nåværendeBehandlingId(),
+                TilbakekrevingRevurderingsårsak.EtterKlage(
+                    årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
+                    vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                    beskrivelse = "Begrunnelse fra klageinstansen",
+                ),
+                saksbehandlerContext(),
+            )
         }.message shouldBe "Kan ikke opprette revurdering i TIL_BEHANDLING"
     }
 

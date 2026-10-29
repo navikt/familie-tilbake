@@ -20,8 +20,9 @@ import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -207,7 +208,10 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingOpprettRevurdering(
                 behandlingId = behandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
-                    revurderingsarsak = TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK,
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Klageinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
                 ),
             )
         }
@@ -216,6 +220,13 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
             status shouldBe Behandlingsstatus.UTREDES
             type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
+            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
+                revurderingsarsak = EtterKlageDto(
+                    instans = RevurderingsinstansDto.Klageinstansen,
+                    begrunnelse = "Begrunnelse for revurdering",
+                ),
+            )
+            behandlingsårsakstype shouldBe null //denne er kun til gammel modell
         }
     }
 
