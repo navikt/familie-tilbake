@@ -1,8 +1,10 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.brev.Informasjonsbrevtype
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
+import no.nav.tilbakekreving.entities.InformasjonsbrevEntity
 import no.nav.tilbakekreving.entities.VarselbrevEntity
 import no.nav.tilbakekreving.entities.VedtaksbrevEntity
 import java.sql.ResultSet
@@ -35,6 +37,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
         resultSet: ResultSet,
         varselbrevEntity: VarselbrevEntity?,
         vedtaksbrevEntity: VedtaksbrevEntity?,
+        informasjonsbrevEntity: InformasjonsbrevEntity?,
     ): BrevEntity {
         return BrevEntity(
             id = resultSet[id],
@@ -42,6 +45,7 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             brevtype = resultSet[brevType],
             varselbrevEntity = varselbrevEntity,
             vedtaksbrevEntity = vedtaksbrevEntity,
+            informasjonsbrevEntity = informasjonsbrevEntity,
             opprettet = resultSet[opprettet],
         )
     }
@@ -135,6 +139,46 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
                 journalpostId = resultSet[journalpostId],
                 dokumentInfoId = resultSet[dokumentInfoId],
                 sendtTid = resultSet[sendtTid]!!,
+            )
+        }
+    }
+
+    object InformasjonsbrevEntityMapper : Entity<InformasjonsbrevEntity, UUID, UUID>(
+        "tilbakekreving_informasjonsbrev",
+        InformasjonsbrevEntity::id,
+        FieldConverter.UUIDConverter.required(),
+    ) {
+        val type = field(
+            "informasjonsbrevtype",
+            InformasjonsbrevEntity::type,
+            FieldConverter.EnumConverter.of<Informasjonsbrevtype>().required(),
+        )
+
+        val sendtTid = field(
+            "sendt_tid",
+            InformasjonsbrevEntity::sendtTid,
+            FieldConverter.LocalDateConverter.required(),
+        )
+
+        val journalpostId = field(
+            "journalpost_id",
+            InformasjonsbrevEntity::journalpostId,
+            FieldConverter.StringConverter,
+        )
+
+        val dokumentInfoId = field(
+            "dokument_info_id",
+            InformasjonsbrevEntity::dokumentInfoId,
+            FieldConverter.StringConverter,
+        )
+
+        fun map(resultSet: ResultSet): InformasjonsbrevEntity {
+            return InformasjonsbrevEntity(
+                id = resultSet[id],
+                type = resultSet[type],
+                journalpostId = resultSet[journalpostId],
+                dokumentInfoId = resultSet[dokumentInfoId],
+                sendtTid = resultSet[sendtTid],
             )
         }
     }

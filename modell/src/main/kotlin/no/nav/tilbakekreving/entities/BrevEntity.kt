@@ -11,6 +11,7 @@ data class BrevEntity(
     val brevtype: Brevtype,
     val varselbrevEntity: VarselbrevEntity?,
     val vedtaksbrevEntity: VedtaksbrevEntity?,
+    val informasjonsbrevEntity: InformasjonsbrevEntity?,
     override val opprettet: LocalDateTime,
 ) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(kravgrunnlagHistorikk: KravgrunnlagHistorikk): Brev {
@@ -25,6 +26,9 @@ data class BrevEntity(
             Brevtype.VEDTAKSBREV -> {
                 vedtaksbrevEntity!!.fraEntity(id, opprettet)
             }
+            Brevtype.INFORMASJONSBREV -> {
+                informasjonsbrevEntity!!.fraEntity(id, opprettet)
+            }
         }
     }
 }
@@ -34,4 +38,5 @@ enum class Brevtype {
     VARSEL_BREV,
     VARSELBREV,
     VEDTAKSBREV,
+    INFORMASJONSBREV,
 }

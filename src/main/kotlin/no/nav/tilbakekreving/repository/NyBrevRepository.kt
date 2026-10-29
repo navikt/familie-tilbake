@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.repository
 
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
+import no.nav.tilbakekreving.entities.InformasjonsbrevEntity
 import no.nav.tilbakekreving.entities.VarselbrevEntity
 import no.nav.tilbakekreving.entities.VedtaksbrevEntity
 import no.nav.tilbakekreving.entity.BrevEntityMapper
@@ -23,7 +24,7 @@ class NyBrevRepository(
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->
             val id = resultSet[BrevEntityMapper.id]
-            BrevEntityMapper.map(resultSet, hentVarselbrev(id), hentVedtaksbrev(id))
+            BrevEntityMapper.map(resultSet, hentVarselbrev(id), hentVedtaksbrev(id), hentInformasjonsbrev(id))
         }
     }
 
@@ -45,6 +46,15 @@ class NyBrevRepository(
         }.singleOrNull()
     }
 
+    fun hentInformasjonsbrev(brevId: UUID): InformasjonsbrevEntity? {
+        return jdbcTemplate.query(
+            "SELECT * FROM tilbakekreving_informasjonsbrev WHERE id = ?",
+            brevId,
+        ) { resultSet, _ ->
+            BrevEntityMapper.InformasjonsbrevEntityMapper.map(resultSet)
+        }.singleOrNull()
+    }
+
     fun lagre(brevListe: List<BrevEntity>, tilbakekrevingId: String) {
         jdbcTemplate.update("DELETE FROM tilbakekreving_brev WHERE tilbakekreving_ref=?;", tilbakekrevingId)
         for (brev in brevListe) {
@@ -55,6 +65,9 @@ class NyBrevRepository(
                 }
                 Brevtype.VEDTAKSBREV -> {
                     BrevEntityMapper.VedtaksbrevEntityMapper.upsertQuery(jdbcTemplate, brev.vedtaksbrevEntity!!)
+                }
+                Brevtype.INFORMASJONSBREV -> {
+                    BrevEntityMapper.InformasjonsbrevEntityMapper.upsertQuery(jdbcTemplate, brev.informasjonsbrevEntity!!)
                 }
                 Brevtype.VARSEL_BREV -> {
                     throw IllegalArgumentException("Deprecated enum")
