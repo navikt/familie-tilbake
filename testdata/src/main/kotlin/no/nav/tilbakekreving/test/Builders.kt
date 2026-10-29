@@ -1,9 +1,11 @@
 package no.nav.tilbakekreving.test
 
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
+import no.nav.tilbakekreving.test.vilkårsvurdering.BeløpIBeholdBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ReduksjonSærligeGrunnerBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.Unnlates
+import java.math.BigDecimal
 
 fun uaktsomt(
     unnlates: KanUnnlates4xRettsgebyrBuilder = skalIkkeUnnlates(),
@@ -28,3 +30,9 @@ fun over4Rettsgebyr(): KanUnnlates4xRettsgebyrBuilder = KanUnnlates4xRettsgebyrB
 fun ingenReduksjon() = ReduksjonSærligeGrunnerBuilder(skalReduseres = false, reduksjon = 0)
 
 val Int.prosentReduksjon get() = ReduksjonSærligeGrunnerBuilder(skalReduseres = true, reduksjon = this)
+
+fun ingenting(): BeløpIBeholdBuilder = BeløpIBeholdBuilder.Ingenting
+
+fun delerAvBeløp(beløp: BigDecimal): BeløpIBeholdBuilder = BeløpIBeholdBuilder.Deler(beløp)
+
+fun heleBeløp(): BeløpIBeholdBuilder = BeløpIBeholdBuilder.Hele

@@ -27,6 +27,8 @@ sealed interface KanUnnlates4xRettsgebyr {
 
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
+    fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse>
+
     fun skalTilbakekreves(): Boolean
 
     fun tilFrontendDTO(): SkalUnnlates
@@ -48,7 +50,11 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Ja
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
+        private fun fellesVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR)
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = fellesVurderinger()
+
+        override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = fellesVurderinger()
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.UNNLATES
 
@@ -76,10 +82,11 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) +
-                reduksjonMomenter.påkrevdeVurderinger()
-        }
+        private fun fellesVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR) + reduksjonMomenter.påkrevdeVurderinger()
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + fellesVurderinger()
+
+        override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD) + fellesVurderinger()
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.SKAL_IKKE_UNNLATES
 
@@ -112,7 +119,11 @@ sealed interface KanUnnlates4xRettsgebyr {
             return VurdertUtbetaling.JaNeiVurdering.Nei
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjon.påkrevdeVurderinger()
+        private fun fellesVurderinger(): Set<VilkårsvurderingBegrunnelse> = reduksjon.påkrevdeVurderinger()
+
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + fellesVurderinger()
+
+        override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD) + fellesVurderinger()
 
         override fun tilEntity(): KanUnnlatesEntity = KanUnnlatesEntity.OVER_4_RETTSGEBYR
 
@@ -146,8 +157,14 @@ sealed interface KanUnnlates4xRettsgebyr {
             return KanUnnlatesEntity.IKKE_VURDERT
         }
 
+        private fun fellesVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR)
+
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> {
-            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+            return setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER) + fellesVurderinger()
+        }
+
+        override fun påkrevdeVurderingerGodTro(): Set<VilkårsvurderingBegrunnelse> {
+            return setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_GOD_TRO) + fellesVurderinger()
         }
 
         override fun skalTilbakekreves(): Boolean {

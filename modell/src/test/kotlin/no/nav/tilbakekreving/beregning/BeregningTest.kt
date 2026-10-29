@@ -38,6 +38,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.Aktsomhet
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.AnnenVurdering
+import no.nav.tilbakekreving.test.delerAvBeløp
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
@@ -163,7 +164,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().godTro(beløpIBehold = 1999.kroner),
+                    forårsaketAvNav().godTro(beløpIBehold = delerAvBeløp(1999.kroner)),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -230,7 +231,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().godTro(beløpIBehold = null),
+                    forårsaketAvNav().godTro(),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -1057,7 +1058,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = true,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 28.februar(2021)).medVurdering(
-                    forårsaketAvNav().godTro(beløpIBehold = 4000.kroner),
+                    forårsaketAvNav().godTro(beløpIBehold = delerAvBeløp(4000.kroner)),
                 ),
             ),
             foreldetPerioder = emptyList(),
@@ -1164,7 +1165,7 @@ class BeregningTest {
             tilbakekrevLavtBeløp = false,
             vilkårsvurdering = vurdering(
                 (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().burdeForstått()),
-                (1.februar(2021) til 28.februar(2021)).medVurdering(forårsaketAvNav().godTro(2000.kroner)),
+                (1.februar(2021) til 28.februar(2021)).medVurdering(forårsaketAvNav().godTro(delerAvBeløp(2000.kroner))),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -1247,7 +1248,7 @@ class BeregningTest {
             beregnRenter = false,
             tilbakekrevLavtBeløp = false,
             vilkårsvurdering = vurdering(
-                (1.januar(2021) til 31.mars(2021)).medVurdering(forårsaketAvNav().godTro(1000500.kroner)),
+                (1.januar(2021) til 31.mars(2021)).medVurdering(forårsaketAvNav().godTro(delerAvBeløp(1000500.kroner))),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(
@@ -1427,7 +1428,7 @@ class BeregningTest {
             beregnRenter = false,
             tilbakekrevLavtBeløp = false,
             vilkårsvurdering = vurdering(
-                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().godTro(2000.kroner)),
+                (1.januar(2021) til 31.januar(2021)).medVurdering(forårsaketAvNav().godTro(delerAvBeløp(2000.kroner))),
             ),
             foreldetPerioder = emptyList(),
             kravgrunnlag = perioder(

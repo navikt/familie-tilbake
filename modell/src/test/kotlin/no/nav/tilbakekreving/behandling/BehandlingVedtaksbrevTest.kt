@@ -13,6 +13,7 @@ import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.delerAvBeløp
 import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
@@ -74,7 +75,7 @@ class BehandlingVedtaksbrevTest {
         val februarId = vilkårsvurdering.vilkårsvurderingsperiodeId(februar)
         vilkårsvurdering.vurder(januarId, forårsaketAvBruker().uaktsomt(unnlates = skalIkkeUnnlates()))
         vilkårsvurdering.splittVilkårsvurdering(februarId)
-        vilkårsvurdering.vurder(februarId, forårsaketAvNav().godTro(beløpIBehold = null))
+        vilkårsvurdering.vurder(februarId, forårsaketAvNav().godTro())
 
         val perioder = vilkårsvurdering.vurdertePerioderForBrev(emptySet())
 
@@ -125,12 +126,12 @@ class BehandlingVedtaksbrevTest {
             return listOf(
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
-                    forårsaketAvNav().godTro(beløpIBehold = 1400.kroner),
+                    forårsaketAvNav().godTro(beløpIBehold = delerAvBeløp(1400.kroner)),
                     setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD),
                 ),
                 Arguments.argumentSet(
                     "God tro, beløp i behold",
-                    forårsaketAvNav().godTro(beløpIBehold = null),
+                    forårsaketAvNav().godTro(),
                     setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD),
                 ),
                 Arguments.argumentSet(
@@ -161,7 +162,7 @@ class BehandlingVedtaksbrevTest {
                 Arguments.argumentSet(
                     "Forsårsaket av Nav, forstod",
                     forårsaketAvNav().forstod(),
-                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES),
+                    setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
                 ),
             )
         }

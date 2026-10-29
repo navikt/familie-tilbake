@@ -293,7 +293,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             behandlingId = behandlingId,
             vurderinger = arrayOf(
                 forårsaketAvBruker().uaktsomt(skalIkkeUnnlates(), ingenReduksjon()).copy(periode = 1.januar(2021) til 31.januar(2021)),
-                forårsaketAvNav().godTro(beløpIBehold = null).copy(periode = 1.februar(2021) til 28.februar(2021)),
+                forårsaketAvNav().godTro().copy(periode = 1.februar(2021) til 28.februar(2021)),
             ),
         )
 

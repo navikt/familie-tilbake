@@ -1,14 +1,15 @@
 package no.nav.tilbakekreving.test.vilkårsvurdering
 
 import no.nav.tilbakekreving.test.grovtUaktsomt
-import java.math.BigDecimal
 
 sealed interface ForårsaketAvNavBuilder<T> {
     fun build(builder: VilkårsvurderingProvider<*, T>): T
 
     @ConsistentCopyVisibility
     data class GodTroBuilder<T> internal constructor(
-        var beløpIBehold: BigDecimal?,
+        var beløpIBehold: BeløpIBeholdBuilder,
+        val kanUnnlates: KanUnnlates4xRettsgebyrBuilder?,
+        val reduksjon: ReduksjonSærligeGrunnerBuilder?,
     ) : ForårsaketAvNavBuilder<T> {
         override fun build(builder: VilkårsvurderingProvider<*, T>): T {
             return builder.build(this)

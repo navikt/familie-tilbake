@@ -11,9 +11,13 @@ import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
+import no.nav.tilbakekreving.test.delerAvBeløp
+import no.nav.tilbakekreving.test.grovtUaktsomt
+import no.nav.tilbakekreving.test.heleBeløp
 import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.prosentReduksjon
+import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.skalUnnlates
 import no.nav.tilbakekreving.test.uaktsomt
 import org.junit.jupiter.params.ParameterizedTest
@@ -102,14 +106,14 @@ class VilkårsvurderingBegrunnelseTest {
                 ),
                 begrunnelse(
                     name = "forårsaket av Nav, god tro, beløp i behold",
-                    vurdering = forårsaketAvNav().godTro(beløpIBehold = 1500.kroner),
+                    vurdering = forårsaketAvNav().godTro(beløpIBehold = delerAvBeløp(1500.kroner)),
                     forventedeBegrunnelser = setOf(
                         VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD,
                     ),
                 ),
                 begrunnelse(
                     name = "forårsaket av Nav, god tro, beløp ikke i behold",
-                    vurdering = forårsaketAvNav().godTro(beløpIBehold = null),
+                    vurdering = forårsaketAvNav().godTro(),
                     forventedeBegrunnelser = setOf(
                         VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_IKKE_I_BEHOLD,
                     ),
@@ -148,6 +152,67 @@ class VilkårsvurderingBegrunnelseTest {
                         ),
                     ),
                     forventedeBegrunnelser = setOf(VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR),
+                ),
+                begrunnelse(
+                    name = "forårsaket av Nav, forstod, reduksjon",
+                    vurdering = forårsaketAvNav().forstod(
+                        grovtUaktsomt(
+                            reduksjon = 50.prosentReduksjon,
+                        ),
+                    ),
+                    forventedeBegrunnelser = setOf(
+                        VilkårsvurderingBegrunnelse.TILBAKEKREVES,
+                        VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR,
+                        VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER,
+                    ),
+                ),
+                begrunnelse(
+                    name = "forårsaket av Nav, god tro, deler av beløp i behold, reduksjon",
+                    vurdering = forårsaketAvNav().godTro(
+                        beløpIBehold = delerAvBeløp(5000.kroner),
+                        kanUnnlates = skalIkkeUnnlates(),
+                        reduksjon = 50.prosentReduksjon,
+                    ),
+                    forventedeBegrunnelser = setOf(
+                        VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD,
+                        VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR,
+                        VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO,
+                    ),
+                ),
+                begrunnelse(
+                    name = "forårsaket av Nav, god tro, hele beløp i behold, reduksjon",
+                    vurdering = forårsaketAvNav().godTro(
+                        beløpIBehold = heleBeløp(),
+                        kanUnnlates = skalIkkeUnnlates(),
+                        reduksjon = 50.prosentReduksjon,
+                    ),
+                    forventedeBegrunnelser = setOf(
+                        VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD,
+                        VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR,
+                        VilkårsvurderingBegrunnelse.REDUSERT_GOD_TRO,
+                    ),
+                ),
+                begrunnelse(
+                    name = "forårsaket av Nav, god tro, deler av beløp i behold, unnlates",
+                    vurdering = forårsaketAvNav().godTro(
+                        beløpIBehold = delerAvBeløp(500.kroner),
+                        kanUnnlates = skalUnnlates(),
+                        reduksjon = ingenReduksjon(),
+                    ),
+                    forventedeBegrunnelser = setOf(
+                        VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR,
+                    ),
+                ),
+                begrunnelse(
+                    name = "forårsaket av Nav, god tro, hele beløp i behold, unnlates",
+                    vurdering = forårsaketAvNav().godTro(
+                        beløpIBehold = heleBeløp(),
+                        kanUnnlates = skalUnnlates(),
+                        reduksjon = ingenReduksjon(),
+                    ),
+                    forventedeBegrunnelser = setOf(
+                        VilkårsvurderingBegrunnelse.UNNLATES_4_RETTSGEBYR,
+                    ),
                 ),
             )
         }

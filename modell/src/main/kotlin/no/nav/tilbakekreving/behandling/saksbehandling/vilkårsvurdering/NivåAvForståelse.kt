@@ -80,7 +80,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
             )
         }
 
-        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
+        override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr?.påkrevdeVurderinger() ?: setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr?.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
@@ -264,7 +264,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                     return kanUnnlates4XRettsgebyr?.reduksjon() ?: Reduksjon.FullstendigTilbakekreving()
                 }
 
-                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr?.påkrevdeVurderingerGodTro() ?: setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
                 override fun tilFrontendDto(): BelopIBeholdDto {
                     val reduksjonArsakerDto = kanUnnlates4XRettsgebyr?.reduksjonMomenter()?.tilFrontendDto()
@@ -305,7 +305,7 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
                         ?: Reduksjon.ManueltBeløp(beløp)
                 }
 
-                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
+                override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr?.påkrevdeVurderingerGodTro() ?: setOf(VilkårsvurderingBegrunnelse.GOD_TRO_BELØP_I_BEHOLD)
 
                 override fun tilFrontendDto(): BelopIBeholdDto {
                     val reduksjonArsakerDto = kanUnnlates4XRettsgebyr?.reduksjonMomenter()?.tilFrontendDto()

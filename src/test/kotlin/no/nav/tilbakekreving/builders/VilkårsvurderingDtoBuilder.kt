@@ -12,6 +12,7 @@ import no.nav.tilbakekreving.test.ingenReduksjon
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.skalIkkeUnnlates
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
+import no.nav.tilbakekreving.test.vilkårsvurdering.BeløpIBeholdBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvNavBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
@@ -31,11 +32,11 @@ object VilkårsvurderingDtoBuilder :
             periode = 1.januar(2021) til 31.januar(2021),
             vilkårsvurderingsresultat = Vilkårsvurderingsresultat.GOD_TRO,
             begrunnelse = "",
-            godTroDto = GodTroDto(
-                beløpErIBehold = vurdering.beløpIBehold != null,
-                beløpTilbakekreves = vurdering.beløpIBehold,
-                begrunnelse = "",
-            ),
+            godTroDto = when (val beløpIBehold = vurdering.beløpIBehold) {
+                BeløpIBeholdBuilder.Ingenting -> GodTroDto(beløpErIBehold = false, beløpTilbakekreves = null, begrunnelse = "")
+                is BeløpIBeholdBuilder.Deler -> GodTroDto(beløpErIBehold = true, beløpTilbakekreves = beløpIBehold.beløp, begrunnelse = "")
+                BeløpIBeholdBuilder.Hele -> error("Gammel modell støtter ikke at hele beløpet er i behold")
+            },
             aktsomhetDto = null,
         )
     }

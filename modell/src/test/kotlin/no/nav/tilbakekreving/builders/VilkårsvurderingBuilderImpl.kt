@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Reduksj
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ReduksjonMomenter.ReduksjonSærligeGrunner
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Skyldgrad
 import no.nav.tilbakekreving.test.vilkårsvurdering.AktsomhetBuilder
+import no.nav.tilbakekreving.test.vilkårsvurdering.BeløpIBeholdBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvBrukerBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.ForårsaketAvNavBuilder
 import no.nav.tilbakekreving.test.vilkårsvurdering.KanUnnlates4xRettsgebyrBuilder
@@ -18,19 +19,42 @@ import no.nav.tilbakekreving.test.vilkårsvurdering.VilkårsvurderingValgProvide
 object VilkårsvurderingBuilderImpl : VilkårsvurderingProvider<ForårsaketAvBruker.Ja, ForårsaketAvBruker.Nei>, VilkårsvurderingValgProvider<KanUnnlates4xRettsgebyr, ReduksjonSærligeGrunner, KanUnnlates4xRettsgebyr> {
     override fun build(vurdering: ForårsaketAvNavBuilder.GodTroBuilder<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
         return NivåAvForståelse.GodTro(
-            vurdering.beløpIBehold?.let {
-                NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
-                    beløp = it,
+            beløpIBehold = when (val beløpIBehold = vurdering.beløpIBehold) {
+                BeløpIBeholdBuilder.Hele -> NivåAvForståelse.GodTro.BeløpIBehold.HeleIBehold(
+                    "",
+                    "",
+                    unnlatelseGodTro(vurdering),
+                )
+
+                BeløpIBeholdBuilder.Ingenting -> NivåAvForståelse.GodTro.BeløpIBehold.Nei(begrunnelse = null)
+                is BeløpIBeholdBuilder.Deler -> NivåAvForståelse.GodTro.BeløpIBehold.DelerIBehold(
+                    beløp = beløpIBehold.beløp,
                     annetBegrunnelse = null,
                     begrunnelse = null,
-                    kanUnnlates4XRettsgebyr = null,
+                    kanUnnlates4XRettsgebyr = unnlatelseGodTro(vurdering),
                 )
-            } ?: NivåAvForståelse.GodTro.BeløpIBehold.Nei(
-                begrunnelse = null,
-            ),
-            "",
-            "",
+            },
+            begrunnelse = "",
+            begrunnelseForGodTro = "",
         )
+    }
+
+    private fun unnlatelseGodTro(vurdering: ForårsaketAvNavBuilder.GodTroBuilder<ForårsaketAvBruker.Nei>): KanUnnlates4xRettsgebyr? {
+        val kanUnnlates = vurdering.kanUnnlates ?: return null
+        val reduksjonBuilder = vurdering.reduksjon!!
+        val reduksjon = ReduksjonMomenter.ReduksjonGodTro(
+            begrunnelse = "",
+            grunner = emptySet(),
+            skalReduseres = when (reduksjonBuilder.skalReduseres) {
+                true -> ReduksjonMomenter.SkalReduseres.Ja(reduksjonBuilder.reduksjon)
+                false -> ReduksjonMomenter.SkalReduseres.Nei
+            },
+        )
+        return when (kanUnnlates.unnlates) {
+            Unnlates.Unnlates -> KanUnnlates4xRettsgebyr.Unnlates("Begrunnelse for unnlatelse")
+            Unnlates.Tilbakekreves -> KanUnnlates4xRettsgebyr.SkalIkkeUnnlates(reduksjon)
+            Unnlates.Over4Rettsgebyr -> KanUnnlates4xRettsgebyr.ErOver4xRettsgebyr(reduksjon)
+        }
     }
 
     override fun build(vurdering: ForårsaketAvNavBuilder.BurdeForstått<ForårsaketAvBruker.Nei>): ForårsaketAvBruker.Nei {
