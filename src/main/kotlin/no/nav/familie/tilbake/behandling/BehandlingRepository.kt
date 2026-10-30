@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -128,4 +129,18 @@ interface BehandlingRepository :
     fun finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato: LocalDate): List<Behandling>
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
+
+    @Query(
+        """
+            SELECT type, COUNT(*) AS antall
+            FROM behandlingsarsak
+            GROUP BY type
+        """,
+    )
+    fun hentAntallPerBehandlingsårsakstype(): List<BehandlingsårsakAntall>
 }
+
+data class BehandlingsårsakAntall(
+    val type: Behandlingsårsakstype,
+    val antall: Long,
+)

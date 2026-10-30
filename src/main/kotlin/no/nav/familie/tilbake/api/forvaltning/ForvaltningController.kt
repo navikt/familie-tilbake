@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
@@ -28,6 +29,7 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
@@ -74,6 +76,23 @@ class ForvaltningController(
     private val tilgangService: TilgangService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
+
+    @Operation(summary = "Hent antall rader per behandlingsårsakstype, inkludert typer uten forekomster")
+    @GetMapping(
+        path = ["/behandlingsarsak/antall"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentAntallPerBehandlingsårsakstype(): Ressurs<Map<Behandlingsårsakstype, Long>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente antall per behandlingsårsakstype",
+                frontendFeilmelding = "Du har ikke tilgang til å hente antall per behandlingsårsakstype",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        val antallPerType = behandlingRepository.hentAntallPerBehandlingsårsakstype().associate { it.type to it.antall }
+        return Ressurs.success(Behandlingsårsakstype.entries.associateWith { antallPerType[it] ?: 0L })
+    }
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
