@@ -180,6 +180,7 @@ class EndringObservatørService(
                             VurdertUtbetaling.ForårsaketAvBruker.FEILAKTIGE_OPPLYSNINGER -> UtvidetVilkårsresultat.FEIL_OPPLYSNINGER_FRA_BRUKER
                             VurdertUtbetaling.ForårsaketAvBruker.MANGELFULLE_OPPLYSNINGER -> UtvidetVilkårsresultat.MANGELFULLE_OPPLYSNINGER_FRA_BRUKER
                             VurdertUtbetaling.ForårsaketAvBruker.FORSTOD_ELLER_BURDE_FORSTÅTT -> UtvidetVilkårsresultat.FORSTO_BURDE_FORSTÅTT
+                            VurdertUtbetaling.ForårsaketAvBruker.FORÅRSAKET_AV_BRUKER -> UtvidetVilkårsresultat.FORÅRSAKET_AV_BRUKER
                             VurdertUtbetaling.ForårsaketAvBruker.GOD_TRO -> UtvidetVilkårsresultat.GOD_TRO
                         },
                         feilutbetaltBeløp = it.beregning.feilutbetaltBeløp,

@@ -39,6 +39,7 @@ data class VurdertUtbetaling(
         FORSTOD_ELLER_BURDE_FORSTÅTT,
         MANGELFULLE_OPPLYSNINGER,
         FEILAKTIGE_OPPLYSNINGER,
+        FORÅRSAKET_AV_BRUKER,
         GOD_TRO,
     }
 
