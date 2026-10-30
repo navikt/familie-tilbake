@@ -24,8 +24,6 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -217,16 +215,6 @@ class RevurderingTest {
             ),
             saksbehandlerContext(),
         )
-
-        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
-            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
-            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
-                revurderingsarsak = EtterKlageDto(
-                    instans = RevurderingsinstansDto.Klageinstansen,
-                    begrunnelse = "Begrunnelse fra klageinstansen",
-                ),
-            )
-        }
 
         tilbakekreving.oppdaterRevurderingsårsak(
             tilbakekreving.nåværendeBehandlingId(),

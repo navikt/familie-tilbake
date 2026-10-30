@@ -1012,11 +1012,12 @@ class Behandling internal constructor(
         )
     }
 
-    fun oppdaterRevurderingsårsak(revurderingsårsak: TilbakekrevingRevurderingsårsak) {
-        this.revurderingsårsak = revurderingsårsak
+    fun oppdaterRevurderingsårsak(oppdatertÅrsak: TilbakekrevingRevurderingsårsak) {
+        if (revurderingsårsak == null) {
+            throw ModellFeil.UgyldigOperasjonException("Behandling med id $id er ikke en revurdering", sporingsinformasjon())
+        }
+        revurderingsårsak = oppdatertÅrsak
     }
-
-    fun erRevurdering(): Boolean = type == Behandlingstype.REVURDERING_TILBAKEKREVING && revurderingsårsak != null
 
     companion object {
         internal fun nyBehandling(
