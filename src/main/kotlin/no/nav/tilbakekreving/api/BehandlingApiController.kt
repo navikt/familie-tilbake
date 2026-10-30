@@ -31,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UpdateUttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
@@ -334,25 +335,7 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
-            val revurderingsårsak = revurderingDto.revurderingsarsak.let {
-                when (it) {
-                    is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                }
-            }
+            val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
             tilbakekreving.opprettRevurdering(behandlingId, revurderingsårsak, context)
             ResponseEntity.ok(
                 OpprettRevurderingResponseDto(tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
@@ -365,29 +348,31 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
-            val revurderingsårsak = revurderingDto.revurderingsarsak.let {
-                when (it) {
-                    is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
-                        beskrivelse = it.begrunnelse,
-                    )
-                    is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
-                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
-                        beskrivelse = it.begrunnelse,
-                    )
-                }
-            }
+            val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
 
             ResponseEntity.ok(
                 tilbakekreving.oppdaterRevurderingsårsak(behandlingId, revurderingsårsak, context),
             )
         } ?: ResponseEntity.notFound().build()
+    }
+
+    private fun mapTilRevurderingsårsak(
+        dto: TilbakekrevingRevurderingsarsakDto,
+    ): TilbakekrevingRevurderingsårsak = when (dto) {
+        is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
+            vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
+            beskrivelse = dto.begrunnelse,
+        )
+        is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
+            vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
+            beskrivelse = dto.begrunnelse,
+        )
+        is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
+            beskrivelse = dto.begrunnelse,
+        )
+        is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
+            vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
+            beskrivelse = dto.begrunnelse,
+        )
     }
 }
