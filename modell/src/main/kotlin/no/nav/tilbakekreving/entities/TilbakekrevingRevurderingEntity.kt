@@ -19,21 +19,17 @@ class TilbakekrevingRevurderingEntity(
     fun fraEntity(): TilbakekrevingRevurderingsårsak {
         return when (revurderingsårsakType) {
             TilbakekrevingRevurderingsårsakType.ETTER_KLAGE -> EtterKlage(
-                årsakType = revurderingsårsakType,
                 vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET -> FeilutbetaltBelopEndret(
-                årsakType = revurderingsårsakType,
                 vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FORELDELSE -> Foreldelse(
-                årsakType = revurderingsårsakType,
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.UTEN_KLAGE -> UtenKlage(
-                årsakType = revurderingsårsakType,
                 vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )

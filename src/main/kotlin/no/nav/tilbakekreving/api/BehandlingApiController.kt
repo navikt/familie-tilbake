@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
-import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsakType
 import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
@@ -338,21 +337,17 @@ class BehandlingApiController(
             val revurderingsårsak = revurderingDto.revurderingsarsak.let {
                 when (it) {
                     is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
-                        årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
                         vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
                         beskrivelse = it.begrunnelse,
                     )
                     is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
-                        årsakType = TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET,
                         vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
                         beskrivelse = it.begrunnelse,
                     )
                     is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
-                        årsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE,
                         beskrivelse = it.begrunnelse,
                     )
                     is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
-                        årsakType = TilbakekrevingRevurderingsårsakType.UTEN_KLAGE,
                         vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
                         beskrivelse = it.begrunnelse,
                     )

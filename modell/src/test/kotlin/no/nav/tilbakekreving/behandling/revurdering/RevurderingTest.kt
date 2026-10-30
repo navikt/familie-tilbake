@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
-import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsakType
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
@@ -54,7 +53,6 @@ class RevurderingTest {
         tilbakekreving.opprettRevurdering(
             tilbakekreving.nåværendeBehandlingId(),
             TilbakekrevingRevurderingsårsak.EtterKlage(
-                årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
@@ -130,7 +128,6 @@ class RevurderingTest {
             tilbakekreving.opprettRevurdering(
                 tilbakekreving.nåværendeBehandlingId(),
                 TilbakekrevingRevurderingsårsak.EtterKlage(
-                    årsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
                     vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                     beskrivelse = "Begrunnelse fra klageinstansen",
                 ),

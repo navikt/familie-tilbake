@@ -10,7 +10,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import java.util.UUID
 
 sealed interface TilbakekrevingRevurderingsårsak {
-    val årsakType: TilbakekrevingRevurderingsårsakType
     val vedtakOmgjortAv: VedtakOmgjortAv?
     val beskrivelse: String
 
@@ -19,7 +18,6 @@ sealed interface TilbakekrevingRevurderingsårsak {
     fun tilFrontend(): TilbakekrevingRevurderingsarsakDto
 
     data class EtterKlage(
-        override val årsakType: TilbakekrevingRevurderingsårsakType,
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
@@ -27,7 +25,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = årsakType,
+                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -42,7 +40,6 @@ sealed interface TilbakekrevingRevurderingsårsak {
     }
 
     data class FeilutbetaltBelopEndret(
-        override val årsakType: TilbakekrevingRevurderingsårsakType,
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
@@ -50,7 +47,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = årsakType,
+                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -65,7 +62,6 @@ sealed interface TilbakekrevingRevurderingsårsak {
     }
 
     data class Foreldelse(
-        override val årsakType: TilbakekrevingRevurderingsårsakType,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
         override val vedtakOmgjortAv: VedtakOmgjortAv? = null
@@ -74,7 +70,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = årsakType,
+                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -88,7 +84,6 @@ sealed interface TilbakekrevingRevurderingsårsak {
     }
 
     data class UtenKlage(
-        override val årsakType: TilbakekrevingRevurderingsårsakType,
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
@@ -96,7 +91,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = årsakType,
+                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.UTEN_KLAGE,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
