@@ -90,7 +90,8 @@ class IverksettService(
             vedtakId = kravgrunnlag.vedtakId,
             vedtaksDato = kravgrunnlag.datoVedtakFagsystem ?: LocalDate.now(),
             kodeHjemmel = "22-15",
-            renterBeregnes = beregnetPerioder.any { it.harRenter() },
+            // Feltet bestemmer om Økonomi skal beregne renter for oss. Settes til false siden vi beregner det selv.
+            renterBeregnes = false,
             enhetAnsvarlig = kravgrunnlag.enhetAnsvarlig,
             kontrollfelt = kravgrunnlag.kontrollfelt,
             saksbehandlerId = ansvarligSaksbehandler,
@@ -107,7 +108,8 @@ class IverksettService(
         VedtakPeriodeDto(
             periodeFom = kgPeriode.periode.fom,
             periodeTom = kgPeriode.periode.tom,
-            renterPeriodeBeregnes = beregnetPeriode.harRenter(),
+            // Feltet bestemmer om Økonomi skal beregne renter for oss. Settes til false siden vi beregner det selv.
+            renterPeriodeBeregnes = false,
             belopRenter = beregnetPeriode.renter(),
             posteringer = lagPosteringer(beregnetPeriode, kgPeriode.tilbakekrevingsBelop),
         )
