@@ -228,6 +228,52 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
+    }
+
+    @Test
+    fun `revurderingsårsak oppdateres for revurdering`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+            ),
+        )
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
+
+        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        lagreUttalelse(behandlingId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = behandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
+            )
+        }
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
+        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg(
+            ident = BESLUTTER_IDENT,
+            behandlingId = behandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
+
+        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId))
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = behandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Klageinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOppdaterRevurderingsarsak(
