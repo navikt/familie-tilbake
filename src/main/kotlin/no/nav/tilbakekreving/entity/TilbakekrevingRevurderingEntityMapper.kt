@@ -22,9 +22,9 @@ object TilbakekrevingRevurderingEntityMapper : Entity<TilbakekrevingRevurderingE
         getter = TilbakekrevingRevurderingEntity::revurderingsårsakType,
         converter = FieldConverter.EnumConverter.of<TilbakekrevingRevurderingsårsakType>().required(),
     )
-    val instans = field(
-        column = "instans",
-        getter = TilbakekrevingRevurderingEntity::instans,
+    val omgjortAv = field(
+        column = "omgjort_av",
+        getter = TilbakekrevingRevurderingEntity::omgjortAv,
         converter = FieldConverter.EnumConverter.of<VedtakOmgjortAv>(),
     )
     val beskrivelse = field(
@@ -38,7 +38,7 @@ object TilbakekrevingRevurderingEntityMapper : Entity<TilbakekrevingRevurderingE
             id = result[id],
             behandlingRef = result[behandlingRef],
             revurderingsårsakType = result[revurderingsårsakType],
-            instans = result[instans],
+            omgjortAv = result[omgjortAv],
             beskrivelse = result[beskrivelse],
         )
 }

@@ -1,9 +1,6 @@
 package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.Behandling
@@ -21,15 +18,17 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
-import no.nav.tilbakekreving.lesContext
 import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class RevurderingEntityTest {
     @Test
-    fun `Revurdering av tilbakekrevingen blir lagret`(){
+    fun `Revurdering av tilbakekrevingen blir lagret`() {
         val behandlingId = UUID.randomUUID()
         val fagsakBehandlingHistorikk = EksternFagsakBehandlingHistorikk(mutableListOf())
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf())
@@ -71,7 +70,7 @@ class RevurderingEntityTest {
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Dette er en test",
             ),
-            klokke = SystemKlokke
+            klokke = SystemKlokke,
         )
 
         val behandlingEtterLagring = revurderingFørLagring
@@ -80,8 +79,8 @@ class RevurderingEntityTest {
         behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true, BehandlerRolle.BESLUTTER).tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
             EtterKlageDto(
                 instans = RevurderingsinstansDto.Klageinstansen,
-                begrunnelse = "Dette er en test"
-            )
+                begrunnelse = "Dette er en test",
+            ),
         )
     }
 }

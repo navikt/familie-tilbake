@@ -13,29 +13,29 @@ class TilbakekrevingRevurderingEntity(
     val id: UUID,
     val behandlingRef: UUID,
     val revurderingsårsakType: TilbakekrevingRevurderingsårsakType,
-    val instans: VedtakOmgjortAv?,
+    val omgjortAv: VedtakOmgjortAv?,
     val beskrivelse: String,
 ) {
     fun fraEntity(): TilbakekrevingRevurderingsårsak {
         return when (revurderingsårsakType) {
             TilbakekrevingRevurderingsårsakType.ETTER_KLAGE -> EtterKlage(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = instans,
+                vedtakOmgjortAv = omgjortAv,
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET -> FeilutbetaltBelopEndret(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = instans,
+                vedtakOmgjortAv = omgjortAv,
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FORELDELSE -> Foreldelse(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = instans,
+                vedtakOmgjortAv = omgjortAv,
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.UTEN_KLAGE -> UtenKlage(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = instans,
+                vedtakOmgjortAv = omgjortAv,
                 beskrivelse = beskrivelse,
             )
         }

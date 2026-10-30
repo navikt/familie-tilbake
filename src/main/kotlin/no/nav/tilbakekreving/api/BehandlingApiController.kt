@@ -14,7 +14,6 @@ import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.ApplicationProperties
-import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto

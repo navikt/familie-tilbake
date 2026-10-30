@@ -28,7 +28,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                instans = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv!!,
                 beskrivelse = beskrivelse,
             )
         }
@@ -51,7 +51,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                instans = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv!!,
                 beskrivelse = beskrivelse,
             )
         }
@@ -74,7 +74,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                instans = null,
+                omgjortAv = null,
                 beskrivelse = beskrivelse,
             )
         }
@@ -96,7 +96,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                instans = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv!!,
                 beskrivelse = beskrivelse,
             )
         }

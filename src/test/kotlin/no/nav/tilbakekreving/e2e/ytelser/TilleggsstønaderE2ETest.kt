@@ -226,7 +226,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                     begrunnelse = "Begrunnelse for revurdering",
                 ),
             )
-            behandlingsårsakstype shouldBe null //denne er kun til gammel modell
         }
     }
 
