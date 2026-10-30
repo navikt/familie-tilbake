@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 
@@ -24,6 +25,12 @@ class PdfGenClientImpl(
     override fun hentPdfForForhåndsvarsel(varselbrevData: VarselbrevDataDto): ByteArray {
         return runBlocking {
             hentVarselbrevPdf(varselbrevData)
+        }
+    }
+
+    override fun hentPdfForInformasjonsbrev(informasjonsbrevData: InformasjonsbrevDataDto): ByteArray {
+        return runBlocking {
+            hentInformasjonsbrevPdf(informasjonsbrevData)
         }
     }
 
@@ -46,6 +53,19 @@ class PdfGenClientImpl(
         val response = httpClient.post("$baseUrl/api/v1/brev/forhåndsvarsel/pdf") {
             contentType(ContentType.Application.Json)
             setBody(varselbrevData)
+        }
+        if (!response.status.isSuccess()) {
+            throw RuntimeException("Feil fra PDF-service: ${response.status}")
+        }
+        return response.body()
+    }
+
+    private suspend fun hentInformasjonsbrevPdf(informasjonsbrevData: InformasjonsbrevDataDto): ByteArray {
+        val baseUrl = config.baseUrl
+
+        val response = httpClient.post("$baseUrl/api/v1/brev/informasjonsbrev/pdf") {
+            contentType(ContentType.Application.Json)
+            setBody(informasjonsbrevData)
         }
         if (!response.status.isSuccess()) {
             throw RuntimeException("Feil fra PDF-service: ${response.status}")
