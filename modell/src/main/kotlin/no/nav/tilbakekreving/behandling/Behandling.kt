@@ -115,7 +115,7 @@ class Behandling internal constructor(
     override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
-    private val revurderingsårsak: TilbakekrevingRevurderingsårsak?,
+    private var revurderingsårsak: TilbakekrevingRevurderingsårsak?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -1011,6 +1011,12 @@ class Behandling internal constructor(
             forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
         )
     }
+
+    fun oppdaterRevurderingsårsak(revurderingsårsak: TilbakekrevingRevurderingsårsak) {
+        this.revurderingsårsak = revurderingsårsak
+    }
+
+    fun erRevurdering(): Boolean = type == Behandlingstype.REVURDERING_TILBAKEKREVING && revurderingsårsak != null
 
     companion object {
         internal fun nyBehandling(

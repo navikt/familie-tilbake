@@ -359,4 +359,35 @@ class BehandlingApiController(
             )
         } ?: ResponseEntity.notFound().build()
     }
+
+    override fun behandlingOppdaterRevurderingsarsak(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.OpprettRevurdering,
+        ) { tilbakekreving, context ->
+            val revurderingsårsak = revurderingDto.revurderingsarsak.let {
+                when (it) {
+                    is EtterKlageDto -> TilbakekrevingRevurderingsårsak.EtterKlage(
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
+                        beskrivelse = it.begrunnelse,
+                    )
+                    is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
+                        vedtakOmgjortAv = it.instans.let { VedtakOmgjortAv.valueOf(it.name) },
+                        beskrivelse = it.begrunnelse,
+                    )
+                }
+            }
+
+            ResponseEntity.ok(
+                tilbakekreving.oppdaterRevurderingsårsak(behandlingId, revurderingsårsak, context),
+            )
+        } ?: ResponseEntity.notFound().build()
+    }
 }
