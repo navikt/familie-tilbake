@@ -20,22 +20,21 @@ class TilbakekrevingRevurderingEntity(
         return when (revurderingsårsakType) {
             TilbakekrevingRevurderingsårsakType.ETTER_KLAGE -> EtterKlage(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = omgjortAv,
+                vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET -> FeilutbetaltBelopEndret(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = omgjortAv,
+                vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.FORELDELSE -> Foreldelse(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = omgjortAv,
                 beskrivelse = beskrivelse,
             )
             TilbakekrevingRevurderingsårsakType.UTEN_KLAGE -> UtenKlage(
                 årsakType = revurderingsårsakType,
-                vedtakOmgjortAv = omgjortAv,
+                vedtakOmgjortAv = requireNotNull(omgjortAv) { "VedtakOmgjortAv må være satt for revurderingsårsak $revurderingsårsakType" },
                 beskrivelse = beskrivelse,
             )
         }

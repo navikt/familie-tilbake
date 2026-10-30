@@ -349,7 +349,6 @@ class BehandlingApiController(
                     )
                     is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
                         årsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE,
-                        vedtakOmgjortAv = null,
                         beskrivelse = it.begrunnelse,
                     )
                     is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(

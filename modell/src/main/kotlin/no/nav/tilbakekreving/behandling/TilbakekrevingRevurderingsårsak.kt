@@ -20,7 +20,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
 
     data class EtterKlage(
         override val årsakType: TilbakekrevingRevurderingsårsakType,
-        override val vedtakOmgjortAv: VedtakOmgjortAv?,
+        override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
@@ -28,14 +28,14 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                omgjortAv = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
         }
 
         override fun tilFrontend(): EtterKlageDto {
             return EtterKlageDto(
-                instans = RevurderingsinstansDto.forValue(vedtakOmgjortAv!!.name),
+                instans = RevurderingsinstansDto.forValue(vedtakOmgjortAv.name),
                 begrunnelse = beskrivelse,
             )
         }
@@ -43,7 +43,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
 
     data class FeilutbetaltBelopEndret(
         override val årsakType: TilbakekrevingRevurderingsårsakType,
-        override val vedtakOmgjortAv: VedtakOmgjortAv?,
+        override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
@@ -51,14 +51,14 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                omgjortAv = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
         }
 
         override fun tilFrontend(): FeilutbetaltBelopEndretDto {
             return FeilutbetaltBelopEndretDto(
-                instans = RevurderingsinstansDto.forValue(vedtakOmgjortAv!!.name),
+                instans = RevurderingsinstansDto.forValue(vedtakOmgjortAv.name),
                 begrunnelse = beskrivelse,
             )
         }
@@ -66,15 +66,16 @@ sealed interface TilbakekrevingRevurderingsårsak {
 
     data class Foreldelse(
         override val årsakType: TilbakekrevingRevurderingsårsakType,
-        override val vedtakOmgjortAv: VedtakOmgjortAv?,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
+        override val vedtakOmgjortAv: VedtakOmgjortAv? = null
+
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                omgjortAv = null,
+                omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
         }
@@ -88,7 +89,7 @@ sealed interface TilbakekrevingRevurderingsårsak {
 
     data class UtenKlage(
         override val årsakType: TilbakekrevingRevurderingsårsakType,
-        override val vedtakOmgjortAv: VedtakOmgjortAv?,
+        override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
@@ -96,14 +97,14 @@ sealed interface TilbakekrevingRevurderingsårsak {
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
                 revurderingsårsakType = årsakType,
-                omgjortAv = vedtakOmgjortAv!!,
+                omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
         }
 
         override fun tilFrontend(): UtenKlageDto {
             return UtenKlageDto(
-                instans = UtenKlageDto.Instans.forValue(vedtakOmgjortAv!!.name),
+                instans = UtenKlageDto.Instans.forValue(vedtakOmgjortAv.name),
                 begrunnelse = beskrivelse,
             )
         }
