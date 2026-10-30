@@ -72,7 +72,6 @@ import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
@@ -87,7 +86,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
@@ -116,7 +115,7 @@ class Behandling internal constructor(
     override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
-    private val revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
+    private val revurderingsårsak: TilbakekrevingRevurderingsårsak?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -194,7 +193,7 @@ class Behandling internal constructor(
             opprettet = opprettet,
             sistEndret = sistEndret,
             enhet = enhet?.tilEntity(),
-            revurderingsårsak = revurderingsårsak,
+            revurderingsårsak = revurderingsårsak?.tilEntity(id),
             ansvarligSaksbehandler = ansvarligSaksbehandler.tilEntity(),
             eksternFagsakBehandlingRef = eksternFagsakRevurdering.tilEntity(),
             kravgrunnlagRef = kravgrunnlag.tilEntity(),
@@ -456,10 +455,7 @@ class Behandling internal constructor(
             fagsystemsbehandlingId = eksternFagsakRevurdering.entry.eksternId,
             // TODO
             eksternFagsakId = "TODO",
-            behandlingsårsakstype = when (revurderingsårsak) {
-                TilbakekrevingRevurderingsarsakDto.REVURDERING_ANNEN_ÅRSAK -> Behandlingsårsakstype.REVURDERING_ANNEN_ÅRSAK
-                null -> null
-            },
+            behandlingsårsakstype = null,
             støtterManuelleBrevmottakere = true,
             harManuelleBrevmottakere = false,
             manuelleBrevmottakere = emptyList(),
@@ -467,6 +463,7 @@ class Behandling internal constructor(
             saksbehandlingstype = Saksbehandlingstype.ORDINÆR,
             erNyModell = true,
             innloggetRolle = utledInnloggetBrukerRolle(lesContext, behandlerRolle),
+            tilbakekrevingRevurdering = revurderingsårsak?.tilFrontend()?.let { TilbakekrevingRevurderingDto(it) },
         )
     }
 
@@ -991,7 +988,7 @@ class Behandling internal constructor(
         )
     }
 
-    fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsarsakDto, klokke: Klokke): Behandling {
+    fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, klokke: Klokke): Behandling {
         val opprettet = klokke.nå()
 
         return Behandling(
@@ -1025,7 +1022,6 @@ class Behandling internal constructor(
             kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
             brevHistorikk: BrevHistorikk,
             klokke: Klokke,
-            revurderingsårsak: TilbakekrevingRevurderingsarsakDto?,
         ): Behandling {
             val opprettet = klokke.nå()
             return Behandling(
@@ -1034,7 +1030,7 @@ class Behandling internal constructor(
                 opprettet = opprettet,
                 sistEndret = opprettet,
                 enhet = enhet,
-                revurderingsårsak = revurderingsårsak,
+                revurderingsårsak = null,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 eksternFagsakRevurdering = eksternFagsakRevurdering,
                 kravgrunnlag = kravgrunnlag,

@@ -18,6 +18,7 @@ class NyBehandlingRepository(
     private val foreslåVedtakRepository: NyForeslåVedtakRepository,
     private val vilkårsvurderingRepository: NyVilkårsvurderingRepository,
     private val forhåndsvarselRepository: NyForhåndsvarselRepository,
+    private val revurderingRepository: NyRevurderingRepository,
 ) {
     fun hentBehandlinger(
         tilbakekrevingId: String,
@@ -35,6 +36,7 @@ class NyBehandlingRepository(
                 foreslåVedtak = foreslåVedtakRepository.hentForeslåttVedtak(behandlingId),
                 fatteVedtak = fatteVedtakRepository.hentVedtaksvurdering(behandlingId),
                 forhåndsvarselEntity = forhåndsvarselRepository.hentForhåndsvarsel(behandlingId),
+                tilbakekrevingRevurderingEntity = revurderingRepository.hentTilbakekrevingRevurdering(behandlingId),
             )
         }
     }
@@ -48,6 +50,9 @@ class NyBehandlingRepository(
             vilkårsvurderingRepository.lagre(behandling.vilkårsvurderingstegEntity)
             foreslåVedtakRepository.lagre(behandling.foreslåVedtakStegEntity)
             forhåndsvarselRepository.lagre(behandling.forhåndsvarselEntity, behandling.id)
+            behandling.revurderingsårsak?.let {
+                revurderingRepository.lagre(it)
+            }
         }
     }
 }

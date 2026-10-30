@@ -43,7 +43,7 @@ object AvventerFagsysteminfo : Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
-        tilbakekreving.opprettBehandling(eksternBehandling, sideeffektContext, fagsysteminfo.behandlendeEnhet, Behandlingstype.TILBAKEKREVING, null)
+        tilbakekreving.opprettBehandling(eksternBehandling, sideeffektContext, fagsysteminfo.behandlendeEnhet, Behandlingstype.TILBAKEKREVING)
         if (fagsysteminfo.aktør != null) {
             tilbakekreving.opprettBruker(fagsysteminfo.aktør)
         }

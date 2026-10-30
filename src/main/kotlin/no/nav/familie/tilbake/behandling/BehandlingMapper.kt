@@ -132,6 +132,7 @@ object BehandlingMapper {
             erNyModell = false,
             innloggetRolle = innloggetSaksbehandlerRolle,
             venter = null,
+            tilbakekrevingRevurdering = null,
         )
     }
 
