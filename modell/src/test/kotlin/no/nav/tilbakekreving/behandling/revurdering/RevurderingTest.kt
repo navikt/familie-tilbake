@@ -24,6 +24,8 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
@@ -199,5 +201,58 @@ class RevurderingTest {
         )
 
         return tilbakekreving
+    }
+
+    @Test
+    fun `oppdaterer revurderingsårsak for revurdering`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        tilbakekreving.opprettRevurdering(
+            tilbakekreving.nåværendeBehandlingId(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        tilbakekreving.oppdaterRevurderingsårsak(
+            tilbakekreving.nåværendeBehandlingId(),
+            TilbakekrevingRevurderingsårsak.UtenKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                beskrivelse = "Begrunnelse fra Førsteinstansen",
+            ),
+            context,
+        )
+
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
+            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
+                revurderingsarsak = UtenKlageDto(
+                    instans = UtenKlageDto.Instans.Førsteinstansen,
+                    begrunnelse = "Begrunnelse fra Førsteinstansen",
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `kan ikke oppdaterer revurderingsårsak når det ikke er revurdering`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            type shouldBe Behandlingstype.TILBAKEKREVING
+        }
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.oppdaterRevurderingsårsak(
+                tilbakekreving.nåværendeBehandlingId(),
+                TilbakekrevingRevurderingsårsak.UtenKlage(
+                    vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                    beskrivelse = "Begrunnelse fra Førsteinstansen",
+                ),
+                context,
+            )
+        }
     }
 }

@@ -115,7 +115,7 @@ class Behandling internal constructor(
     override val opprettet: LocalDateTime,
     private var sistEndret: LocalDateTime,
     private var enhet: Enhet?,
-    private val revurderingsårsak: TilbakekrevingRevurderingsårsak?,
+    private var revurderingsårsak: TilbakekrevingRevurderingsårsak?,
     private var ansvarligSaksbehandler: Behandler,
     private var eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
     private var kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
@@ -1010,6 +1010,13 @@ class Behandling internal constructor(
             forhåndsvarsel = forhåndsvarsel.klon(),
             forrigeBehandlingsstatus = BehandlingsstatusModell.OPPRETTET,
         )
+    }
+
+    fun oppdaterRevurderingsårsak(oppdatertÅrsak: TilbakekrevingRevurderingsårsak) {
+        if (revurderingsårsak == null) {
+            throw ModellFeil.UgyldigOperasjonException("Behandling med id $id er ikke en revurdering", sporingsinformasjon())
+        }
+        revurderingsårsak = oppdatertÅrsak
     }
 
     companion object {
