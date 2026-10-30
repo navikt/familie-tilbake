@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -224,6 +225,29 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                 revurderingsarsak = EtterKlageDto(
                     instans = RevurderingsinstansDto.Klageinstansen,
                     begrunnelse = "Begrunnelse for revurdering",
+                ),
+            )
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterRevurderingsarsak(
+                behandlingId = revurderingBehandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = UtenKlageDto(
+                        instans = UtenKlageDto.Instans.Klageinstansen,
+                        begrunnelse = "Oppdatert begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            status shouldBe Behandlingsstatus.UTREDES
+            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
+            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
+                revurderingsarsak = UtenKlageDto(
+                    instans = UtenKlageDto.Instans.Klageinstansen,
+                    begrunnelse = "Oppdatert begrunnelse for revurdering",
                 ),
             )
         }
