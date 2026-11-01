@@ -1,9 +1,9 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "3.1.1"
+val springDocVersion = "3.2.0"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.12"
+val tokenValidationVersion = "7.0.1"
 val flywayVersion = "11.3.4"
 val ktorVersion = "3.6.0"
 ext["ktorVersion"] = ktorVersion
@@ -83,7 +83,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.73.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.74.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -116,11 +116,11 @@ dependencies {
     api(project(":kontrakter-frontend:api"))
     api(project(":modell"))
     api(project(":pdf"))
-    api("no.nav.familie:prosessering-core:2.20260817115650_f13f507") {
+    api("no.nav.familie:prosessering-core:2.20261027150838_57ccae7") {
         // La spring boot håndtere flyway versjon selv om den er eldre enn den som er inkludert i prosessering-core
         exclude("org.flywaydb")
     }
-    api("no.nav.familie:prosessering-web-nav-token-support:2.20260817115650_f13f507")
+    api("no.nav.familie:prosessering-web-nav-token-support:2.20261027150838_57ccae7")
     api("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
     api("no.nav.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:2648.7dd4e44")
 
@@ -135,11 +135,11 @@ dependencies {
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
     api("io.getunleash:unleash-client-java:12.3.1")
-    api("org.messaginghub:pooled-jms:3.2.5")
+    api("org.messaginghub:pooled-jms:3.2.6")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.6.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.7.0")
 
     testImplementation(project(":testdata"))
 
