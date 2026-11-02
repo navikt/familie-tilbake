@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
@@ -22,6 +23,7 @@ fun vedtaksbrevInfo(
     periodeId: UUID = UUID.randomUUID(),
     vararg påkrevdeBegrunnelser: VilkårsvurderingBegrunnelse = arrayOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
     skalTilbakerkeves: Boolean = true,
+    behandlingstype: Behandlingstype = Behandlingstype.TILBAKEKREVING,
 ) = VedtaksbrevInfo(
     brukerdata = brevmottaker,
     ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
@@ -56,4 +58,5 @@ fun vedtaksbrevInfo(
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
     beregnerSkatt = true,
+    behandlingstype = behandlingstype,
 )
