@@ -26,6 +26,7 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
@@ -75,15 +76,21 @@ class NyVedtaksbrevService(
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittDto(
                 tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
-                forklaring = Forklaringstekster.HOVEDAVSNITT,
-                underavsnitt = listOf(RentekstElementDto("")),
+                forklaring = hovedavsnittForklaring(vedtaksbrevInfo.behandlingstype),
+                underavsnitt = when (vedtaksbrevInfo.behandlingstype) {
+                    Behandlingstype.TILBAKEKREVING -> listOf(RentekstElementDto(""))
+                    Behandlingstype.REVURDERING_TILBAKEKREVING -> listOf(RentekstElementDto(REVURDERINGSVEDTAK_FRITEKSTFELT))
+                },
                 hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
             ),
-            avsnitt = vedtaksbrevInfo.perioder.map {
-                BrevFormatterer.lagAvsnitt(
-                    periode = it,
-                    flerePerioder = vedtaksbrevInfo.perioder.size > 1,
-                )
+            avsnitt = when (vedtaksbrevInfo.behandlingstype) {
+                Behandlingstype.TILBAKEKREVING -> vedtaksbrevInfo.perioder.map {
+                    BrevFormatterer.lagAvsnitt(
+                        periode = it,
+                        flerePerioder = vedtaksbrevInfo.perioder.size > 1,
+                    )
+                }
+                Behandlingstype.REVURDERING_TILBAKEKREVING -> emptyList()
             },
             sistOppdatert = OffsetDateTime.now(),
             brevGjelder = vedtaksbrevInfo.brukerdata,
@@ -182,7 +189,7 @@ class NyVedtaksbrevService(
     ): HovedavsnittDto {
         return HovedavsnittDto(
             tittel = BrevFormatterer.lagHovedavsnittTittel(info),
-            forklaring = Forklaringstekster.HOVEDAVSNITT,
+            forklaring = hovedavsnittForklaring(info.behandlingstype),
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
             },
@@ -238,6 +245,13 @@ class NyVedtaksbrevService(
                 tittel = avsnitt.tittel!!,
                 underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
             )
+        }
+    }
+
+    private fun hovedavsnittForklaring(behandlingstype: Behandlingstype): String {
+        return when (behandlingstype) {
+            Behandlingstype.TILBAKEKREVING -> Forklaringstekster.HOVEDAVSNITT
+            Behandlingstype.REVURDERING_TILBAKEKREVING -> Forklaringstekster.HOVEDAVSNITT_REVURDERING
         }
     }
 
@@ -343,5 +357,6 @@ class NyVedtaksbrevService(
     companion object {
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
+        private const val REVURDERINGSVEDTAK_FRITEKSTFELT = "Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst."
     }
 }
