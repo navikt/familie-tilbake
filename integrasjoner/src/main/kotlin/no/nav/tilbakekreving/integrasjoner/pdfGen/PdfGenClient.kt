@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
+import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 
@@ -13,6 +14,8 @@ interface PdfGenClient {
     fun hentPdfForVedtak(vedtaksbrevData: VedtaksbrevDataDto): ByteArray
 
     fun hentPdfForForhåndsvarsel(varselbrevData: VarselbrevDataDto): ByteArray
+
+    fun hentPdfForInformasjonsbrev(informasjonsbrevData: InformasjonsbrevDataDto): ByteArray
 
     companion object {
         fun opprett(
