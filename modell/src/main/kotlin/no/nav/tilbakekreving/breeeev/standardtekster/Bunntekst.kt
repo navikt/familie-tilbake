@@ -97,5 +97,14 @@ enum class Bunntekst(
             RETT_TIL_HJELP,
             SPØRSMÅL,
         )
+
+        val REVURDERING_STANDARD_BUNNTEKSTER = setOf(
+            HVORDAN_BETALE_TILBAKE,
+            RETT_TIL_Å_KLAGE,
+            RETT_TIL_INNSYN,
+            PERSONVÆRN_ERKLÆRING,
+            RETT_TIL_HJELP,
+            SPØRSMÅL,
+        )
     }
 }

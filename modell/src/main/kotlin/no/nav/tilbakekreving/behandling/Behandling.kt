@@ -939,12 +939,16 @@ class Behandling internal constructor(
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
         val resultat = lagBeregning().oppsummer()
+        val bunntekst = when (type) {
+            Behandlingstype.TILBAKEKREVING -> Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse)
+            Behandlingstype.REVURDERING_TILBAKEKREVING -> Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER
+        }
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
             ytelse = ytelse.brevmeta(),
             signatur = brevSignatur(),
             perioder = vurdertePerioderForBrev(),
-            bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
+            bunntekster = bunntekst,
             skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
             tilbakekrevingId = tilbakekrevingId,
             beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
@@ -953,6 +957,7 @@ class Behandling internal constructor(
                 foreldelsesteg.hjemlerForTilbakekreving() +
                 vilkårsvurderingsteg.hjemlerForTilbakekreving(),
             beregnerSkatt = ytelse.beregnerSkatt,
+            behandlingstype = type,
         )
     }
 

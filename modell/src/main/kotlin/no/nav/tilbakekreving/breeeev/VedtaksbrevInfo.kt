@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.breeeev
 
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
@@ -18,6 +19,7 @@ data class VedtaksbrevInfo(
     val beregningsresultat: List<BeregningsresultatsperiodeDto>,
     val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
     val beregnerSkatt: Boolean,
+    val behandlingstype: Behandlingstype,
 )
 
 data class InfobrevData(
