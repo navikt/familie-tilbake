@@ -33,6 +33,7 @@ import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.OpprettManueltTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter.Companion.behandling
 import org.springframework.http.HttpStatus
@@ -112,6 +113,10 @@ class BehandlingController(
         @Valid @RequestBody
         opprettRevurderingDto: OpprettRevurderingDto,
     ): Ressurs<String> {
+        if (opprettRevurderingDto.årsakstype == Behandlingsårsakstype.REVURDERING_ANNEN_ÅRSAK) {
+            throw IllegalArgumentException("REVURDERING_ANNEN_ÅRSAK er ikke støttet for revurdering.")
+        }
+
         if (tilbakekrevingService.hentTilbakekreving(behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
             throw ModellFeil.UtenforScopeException(
                 UtenforScope.Revurdering,
@@ -197,6 +202,9 @@ class BehandlingController(
             behandlingService.oppdaterAnsvarligSaksbehandler(behandlingId)
         }
         val behandling = behandlingService.hentBehandling(behandlingId)
+        if (behandling.behandlingsårsakstype == Behandlingsårsakstype.REVURDERING_ANNEN_ÅRSAK) {
+            throw IllegalArgumentException("REVURDERING_ANNEN_ÅRSAK er ikke støttet for revurdering.")
+        }
         stegService.håndterSteg(
             behandlingId,
             behandlingsstegDto,
