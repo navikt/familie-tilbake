@@ -11,7 +11,6 @@ import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
-import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakBeregningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
@@ -36,7 +35,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -48,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -76,7 +73,6 @@ class ForvaltningController(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
     private val tilgangService: TilgangService,
-    private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -455,42 +451,6 @@ class ForvaltningController(
             "${applicationProperties.frontendUrl}/fagsystem/${fagsak.fagsystem.name}/fagsak/${fagsak.eksternFagsakId}/behandling/${behandling.eksternBrukId}/fakta"
         }
         return Ressurs.success(urler)
-    }
-
-    @Operation(summary = "Henter informasjon for feilretting av saker med feilberegnet renter")
-    @PostMapping(
-        path = ["/beregninger/csv"],
-        produces = ["text/csv;charset=UTF-8"],
-    )
-    fun hentBeregninger(
-        @RequestBody eksternBrukIder: List<UUID>,
-    ): ResponseEntity<String> {
-        val header = "fagsystemId,fødselsnummer,vedtakId,fom,tom,renteprosent,rentebeløp,tilbakekreves før skatt,tilbakekreves etter skatt"
-        val rows = eksternBrukIder.flatMap { eksternBrukId ->
-            val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
-                ?: throw IllegalArgumentException("Fant ikke behandling for eksternBrukId=$eksternBrukId")
-            tilgangskontrollService.validerTilgangBehandlingID(
-                behandlingId = behandling.id,
-                minimumBehandlerrolle = Behandlerrolle.FORVALTER,
-                auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                handling = "Henter informasjon for feilretting av sak med feilberegnet renter",
-            )
-            val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
-            val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
-            val beløp = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag).map { vedtaksperiode ->
-                val periode = vedtaksperiode.periode.toDatoperiode()
-                val renteprosent = "10%".takeIf { vedtaksperiode.renter >= BigDecimal.ZERO }
-                val førSkatt = vedtaksperiode.beløp.sumOf { it.tilbakekrevesBeløp } + vedtaksperiode.renter
-                val etterSkatt = førSkatt - vedtaksperiode.beløp.sumOf { it.skattBeløp }
-                ",,,${periode.fom},${periode.tom},$renteprosent,${vedtaksperiode.renter},$førSkatt,$etterSkatt"
-            }
-            listOf("${kravgrunnlag.fagsystemId},${fagsak.bruker.ident},${kravgrunnlag.vedtakId},,,,,,") + beløp
-        }
-        val csv = (listOf(header) + rows).joinToString("\r\n")
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"behandlinger.csv\"")
-            .body(csv)
     }
 
     @PostMapping("/bytt-institusjon/{behandlingId}")
