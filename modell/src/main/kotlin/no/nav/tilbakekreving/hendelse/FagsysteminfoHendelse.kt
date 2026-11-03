@@ -10,6 +10,7 @@ data class FagsysteminfoHendelse(
     val revurdering: Revurdering,
     val utvidPerioder: List<UtvidetPeriode>?,
     val behandlendeEnhet: String?,
+    val overstyrtEksternFagsakId: String?,
 ) {
     data class UtvidetPeriode(
         val kravgrunnlagPeriode: Datoperiode,

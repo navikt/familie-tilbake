@@ -13,7 +13,7 @@ import java.util.UUID
 
 class EksternFagsak(
     private val id: UUID,
-    private val eksternId: String?,
+    private var eksternId: String?,
     private val eksternIdFraOppdrag: String,
     internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
@@ -29,6 +29,7 @@ class EksternFagsak(
     }
 
     fun lagre(fagsysteminfo: FagsysteminfoHendelse, klokke: Klokke): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
+        eksternId = fagsysteminfo.overstyrtEksternFagsakId
         return behandlinger.lagre(
             EksternFagsakRevurdering.Revurdering(
                 id = UUID.randomUUID(),
