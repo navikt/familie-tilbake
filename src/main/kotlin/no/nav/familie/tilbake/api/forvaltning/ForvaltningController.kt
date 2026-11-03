@@ -29,7 +29,6 @@ import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.entities.TilbakekrevingEntity
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
@@ -77,21 +76,20 @@ class ForvaltningController(
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
-    @Operation(summary = "Hent antall rader per behandlingsårsakstype, inkludert typer uten forekomster")
+    @Operation(summary = "Hent behandlings-ID-er med behandlingsårsak REVURDERING_ANNEN_ÅRSAK")
     @GetMapping(
-        path = ["/behandlingsarsak/antall"],
+        path = ["/behandlingsarsak/revurdering-annen-arsak/behandlinger"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentAntallPerBehandlingsårsakstype(): Ressurs<Map<Behandlingsårsakstype, Long>> {
+    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): Ressurs<List<UUID>> {
         if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
             throw ForbiddenError(
-                message = "Mangler forvaltertilgang til å hente antall per behandlingsårsakstype",
-                frontendFeilmelding = "Du har ikke tilgang til å hente antall per behandlingsårsakstype",
+                message = "Mangler forvaltertilgang til å hente behandlings-ID-er med revurdering annen årsak",
+                frontendFeilmelding = "Du har ikke tilgang til å hente behandlings-ID-er med revurdering annen årsak",
                 logContext = SecureLog.Context.tom(),
             )
         }
-        val antallPerType = behandlingRepository.hentAntallPerBehandlingsårsakstype().associate { it.type to it.antall }
-        return Ressurs.success(Behandlingsårsakstype.entries.associateWith { antallPerType[it] ?: 0L })
+        return Ressurs.success(behandlingRepository.hentBehandlingsIderMedRevurderingAnnenÅrsak())
     }
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
