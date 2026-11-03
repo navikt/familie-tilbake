@@ -15,6 +15,7 @@ import io.mockk.verifyOrder
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
+import no.nav.tilbakekreving.Testdata.dokumentInfo
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
@@ -59,10 +60,10 @@ class VedtakDokumentControllerTest {
         every { vedtaksdokumentTilgang.validerMaskintilgang() } just Runs
         every { vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(vedtakId) } returns tilbakekrevingId
         every { tilbakekrevingService.hentTilbakekreving(any(), true) } returns tilbakekrevingMedDokumenter(
-            dokument("journalpost-1", "dokument-1"),
-            dokument("journalpost-1", "dokument-1").copy(brevSendt = 2.januar(2025)),
-            dokument("journalpost-1", "dokument-2"),
-            dokument("journalpost-2", "dokument-1"),
+            dokumentInfo("journalpost-1", "dokument-1", brevSendt = 1.januar(2025)),
+            dokumentInfo("journalpost-1", "dokument-1", brevSendt = 2.januar(2025)),
+            dokumentInfo("journalpost-1", "dokument-2", brevSendt = 1.januar(2025)),
+            dokumentInfo("journalpost-2", "dokument-1", brevSendt = 1.januar(2025)),
         )
 
         val response = controller.dokumenterHentVedtaksdokumenter(vedtakId.toString())
@@ -104,10 +105,4 @@ class VedtakDokumentControllerTest {
     private fun tilbakekrevingMedDokumenter(vararg dokumenter: DokumentInfoDto): Tilbakekreving = mockk {
         every { brevHistorikk.alleSendteDokumenter() } returns dokumenter.toList()
     }
-
-    private fun dokument(journalpostId: String, dokumentId: String) = DokumentInfoDto(
-        brevSendt = 1.januar(2025),
-        journalpostId = journalpostId,
-        dokumentId = dokumentId,
-    )
 }

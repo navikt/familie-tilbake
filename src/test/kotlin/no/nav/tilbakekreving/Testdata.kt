@@ -3,6 +3,7 @@ package no.nav.tilbakekreving
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
+import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
 import no.nav.tilbakekreving.test.januar
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,6 +11,16 @@ import java.util.UUID
 
 object Testdata {
     val TESTBRUKER = "20046912345"
+
+    fun dokumentInfo(
+        journalpostId: String,
+        dokumentId: String,
+        brevSendt: LocalDate,
+    ) = DokumentInfoDto(
+        brevSendt = brevSendt,
+        journalpostId = journalpostId,
+        dokumentId = dokumentId,
+    )
 
     fun fagsysteminfoSvar(
         fagsystemId: String,
