@@ -6,12 +6,12 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
-import no.nav.familie.tilbake.beregning.TilbakekrevingsberegningService
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
+import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakBeregningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.log.LogService
@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -75,7 +76,7 @@ class ForvaltningController(
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
     private val tilgangService: TilgangService,
-    private val tilbakekrevingsberegningService: TilbakekrevingsberegningService,
+    private val tilbakekrevingsvedtakBeregningService: TilbakekrevingsvedtakBeregningService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
@@ -464,7 +465,7 @@ class ForvaltningController(
     fun hentBeregninger(
         @RequestBody eksternBrukIder: List<UUID>,
     ): ResponseEntity<String> {
-        val header = "fagsystemId,fødselsnummer,vedtakId,fom,tom,renteprosent,tilbakekreves før skatt,tilbakekreves etter skatt"
+        val header = "fagsystemId,fødselsnummer,vedtakId,fom,tom,renteprosent,rentebeløp,tilbakekreves før skatt,tilbakekreves etter skatt"
         val rows = eksternBrukIder.flatMap { eksternBrukId ->
             val behandling = behandlingRepository.findByEksternBrukId(eksternBrukId)
                 ?: throw IllegalArgumentException("Fant ikke behandling for eksternBrukId=$eksternBrukId")
@@ -476,10 +477,14 @@ class ForvaltningController(
             )
             val kravgrunnlag = kravgrunnlagRepository.findByBehandlingIdAndAktivIsTrue(behandling.id)
             val fagsak = fagsakRepository.finnFagsakForBehandlingId(behandling.id)
-            val beløp = tilbakekrevingsberegningService.hentBeregningsresultat(behandling.id).beregningsresultatsperioder.map { periode ->
-                ",,,${periode.periode.fom},${periode.periode.tom},${periode.renteprosent ?: 0},${periode.tilbakekrevingsbeløp ?: 0},${periode.tilbakekrevesBeløpEtterSkatt ?: 0}"
+            val beløp = tilbakekrevingsvedtakBeregningService.beregnVedtaksperioder(behandling.id, kravgrunnlag).map { vedtaksperiode ->
+                val periode = vedtaksperiode.periode.toDatoperiode()
+                val renteprosent = "10%".takeIf { vedtaksperiode.renter >= BigDecimal.ZERO }
+                val førSkatt = vedtaksperiode.beløp.sumOf { it.tilbakekrevesBeløp } + vedtaksperiode.renter
+                val etterSkatt = førSkatt - vedtaksperiode.beløp.sumOf { it.skattBeløp }
+                ",,,${periode.fom},${periode.tom},$renteprosent,${vedtaksperiode.renter},$førSkatt,$etterSkatt"
             }
-            listOf("${kravgrunnlag.fagsystemId},${fagsak.bruker.ident},${kravgrunnlag.vedtakId},,,,,") + beløp
+            listOf("${kravgrunnlag.fagsystemId},${fagsak.bruker.ident},${kravgrunnlag.vedtakId},,,,,,") + beløp
         }
         val csv = (listOf(header) + rows).joinToString("\r\n")
         return ResponseEntity.ok()
