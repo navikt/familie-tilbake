@@ -13,6 +13,8 @@ oppdrag.mq:
   enabled: true
 
 tilbakekreving:
+  vedtaksdokumenter:
+    maskin-klient: dev-gcp:tilbake:tilbakekreving-tvangsgrunnlag
   frontendUrl: https://tilbakekreving.ansatt.dev.nav.no
   kravgrunnlag:
     - QA.Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
