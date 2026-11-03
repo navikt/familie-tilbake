@@ -2,6 +2,7 @@ package no.nav.familie.tilbake.api.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.BehandlingRepository
+import no.nav.familie.tilbake.behandling.FagsakMedRevurderingAnnenÅrsak
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
@@ -76,20 +77,20 @@ class ForvaltningController(
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
-    @Operation(summary = "Hent behandlings-ID-er med behandlingsårsak REVURDERING_ANNEN_ÅRSAK")
+    @Operation(summary = "Hent fagsakId og eksternFagsakId for fagsaker med behandlingsårsak REVURDERING_ANNEN_ÅRSAK")
     @GetMapping(
         path = ["/behandlingsarsak/revurdering-annen-arsak/behandlinger"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): Ressurs<List<UUID>> {
+    fun hentFagsakerMedRevurderingAnnenÅrsak(): Ressurs<List<FagsakMedRevurderingAnnenÅrsak>> {
         if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
             throw ForbiddenError(
-                message = "Mangler forvaltertilgang til å hente behandlings-ID-er med revurdering annen årsak",
-                frontendFeilmelding = "Du har ikke tilgang til å hente behandlings-ID-er med revurdering annen årsak",
+                message = "Mangler forvaltertilgang til å hente fagsaker med revurdering annen årsak",
+                frontendFeilmelding = "Du har ikke tilgang til å hente fagsaker med revurdering annen årsak",
                 logContext = SecureLog.Context.tom(),
             )
         }
-        return Ressurs.success(behandlingRepository.hentBehandlingsIderMedRevurderingAnnenÅrsak())
+        return Ressurs.success(behandlingRepository.hentFagsakerMedRevurderingAnnenÅrsak())
     }
 
     @Operation(summary = "Hent korrigert kravgrunnlag")

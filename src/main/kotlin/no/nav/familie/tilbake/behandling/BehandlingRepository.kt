@@ -131,10 +131,17 @@ interface BehandlingRepository :
 
     @Query(
         """
-            SELECT DISTINCT behandling_id
-            FROM behandlingsarsak
-            WHERE type = 'REVURDERING_ANNEN_ÅRSAK'
+            SELECT DISTINCT beh.fagsak_id, f.ekstern_fagsak_id
+            FROM behandling beh
+            JOIN behandlingsarsak arsak ON arsak.behandling_id = beh.id
+            JOIN fagsak f ON f.id = beh.fagsak_id
+            WHERE arsak.type = 'REVURDERING_ANNEN_ÅRSAK'
         """,
     )
-    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): List<UUID>
+    fun hentFagsakerMedRevurderingAnnenÅrsak(): List<FagsakMedRevurderingAnnenÅrsak>
 }
+
+data class FagsakMedRevurderingAnnenÅrsak(
+    val fagsakId: UUID,
+    val eksternFagsakId: String,
+)
