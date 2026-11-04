@@ -561,7 +561,7 @@ class Tilbakekreving internal constructor(
                 EndringObservatør.BehandlingEndret(
                     behandlingId = behandlingId,
                     vedtakGjelderId = bruker?.aktør?.ident ?: "Ukjent",
-                    eksternFagsakId = eksternFagsak.eksternId(),
+                    eksternFagsakId = eksternFagsak.eksternIdFraOppdrag,
                     ytelse = eksternFagsak.ytelse,
                     eksternBehandlingId = eksternFagsak.behandlinger.nåværende().entry.behandlingId(),
                     sakOpprettet = opprettet,
