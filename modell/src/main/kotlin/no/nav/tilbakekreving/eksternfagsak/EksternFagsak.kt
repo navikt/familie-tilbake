@@ -14,7 +14,7 @@ import java.util.UUID
 class EksternFagsak(
     private val id: UUID,
     private var eksternId: String?,
-    private val eksternIdFraOppdrag: String,
+    val eksternIdFraOppdrag: String,
     internal val ytelse: Ytelse,
     val behandlinger: EksternFagsakBehandlingHistorikk,
 ) {

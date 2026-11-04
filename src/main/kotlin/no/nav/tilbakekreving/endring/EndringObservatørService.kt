@@ -134,7 +134,6 @@ class EndringObservatørService(
         when (this) {
             ForenkletBehandlingsstatus.OPPRETTET -> BehandlingsstatusEventDto.OPPRETTET
             ForenkletBehandlingsstatus.TIL_BEHANDLING -> BehandlingsstatusEventDto.TIL_BEHANDLING
-            ForenkletBehandlingsstatus.VENTER -> BehandlingsstatusEventDto.VENTER
             ForenkletBehandlingsstatus.TIL_FORHÅNDSVARSEL -> BehandlingsstatusEventDto.TIL_FORHÅNDSVARSEL
             ForenkletBehandlingsstatus.TIL_GODKJENNING -> BehandlingsstatusEventDto.TIL_GODKJENNING
             ForenkletBehandlingsstatus.AVSLUTTET -> BehandlingsstatusEventDto.AVSLUTTET
