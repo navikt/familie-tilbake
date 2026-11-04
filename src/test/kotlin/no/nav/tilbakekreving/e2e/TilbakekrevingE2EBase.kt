@@ -29,7 +29,6 @@ import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.test.FellesTestdata
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_SAKSBEHANDLER
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
-import okio.withLock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
@@ -37,6 +36,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 @ActiveProfiles("ny-modell")
 open class TilbakekrevingE2EBase : E2EBase() {
