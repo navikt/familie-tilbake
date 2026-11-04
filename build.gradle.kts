@@ -1,11 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
-val springDocVersion = "3.1.1"
+val springDocVersion = "3.2.0"
 val testcontainersVersion = "1.21.4"
-val tokenValidationVersion = "6.0.12"
+val tokenValidationVersion = "7.0.1"
 val flywayVersion = "11.3.4"
-val ktorVersion = "3.6.0"
+val ktorVersion = "3.6.1"
 ext["ktorVersion"] = ktorVersion
 
 group = "no.nav"
@@ -83,7 +83,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.73.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.74.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -134,12 +134,12 @@ dependencies {
     api("io.micrometer:micrometer-registry-prometheus")
     api("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("io.getunleash:unleash-client-java:12.3.1")
-    api("org.messaginghub:pooled-jms:3.2.5")
+    api("io.getunleash:unleash-client-java:12.3.2")
+    api("org.messaginghub:pooled-jms:3.2.6")
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.6.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.7.0")
 
     testImplementation(project(":testdata"))
 
