@@ -406,11 +406,34 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettVedtaksbrev(klokke: Klokke) {
-        brevHistorikk.lagre(Vedtaksbrev.opprett(klokke))
+        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
+            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.REVURDERING))
+        } else {
+            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.ORDINÆR))
+        }
     }
 
     fun trengerVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
-        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
+        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
+            trengerRevurderingVedtaksbrevJournalføring(sideeffektContext)
+        } else {
+            trengerOrdinærVedtaksbrevJournalføring(sideeffektContext)
+        }
+    }
+
+    private fun trengerOrdinærVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.trengerOrdinærVedtaksbrevJournalføring(
+            sideeffektContext = sideeffektContext,
+            brevId = brevHistorikk.nåværende().entry.id,
+            ytelse = eksternFagsak.ytelse,
+            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
+            fagsakId = eksternFagsak.eksternId(),
+            tilbakekrevingId = id,
+        )
+    }
+
+    private fun trengerRevurderingVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.trengerRevurderingVedtaksbrevJournalføring(
             sideeffektContext = sideeffektContext,
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,

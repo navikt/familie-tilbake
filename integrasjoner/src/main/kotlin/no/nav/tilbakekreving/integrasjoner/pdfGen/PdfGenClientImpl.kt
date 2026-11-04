@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 
@@ -19,6 +20,12 @@ class PdfGenClientImpl(
     override fun hentPdfForVedtak(vedtaksbrevData: VedtaksbrevDataDto): ByteArray {
         return runBlocking {
             hentVedtaksbrevPdf(vedtaksbrevData)
+        }
+    }
+
+    override fun hentPdfForRevurderingVedtak(vedtaksbrevData: RevurderingVedtaksbrevDataDto): ByteArray {
+        return runBlocking {
+            hentRevurderingVedtaksbrevPdf(vedtaksbrevData)
         }
     }
 
@@ -38,6 +45,19 @@ class PdfGenClientImpl(
         val baseUrl = config.baseUrl
 
         val response = httpClient.post("$baseUrl/api/v1/brev/vedtaksbrev/pdf") {
+            contentType(ContentType.Application.Json)
+            setBody(vedtaksbrevData)
+        }
+        if (!response.status.isSuccess()) {
+            throw RuntimeException("Feil fra PDF-service: ${response.status}")
+        }
+        return response.body()
+    }
+
+    private suspend fun hentRevurderingVedtaksbrevPdf(vedtaksbrevData: RevurderingVedtaksbrevDataDto): ByteArray {
+        val baseUrl = config.baseUrl
+
+        val response = httpClient.post("$baseUrl/api/v1/brev/revurdering/pdf") {
             contentType(ContentType.Application.Json)
             setBody(vedtaksbrevData)
         }

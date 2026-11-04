@@ -6,10 +6,12 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
+import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -128,8 +130,42 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         }.message shouldBe "Denne behandlingen kan ikke endres fordi den har allerede en revurdering."
     }
 
-    private fun gjørBehandlingKlarTilRevurdering(fagsystemId: String): UUID {
+    @Test
+    fun `revurdering vedtaksbrev blir opprettet med korrekt brevtype`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val opprinneligBehandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId, vedtakId)
+
+        tilbakekreving(opprinneligBehandlingId).brevHistorikk.nåværende().entry.shouldBeInstanceOf<Vedtaksbrev> {
+            it.vedtaksbrevType shouldBe Vedtaksbrev.Vedtaksbrevtype.ORDINÆR
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = opprinneligBehandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Klageinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        utførSteg(revurderingBehandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
+        utførSteg(
+            ident = BESLUTTER_IDENT,
+            behandlingId = revurderingBehandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
+
+        tilbakekreving(revurderingBehandlingId).brevHistorikk.nåværende().entry.shouldBeInstanceOf<Vedtaksbrev> {
+            it.vedtaksbrevType shouldBe Vedtaksbrev.Vedtaksbrevtype.REVURDERING
+        }
+    }
+
+    private fun gjørBehandlingKlarTilRevurdering(fagsystemId: String, vedtakId: String = KravgrunnlagGenerator.nextPaddedId(6)): UUID {
         sendKravgrunnlagOgAvventLesing(
             kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
                 fagsystemId = fagsystemId,
