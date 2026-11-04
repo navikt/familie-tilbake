@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -78,6 +79,14 @@ internal sealed interface Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke journalføring av varselbrev i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        infobrevJournalføringHendelse: InfobrevJournalføringHendelse,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke journalføring av informasjonsbrev i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(

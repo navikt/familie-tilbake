@@ -18,11 +18,13 @@ import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
+import no.nav.tilbakekreving.brev.informasjonsbrev.InformasjonsbrevService
 import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -44,6 +46,7 @@ class BehovMediator(
     private val dokdistService: DokdistClient,
     private val forhåndsvarselService: ForhåndsvarselService,
     private val vedtaksbrevService: NyVedtaksbrevService,
+    private val informasjonsbrevService: InformasjonsbrevService,
     private val featureService: FeatureService,
     private val oppdragRestClient: OppdragRestClient,
 ) {
@@ -199,7 +202,32 @@ class BehovMediator(
                 )
             }
             is KorrigertKravgrunnlagBehov -> korrigerKravgrunnlag(behov, tilbakekreving, sideeffektContext)
-            is InfobrevJournalføringBehov -> TODO() // venter på brev
+            is InfobrevJournalføringBehov -> {
+                val journalpost = informasjonsbrevService.journalførInformasjonsbrev(behov)
+                if (journalpost.journalpostId == null) {
+                    throw Feil(
+                        message = "journalføring av informasjonsbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
+                        frontendFeilmelding = "journalføring av informasjonsbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+                if (journalpost.dokumenter.isNullOrEmpty()) {
+                    throw Feil(
+                        message = "Response fra journalføring av informasjonsbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                        frontendFeilmelding = "Response fra journalføring av informasjonsbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                        logContext = SecureLog.Context.fra(tilbakekreving),
+                    )
+                }
+
+                tilbakekreving.håndter(
+                    InfobrevJournalføringHendelse(
+                        infobrevId = behov.brevId,
+                        journalpostId = journalpost.journalpostId,
+                        dokumentInfoId = journalpost.dokumenter[0].dokumentInfoId!!,
+                    ),
+                    sideeffektContext,
+                )
+            }
         }
     }
 

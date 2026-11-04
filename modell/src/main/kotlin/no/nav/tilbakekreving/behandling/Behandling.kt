@@ -51,6 +51,7 @@ import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.InfobrevData
+import no.nav.tilbakekreving.breeeev.Infobrevavsnitt
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
@@ -326,7 +327,10 @@ class Behandling internal constructor(
         bruker: Bruker,
         fagsakId: String,
         tilbakekrevingId: String,
+        varsletDato: LocalDate,
+        sendtDato: LocalDate,
     ) {
+        val enhet = requireNotNull(enhet) { "Behandlende enhet kreves for journalføring av informasjonsbrev." }
         sideeffektContext.behovObservatør.håndter(
             InfobrevJournalføringBehov(
                 brevId = brevId,
@@ -334,11 +338,16 @@ class Behandling internal constructor(
                 ytelse = ytelse,
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
-                journalførendeEnhet = enhet!!.kode,
+                journalførendeEnhet = enhet.kode,
                 infobrevData = InfobrevData(
                     brukerdata = bruker.brevmeta(),
-                    ytelse = ytelse.brevmeta(),
-                    bunntekster = KravBortfaltTekster.finnTekster(ytelse, bruker.språkkode ?: Språkkode.NB),
+                    tittel = KravBortfaltTekster.INNLEDNING.tittel,
+                    innhold = KravBortfaltTekster.INNLEDNING.avsnitt(ytelse, varsletDato).toList(),
+                    underavsnitt = KravBortfaltTekster.STANDARD_BUNNTEKSTER.map {
+                        Infobrevavsnitt(tittel = it.tittel, avsnitt = it.avsnitt(ytelse, varsletDato).toList())
+                    },
+                    enhetNavn = enhet.navn,
+                    sendtDato = sendtDato,
                     tilbakekrevingId = tilbakekrevingId,
                 ),
             ),

@@ -5,6 +5,8 @@ import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
+import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import java.util.UUID
@@ -31,6 +33,27 @@ fun tilbakekrevingTilBehandling(
         håndter(brukerinfoHendelse(), context)
     }
     return tilbakekreving
+}
+
+fun Tilbakekreving.sendOgDistribuerForhåndsvarsel(context: SideeffektContext = saksbehandlerContext()) {
+    sendVarselbrev(nåværendeBehandlingId(), "Tekst fra saksbehandler", context)
+    val varselbrevId = requireNotNull(brevHistorikk.sisteVarselbrev()).id
+    håndter(
+        VarselbrevJournalføringHendelse(
+            varselbrevId = varselbrevId,
+            journalpostId = "varselbrev-journalpost",
+            dokumentInfoId = "varselbrev-dokument",
+        ),
+        systemContext(),
+    )
+    håndter(
+        VarselbrevDistribueringHendelse(
+            brevId = varselbrevId,
+            journalpostId = "varselbrev-journalpost",
+            dokumentInfoId = "varselbrev-dokument",
+        ),
+        systemContext(),
+    )
 }
 
 fun Tilbakekreving.vurderAlleSteg(context: SideeffektContext, vararg perioder: Datoperiode) {

@@ -143,6 +143,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    INFORMASJONSBREV_JOURNALFØRT(
+        tittel = "Informasjonsbrev journalført",
+        tekst = null,
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     BEHANDLING_NULLSTILLT(
         tittel = "Behandling nullstilt",
         tekst = null,

@@ -5,7 +5,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.hendelse.JournalføringHendelse
+import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -27,13 +27,13 @@ object JournalførInfobrevForBortfaltKrav : Tilstand {
 
     override fun håndter(
         tilbakekreving: Tilbakekreving,
-        journalføringHendelse: JournalføringHendelse,
+        infobrevJournalføringHendelse: InfobrevJournalføringHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.brevHistorikk.entry(journalføringHendelse.brevId).brevSendt(
-            journalpostId = journalføringHendelse.journalpostId,
-            dokumentInfoId = journalføringHendelse.dokumentInfoId,
+        tilbakekreving.brevHistorikk.entry(infobrevJournalføringHendelse.infobrevId).brevSendt(
+            journalpostId = infobrevJournalføringHendelse.journalpostId,
+            dokumentInfoId = infobrevJournalføringHendelse.dokumentInfoId,
         )
-        tilbakekreving.byttTilstand(DistribuerVedtak, sideeffektContext)
+        tilbakekreving.byttTilstand(DistribuerInfobrevForBortfaltKrav, sideeffektContext)
     }
 }

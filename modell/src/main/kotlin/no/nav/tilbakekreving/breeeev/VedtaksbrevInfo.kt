@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
+import java.time.LocalDate
 
 data class VedtaksbrevInfo(
     val brukerdata: BrevmottakerDto,
@@ -21,7 +22,15 @@ data class VedtaksbrevInfo(
 
 data class InfobrevData(
     val brukerdata: BrevmottakerDto,
-    val ytelse: YtelseDto,
-    val bunntekster: Set<String>,
+    val tittel: String,
+    val innhold: List<String>,
+    val underavsnitt: List<Infobrevavsnitt>,
+    val enhetNavn: String,
+    val sendtDato: LocalDate,
     val tilbakekrevingId: String,
+)
+
+data class Infobrevavsnitt(
+    val tittel: String,
+    val avsnitt: List<String>,
 )

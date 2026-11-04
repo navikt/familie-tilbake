@@ -24,6 +24,8 @@ import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
+import no.nav.tilbakekreving.brev.Informasjonsbrev
+import no.nav.tilbakekreving.brev.Informasjonsbrevtype
 import no.nav.tilbakekreving.brev.VarselbrevInfo
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
@@ -38,6 +40,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -59,6 +62,8 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
+import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
+import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
 import no.nav.tilbakekreving.tilstand.SendVarselbrev
 import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
@@ -131,6 +136,16 @@ class Tilbakekreving internal constructor(
         tilstand.håndter(this, hendelse, sideeffektContext)
         sideeffektContext.logg(
             behandlingsloggstype = Behandlingsloggstype.VARSELBREV_JOURNALFØRT,
+            behandlingId = behandlingHistorikk.nåværende().entry.id,
+            EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+            EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+        )
+    }
+
+    fun håndter(hendelse: InfobrevJournalføringHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_JOURNALFØRT,
             behandlingId = behandlingHistorikk.nåværende().entry.id,
             EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
             EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
@@ -362,18 +377,30 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    internal fun kravgrunnlagBortfalt(sideeffektContext: SideeffektContext) {
+        val forhåndsvarselSendt = brevHistorikk.sisteVarselbrev() != null
+        if (sideeffektContext.features[Toggle.KravBortfalt] && forhåndsvarselSendt) {
+            byttTilstand(JournalførInfobrevForBortfaltKrav, sideeffektContext)
+        } else {
+            byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+        }
+    }
+
     fun opprettInfobrev(klokke: Klokke) {
-        // todo()
+        brevHistorikk.lagre(Informasjonsbrev.opprett(Informasjonsbrevtype.BORTFALT_KRAV, klokke))
     }
 
     fun trengerInfobrevJournalføring(sideeffektContext: SideeffektContext) {
+        val informasjonsbrev = brevHistorikk.nåværende().entry
         behandlingHistorikk.nåværende().entry.trengerInfobrevJournalføring(
             sideeffektContext = sideeffektContext,
-            brevId = brevHistorikk.nåværende().entry.id,
+            brevId = informasjonsbrev.id,
             ytelse = eksternFagsak.ytelse,
-            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
+            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av informasjonsbrev." },
             fagsakId = eksternFagsak.eksternId(),
             tilbakekrevingId = id,
+            varsletDato = requireNotNull(brevHistorikk.sisteVarselbrev()) { "Forhåndsvarsel kreves for journalføring av informasjonsbrev om bortfalt krav." }.sendtTid,
+            sendtDato = informasjonsbrev.sendtTid,
         )
     }
 
