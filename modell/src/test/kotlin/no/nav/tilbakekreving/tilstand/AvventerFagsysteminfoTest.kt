@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bruker
+import no.nav.tilbakekreving.eksternFagsak
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -121,5 +122,35 @@ class AvventerFagsysteminfoTest {
         tilbakekreving.håndter(kravgrunnlag, systemContext())
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
         tilbakekreving.hentTilbakekrevingUrl("https://tilbakekreving.ansatt.dev.nav.no") shouldBe "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/BA/fagsak/101010"
+    }
+
+    @Test
+    fun `fagsysteminfo_svar med overstyrt ekstern fagsakId`() {
+        val tilbakekrevingId = UUID.randomUUID().toString()
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = tilbakekrevingId,
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse(eksternFagsak = eksternFagsak(eksternId = "original")),
+            sideeffektContext = systemContext(),
+        )
+        tilbakekreving.håndter(kravgrunnlag(), systemContext())
+
+        tilbakekreving.håndter(fagsysteminfoHendelse(overstyrtEksternFagsakId = "overstyrt"), systemContext())
+
+        tilbakekreving.eksternFagsak.eksternId() shouldBe "overstyrt"
+    }
+
+    @Test
+    fun `fagsysteminfo_svar uten overstyrt fagsakId`() {
+        val tilbakekrevingId = UUID.randomUUID().toString()
+        val tilbakekreving = Tilbakekreving.opprett(
+            id = tilbakekrevingId,
+            opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse(eksternFagsak = eksternFagsak(eksternId = "original")),
+            sideeffektContext = systemContext(),
+        )
+        tilbakekreving.håndter(kravgrunnlag(), systemContext())
+
+        tilbakekreving.håndter(fagsysteminfoHendelse(overstyrtEksternFagsakId = null), systemContext())
+
+        tilbakekreving.eksternFagsak.eksternId() shouldBe "original"
     }
 }

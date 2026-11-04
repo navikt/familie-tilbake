@@ -3,7 +3,6 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -132,15 +131,10 @@ interface BehandlingRepository :
 
     @Query(
         """
-            SELECT type, COUNT(*) AS antall
+            SELECT DISTINCT behandling_id
             FROM behandlingsarsak
-            GROUP BY type
+            WHERE type = 'REVURDERING_ANNEN_ÅRSAK'
         """,
     )
-    fun hentAntallPerBehandlingsårsakstype(): List<BehandlingsårsakAntall>
+    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): List<UUID>
 }
-
-data class BehandlingsårsakAntall(
-    val type: Behandlingsårsakstype,
-    val antall: Long,
-)

@@ -611,7 +611,7 @@ class Tilbakekreving internal constructor(
                 opprettelsesvalg = opprettTilbakekrevingEvent.opprettelsesvalg,
                 eksternFagsak = EksternFagsak(
                     id = UUID.randomUUID(),
-                    eksternId = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
+                    eksternId = null,
                     eksternIdFraOppdrag = opprettTilbakekrevingEvent.eksternFagsak.eksternId,
                     ytelse = opprettTilbakekrevingEvent.eksternFagsak.ytelse,
                     behandlinger = EksternFagsakBehandlingHistorikk(mutableListOf()),

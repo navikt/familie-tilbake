@@ -40,6 +40,7 @@ class FagsystemIntegrasjonServiceImpl(
                         )
                     },
                     behandlendeEnhet = fagsysteminfo.behandlendeEnhet,
+                    overstyrtEksternFagsakId = fagsysteminfo.overstyrtEksternFagsakId,
                 ),
                 context(Behandler.Vedtaksløsning),
             )

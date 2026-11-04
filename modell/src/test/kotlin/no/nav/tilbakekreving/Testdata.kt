@@ -138,6 +138,7 @@ fun fagsysteminfoHendelse(
     utvidPerioder: List<FagsysteminfoHendelse.UtvidetPeriode>? = null,
     behandlendeEnhet: String? = "0425",
     url: String? = "http://localhost:8080",
+    overstyrtEksternFagsakId: String? = null,
 ) = FagsysteminfoHendelse(
     aktør = Aktør.Person(bruker().ident),
     revurdering = FagsysteminfoHendelse.Revurdering(
@@ -149,6 +150,7 @@ fun fagsysteminfoHendelse(
     ),
     utvidPerioder = utvidPerioder,
     behandlendeEnhet = behandlendeEnhet,
+    overstyrtEksternFagsakId = overstyrtEksternFagsakId,
 )
 
 fun brukerinfoHendelse() = BrukerinfoHendelse(
