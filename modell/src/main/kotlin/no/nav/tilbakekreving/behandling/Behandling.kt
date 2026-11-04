@@ -393,7 +393,7 @@ class Behandling internal constructor(
         }
     }
 
-    internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean, behandlerRolle: BehandlerRolle): BehandlingDto {
+    internal fun tilFrontendDto(tilstand: Tilstand, lesContext: LesContext, kanBeslutte: Boolean, behandlerRolle: BehandlerRolle, nåværendeBehandlingId: UUID): BehandlingDto {
         val venter = tilstand.venter(lesContext.klokke, sporingsinformasjon())
         return BehandlingDto(
             eksternBrukId = id,
@@ -435,7 +435,7 @@ class Behandling internal constructor(
             kanHenleggeBehandling = false,
             kanRevurderingOpprettes = tilstand.kanRevurderes,
             harVerge = false,
-            kanEndres = tilstand.kanEndresAvSaksbehandler && kanEndres(lesContext.behandler, kanBeslutte, lesContext.klokke),
+            kanEndres = id == nåværendeBehandlingId && tilstand.kanEndresAvSaksbehandler && kanEndres(lesContext.behandler, kanBeslutte, lesContext.klokke),
             kanSetteTilbakeTilFakta = true,
             varselSendt = false,
             behandlingsstegsinfo = listOf(

@@ -138,6 +138,44 @@ class RevurderingTest {
         }.message shouldBe "Kan ikke opprette revurdering i TIL_BEHANDLING"
     }
 
+    @Test
+    fun `opprinnelig behandling kan ikke oppdateres når revurdering er opprettet`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        val opprinneligBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
+
+        tilbakekreving.opprettRevurdering(
+            opprinneligBehandling.id,
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        val revurderingBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
+
+        tilbakekreving.frontendDtoForBehandling(
+            behandlingId = revurderingBehandling.id,
+            sideeffektContext = saksbehandlerContext(),
+            kanBeslutte = false,
+            behandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+        ).kanEndres shouldBe true
+
+        tilbakekreving.frontendDtoForBehandling(
+            behandlingId = opprinneligBehandling.id,
+            sideeffektContext = saksbehandlerContext(),
+            kanBeslutte = false,
+            behandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+        ).kanEndres shouldBe false
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.gjørSaksbehandling(opprinneligBehandling.id, context) {
+                vurderFakta(faktastegVurdering())
+            }
+        }
+    }
+
     private fun tilbakekrevingTilAvsluttet(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         saksbehandlerContext: SideeffektContext,

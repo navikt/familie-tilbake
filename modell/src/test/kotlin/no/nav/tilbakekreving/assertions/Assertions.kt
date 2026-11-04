@@ -11,12 +11,13 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.lesContext
 import no.nav.tilbakekreving.tilstand.TilBehandling
+import java.util.UUID
 
 fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): BehandlingsstegsinfoDto {
     return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
 }
 
-infix fun Behandling.skalHaSteg(behandlingssteg: Behandlingssteg) = tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.SAKSBEHANDLER)
+infix fun Behandling.skalHaSteg(behandlingssteg: Behandlingssteg) = tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.SAKSBEHANDLER, UUID.randomUUID())
     .behandlingsstegsinfo filterMatching { it.behandlingssteg shouldBe behandlingssteg } forSingle {}
 
 infix fun BehandlingsstegsinfoDto.skalHaStatus(status: Behandlingsstegstatus) = behandlingsstegstatus shouldBe status

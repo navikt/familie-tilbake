@@ -199,8 +199,19 @@ class Tilbakekreving internal constructor(
         }
     }
 
+    private fun hentBehandlingForEndring(behandlingId: UUID): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        if (behandling.id != behandlingHistorikk.nåværende().entry.id) {
+            throw ModellFeil.UgyldigOperasjonException(
+                "Historiske behandlinger kan ikke endres",
+                sporingsinformasjon(behandlingId),
+            )
+        }
+        return behandling
+    }
+
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {
-        return tilstand.gjørSaksbehandling(this, hentBehandling(behandlingId), sideeffektContext, callback)
+        return tilstand.gjørSaksbehandling(this, hentBehandlingForEndring(behandlingId), sideeffektContext, callback)
     }
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
@@ -464,7 +475,7 @@ class Tilbakekreving internal constructor(
         sideeffektContext: LesContext,
         kanBeslutte: Boolean,
         behandlerRolle: BehandlerRolle,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle)
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle, behandlingHistorikk.nåværende().entry.id)
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
