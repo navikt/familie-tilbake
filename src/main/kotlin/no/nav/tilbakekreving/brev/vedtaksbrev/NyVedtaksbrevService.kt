@@ -13,11 +13,14 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.behov.RevurderingVedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT_REVURDERING
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -27,17 +30,18 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittRevurderingVedtaksbrevDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummeringsdataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummertPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
@@ -77,21 +81,15 @@ class NyVedtaksbrevService(
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittDto(
                 tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
-                forklaring = hovedavsnittForklaring(vedtaksbrevInfo.behandlingstype),
-                underavsnitt = when (vedtaksbrevInfo.behandlingstype) {
-                    Behandlingstype.TILBAKEKREVING -> listOf(RentekstElementDto(""))
-                    Behandlingstype.REVURDERING_TILBAKEKREVING -> listOf(RentekstElementDto(REVURDERINGSVEDTAK_FRITEKSTFELT))
-                },
+                forklaring = Forklaringstekster.HOVEDAVSNITT,
+                underavsnitt = listOf(RentekstElementDto("")),
                 hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
             ),
-            avsnitt = when (vedtaksbrevInfo.behandlingstype) {
-                Behandlingstype.TILBAKEKREVING -> vedtaksbrevInfo.perioder.map {
-                    BrevFormatterer.lagAvsnitt(
-                        periode = it,
-                        flerePerioder = vedtaksbrevInfo.perioder.size > 1,
-                    )
-                }
-                Behandlingstype.REVURDERING_TILBAKEKREVING -> emptyList()
+            avsnitt = vedtaksbrevInfo.perioder.map {
+                BrevFormatterer.lagAvsnitt(
+                    periode = it,
+                    flerePerioder = vedtaksbrevInfo.perioder.size > 1,
+                )
             },
             sistOppdatert = OffsetDateTime.now(),
             brevGjelder = vedtaksbrevInfo.brukerdata,
@@ -134,6 +132,27 @@ class NyVedtaksbrevService(
                 sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
                 sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
             ),
+        )
+    }
+
+    fun hentRevurderingVedtaksbrevData(revurderingVedtaksbrevInfo: RevurderingVedtaksbrevInfo, beslutter: Behandler): RevurderingVedtaksbrevDataDto {
+        val beslutter = beslutter.takeIf { it.ident != revurderingVedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
+
+        return RevurderingVedtaksbrevDataDto(
+            hovedavsnitt = HovedavsnittRevurderingVedtaksbrevDto(
+                tittel = BrevFormatterer.lagHovedavsnittTittelForRevurdering(revurderingVedtaksbrevInfo),
+                forklaring = listOf(HOVEDAVSNITT_REVURDERING),
+            ),
+            underavsnitt = listOf(UnderavsnittElementDto(tittel = "Fritekstfelt", underavsnitt = listOf(RentekstElementDto(REVURDERINGSVEDTAK_FRITEKSTFELT)))),
+            bunntekster = revurderingVedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
+            brevGjelder = revurderingVedtaksbrevInfo.brukerdata,
+            signatur = SignaturDto(
+                enhetNavn = revurderingVedtaksbrevInfo.signatur.ansvarligEnhet,
+                ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(revurderingVedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent),
+                besluttendeSaksbehandler = beslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it.ident) },
+            ),
+            sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
+            saksnummer = revurderingVedtaksbrevInfo.tilbakekrevingId,
         )
     }
 
@@ -192,7 +211,7 @@ class NyVedtaksbrevService(
     ): HovedavsnittDto {
         return HovedavsnittDto(
             tittel = BrevFormatterer.lagHovedavsnittTittel(info),
-            forklaring = hovedavsnittForklaring(info.behandlingstype),
+            forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
             },
@@ -251,13 +270,6 @@ class NyVedtaksbrevService(
         }
     }
 
-    private fun hovedavsnittForklaring(behandlingstype: Behandlingstype): String {
-        return when (behandlingstype) {
-            Behandlingstype.TILBAKEKREVING -> Forklaringstekster.HOVEDAVSNITT
-            Behandlingstype.REVURDERING_TILBAKEKREVING -> Forklaringstekster.HOVEDAVSNITT_REVURDERING
-        }
-    }
-
     fun journalførVedtaksbrev(
         behov: VedtaksbrevJournalføringBehov,
     ): OpprettJournalpostResponse {
@@ -270,6 +282,41 @@ class NyVedtaksbrevService(
                     filtype = Filtype.PDFA,
                     filnavn = "vedtak.pdf",
                     tittel = lagTittel(behov),
+                    dokumenttype = null,
+                ),
+            ),
+            fagsakId = behov.fagsakId,
+            journalførendeEnhet = behov.journalførendeEnhet,
+            eksternReferanseId = lagEksternReferanseId(behov.behandlingId, Brevtype.VEDTAK, Brevmottager.BRUKER),
+            avsenderMottaker = AvsenderMottaker(
+                id = behov.bruker.ident,
+                idType = AvsenderMottakerIdType.FNR,
+                navn = behov.bruker.navn,
+            ),
+        )
+
+        return dokarkivClient.opprettOgSendJournalpostRequest(
+            arkiverDokument = arkiverDokumentRequest,
+            fagsaksystem = behov.ytelse.tilDokarkivFagsaksystem(),
+            brevkode = behov.ytelse.tilFagsystemDTO().name + "-TILB",
+            tema = behov.ytelse.tilTema(),
+            dokuemntkategori = DokumentKlasse.VB,
+            behandlingId = behov.behandlingId,
+        )
+    }
+
+    fun journalførRevurderingVedtaksbrev(
+        behov: RevurderingVedtaksbrevJournalføringBehov,
+    ): OpprettJournalpostResponse {
+        val arkiverDokumentRequest = ArkiverDokumentRequest(
+            fnr = behov.bruker.ident,
+            forsøkFerdigstill = true,
+            hoveddokumentvarianter = listOf(
+                Dokument(
+                    dokument = pdfGenClient.hentPdfForRevurderingVedtak(hentRevurderingVedtaksbrevData(behov.revurderingVedtaksbrevInfo, behov.beslutter)),
+                    filtype = Filtype.PDFA,
+                    filnavn = "revurdering_vedtak.pdf",
+                    tittel = TITTEL_REVURDERING_TILBAKEKREVING,
                     dokumenttype = null,
                 ),
             ),
@@ -360,6 +407,7 @@ class NyVedtaksbrevService(
     companion object {
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
+        private const val TITTEL_REVURDERING_TILBAKEKREVING = "Vedtak om revurdering av tilbakekreving "
         private const val REVURDERINGSVEDTAK_FRITEKSTFELT = "Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst."
     }
 }

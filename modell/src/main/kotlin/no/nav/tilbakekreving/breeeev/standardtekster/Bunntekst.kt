@@ -98,13 +98,10 @@ enum class Bunntekst(
             SPØRSMÅL,
         )
 
-        val REVURDERING_STANDARD_BUNNTEKSTER = setOf(
-            HVORDAN_BETALE_TILBAKE,
-            RETT_TIL_Å_KLAGE,
-            RETT_TIL_INNSYN,
-            PERSONVÆRN_ERKLÆRING,
-            RETT_TIL_HJELP,
-            SPØRSMÅL,
-        )
+        val REVURDERING_STANDARD_BUNNTEKSTER: Set<Bunntekst> = buildSet {
+            add(HVORDAN_BETALE_TILBAKE)
+            add(RETT_TIL_Å_KLAGE)
+            addAll(STANDARD_BUNNTEKSTER)
+        }
     }
 }

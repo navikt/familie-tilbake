@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -58,5 +59,16 @@ fun vedtaksbrevInfo(
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
     beregnerSkatt = true,
-    behandlingstype = behandlingstype,
+)
+
+fun revurderingVedtaksbrevInfo() = RevurderingVedtaksbrevInfo(
+    brukerdata = brevmottaker,
+    ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
+    signatur = Signatur(
+        ansvarligSaksbehandlerIdent = "Z999999",
+        ansvarligBeslutterIdent = null,
+        ansvarligEnhet = "NAV Arbeid og Ytelser",
+    ),
+    bunntekster = emptySet(),
+    tilbakekrevingId = UUID.randomUUID().toString(),
 )

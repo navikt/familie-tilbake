@@ -12,14 +12,15 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittRevurderingVedtaksbrevDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnderavsnittElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
@@ -318,19 +319,24 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `revurderingsvedtak har riktig tittle og hjelpetekst`() {
-        val behandlingId = lagBehandlingId()
-        val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID(), behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING)
+        val vedtaksbrevInfo = revurderingVedtaksbrevInfo()
 
-        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
-            it.hovedavsnitt shouldBe HovedavsnittDto(
+        nyVedtaksbrevService.hentRevurderingVedtaksbrevData(vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
+            it.hovedavsnitt shouldBe HovedavsnittRevurderingVedtaksbrevDto(
                 tittel = "Vi har endret vedtaket ditt om tilbakekreving av arbeidsavklaringspenger",
-                forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
-                underavsnitt = listOf(RentekstElementDto("Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst.")),
-                hjemler = "Vedtaket er gjort etter folketrygdloven § 22-15.",
+                forklaring = listOf(Forklaringstekster.HOVEDAVSNITT_REVURDERING),
             )
-            it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
+            it.underavsnitt shouldBe listOf(
+                UnderavsnittElementDto(
+                    tittel = "Fritekstfelt",
+                    underavsnitt = listOf(
+                        RentekstElementDto(
+                            "Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst.",
+                        ),
+                    ),
+                ),
+            )
             it.signatur shouldBe expectedSignatur
-            it.avsnitt shouldBe emptyList()
         }
     }
 

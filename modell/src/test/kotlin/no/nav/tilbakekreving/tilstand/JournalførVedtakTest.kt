@@ -51,6 +51,7 @@ class JournalførVedtakTest {
                 dokumentInfoId = null,
                 sendtTid = LocalDate.now(),
                 opprettet = brev.opprettet,
+                vedtaksbrevType = Vedtaksbrev.Vedtaksbrevtype.ORDINÆR,
             ),
         )
         brev.id shouldBe oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>().first().brevId

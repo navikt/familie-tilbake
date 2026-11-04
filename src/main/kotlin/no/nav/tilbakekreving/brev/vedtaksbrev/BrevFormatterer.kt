@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
@@ -10,7 +11,6 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving.Companion.formatter
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
@@ -52,14 +52,11 @@ object BrevFormatterer {
         }
 
     fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = when {
-            info.behandlingstype == Behandlingstype.REVURDERING_TILBAKEKREVING ->
-                "Vi har endret vedtaket ditt om tilbakekreving av ${info.ytelse.ubestemtEntall}"
-            info.skalTilbakekreves ->
-                "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
-            else ->
-                "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
-        }
-    
+        info.skalTilbakekreves -> "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
+        else -> "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
+    }
+
+    fun lagHovedavsnittTittelForRevurdering(info: RevurderingVedtaksbrevInfo) = "Vi har endret vedtaket ditt om tilbakekreving av ${info.ytelse.ubestemtEntall}"
 
     fun lagVedtakHjemmelAvsnitt(
         hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,

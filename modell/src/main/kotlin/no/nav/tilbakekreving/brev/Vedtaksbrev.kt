@@ -14,6 +14,7 @@ data class Vedtaksbrev(
     override var dokumentInfoId: String?,
     override var sendtTid: LocalDate,
     override val opprettet: LocalDateTime,
+    val vedtaksbrevType: Vedtaksbrevtype,
 ) : Brev {
     override fun brevSendt(journalpostId: String, dokumentInfoId: String) {
         this.journalpostId = journalpostId
@@ -31,6 +32,7 @@ data class Vedtaksbrev(
                 journalpostId = journalpostId,
                 dokumentInfoId = dokumentInfoId,
                 sendtTid = sendtTid,
+                vedtaksbrevtype = vedtaksbrevType,
             ),
             informasjonsbrevEntity = null,
             opprettet = opprettet,
@@ -38,14 +40,20 @@ data class Vedtaksbrev(
     }
 
     companion object {
-        fun opprett(klokke: Klokke): Vedtaksbrev {
+        fun opprett(klokke: Klokke, vedtaksbrevtype: Vedtaksbrevtype): Vedtaksbrev {
             return Vedtaksbrev(
                 id = UUID.randomUUID(),
                 journalpostId = null,
                 dokumentInfoId = null,
                 sendtTid = klokke.dagensDato(),
                 opprettet = klokke.nå(),
+                vedtaksbrevType = vedtaksbrevtype,
             )
         }
+    }
+
+    enum class Vedtaksbrevtype {
+        ORDINÆR,
+        REVURDERING,
     }
 }

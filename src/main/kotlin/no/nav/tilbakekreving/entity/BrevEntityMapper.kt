@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.entity
 
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
+import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.entities.BrevEntity
 import no.nav.tilbakekreving.entities.Brevtype
 import no.nav.tilbakekreving.entities.HistorikkReferanseEntity
@@ -133,12 +134,19 @@ object BrevEntityMapper : Entity<BrevEntity, UUID, UUID>(
             FieldConverter.StringConverter,
         )
 
+        val vedtaksbrevtype = field(
+            "vedtaksbrevtype",
+            VedtaksbrevEntity::vedtaksbrevtype,
+            FieldConverter.EnumConverter.of<Vedtaksbrev.Vedtaksbrevtype>().required(),
+        )
+
         fun map(resultSet: ResultSet): VedtaksbrevEntity {
             return VedtaksbrevEntity(
                 id = resultSet[id],
                 journalpostId = resultSet[journalpostId],
                 dokumentInfoId = resultSet[dokumentInfoId],
                 sendtTid = resultSet[sendtTid]!!,
+                vedtaksbrevtype = resultSet[vedtaksbrevtype],
             )
         }
     }
