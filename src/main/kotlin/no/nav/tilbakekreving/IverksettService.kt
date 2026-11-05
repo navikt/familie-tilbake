@@ -1,14 +1,12 @@
 package no.nav.tilbakekreving
 
 import no.nav.familie.tilbake.common.exceptionhandler.IntegrasjonException
-import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
+import no.nav.familie.tilbake.iverksettvedtak.TilbakekrevingsvedtakBeregningService
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
-import no.nav.tilbakekreving.beregning.delperiode.Foreldet
-import no.nav.tilbakekreving.beregning.isZero
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
@@ -130,7 +128,7 @@ class IverksettService(
                     .subtract(beløp.tilbakekrevesBrutto())
                     .setScale(0, RoundingMode.HALF_UP),
                 belopSkatt = beløp.skatt(),
-                kodeResultat = utledKodeResulat(delperiode).kode,
+                kodeResultat = TilbakekrevingsvedtakBeregningService.utledKodeResulat(delperiode),
                 kodeAarsak = "ANNET", // fast verdi
                 kodeSkyld = "IKKE_FORDELT", // fast verdi
             )
@@ -149,13 +147,6 @@ class IverksettService(
 
             else -> null
         }
-    }
-
-    private fun utledKodeResulat(beregnetPeriode: Delperiode<out Delperiode.Beløp>): KodeResultat = when {
-        beregnetPeriode is Foreldet.ForeldetPeriode -> KodeResultat.FORELDET
-        beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() }.isZero() -> KodeResultat.INGEN_TILBAKEKREVING
-        beregnetPeriode.feilutbetaltBeløp() == beregnetPeriode.beløp().sumOf { it.tilbakekrevesBrutto() } -> KodeResultat.FULL_TILBAKEKREVING
-        else -> KodeResultat.DELVIS_TILBAKEKREVING
     }
 
     companion object {

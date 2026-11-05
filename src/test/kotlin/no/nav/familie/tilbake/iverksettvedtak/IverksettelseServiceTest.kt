@@ -19,7 +19,6 @@ import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
-import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.familie.tilbake.kravgrunnlag.domain.Fagområdekode
 import no.nav.familie.tilbake.kravgrunnlag.domain.GjelderType
@@ -324,7 +323,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             klassekode = Klassekode.BATR,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
-            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+            kodeResultat = "FULL_TILBAKEKREV",
             kodeÅrsak = "ANNET",
             kodeSkyld = "IKKE_FORDELT",
         )
@@ -347,7 +346,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
             klassekode = Klassekode.BATR,
             utbetaltBeløp = BigDecimal(5000),
             tilbakekrevesBeløp = BigDecimal(5000),
-            kodeResultat = KodeResultat.FULL_TILBAKEKREVING,
+            kodeResultat = "FULL_TILBAKEKREV",
             kodeÅrsak = "ANNET",
             kodeSkyld = "IKKE_FORDELT",
         )
@@ -361,7 +360,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         tilbakekrevesBeløp: BigDecimal = BigDecimal.ZERO,
         uinnkrevdBeløp: BigDecimal = BigDecimal.ZERO,
         skattBeløp: BigDecimal = BigDecimal.ZERO,
-        kodeResultat: KodeResultat?,
+        kodeResultat: String?,
         kodeÅrsak: String?,
         kodeSkyld: String?,
     ) {
@@ -375,7 +374,7 @@ internal class IverksettelseServiceTest : OppslagSpringRunnerTest() {
         }
 
         beløpene.forOne {
-            it.kodeResultat shouldBe (kodeResultat?.kode ?: "")
+            it.kodeResultat shouldBe (kodeResultat ?: "")
             it.kodeAarsak shouldBe (kodeÅrsak ?: "")
             it.kodeSkyld shouldBe (kodeSkyld ?: "")
         }

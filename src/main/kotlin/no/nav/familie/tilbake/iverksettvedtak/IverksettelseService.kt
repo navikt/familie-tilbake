@@ -6,11 +6,7 @@ import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.domain.Iverksettingsstatus
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.foreldelse.ForeldelseService
-import no.nav.familie.tilbake.iverksettvedtak.domain.KodeResultat
-import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsbeløp
-import no.nav.familie.tilbake.iverksettvedtak.domain.Tilbakekrevingsperiode
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.familie.tilbake.kravgrunnlag.domain.Klassetype
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravgrunnlag431
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
@@ -21,14 +17,12 @@ import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.integrasjoner.oppdrag.OppdragRestClient
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
-import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.PosteringDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.TilbakekrevingsvedtakRequestDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.VedtakPeriodeDto
 import no.nav.tilbakekreving.vedtak.IverksattVedtak
 import no.nav.tilbakekreving.vedtak.IverksettRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -103,7 +97,7 @@ class IverksettelseService(
     private fun lagIveksettelseRequest(
         ansvarligSaksbehandler: String,
         kravgrunnlag: Kravgrunnlag431,
-        beregnetPerioder: List<Tilbakekrevingsperiode>,
+        beregnetPerioder: List<VedtakPeriodeDto>,
         logContext: SecureLog.Context,
     ): TilbakekrevingsvedtakRequestDto {
         return TilbakekrevingsvedtakRequestDto(
@@ -116,75 +110,8 @@ class IverksettelseService(
             enhetAnsvarlig = kravgrunnlag.ansvarligEnhet,
             kontrollfelt = kravgrunnlag.kontrollfelt,
             saksbehandlerId = ansvarligSaksbehandler,
-            perioder = lagVedtaksperiode(beregnetPerioder, logContext),
+            perioder = beregnetPerioder,
             datoTilleggsfrist = foreldelseService.hentOppdagelsesdatoForTilleggsfrist(kravgrunnlag.behandlingId, logContext),
         )
     }
-
-    private fun lagVedtaksperiode(
-        beregnetPerioder: List<Tilbakekrevingsperiode>,
-        logContext: SecureLog.Context,
-    ) = beregnetPerioder.map { periode ->
-        VedtakPeriodeDto(
-            periodeFom = periode.periode.fom.atDay(1),
-            periodeTom = periode.periode.tom.atEndOfMonth(),
-            // Feltet bestemmer om Økonomi skal beregne renter for oss. Settes til false siden vi beregner det selv.
-            renterPeriodeBeregnes = false,
-            belopRenter = periode.renter,
-            posteringer = lagPosteringer(periode.beløp, logContext),
-        )
-    }
-
-    private fun lagPosteringer(
-        beregnetBeløper: List<Tilbakekrevingsbeløp>,
-        logContext: SecureLog.Context,
-    ) = beregnetBeløper.map {
-        when (it.klassetype) {
-            Klassetype.YTEL -> PosteringDto(
-                kodeKlasse = it.klassekode.tilKlassekodeNavn(),
-                belopOpprinneligUtbetalt = it.utbetaltBeløp,
-                belopNy = it.nyttBeløp,
-                belopTilbakekreves = it.tilbakekrevesBeløp,
-                belopUinnkrevd = it.uinnkrevdBeløp,
-                belopSkatt = it.skattBeløp,
-                kodeResultat = utledKodeResultat(it, logContext),
-                kodeAarsak = "ANNET", // fast verdi
-                kodeSkyld = "IKKE_FORDELT", // fast verdi
-            )
-
-            else ->
-                PosteringDto(
-                    kodeKlasse = it.klassekode.tilKlassekodeNavn(),
-                    belopOpprinneligUtbetalt = it.utbetaltBeløp,
-                    belopNy = it.nyttBeløp,
-                    belopTilbakekreves = it.tilbakekrevesBeløp,
-                    belopUinnkrevd = it.uinnkrevdBeløp,
-                    belopSkatt = it.skattBeløp,
-                    kodeResultat = "",
-                    kodeAarsak = "", // fast verdi
-                    kodeSkyld = "", // fast verdi
-                )
-        }
-    }
-
-    private fun utledKodeResultat(
-        tilbakekrevingsbeløp: Tilbakekrevingsbeløp,
-        logContext: SecureLog.Context,
-    ): String =
-        if (harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp)) {
-            SecureLog.medContext(logContext) {
-                warn(
-                    """Fant tilbakekrevingsperiode med delvis tilbakekreving hvor vi krever tilbake hele beløpet.
-                | Økonomi krever trolig at vi setter full tilbakekreving. 
-                | Dersom kjøringen feiler mot økonomi med feilmelding: Innkrevd beløp = feilutbetalt ved delvis tilbakekreving.
-                | Vurder å skru på featuretoggle familie-tilbake-overstyr-delvis-tilbakekreving og rekjør.
-                | Tilbakekrevingsbeløp=$tilbakekrevingsbeløp """.trimMargin(),
-                )
-            }
-            KodeResultat.DELVIS_TILBAKEKREVING.kode
-        } else {
-            tilbakekrevingsbeløp.kodeResultat.kode
-        }
-
-    private fun harSattDelvisTilbakekrevingMenKreverTilbakeFulltBeløp(tilbakekrevingsbeløp: Tilbakekrevingsbeløp) = tilbakekrevingsbeløp.kodeResultat == KodeResultat.DELVIS_TILBAKEKREVING && tilbakekrevingsbeløp.uinnkrevdBeløp == BigDecimal.ZERO
 }
