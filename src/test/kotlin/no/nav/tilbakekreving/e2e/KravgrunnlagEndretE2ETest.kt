@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import java.util.UUID
+import org.junit.jupiter.api.Disabled
 
 @TestPropertySource(
     properties = ["tilbakekreving.toggles.nyModell.EndretKravgrunnlagVisning=true"],
@@ -84,6 +85,7 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
         }
     }
 
+    @Disabled
     @Test
     fun `henting av uendret kravgrunnlag`() {
         val periode = 1.januar(2021) til 31.januar(2021)

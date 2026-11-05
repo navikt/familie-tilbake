@@ -120,9 +120,7 @@ class ForvaltningController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         val response = tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.ForvaltningHentKorrigertKravgrunnlag) { tilbakekreving, context ->
-            val behov = tilbakekreving.trengerKorrigertKravgrunnlag()
-            val korrigertKravgrunnlag = behovMediator.hentKorrigertKravgrunnlag(behov)
-            tilbakekreving.håndter(korrigertKravgrunnlag, context)
+            tilbakekreving.trengerKorrigertKravgrunnlag(context)
             Ressurs.success("OK")
         }
         if (response != null) return response
