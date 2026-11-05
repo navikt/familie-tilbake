@@ -173,7 +173,7 @@ class BehandlingController(
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
         val nyModell = tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = when (behandlingsstegDto) {
                 is BehandlingsstegFatteVedtaksstegDto -> ValideringContext.FatteVedtak
                 else -> ValideringContext.UtførSteg
@@ -309,7 +309,7 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
+        val response = tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
                 trekkTilbakeFraGodkjenning()
             }

@@ -18,7 +18,7 @@ class ForeslåVedtakSteg(
     fun klon(): ForeslåVedtakSteg {
         return ForeslåVedtakSteg(
             id = UUID.randomUUID(),
-            vurdert = vurdert,
+            vurdert = false,
             tilbakeført = null,
         )
     }

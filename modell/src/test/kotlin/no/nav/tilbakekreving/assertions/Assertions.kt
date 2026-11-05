@@ -16,7 +16,7 @@ fun List<BehandlingsstegsinfoDto>.skalHaSteg(behandlingssteg: Behandlingssteg): 
     return this.singleOrNull { it.behandlingssteg == behandlingssteg } ?: fail("Fant ikke $behandlingssteg i ${this.map(BehandlingsstegsinfoDto::behandlingssteg)}")
 }
 
-infix fun Behandling.skalHaSteg(behandlingssteg: Behandlingssteg) = tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.SAKSBEHANDLER)
+infix fun Behandling.skalHaSteg(behandlingssteg: Behandlingssteg) = tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.SAKSBEHANDLER, true)
     .behandlingsstegsinfo filterMatching { it.behandlingssteg shouldBe behandlingssteg } forSingle {}
 
 infix fun BehandlingsstegsinfoDto.skalHaStatus(status: Behandlingsstegstatus) = behandlingsstegstatus shouldBe status

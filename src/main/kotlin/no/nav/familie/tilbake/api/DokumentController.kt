@@ -55,7 +55,7 @@ class DokumentController(
         @RequestBody @Valid
         bestillBrevDto: BestillBrevDto,
     ): Ressurs<Nothing?> {
-        val responseNyModell = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(bestillBrevDto.behandlingId), ValideringContext.BestillBrev) { tilbakekreving, context ->
+        val responseNyModell = tilbakekrevingService.endreTilbakekreving(bestillBrevDto.behandlingId, ValideringContext.BestillBrev) { tilbakekreving, context ->
             when (bestillBrevDto.brevmalkode) {
                 Dokumentmalstype.VARSEL -> {
                     tilbakekreving.hentBehandling(bestillBrevDto.behandlingId).nullstillForhåndsvarselUnntakOgUttalelse()

@@ -54,7 +54,7 @@ class BehandlingTest {
             vurderFakta(faktasteg)
             behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.beskrivelse shouldBe null
             behandling.faktastegFrontendDto(Opprettelsesvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL, LocalDateTime.now()).vurderingAvBrukersUttalelse.harBrukerUttaltSeg shouldBe HarBrukerUttaltSeg.NEI
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true)
                 .behandlingsstegsinfo.find { it.behandlingssteg == Behandlingssteg.FAKTA }
                 .shouldNotBeNull()
                 .behandlingsstegstatus shouldBe Behandlingsstegstatus.UTFØRT
@@ -115,7 +115,7 @@ class BehandlingTest {
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
             foreslåVedtak()
         }
 
@@ -126,17 +126,17 @@ class BehandlingTest {
                 ),
             )
         }
-        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
 
         behandling.medSaksbehandling(saksbehandlerContext()) {
             vurderFakta(faktastegVurdering())
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
             foreslåVedtak()
         }
-        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe false
+        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe false
 
         behandling.medSaksbehandling(beslutterContext()) { fatteVedtak(fatteVedtakVurdering()) }
-        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe false
+        behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe false
     }
 
     @Test
@@ -150,7 +150,7 @@ class BehandlingTest {
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
             foreslåVedtak()
         }
 
@@ -161,7 +161,7 @@ class BehandlingTest {
                 ),
             )
         }
-        behandling.tilFrontendDto(TilBehandling, behandlerContext(Behandler.Saksbehandler("Z222222")), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+        behandling.tilFrontendDto(TilBehandling, behandlerContext(Behandler.Saksbehandler("Z222222")), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
     }
 
     @Test
@@ -175,7 +175,7 @@ class BehandlingTest {
             )
             vurderForeldelse(periode, foreldelseVurdering())
             vurderVilkår(periode, forårsaketAvNav().godTro())
-            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER).kanEndres shouldBe true
+            behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true).kanEndres shouldBe true
             foreslåVedtak()
         }
 
@@ -191,7 +191,7 @@ class BehandlingTest {
             vurderFakta(faktastegVurdering())
             foreslåVedtak()
         }
-        val frontendDto = behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER)
+        val frontendDto = behandling.tilFrontendDto(TilBehandling, saksbehandlerContext(), true, BehandlerRolle.BESLUTTER, true)
 
         val fatteVedtakSteg = frontendDto.behandlingsstegsinfo.skalHaSteg(Behandlingssteg.FATTE_VEDTAK)
         fatteVedtakSteg.behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR

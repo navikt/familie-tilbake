@@ -459,12 +459,14 @@ class Tilbakekreving internal constructor(
         behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, sideeffektContext, this)
     }
 
+    fun erGjeldendeBehandling(behandlingId: UUID) = behandlingHistorikk.nåværende().entry.id == behandlingId
+
     fun frontendDtoForBehandling(
         behandlingId: UUID,
         sideeffektContext: LesContext,
         kanBeslutte: Boolean,
         behandlerRolle: BehandlerRolle,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle)
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle, erGjeldendeBehandling(behandlingId))
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(
