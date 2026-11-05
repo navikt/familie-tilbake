@@ -14,7 +14,7 @@ import no.nav.tilbakekreving.fatteVedtak
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Ventegrunn
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
@@ -33,7 +33,6 @@ import no.nav.tilbakekreving.tilstand.Sperret
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.vurderAlleSteg
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
 class StatusmeldingSperrTest {
@@ -133,8 +132,7 @@ class StatusmeldingSperrTest {
             kanEndres shouldBe false
             erBehandlingPåVent shouldBe true
             venter shouldNotBeNull {
-                grunn shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
-                frist shouldBe LocalDate.now().plusDays(1)
+                grunn shouldBe Ventegrunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
             }
         }
     }

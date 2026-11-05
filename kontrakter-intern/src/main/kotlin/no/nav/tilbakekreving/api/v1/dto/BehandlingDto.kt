@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Ventegrunn
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import java.time.LocalDate
@@ -59,6 +60,5 @@ data class BehandlingsstegsinfoDto(
 )
 
 data class VenterDto(
-    val grunn: Venteårsak,
-    val frist: LocalDate,
+    val grunn: Ventegrunn,
 )

@@ -75,7 +75,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Ventegrunn
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
@@ -418,8 +418,7 @@ class Behandling internal constructor(
             erBehandlingPåVent = venter != null,
             venter = venter?.let { venter ->
                 VenterDto(
-                    grunn = Venteårsak.valueOf(venter.grunn.name),
-                    frist = venter.frist,
+                    grunn = Ventegrunn.valueOf(venter.grunn.name),
                 )
             },
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->

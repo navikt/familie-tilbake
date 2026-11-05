@@ -9,14 +9,13 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Venteårsak
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Ventegrunn
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.query
-import java.time.LocalDate
 
 class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
@@ -52,8 +51,7 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
                 data.kanEndres shouldBe false
                 data.erBehandlingPåVent shouldBe true
                 data.venter shouldNotBeNull {
-                    grunn shouldBe Venteårsak.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
-                    frist shouldBe LocalDate.now().plusDays(1)
+                    grunn shouldBe Ventegrunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
                 }
             }
         }
