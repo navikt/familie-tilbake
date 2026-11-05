@@ -25,7 +25,6 @@ enum class Toggle(val default: Boolean) {
     FjernUttalelsesfrist(default = false),
     ForhandsvarselTypst(default = false),
     EndretKravgrunnlagVisning(default = false),
-    SperretStatusmelding(default = true),
     KravBortfalt(default = false),
 }
 
