@@ -176,6 +176,33 @@ class RevurderingTest {
         }
     }
 
+    @Test
+    fun `kan ikke opprette to revurderinger på opprinnelig behandling`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        val opprinneligBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
+
+        tilbakekreving.opprettRevurdering(
+            opprinneligBehandling.id,
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.opprettRevurdering(
+                opprinneligBehandling.id,
+                TilbakekrevingRevurderingsårsak.EtterKlage(
+                    vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                    beskrivelse = "Begrunnelse fra klageinstansen",
+                ),
+                saksbehandlerContext(),
+            )
+        }
+    }
+
     private fun tilbakekrevingTilAvsluttet(
         opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse,
         saksbehandlerContext: SideeffektContext,

@@ -66,7 +66,7 @@ class BehandlingEntityTest {
         val behandlingEtterLagring = behandlingFørLagring
             .tilEntity("not_needed")
             .fraEntity(fagsakBehandlingHistorikk, kravgrunnlagHistorikk, brevHistorikk)
-        behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true, BehandlerRolle.BESLUTTER, behandlingEtterLagring.id) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.BESLUTTER, behandlingFørLagring.id)
+        behandlingEtterLagring.tilFrontendDto(TilBehandling, systemContext(), true, BehandlerRolle.BESLUTTER, true) shouldBe behandlingFørLagring.tilFrontendDto(TilBehandling, lesContext(), true, BehandlerRolle.BESLUTTER, true)
 
         val observatør = BehovObservatørOppsamler()
         behandlingEtterLagring.trengerIverksettelse(systemContext(behovObservatør = observatør), Ytelse.Tilleggsstønad, Aktør.Person("20046912345"))

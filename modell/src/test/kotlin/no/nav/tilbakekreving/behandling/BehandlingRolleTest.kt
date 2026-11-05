@@ -26,7 +26,7 @@ class BehandlingRolleTest {
         val behandling = behandling()
         val veileder = Behandler.Saksbehandler("veileder")
 
-        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext = behandlerContext(veileder), kanBeslutte = false, behandlerRolle = BehandlerRolle.VEILEDER, behandling.id)
+        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, lesContext = behandlerContext(veileder), kanBeslutte = false, behandlerRolle = BehandlerRolle.VEILEDER, true)
 
         dto.innloggetRolle shouldBe BehandlerRolle.VEILEDER
     }
@@ -35,7 +35,7 @@ class BehandlingRolleTest {
     fun `saksbehandler-rolle vises for bruker med beslutter-tilgang utenfor fatte-vedtak-steget`() {
         val behandling = behandling()
 
-        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, beslutterContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, behandling.id)
+        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, beslutterContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, true)
 
         dto.innloggetRolle shouldBe BehandlerRolle.SAKSBEHANDLER
     }
@@ -45,7 +45,7 @@ class BehandlingRolleTest {
         val behandling = behandlingKlarTilBeslutning()
         val annenBeslutter = Behandler.Saksbehandler("annen-beslutter")
 
-        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, behandlerContext(annenBeslutter), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, behandling.id)
+        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, behandlerContext(annenBeslutter), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, true)
 
         dto.innloggetRolle shouldBe BehandlerRolle.BESLUTTER
     }
@@ -54,7 +54,7 @@ class BehandlingRolleTest {
     fun `saksbehandler-rolle vises for beslutter som er ansvarlig saksbehandler på fatte-vedtak-steget`() {
         val behandling = behandlingKlarTilBeslutning()
 
-        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, saksbehandlerContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, behandling.id)
+        val dto = behandling.tilFrontendDto(tilstand = TilBehandling, saksbehandlerContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, true)
 
         dto.innloggetRolle shouldBe BehandlerRolle.SAKSBEHANDLER
     }
@@ -64,7 +64,7 @@ class BehandlingRolleTest {
         val behandling = behandlingKlarTilBeslutning()
         behandling.medSaksbehandling(beslutterContext()) { fatteVedtak(fatteVedtakVurdering()) }
 
-        val dto = behandling.tilFrontendDto(tilstand = Avsluttet, beslutterContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, behandling.id)
+        val dto = behandling.tilFrontendDto(tilstand = Avsluttet, beslutterContext(), kanBeslutte = true, behandlerRolle = BehandlerRolle.BESLUTTER, true)
 
         dto.innloggetRolle shouldBe BehandlerRolle.BESLUTTER
     }
