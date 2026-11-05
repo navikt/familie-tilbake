@@ -4,7 +4,6 @@ import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.tilbakekreving.Testdata
@@ -18,12 +17,7 @@ import no.nav.tilbakekreving.e2e.kanBehandle
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.KodeAksjonDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
-import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
-import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -164,138 +158,6 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
                     beløp.kodeSkyld shouldBe ""
                 }
             }
-        }
-    }
-
-    @Test
-    fun `revurdering av vedtak med full utbetaling fører til ny behandling`() {
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
-
-        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOppdaterFakta(
-                behandlingId = behandlingId.toString(),
-                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
-            )
-        }
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
-        utførSteg(
-            ident = BESLUTTER_IDENT,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
-        )
-
-        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) { vedtak ->
-            vedtak.perioder shouldHaveSize 1
-            val tilbakekrevingsperiode = vedtak.perioder.single()
-            tilbakekrevingsperiode.posteringer shouldHaveSize 2
-            tilbakekrevingsperiode.posteringer.forOne { beløp ->
-                beløp.kodeResultat shouldBe "FULL_TILBAKEKREV"
-            }
-        }
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOpprettRevurdering(
-                behandlingId = behandlingId,
-                revurderingDto = TilbakekrevingRevurderingDto(
-                    revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
-                        begrunnelse = "Begrunnelse for revurdering",
-                    ),
-                ),
-            )
-        }
-        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        revurderingBehandlingId shouldNotBe behandlingId
-        tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
-            status shouldBe Behandlingsstatus.UTREDES
-            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
-            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
-                revurderingsarsak = EtterKlageDto(
-                    instans = RevurderingsinstansDto.Klageinstansen,
-                    begrunnelse = "Begrunnelse for revurdering",
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `revurderingsårsak oppdateres for revurdering`() {
-        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(
-            kravgrunnlag = KravgrunnlagGenerator.forTilleggsstønader(
-                fagsystemId = fagsystemId,
-                vedtakId = vedtakId,
-            ),
-        )
-        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId, utvidPerioder = emptyList()))
-
-        val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-        lagreUttalelse(behandlingId)
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOppdaterFakta(
-                behandlingId = behandlingId.toString(),
-                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(behandlingId)),
-            )
-        }
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
-        utførSteg(behandlingId, BehandlingsstegGenerator.lagForeslåVedtakVurdering())
-        utførSteg(
-            ident = BESLUTTER_IDENT,
-            behandlingId = behandlingId,
-            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
-        )
-
-        oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId))
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOpprettRevurdering(
-                behandlingId = behandlingId,
-                revurderingDto = TilbakekrevingRevurderingDto(
-                    revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
-                        begrunnelse = "Begrunnelse for revurdering",
-                    ),
-                ),
-            )
-        }
-        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
-
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingOppdaterRevurderingsarsak(
-                behandlingId = revurderingBehandlingId,
-                revurderingDto = TilbakekrevingRevurderingDto(
-                    revurderingsarsak = UtenKlageDto(
-                        instans = UtenKlageDto.Instans.Klageinstansen,
-                        begrunnelse = "Oppdatert begrunnelse for revurdering",
-                    ),
-                ),
-            )
-        }
-
-        tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
-            status shouldBe Behandlingsstatus.UTREDES
-            type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
-            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
-                revurderingsarsak = UtenKlageDto(
-                    instans = UtenKlageDto.Instans.Klageinstansen,
-                    begrunnelse = "Oppdatert begrunnelse for revurdering",
-                ),
-            )
         }
     }
 

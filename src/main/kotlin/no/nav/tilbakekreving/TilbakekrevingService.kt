@@ -102,11 +102,15 @@ class TilbakekrevingService(
     }
 
     fun <T> endreTilbakekreving(
-        filter: TilbakekrevingFilter,
+        behandlingId: UUID,
         valideringContext: ValideringContext,
         callback: (Tilbakekreving, SideeffektContext) -> T,
     ): T? {
+        val filter = TilbakekrevingFilter.behandling(behandlingId)
         return hentOgLagreTilbakekreving(filter) { tilbakekreving, sideeffektContext ->
+            if (!tilbakekreving.erGjeldendeBehandling(behandlingId)) {
+                throw Feil("Denne behandlingen kan ikke endres fordi den har allerede en revurdering.", logContext = SecureLog.Context.fra(tilbakekreving))
+            }
             val behandler = ContextService.hentBehandler(filter.logContext())
             tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, valideringContext, behandler)
             callback(tilbakekreving, sideeffektContext(behandler))

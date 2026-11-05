@@ -77,7 +77,7 @@ class BehandlingApiController(
         @Valid oppdaterFaktaOmFeilutbetalingDto: OppdaterFaktaOmFeilutbetalingDto,
     ): ResponseEntity<FaktaOmFeilutbetalingDto> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(UUID.fromString(behandlingId)),
+            behandlingId = UUID.fromString(behandlingId),
             valideringContext = ValideringContext.OppdaterFakta,
         ) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(UUID.fromString(behandlingId), context) {
@@ -110,7 +110,7 @@ class BehandlingApiController(
 
     override fun behandlingForeslaaVedtak(behandlingId: UUID): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.ForeslåVedtak,
         ) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
@@ -164,7 +164,7 @@ class BehandlingApiController(
 
     override fun behandlingSendVarselbrev(behandlingId: UUID, sendForhaandsvarselDto: SendForhaandsvarselDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.SendVarselbrev,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(tilbakekreving.sendVarselbrev(behandlingId, sendForhaandsvarselDto.tekstFraSaksbehandler, context))
@@ -173,7 +173,7 @@ class BehandlingApiController(
 
     override fun behandlingSplittPeriode(behandlingId: UUID, splittPeriode: SplittPeriodeDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.SplitteVilkårsvurderingsperiode,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -195,7 +195,7 @@ class BehandlingApiController(
 
     override fun behandlingSlaaSammenPerioder(behandlingId: UUID, sammenslåingDto: SammenslaaingDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.SlåSammenVilkårsvurderingsperiode,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -208,7 +208,7 @@ class BehandlingApiController(
 
     override fun behandlingLagreBrukersuttalelse(behandlingId: UUID, uttalelseVurderingDto: UttalelseVurderingDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.LagreBrukersuttalelse,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(forhåndsvarselService.nyLagreUttalelse(behandlingId, tilbakekreving, uttalelseVurderingDto, context))
@@ -217,7 +217,7 @@ class BehandlingApiController(
 
     override fun behandlingUtsettUttalelsesfrist(behandlingId: UUID, updateUttalelsesfristDto: UpdateUttalelsesfristDto): ResponseEntity<UttalelsesfristDto> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.UtsettUttalelsesfrist,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -230,7 +230,7 @@ class BehandlingApiController(
 
     override fun behandlingLagreForhaandsvarselUnntak(behandlingId: UUID, unntakDto: UnntakDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.LagreForhåndsvarselUnntak,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -305,7 +305,7 @@ class BehandlingApiController(
         vilkaarsvurderingDto: VilkaarsvurderingDto,
     ): ResponseEntity<VilkaarsvurderingDto> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.LagreVilkårsvurdering,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -319,7 +319,7 @@ class BehandlingApiController(
 
     override fun behandlingBenyttNyesteKravgrunnlag(behandlingId: UUID): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.OppdaterKravgrunnlag,
         ) { tilbakekreving, context ->
             ResponseEntity.ok(
@@ -332,7 +332,7 @@ class BehandlingApiController(
 
     override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<OpprettRevurderingResponseDto> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
             val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
@@ -345,7 +345,7 @@ class BehandlingApiController(
 
     override fun behandlingOppdaterRevurderingsarsak(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
+            behandlingId = behandlingId,
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
             val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)

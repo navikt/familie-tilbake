@@ -199,19 +199,8 @@ class Tilbakekreving internal constructor(
         }
     }
 
-    private fun hentBehandlingForEndring(behandlingId: UUID): Behandling {
-        val behandling = hentBehandling(behandlingId)
-        if (behandling.id != behandlingHistorikk.nåværende().entry.id) {
-            throw ModellFeil.UgyldigOperasjonException(
-                "Denne tilbakekrevingen kan ikke endres fordi den har allerede en revurdering.",
-                sporingsinformasjon(behandlingId),
-            )
-        }
-        return behandling
-    }
-
     fun <T> gjørSaksbehandling(behandlingId: UUID, sideeffektContext: SideeffektContext, callback: Behandling.Saksbehandling.() -> T): T {
-        return tilstand.gjørSaksbehandling(this, hentBehandlingForEndring(behandlingId), sideeffektContext, callback)
+        return tilstand.gjørSaksbehandling(this, hentBehandling(behandlingId), sideeffektContext, callback)
     }
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
@@ -253,7 +242,7 @@ class Tilbakekreving internal constructor(
             tilbakekreving = this,
             sideeffektContext = sideeffektContext,
             eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
-            behandlendeEnhet = hentBehandlingForEndring(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
+            behandlendeEnhet = hentBehandling(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
             revurderingsårsak = revurderingsårsak,
         )
     }
@@ -470,7 +459,7 @@ class Tilbakekreving internal constructor(
         behandlingHistorikk.nåværende().entry.håndterPåminnelse(tilstand, sideeffektContext, this)
     }
 
-    private fun erGjeldendeBehandling(behandlingId: UUID) = behandlingHistorikk.nåværende().entry.id == behandlingId
+    fun erGjeldendeBehandling(behandlingId: UUID) = behandlingHistorikk.nåværende().entry.id == behandlingId
 
     fun frontendDtoForBehandling(
         behandlingId: UUID,
