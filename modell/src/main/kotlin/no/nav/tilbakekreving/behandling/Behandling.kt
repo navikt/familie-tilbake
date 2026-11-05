@@ -418,7 +418,10 @@ class Behandling internal constructor(
             erBehandlingPåVent = venter != null,
             venter = venter?.let { venter ->
                 VenterDto(
-                    grunn = Ventegrunn.valueOf(venter.grunn.name),
+                    grunn = when (venter.grunn) {
+                        Venter.Grunn.BRUKERUTTALELSE -> Ventegrunn.BRUKERUTTALELSE
+                        Venter.Grunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI -> Ventegrunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+                    },
                 )
             },
             endretKravgrunnlag = nyttKravgrunnlag?.let { nyttKravgrunnlag ->
