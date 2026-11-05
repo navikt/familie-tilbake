@@ -75,6 +75,45 @@ sealed interface Ytelse {
         }
     }
 
+    object Kontantstøtte : Ytelse {
+        override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.KONT
+
+        override fun tilYtelseDTO(): YtelsestypeDTO = YtelsestypeDTO.KONTANTSTØTTE
+
+        override fun integrererMotFagsystem(): Boolean = true
+
+        override fun tilYtelsestype(): Ytelsestype = Ytelsestype.KONTANTSTØTTE
+
+        override fun tilTema(): Tema = Tema.KON
+
+        override fun hentYtelsesnavn(språkkode: Språkkode): String {
+            return when (språkkode) {
+                Språkkode.NB -> "Kontantstøtte"
+                Språkkode.NN -> "Kontantstøtte"
+            }
+        }
+
+        override fun tilDokarkivFagsaksystem(): DokarkivFagsaksystem = DokarkivFagsaksystem.KONT
+
+        override val kafkaTopic: String = "tilbake.privat-tilbakekreving-kontantstøtte"
+
+        override val brukerEksternFagsakIdForUrl: Boolean = true
+
+        override val beregnerSkatt: Boolean = false
+
+        override fun hjemlerForTilbakekreving(): List<HjemmelForTilbakekreving> = listOf(HjemmelForTilbakekreving.KONTANTSTØTTELOVEN_11)
+
+        override fun tilEntity(): YtelseEntity = YtelseEntity(Ytelsestype.KONTANTSTØTTE)
+
+        override fun brevmeta(): YtelseDto {
+            return YtelseDto(
+                url = "nav.no/kontantstøtte",
+                ubestemtEntall = "kontantstøtte",
+                bestemtEntall = "kontantstøtten",
+            )
+        }
+    }
+
     object Tilleggsstønad : Ytelse {
         override fun tilFagsystemDTO(): FagsystemDTO = FagsystemDTO.TS
 

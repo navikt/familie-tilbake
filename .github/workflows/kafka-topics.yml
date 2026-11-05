@@ -60,3 +60,15 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: ./.deploy/nais/prod/kafka/ytelser/dagpenger.yaml
           ENVIRONMENT: prod-gcp:tilbake
+      - name: Apply kontantstøtte kafka topic to dev-gcp
+        uses: nais/deploy/actions/deploy@v3
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ./.deploy/nais/dev/kafka/ytelser/kontantstøtte.yaml
+          ENVIRONMENT: dev-gcp:tilbake
+      - name: Apply kontantstøtte kafka topic to prod-gcp
+        uses: nais/deploy/actions/deploy@v3
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: ./.deploy/nais/prod/kafka/ytelser/kontantstøtte.yaml
+          ENVIRONMENT: prod-gcp:tilbake

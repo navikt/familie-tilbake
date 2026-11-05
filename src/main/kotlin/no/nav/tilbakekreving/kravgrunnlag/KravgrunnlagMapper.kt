@@ -142,6 +142,8 @@ object KravgrunnlagMapper {
         "AAP" -> Ytelse.Arbeidsavklaringspenger
         "TILTPENG" -> Ytelse.Tiltakspenger
         "DP" -> Ytelse.Dagpenger
+        "BATR" -> Ytelse.Barnetrygd
+        "KS" -> Ytelse.Kontantstøtte
         else -> throw Feil(
             message = "Kan ikke håndtere saker for $kodeFagomraade med ny modell",
             httpStatus = HttpStatus.BAD_REQUEST,
