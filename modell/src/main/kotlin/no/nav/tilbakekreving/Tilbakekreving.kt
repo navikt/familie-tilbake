@@ -280,6 +280,7 @@ class Tilbakekreving internal constructor(
                 behandlingId = klonetBehandling.id,
             )
         }
+        trengerKorrigertKravgrunnlag(sideeffektContext)
     }
 
     fun opprettBehandling(
@@ -439,9 +440,11 @@ class Tilbakekreving internal constructor(
     }
 
     // Denne burde følge vanlig behov løype i stedet for å håndteres direkte når det skal skje automatisk.
-    fun trengerKorrigertKravgrunnlag(): KorrigertKravgrunnlagBehov {
-        return KorrigertKravgrunnlagBehov(
-            kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
+    fun trengerKorrigertKravgrunnlag(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(
+            KorrigertKravgrunnlagBehov(
+                kravgrunnlagId = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
+            ),
         )
     }
 
