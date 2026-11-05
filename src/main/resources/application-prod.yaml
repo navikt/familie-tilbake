@@ -62,7 +62,6 @@ tilbakekreving:
   toggles:
     ny-modell:
       EndretKravgrunnlagVisning: true
-      SperretStatusmelding: false
   tilgangsmaskinen:
     scope: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
   tilgangsstyring:
