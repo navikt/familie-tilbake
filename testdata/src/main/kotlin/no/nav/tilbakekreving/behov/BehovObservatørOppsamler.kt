@@ -46,7 +46,7 @@ class BehovObservatørOppsamler() : BehovObservatør {
         behovListe.add(behov)
     }
 
-    override fun håndter(behov: KorrigertKravgrunnlagBehov) {
+    override fun håndter(behov: KravgrunnlagForRevurderingBehov) {
         behovListe.add(behov)
     }
 
