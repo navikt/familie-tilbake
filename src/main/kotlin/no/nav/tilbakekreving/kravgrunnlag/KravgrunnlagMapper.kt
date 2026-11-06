@@ -8,8 +8,8 @@ import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
@@ -64,7 +64,7 @@ object KravgrunnlagMapper {
                         beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                     )
                 },
-            kravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
+            henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
             opprettet = klokke.nå(),
         )
         return kravgrunnlagHendelse
@@ -152,7 +152,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke, kravgrunnlagHentetÅrsak: KravgrunnlagHentetÅrsak): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke, henteårsak: Henteårsak): KravgrunnlagHendelse {
         val kravgrunnlag = response.kravgrunnlag
         return KravgrunnlagHendelse(
             id = UUID.randomUUID(),
@@ -186,7 +186,7 @@ object KravgrunnlagMapper {
                         },
                     )
                 },
-            kravgrunnlagHentetÅrsak = kravgrunnlagHentetÅrsak,
+            henteårsak = henteårsak,
             opprettet = klokke.nå(),
         )
     }

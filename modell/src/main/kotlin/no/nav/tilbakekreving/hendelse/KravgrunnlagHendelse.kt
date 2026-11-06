@@ -34,7 +34,7 @@ class KravgrunnlagHendelse(
     val kravgrunnlagId: String,
     override val referanse: String,
     private val perioder: List<Periode>,
-    val kravgrunnlagHentetÅrsak: KravgrunnlagHentetÅrsak,
+    val henteårsak: Henteårsak,
     override val opprettet: LocalDateTime,
 ) : KravHendelse, KravgrunnlagAdapter {
     override fun valider(sporing: Sporing) {
@@ -82,7 +82,7 @@ class KravgrunnlagHendelse(
             referanse = referanse,
             perioder = perioder.map { it.tilEntity(id) },
             opprettet = opprettet,
-            kravgrunnlagHentetÅrsak = kravgrunnlagHentetÅrsak,
+            henteårsak = henteårsak,
         )
     }
 
@@ -231,7 +231,7 @@ class KravgrunnlagHendelse(
     }
 }
 
-enum class KravgrunnlagHentetÅrsak {
-    DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
-    OMGJORING_AV_TILBAKEKREVINGSVEDTAK,
+enum class Henteårsak {
+    KORRIGERING_AV_KRAV,
+    OMGJØRING_AV_VEDTAK,
 }
