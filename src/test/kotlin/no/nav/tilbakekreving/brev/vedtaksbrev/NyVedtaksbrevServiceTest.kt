@@ -9,6 +9,7 @@ import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittUpdateDto
@@ -275,6 +276,24 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     meldingerTilSaksbehandler = emptyList(),
                 ),
             )
+        }
+    }
+
+    @Test
+    fun `revurderingsvedtak har riktig tittle og hjelpetekst`() {
+        val behandlingId = lagBehandlingId()
+        val vedtaksbrevInfo = vedtaksbrevInfo(UUID.randomUUID(), behandlingstype = Behandlingstype.REVURDERING_TILBAKEKREVING)
+
+        nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
+            it.hovedavsnitt shouldBe HovedavsnittDto(
+                tittel = "Vi har endret vedtaket ditt om tilbakekreving av arbeidsavklaringspenger",
+                forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
+                underavsnitt = listOf(RentekstElementDto("Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst.")),
+                hjemler = "Vedtaket er gjort etter folketrygdloven § 22-15.",
+            )
+            it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
+            it.signatur shouldBe expectedSignatur
+            it.avsnitt shouldBe emptyList()
         }
     }
 
