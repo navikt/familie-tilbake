@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
+import no.nav.tilbakekreving.behov.KravgrunnlagForRevurderingBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Informasjonsbrev
@@ -220,11 +221,22 @@ class Tilbakekreving internal constructor(
 
     internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
-            if (kravgrunnlagHendelse.korrigering && kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse) {
-                throw ModellFeil.BehandlingIkkeEndretException("Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag", sporingsinformasjon())
+            val erUendret = kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse
+
+            if (kravgrunnlagHendelse.korrigering && erUendret) {
+                throw ModellFeil.BehandlingIkkeEndretException(
+                    "Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag",
+                    sporingsinformasjon(),
+                )
             }
-            kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlag(kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(), sideeffektContext)
+
+            if (!erUendret) {
+                kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
+                oppdaterKravgrunnlag(
+                    kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
+                    sideeffektContext,
+                )
+            }
         }
     }
 
@@ -272,7 +284,8 @@ class Tilbakekreving internal constructor(
     fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
         val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
-
+        val test = kravgrunnlagHistorikk.nåværende().entry
+        println("kravgrunnlagId: ${test.id}")
         klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(klonetBehandling)
             sideeffektContext.logg(
@@ -280,7 +293,15 @@ class Tilbakekreving internal constructor(
                 behandlingId = klonetBehandling.id,
             )
         }
-        trengerKorrigertKravgrunnlag(sideeffektContext)
+        trengerKravgrunnlagForRevurdering(sideeffektContext)
+    }
+
+    fun trengerKravgrunnlagForRevurdering(sideeffektContext: SideeffektContext) {
+        sideeffektContext.behovObservatør.håndter(
+            KravgrunnlagForRevurderingBehov(
+                kravgrunnlagId = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
+            ),
+        )
     }
 
     fun opprettBehandling(
@@ -440,11 +461,9 @@ class Tilbakekreving internal constructor(
     }
 
     // Denne burde følge vanlig behov løype i stedet for å håndteres direkte når det skal skje automatisk.
-    fun trengerKorrigertKravgrunnlag(sideeffektContext: SideeffektContext) {
-        sideeffektContext.behovObservatør.håndter(
-            KorrigertKravgrunnlagBehov(
-                kravgrunnlagId = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
-            ),
+    fun trengerKorrigertKravgrunnlag(): KorrigertKravgrunnlagBehov {
+        return KorrigertKravgrunnlagBehov(
+            kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
         )
     }
 

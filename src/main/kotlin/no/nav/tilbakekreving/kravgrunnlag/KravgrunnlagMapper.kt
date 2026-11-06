@@ -151,7 +151,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke, korrigering: Boolean): KravgrunnlagHendelse {
         val kravgrunnlag = response.kravgrunnlag
         return KravgrunnlagHendelse(
             id = UUID.randomUUID(),
@@ -185,7 +185,7 @@ object KravgrunnlagMapper {
                         },
                     )
                 },
-            korrigering = true,
+            korrigering = korrigering,
             opprettet = klokke.nå(),
         )
     }

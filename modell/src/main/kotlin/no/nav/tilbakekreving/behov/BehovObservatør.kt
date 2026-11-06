@@ -25,5 +25,5 @@ interface BehovObservatør {
 
     fun håndter(behov: InfobrevJournalføringBehov)
 
-    fun håndter(behov: KorrigertKravgrunnlagBehov)
+    fun håndter(behov: KravgrunnlagForRevurderingBehov)
 }
