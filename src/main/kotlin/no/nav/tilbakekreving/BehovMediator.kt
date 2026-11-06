@@ -29,6 +29,7 @@ import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
@@ -239,7 +240,7 @@ class BehovMediator(
             kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
             kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
         )
-        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, korrigering = true)
+        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, kravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK)
     }
 
     internal fun korrigerKravgrunnlag(
@@ -255,6 +256,6 @@ class BehovMediator(
             kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
             kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_OMGJORING_AV_TILBAKEKREVINGSVEDTAK,
         )
-        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, korrigering = false)
+        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, kravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.OMGJORING_AV_TILBAKEKREVINGSVEDTAK)
     }
 }

@@ -45,6 +45,7 @@ import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
@@ -219,24 +220,25 @@ class Tilbakekreving internal constructor(
         return tilstand.gjørSaksbehandling(this, hentBehandling(behandlingId), sideeffektContext, callback)
     }
 
-    internal fun hånterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
+    internal fun håndterEndretKravgrunnlag(kravgrunnlagHendelse: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
         behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             val erUendret = kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse
 
-            if (kravgrunnlagHendelse.korrigering && erUendret) {
-                throw ModellFeil.BehandlingIkkeEndretException(
-                    "Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag",
-                    sporingsinformasjon(),
-                )
+            if (erUendret) {
+                if (kravgrunnlagHendelse.kravgrunnlagHentetÅrsak == KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK) {
+                    throw ModellFeil.BehandlingIkkeEndretException(
+                        "Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag",
+                        sporingsinformasjon(),
+                    )
+                }
+                return@utførEndring
             }
 
-            if (!erUendret) {
-                kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-                oppdaterKravgrunnlag(
-                    kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
-                    sideeffektContext,
-                )
-            }
+            kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
+            oppdaterKravgrunnlag(
+                kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
+                sideeffektContext,
+            )
         }
     }
 

@@ -59,7 +59,7 @@ object TilBehandling : Tilstand {
         kravgrunnlag: KravgrunnlagHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.hånterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
+        tilbakekreving.håndterEndretKravgrunnlag(kravgrunnlag, sideeffektContext)
         tilbakekreving.trengerFagsysteminfo(sideeffektContext)
     }
 
