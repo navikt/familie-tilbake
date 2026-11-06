@@ -126,7 +126,6 @@ class KravgrunnlagHendelseTest {
         val b = standardKravgrunnlag(
             id = UUID.randomUUID(),
             opprettet = LocalDateTime.of(2022, 5, 5, 8, 0),
-            korrigering = true,
         )
 
         a.harNokOverlapp(b) shouldBe true
@@ -264,7 +263,7 @@ class KravgrunnlagHendelseTest {
             referanse: String = "referanse",
             id: UUID = UUID.randomUUID(),
             opprettet: LocalDateTime = 1.februar(2021).atTime(12, 0),
-            korrigering: Boolean = false,
+            kravgrunnlagHentetÅrsak: KravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
         ) = KravgrunnlagHendelse(
             vedtakGjelder = vedtakGjelder,
             utbetalesTil = utbetalesTil,
@@ -279,7 +278,7 @@ class KravgrunnlagHendelseTest {
             id = id,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
             ansvarligEnhet = ansvarligEnhet,
-            korrigering = korrigering,
+            kravgrunnlagHentetÅrsak = kravgrunnlagHentetÅrsak,
         )
     }
 }

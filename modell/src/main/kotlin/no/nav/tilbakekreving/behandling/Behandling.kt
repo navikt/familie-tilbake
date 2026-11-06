@@ -69,6 +69,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
@@ -670,7 +671,7 @@ class Behandling internal constructor(
         kravgrunnlag.entry.valider(sporingsinformasjon())
         if (nyttKravgrunnlag != null) {
             nyttKravgrunnlag!!.entry.valider(sporingsinformasjon())
-            if (!toggles[Toggle.EndretKravgrunnlagVisning] && !nyttKravgrunnlag!!.entry.korrigering) {
+            if (!toggles[Toggle.EndretKravgrunnlagVisning] && nyttKravgrunnlag!!.entry.kravgrunnlagHentetÅrsak == KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK) {
                 throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagMedEndretBeløp, sporingsinformasjon())
             }
         }
