@@ -41,11 +41,11 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
@@ -225,7 +225,7 @@ class Tilbakekreving internal constructor(
             val erUendret = kravgrunnlagHistorikk.nåværende().entry == kravgrunnlagHendelse
 
             if (erUendret) {
-                if (kravgrunnlagHendelse.kravgrunnlagHentetÅrsak == KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK) {
+                if (kravgrunnlagHendelse.henteårsak == Henteårsak.KORRIGERING_AV_KRAV) {
                     throw ModellFeil.BehandlingIkkeEndretException(
                         "Hentet patchet kravgrunnlag som er likt gjeldende kravgrunnlag",
                         sporingsinformasjon(),
@@ -286,8 +286,6 @@ class Tilbakekreving internal constructor(
     fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
         val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
-        val test = kravgrunnlagHistorikk.nåværende().entry
-        println("kravgrunnlagId: ${test.id}")
         klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(klonetBehandling)
             sideeffektContext.logg(

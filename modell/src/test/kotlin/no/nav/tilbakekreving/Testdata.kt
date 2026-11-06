@@ -19,10 +19,10 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
@@ -75,6 +75,7 @@ fun kravgrunnlag(
     referanse: String = UUID.randomUUID().toString(),
     kravgrunnlagId: String = UUID.randomUUID().toString(),
     opprettet: LocalDateTime = LocalDateTime.now(),
+    henteårsak: Henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
 ): KravgrunnlagHendelse {
     val kravgrunnlagHendelse = KravgrunnlagHendelse(
         id = UUID.randomUUID(),
@@ -89,7 +90,7 @@ fun kravgrunnlag(
         referanse = referanse,
         kravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
-        kravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
+        henteårsak = henteårsak,
         opprettet = opprettet,
     )
     kravgrunnlagHendelse.valider(Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))

@@ -263,7 +263,7 @@ class KravgrunnlagHendelseTest {
             referanse: String = "referanse",
             id: UUID = UUID.randomUUID(),
             opprettet: LocalDateTime = 1.februar(2021).atTime(12, 0),
-            kravgrunnlagHentetÅrsak: KravgrunnlagHentetÅrsak = KravgrunnlagHentetÅrsak.DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
+            henteårsak: Henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
         ) = KravgrunnlagHendelse(
             vedtakGjelder = vedtakGjelder,
             utbetalesTil = utbetalesTil,
@@ -278,7 +278,7 @@ class KravgrunnlagHendelseTest {
             id = id,
             fagsystemVedtaksdato = fagsystemVedtaksdato,
             ansvarligEnhet = ansvarligEnhet,
-            kravgrunnlagHentetÅrsak = kravgrunnlagHentetÅrsak,
+            henteårsak = henteårsak,
         )
     }
 }

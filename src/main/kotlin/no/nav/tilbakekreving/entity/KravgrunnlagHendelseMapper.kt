@@ -4,7 +4,7 @@ import no.nav.tilbakekreving.entities.AktørEntity
 import no.nav.tilbakekreving.entities.AktørType
 import no.nav.tilbakekreving.entities.KravgrunnlagHendelseEntity
 import no.nav.tilbakekreving.entities.KravgrunnlagPeriodeEntity
-import no.nav.tilbakekreving.hendelse.KravgrunnlagHentetÅrsak
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import java.sql.ResultSet
 import java.util.UUID
@@ -85,10 +85,10 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
         FieldConverter.LocalDateTimeConverter.required(),
     )
 
-    val kravgrunnlagHentetÅrsak = field(
-        "kravgrunnlag_hentet_årsak",
-        KravgrunnlagHendelseEntity::kravgrunnlagHentetÅrsak,
-        FieldConverter.EnumConverter.of<KravgrunnlagHentetÅrsak>().required(),
+    val henteårsak = field(
+        "henteårsak",
+        KravgrunnlagHendelseEntity::henteårsak,
+        FieldConverter.EnumConverter.of<Henteårsak>().required(),
     )
 
     fun map(
@@ -116,7 +116,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
             referanse = resultSet[referanse],
             perioder = perioder,
             opprettet = resultSet[opprettet],
-            kravgrunnlagHentetÅrsak = resultSet[kravgrunnlagHentetÅrsak],
+            henteårsak = resultSet[henteårsak],
         )
     }
 }
