@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
@@ -63,7 +64,7 @@ object KravgrunnlagMapper {
                         beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                     )
                 },
-            korrigering = false,
+            henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
             opprettet = klokke.nå(),
         )
         return kravgrunnlagHendelse
@@ -151,7 +152,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(response: HentKravgrunnlagDetaljerResponseDto, klokke: Klokke, henteårsak: Henteårsak): KravgrunnlagHendelse {
         val kravgrunnlag = response.kravgrunnlag
         return KravgrunnlagHendelse(
             id = UUID.randomUUID(),
@@ -185,7 +186,7 @@ object KravgrunnlagMapper {
                         },
                     )
                 },
-            korrigering = true,
+            henteårsak = henteårsak,
             opprettet = klokke.nå(),
         )
     }

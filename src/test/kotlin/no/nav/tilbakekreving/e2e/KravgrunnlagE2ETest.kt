@@ -29,6 +29,7 @@ import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsbeløp.Com
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator.Tilbakekrevingsperiode
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
@@ -240,8 +241,8 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
                         kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6),
                         referanse = "referanse",
                         perioder = listOf(kravgrunnlagPeriode()),
-                        korrigering = false,
                         opprettet = LocalDateTime.now(),
+                        henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
                     ),
                     systemContext(),
                 )

@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
+import no.nav.tilbakekreving.behov.KravgrunnlagForRevurderingBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
@@ -228,6 +230,8 @@ class BehovMediator(
                     sideeffektContext,
                 )
             }
+            is InfobrevJournalføringBehov -> TODO() // venter på brev
+            is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), sideeffektContext)
         }
     }
 
@@ -236,7 +240,7 @@ class BehovMediator(
             kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
             kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
         )
-        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke)
+        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, henteårsak = Henteårsak.KORRIGERING_AV_KRAV)
     }
 
     internal fun korrigerKravgrunnlag(
@@ -245,5 +249,13 @@ class BehovMediator(
         sideeffektContext: SideeffektContext,
     ) {
         tilbakekreving.håndter(hentKorrigertKravgrunnlag(behov), sideeffektContext)
+    }
+
+    internal fun hentKravgrunnlagForRevurdering(behov: KravgrunnlagForRevurderingBehov): KravgrunnlagHendelse {
+        val oppdatertKravgrunnlag = oppdragRestClient.hentKravgrunnlag(
+            kravgrunnlagId = behov.kravgrunnlagId.toBigInteger(),
+            kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_OMGJORING_AV_TILBAKEKREVINGSVEDTAK,
+        )
+        return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK)
     }
 }
