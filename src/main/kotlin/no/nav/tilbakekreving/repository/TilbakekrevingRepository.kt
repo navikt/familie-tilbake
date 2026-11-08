@@ -161,6 +161,14 @@ WHERE tbk.neste_påminnelse < ?;""",
         }.toList()
     }
 
+    fun hentTilbakekrevingIderMedSperretStatusmelding(): List<String> {
+        return jdbcTemplate.query(
+            """SELECT DISTINCT s.tilbakekreving_ref
+FROM tilbakekreving_krav_statusmelding s
+WHERE s.opprettet::date = '2026-09-01'::date;""",
+        ) { rs, _ -> FieldConverter.NumericId.convert(rs, "tilbakekreving_ref") }
+    }
+
     data class TilbakekrevingForPåminnelse(
         val tilbakekrevingId: String,
         val fagsystemId: String,

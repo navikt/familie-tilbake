@@ -426,6 +426,26 @@ class ForvaltningController(
         )
     }
 
+    @Operation(summary = "Hent URL-er for alle tilbakekrevinger som mangler opprettet dato")
+    @GetMapping(
+        path = ["/statusmelding-med-manglende-opprettet-dato"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentUrlForSperredeSakerMedManglendeOpprettetDato(): Ressurs<List<String>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Du har ikke forvaltertilgang",
+                frontendFeilmelding = "Du har ikke forvaltertilgang",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(
+            tilbakekrevingRepository.hentTilbakekrevingIderMedSperretStatusmelding()
+                .mapNotNull { tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.tilbakekreving(it)) }
+                .map { it.fraEntity().hentTilbakekrevingUrl(applicationProperties.frontendUrl) },
+        )
+    }
+
     @Operation(summary = "Hent URL for ytelser i gammel modell")
     @GetMapping(
         path = ["/behandling-url"],
