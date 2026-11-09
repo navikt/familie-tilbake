@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.tilstand
 
-import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
@@ -22,7 +21,7 @@ object DistribuerInfobrevForBortfaltKrav : Tilstand {
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
 
-    override fun validerInnenforScope(tilbakekreving: Tilbakekreving, toggles: FeatureToggles) {
+    override fun validerInnenforScope(tilbakekreving: Tilbakekreving) {
         throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
     }
 }
