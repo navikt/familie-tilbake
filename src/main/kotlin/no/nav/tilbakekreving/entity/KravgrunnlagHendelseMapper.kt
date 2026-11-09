@@ -88,7 +88,7 @@ object KravgrunnlagHendelseMapper : Entity<KravgrunnlagHendelseEntity, UUID, UUI
     val henteårsak = field(
         "henteårsak",
         KravgrunnlagHendelseEntity::henteårsak,
-        FieldConverter.EnumConverter.of<Henteårsak>().required(),
+        FieldConverter.EnumConverter.of<Henteårsak>(),
     )
 
     fun map(

@@ -75,7 +75,7 @@ fun kravgrunnlag(
     referanse: String = UUID.randomUUID().toString(),
     kravgrunnlagId: String = UUID.randomUUID().toString(),
     opprettet: LocalDateTime = LocalDateTime.now(),
-    henteårsak: Henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
+    henteårsak: Henteårsak? = null,
 ): KravgrunnlagHendelse {
     val kravgrunnlagHendelse = KravgrunnlagHendelse(
         id = UUID.randomUUID(),

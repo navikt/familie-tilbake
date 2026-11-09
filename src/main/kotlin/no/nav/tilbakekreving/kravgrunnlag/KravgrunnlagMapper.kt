@@ -64,7 +64,7 @@ object KravgrunnlagMapper {
                         beløp = periode.tilbakekrevingsBelop.tilBeløp(),
                     )
                 },
-            henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
+            henteårsak = null,
             opprettet = klokke.nå(),
         )
         return kravgrunnlagHendelse

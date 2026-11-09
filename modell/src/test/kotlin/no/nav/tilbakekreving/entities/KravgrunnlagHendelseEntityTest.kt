@@ -2,7 +2,6 @@ package no.nav.tilbakekreving.entities
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.bruker
-import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
@@ -46,7 +45,7 @@ class KravgrunnlagHendelseEntityTest {
                 ),
             ),
             opprettet = LocalDateTime.now(),
-            henteårsak = Henteårsak.OMGJØRING_AV_VEDTAK,
+            henteårsak = null,
         )
 
         val gjenopprettetEntity = entity.fraEntity().tilEntity("")

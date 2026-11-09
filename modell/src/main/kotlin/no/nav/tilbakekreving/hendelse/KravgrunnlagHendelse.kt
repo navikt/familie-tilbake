@@ -34,7 +34,7 @@ class KravgrunnlagHendelse(
     val kravgrunnlagId: String,
     override val referanse: String,
     private val perioder: List<Periode>,
-    val henteårsak: Henteårsak,
+    val henteårsak: Henteårsak?,
     override val opprettet: LocalDateTime,
 ) : KravHendelse, KravgrunnlagAdapter {
     override fun valider(sporing: Sporing) {

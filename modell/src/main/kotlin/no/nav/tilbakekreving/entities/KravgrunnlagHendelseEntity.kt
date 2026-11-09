@@ -23,7 +23,7 @@ data class KravgrunnlagHendelseEntity(
     val referanse: String,
     val perioder: List<KravgrunnlagPeriodeEntity>,
     override val opprettet: LocalDateTime,
-    val henteårsak: Henteårsak,
+    val henteårsak: Henteårsak?,
 ) : KravHendelseEntity() {
     override fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
