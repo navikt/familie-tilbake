@@ -4,10 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
+import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
@@ -62,7 +64,12 @@ class PdfGenClientImpl(
             setBody(vedtaksbrevData)
         }
         if (!response.status.isSuccess()) {
-            throw RuntimeException("Feil fra PDF-service: ${response.status}")
+            throw UnexpectedResponseException(
+                message = "Feil fra PDF-service: ${response.status}",
+                endpoint = "$baseUrl/api/v1/brev/revurdering/pdf",
+                statusCode = response.status,
+                response = response.bodyAsText(),
+            )
         }
         return response.body()
     }

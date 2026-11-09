@@ -28,12 +28,12 @@ class BrevHistorikkTest {
         )
         varselbrev.brevSendt("journalpost-varsel", "dokument-varsel")
         klokke.settTid(11.januar(2025))
-        val vedtaksbrev = Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.ORDINÆR)
+        val vedtaksbrev = Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG)
         vedtaksbrev.brevSendt("journalpost-vedtak", "dokument-vedtak")
         val historikk = BrevHistorikk(mutableListOf())
         historikk.lagre(varselbrev)
         historikk.lagre(vedtaksbrev)
-        historikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.ORDINÆR))
+        historikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG))
 
         val dokumenter = historikk.alleSendteDokumenter()
 
@@ -54,7 +54,7 @@ class BrevHistorikkTest {
     @Test
     fun `brev som mangler begge dokumentreferansene`() {
         val historikk = BrevHistorikk(mutableListOf())
-        historikk.lagre(Vedtaksbrev.opprett(KlokkeStub(10.januar(2025)), Vedtaksbrev.Vedtaksbrevtype.ORDINÆR))
+        historikk.lagre(Vedtaksbrev.opprett(KlokkeStub(10.januar(2025)), Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG))
 
         historikk.alleSendteDokumenter() shouldBe emptyList()
     }

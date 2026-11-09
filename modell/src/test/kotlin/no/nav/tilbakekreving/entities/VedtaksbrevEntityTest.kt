@@ -17,7 +17,7 @@ class VedtaksbrevEntityTest {
             dokumentInfoId = "dokumentInfoId",
             sendtTid = LocalDate.now(),
             opprettet = LocalDateTime.now(),
-            vedtaksbrevType = Vedtaksbrev.Vedtaksbrevtype.ORDINÆR,
+            vedtaksbrevType = Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG,
         )
 
         val vedtaksbrevEtterLagring = vedtaksbrevFørLagring.tilEntity("no-needed").fraEntity(KravgrunnlagHistorikk(mutableListOf()))

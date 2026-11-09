@@ -20,7 +20,6 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
-import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT_REVURDERING
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forPeriodeavsnitt
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
@@ -55,6 +54,7 @@ import no.nav.tilbakekreving.pdf.dokumentbestilling.felles.pdf.DokumentKlasse
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
@@ -135,15 +135,14 @@ class NyVedtaksbrevService(
         )
     }
 
-    fun hentRevurderingVedtaksbrevData(revurderingVedtaksbrevInfo: RevurderingVedtaksbrevInfo, beslutter: Behandler): RevurderingVedtaksbrevDataDto {
+    fun hentRevurderingVedtaksbrevData(behandlingId: UUID, revurderingVedtaksbrevInfo: RevurderingVedtaksbrevInfo, beslutter: Behandler): RevurderingVedtaksbrevDataDto {
+        val innhold = hentRevurderingVedtaksbrevTekster(behandlingId)?.second ?: throw IllegalStateException("Ingen revurdering vedtaksbrev data funnet for behandling $behandlingId")
         val beslutter = beslutter.takeIf { it.ident != revurderingVedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
-
         return RevurderingVedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittRevurderingVedtaksbrevDto(
                 tittel = BrevFormatterer.lagHovedavsnittTittelForRevurdering(revurderingVedtaksbrevInfo),
-                forklaring = listOf(HOVEDAVSNITT_REVURDERING),
+                innhold = listOf(innhold),
             ),
-            underavsnitt = listOf(UnderavsnittElementDto(tittel = "Fritekstfelt", underavsnitt = listOf(RentekstElementDto(REVURDERINGSVEDTAK_FRITEKSTFELT)))),
             bunntekster = revurderingVedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             brevGjelder = revurderingVedtaksbrevInfo.brukerdata,
             signatur = SignaturDto(
@@ -203,6 +202,20 @@ class NyVedtaksbrevService(
             avsnitt = info.perioder.map { mapAvsnitt(it, data.avsnitt) },
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
         )
+    }
+
+    fun lagreRevurderingVedtaksbrevData(
+        behandlingId: UUID,
+        data: String,
+    ) {
+        vedtaksbrevDataRepository.lagreRevurderingVedtaksbrevData(
+            behandlingId,
+            data,
+        )
+    }
+
+    fun hentRevurderingVedtaksbrevTekster(behandlingId: UUID): Pair<LocalDateTime, String>? {
+        return vedtaksbrevDataRepository.hentRevurderingVedtaksbrevData(behandlingId)
     }
 
     fun mapHovedavsnitt(
@@ -313,7 +326,7 @@ class NyVedtaksbrevService(
             forsøkFerdigstill = true,
             hoveddokumentvarianter = listOf(
                 Dokument(
-                    dokument = pdfGenClient.hentPdfForRevurderingVedtak(hentRevurderingVedtaksbrevData(behov.revurderingVedtaksbrevInfo, behov.beslutter)),
+                    dokument = pdfGenClient.hentPdfForRevurderingVedtak(hentRevurderingVedtaksbrevData(behov.behandlingId, behov.revurderingVedtaksbrevInfo, behov.beslutter)),
                     filtype = Filtype.PDFA,
                     filnavn = "revurdering_vedtak.pdf",
                     tittel = TITTEL_REVURDERING_TILBAKEKREVING,
@@ -408,6 +421,5 @@ class NyVedtaksbrevService(
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
         private const val TITTEL_REVURDERING_TILBAKEKREVING = "Vedtak om revurdering av tilbakekreving "
-        private const val REVURDERINGSVEDTAK_FRITEKSTFELT = "Standardtekst som skal stå her og endres av saksbehandler. Dette må oppdateres når jurister har en tekst."
     }
 }

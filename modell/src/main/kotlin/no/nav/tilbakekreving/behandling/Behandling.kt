@@ -171,6 +171,11 @@ class Behandling internal constructor(
         }
     }
 
+    internal fun settKravgrunnlagForRevurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
+        this.kravgrunnlag = kravgrunnlag
+        nyttKravgrunnlag = null
+    }
+
     override fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
         tilbakekrevingOpprettet: LocalDateTime,
