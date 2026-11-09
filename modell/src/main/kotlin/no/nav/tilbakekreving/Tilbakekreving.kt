@@ -42,6 +42,7 @@ import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.Henteårsak
+import no.nav.tilbakekreving.hendelse.InfobrevDistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
@@ -152,6 +153,19 @@ class Tilbakekreving internal constructor(
             EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
             EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
         )
+    }
+
+    fun håndter(hendelse: InfobrevDistribusjonHendelse, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, hendelse, sideeffektContext)
+
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_SENDT,
+                behandlingId = id,
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+            )
+        }
     }
 
     fun håndter(hendelse: VarselbrevDistribueringHendelse, sideeffektContext: SideeffektContext) {
@@ -423,6 +437,19 @@ class Tilbakekreving internal constructor(
             tilbakekrevingId = id,
             varsletDato = requireNotNull(brevHistorikk.sisteVarselbrev()) { "Forhåndsvarsel kreves for journalføring av informasjonsbrev om bortfalt krav." }.sendtTid,
             sendtDato = informasjonsbrev.sendtTid,
+        )
+    }
+
+    fun trengerInfobrevDistribusjon(sideeffektContext: SideeffektContext) {
+        val informasjonsbrev = brevHistorikk.nåværende().entry
+        sideeffektContext.behovObservatør.håndter(
+            behandlingHistorikk.nåværende().entry.lagInfobrevDistribusjonBehov(
+                brevId = informasjonsbrev.id,
+                fagsakId = eksternFagsak.eksternId(),
+                journalpostId = requireNotNull(informasjonsbrev.journalpostId) { "JournalpostId kreves for distribusjon av informasjonsbrev." },
+                dokumentInfoId = requireNotNull(informasjonsbrev.dokumentInfoId) { "DokumentInfoId kreves for distribusjon av informasjonsbrev." },
+                ytelse = eksternFagsak.ytelse,
+            ),
         )
     }
 

@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.hendelse.KravHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.tilstand.Avsluttet
+import no.nav.tilbakekreving.tilstand.AvsluttetUtenVedtak
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
 import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
@@ -87,6 +88,7 @@ data class TilbakekrevingEntity(
                 TilbakekrevingTilstand.DISTRIBUER_INFOBREV_FOR_BORTFALT_KRAV -> DistribuerInfobrevForBortfaltKrav
                 TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT -> KravgrunnlagBortfalt
                 TilbakekrevingTilstand.AVSLUTTET -> Avsluttet
+                TilbakekrevingTilstand.AVSLUTTET_UTEN_VEDTAK -> AvsluttetUtenVedtak
             },
         )
 

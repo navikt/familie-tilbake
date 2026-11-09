@@ -9,6 +9,5 @@ enum class Behandlingsstatus(
     OPPRETTET("OPPRE"),
     UTREDES("UTRED"),
     JOURNALFØR_VEDTAK("JVED"),
-    JOURNALFØRER_INFOBREV("JINF"),
     DISTRIUBER_VEDTAK("DVED"),
 }

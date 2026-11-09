@@ -149,6 +149,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    INFORMASJONSBREV_SENDT(
+        tittel = "Informasjonsbrev sendt",
+        tekst = "Avsluttet sak om tilbakebetaling",
+        type = Historikkinnslagstype.BREV,
+        steg = null,
+    ),
     BEHANDLING_NULLSTILLT(
         tittel = "Behandling nullstilt",
         tekst = null,

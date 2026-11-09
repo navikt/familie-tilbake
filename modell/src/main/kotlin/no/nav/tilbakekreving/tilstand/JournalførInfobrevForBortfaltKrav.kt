@@ -14,7 +14,7 @@ object JournalførInfobrevForBortfaltKrav : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV
 
-    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.JOURNALFØRER_INFOBREV
+    override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
         tilbakekreving.opprettInfobrev(sideeffektContext.klokke)

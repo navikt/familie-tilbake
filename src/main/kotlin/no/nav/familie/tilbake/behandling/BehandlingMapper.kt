@@ -244,7 +244,7 @@ object BehandlingMapper {
                 no.nav.tilbakekreving.kontrakter.Behandlingsstatus.OPPRETTET
             }
 
-            Behandlingsstatus.DISTRIUBER_VEDTAK, Behandlingsstatus.JOURNALFØRER_INFOBREV,
+            Behandlingsstatus.DISTRIUBER_VEDTAK,
             -> {
                 throw IllegalArgumentException("${behandling.status} er til ny modell!")
             }

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.statusmeldinger
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -9,13 +10,19 @@ import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
+import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
+import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.bortfaltStatusmelding
 import no.nav.tilbakekreving.brev.Informasjonsbrev
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.InfobrevDistribusjonHendelse
+import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -24,6 +31,8 @@ import no.nav.tilbakekreving.systemContext
 import no.nav.tilbakekreving.test.juni
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
+import no.nav.tilbakekreving.tilstand.AvsluttetUtenVedtak
+import no.nav.tilbakekreving.tilstand.DistribuerInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
 import no.nav.tilbakekreving.tilstand.TilBehandling
@@ -78,6 +87,54 @@ class InformasjonsbrevBortfaltKravTest {
 
         tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
         oppsamler.behovListe.filterIsInstance<InfobrevJournalføringBehov>().shouldBeEmpty()
+    }
+
+    @Test
+    fun `journalføring og distribusjon av informasjonsbrev om bortfalt krav`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val tilbakekreving = tilbakekrevingMedForhåndsvarsel(varsletDato = 17.mai(2026))
+        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext(features = kravBortfaltPå()))
+        val brevId = tilbakekreving.brevHistorikk.nåværende().entry.id
+
+        tilbakekreving.håndter(
+            InfobrevJournalføringHendelse(infobrevId = brevId, journalpostId = "infobrev-journalpost", dokumentInfoId = "infobrev-dokument"),
+            systemContext(behovObservatør = oppsamler),
+        )
+
+        tilbakekreving.tilstand shouldBe DistribuerInfobrevForBortfaltKrav
+        oppsamler.behovListe.filterIsInstance<InfobrevDistribusjonBehov>().forSingle { behov ->
+            behov.brevId shouldBe brevId
+            behov.journalpostId shouldBe "infobrev-journalpost"
+            behov.dokumentInfoId shouldBe "infobrev-dokument"
+        }
+
+        tilbakekreving.håndter(
+            InfobrevDistribusjonHendelse(infobrevId = brevId, journalpostId = "infobrev-journalpost", dokumentInfoId = "infobrev-dokument"),
+            systemContext(),
+        )
+
+        tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
+    }
+
+    @Test
+    fun `sak avsluttet uten vedtak kan ikke revurderes`() {
+        val tilbakekreving = tilbakekrevingMedForhåndsvarsel(varsletDato = 17.mai(2026))
+        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext(features = kravBortfaltPå()))
+        val brevId = tilbakekreving.brevHistorikk.nåværende().entry.id
+        tilbakekreving.håndter(InfobrevJournalføringHendelse(brevId, "infobrev-journalpost", "infobrev-dokument"), systemContext())
+        tilbakekreving.håndter(InfobrevDistribusjonHendelse(brevId, "infobrev-journalpost", "infobrev-dokument"), systemContext())
+        tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
+
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
+            tilbakekreving.opprettRevurdering(
+                tilbakekreving.nåværendeBehandlingId(),
+                TilbakekrevingRevurderingsårsak.EtterKlage(
+                    vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                    beskrivelse = "Begrunnelse fra klageinstansen",
+                ),
+                saksbehandlerContext(),
+            )
+        }.message shouldBe "Kan ikke opprette revurdering i AVSLUTTET_UTEN_VEDTAK"
     }
 
     private fun kravBortfaltPå(): FeatureToggles = defaultFeatures(featureOverrides = arrayOf(Toggle.KravBortfalt to true))

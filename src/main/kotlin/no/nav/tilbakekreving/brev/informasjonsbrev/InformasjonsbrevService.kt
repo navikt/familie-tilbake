@@ -4,12 +4,17 @@ import no.nav.familie.tilbake.kontrakter.dokarkiv.AvsenderMottaker
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Dokument
 import no.nav.familie.tilbake.kontrakter.dokarkiv.v2.Filtype
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstidspunkt
+import no.nav.familie.tilbake.kontrakter.dokdist.Distribusjonstype
 import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.callId
+import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.InfobrevData
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
+import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedavsnittInformasjonsbrevDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
@@ -25,6 +30,7 @@ import java.util.UUID
 @Service
 class InformasjonsbrevService(
     private val dokarkivClient: DokarkivClient,
+    private val dokdistClient: DokdistClient,
     private val pdfGenClient: PdfGenClient,
 ) {
     fun journalførInformasjonsbrev(behov: InfobrevJournalføringBehov): OpprettJournalpostResponse {
@@ -58,6 +64,18 @@ class InformasjonsbrevService(
             dokuemntkategori = DokumentKlasse.IB,
             behandlingId = behov.behandlingId,
         )
+    }
+
+    fun distribuerInformasjonsbrev(behov: InfobrevDistribusjonBehov, logContext: SecureLog.Context): String {
+        return dokdistClient.brevTilUtsending(
+            behandlingId = behov.behandlingId,
+            journalpostId = behov.journalpostId,
+            fagsystem = behov.ytelse.tilFagsystemDTO(),
+            distribusjonstype = Distribusjonstype.ANNET,
+            distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+            adresse = null,
+            logContext = logContext,
+        ).bestillingsId
     }
 
     private fun lagEksternReferanseId(behandlingId: UUID): String {

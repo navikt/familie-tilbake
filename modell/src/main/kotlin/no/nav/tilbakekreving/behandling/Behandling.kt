@@ -41,6 +41,7 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behandlingslogg.Rolle
+import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
@@ -353,6 +354,21 @@ class Behandling internal constructor(
             ),
         )
     }
+
+    internal fun lagInfobrevDistribusjonBehov(
+        brevId: UUID,
+        fagsakId: String,
+        journalpostId: String,
+        dokumentInfoId: String,
+        ytelse: Ytelse,
+    ) = InfobrevDistribusjonBehov(
+        brevId = brevId,
+        behandlingId = id,
+        fagsakId = fagsakId,
+        journalpostId = journalpostId,
+        dokumentInfoId = dokumentInfoId,
+        ytelse = ytelse,
+    )
 
     internal fun lagVarselbrevDistribusjonBehov(
         journalpostId: String,

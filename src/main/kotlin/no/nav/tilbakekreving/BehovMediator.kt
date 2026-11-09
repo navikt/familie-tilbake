@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.api.v2.fagsystem.behov.FagsysteminfoBehovHendelse
 import no.nav.tilbakekreving.behov.Behov
 import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
+import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
@@ -26,6 +27,7 @@ import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.Henteårsak
+import no.nav.tilbakekreving.hendelse.InfobrevDistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
@@ -230,7 +232,8 @@ class BehovMediator(
                     sideeffektContext,
                 )
             }
-            is InfobrevJournalføringBehov -> TODO() // venter på brev
+
+            is InfobrevDistribusjonBehov -> distribuerInformasjonsbrev(behov, tilbakekreving, sideeffektContext, logContext)
             is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), sideeffektContext)
         }
     }
@@ -241,6 +244,23 @@ class BehovMediator(
             kodeAksjon = KodeAksjonDto.HENT_KRAVGRUNNLAG_FOR_DANNING_AV_NYTT_TILBAKEKREVINGSVEDTAK,
         )
         return KravgrunnlagMapper.tilKravgrunnlagHendelse(oppdatertKravgrunnlag, SystemKlokke, henteårsak = Henteårsak.KORRIGERING_AV_KRAV)
+    }
+
+    private fun distribuerInformasjonsbrev(
+        behov: InfobrevDistribusjonBehov,
+        tilbakekreving: Tilbakekreving,
+        sideeffektContext: SideeffektContext,
+        logContext: SecureLog.Context,
+    ) {
+        informasjonsbrevService.distribuerInformasjonsbrev(behov, logContext)
+        tilbakekreving.håndter(
+            InfobrevDistribusjonHendelse(
+                infobrevId = behov.brevId,
+                journalpostId = behov.journalpostId,
+                dokumentInfoId = behov.dokumentInfoId,
+            ),
+            sideeffektContext,
+        )
     }
 
     internal fun korrigerKravgrunnlag(
