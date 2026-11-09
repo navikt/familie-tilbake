@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entities
 
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import java.math.BigInteger
@@ -22,7 +23,7 @@ data class KravgrunnlagHendelseEntity(
     val referanse: String,
     val perioder: List<KravgrunnlagPeriodeEntity>,
     override val opprettet: LocalDateTime,
-    val korrigering: Boolean,
+    val henteårsak: Henteårsak?,
 ) : KravHendelseEntity() {
     override fun fraEntity(): KravgrunnlagHendelse {
         return KravgrunnlagHendelse(
@@ -39,7 +40,7 @@ data class KravgrunnlagHendelseEntity(
             referanse = referanse,
             perioder = perioder.sortedBy { it.periode }.map { it.fraEntity() },
             opprettet = opprettet,
-            korrigering = korrigering,
+            henteårsak = henteårsak,
         )
     }
 }

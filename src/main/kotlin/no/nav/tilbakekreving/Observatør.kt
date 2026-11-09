@@ -6,6 +6,7 @@ import no.nav.tilbakekreving.behov.BrukerinfoBehov
 import no.nav.tilbakekreving.behov.FagsysteminfoBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
+import no.nav.tilbakekreving.behov.KravgrunnlagForRevurderingBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
@@ -55,6 +56,10 @@ class Observatør() : BehovObservatør {
     }
 
     override fun håndter(behov: InfobrevJournalføringBehov) {
+        behovListe.add(behov)
+    }
+
+    override fun håndter(behov: KravgrunnlagForRevurderingBehov) {
         behovListe.add(behov)
     }
 }

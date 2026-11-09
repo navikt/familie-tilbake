@@ -22,9 +22,13 @@ import no.nav.tilbakekreving.test.FellesTestdata.BESLUTTER_IDENT
 import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.TestPropertySource
 import java.math.BigInteger
 import java.util.UUID
 
+@TestPropertySource(
+    properties = ["tilbakekreving.toggles.nyModell.EndretKravgrunnlagVisning=true"],
+)
 class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var oppdragRestClient: OppdragClientRestMock

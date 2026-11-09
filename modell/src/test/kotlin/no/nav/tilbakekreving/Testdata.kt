@@ -19,6 +19,7 @@ import no.nav.tilbakekreving.hendelse.BrukerinfoHendelse
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
+import no.nav.tilbakekreving.hendelse.Henteårsak
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
@@ -74,6 +75,7 @@ fun kravgrunnlag(
     referanse: String = UUID.randomUUID().toString(),
     kravgrunnlagId: String = UUID.randomUUID().toString(),
     opprettet: LocalDateTime = LocalDateTime.now(),
+    henteårsak: Henteårsak? = null,
 ): KravgrunnlagHendelse {
     val kravgrunnlagHendelse = KravgrunnlagHendelse(
         id = UUID.randomUUID(),
@@ -88,7 +90,7 @@ fun kravgrunnlag(
         referanse = referanse,
         kravgrunnlagId = kravgrunnlagId,
         perioder = perioder,
-        korrigering = false,
+        henteårsak = henteårsak,
         opprettet = opprettet,
     )
     kravgrunnlagHendelse.valider(Sporing(UUID.randomUUID().toString(), UUID.randomUUID().toString()))

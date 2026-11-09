@@ -44,8 +44,8 @@ class KravgrunnlagHendelseEntityTest {
                     beløp = emptyList(),
                 ),
             ),
-            korrigering = false,
             opprettet = LocalDateTime.now(),
+            henteårsak = null,
         )
 
         val gjenopprettetEntity = entity.fraEntity().tilEntity("")
