@@ -241,8 +241,8 @@ class BehovMediator(
                 val journalpost = vedtaksbrevService.journalførRevurderingVedtaksbrev(behov)
                 if (journalpost.journalpostId == null) {
                     throw Feil(
-                        message = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
-                        frontendFeilmelding = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} misslykket med denne meldingen: ${journalpost.melding}",
+                        message = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mislyktes med denne meldingen: ${journalpost.melding}",
+                        frontendFeilmelding = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mislyktes med denne meldingen: ${journalpost.melding}",
                         logContext = SecureLog.Context.fra(tilbakekreving),
                     )
                 }

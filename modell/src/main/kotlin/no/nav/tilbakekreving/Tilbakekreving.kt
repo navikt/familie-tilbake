@@ -256,10 +256,14 @@ class Tilbakekreving internal constructor(
             }
 
             kravgrunnlagHistorikk.lagre(kravgrunnlagHendelse)
-            oppdaterKravgrunnlag(
-                kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
-                sideeffektContext,
-            )
+            if (kravgrunnlagHendelse.henteårsak == Henteårsak.OMGJØRING_AV_VEDTAK) {
+                settKravgrunnlagForRevurdering(kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse())
+            } else {
+                oppdaterKravgrunnlag(
+                    kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
+                    sideeffektContext,
+                )
+            }
         }
     }
 
@@ -409,7 +413,7 @@ class Tilbakekreving internal constructor(
         if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
             brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.REVURDERING))
         } else {
-            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.ORDINÆR))
+            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG))
         }
     }
 

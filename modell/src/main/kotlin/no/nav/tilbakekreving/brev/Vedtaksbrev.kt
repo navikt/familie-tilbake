@@ -53,7 +53,7 @@ data class Vedtaksbrev(
     }
 
     enum class Vedtaksbrevtype {
-        ORDINÆR,
+        FØRSTEGANG,
         REVURDERING,
     }
 }

@@ -27,6 +27,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OpprettRevurderingResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevTekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
@@ -355,6 +356,20 @@ class BehandlingApiController(
                 tilbakekreving.oppdaterRevurderingsårsak(behandlingId, revurderingsårsak, context),
             )
         } ?: ResponseEntity.notFound().build()
+    }
+
+    override fun behandlingLagreRevurderingVedtaksbrevTekst(behandlingId: UUID, revurderingVedtaksbrevTekstDto: RevurderingVedtaksbrevTekstDto): ResponseEntity<Unit> {
+        tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.OppdaterVedtaksbrev,
+        ) ?: return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(
+            nyVedtaksbrevService.lagreRevurderingVedtaksbrevData(
+                behandlingId = behandlingId,
+                data = revurderingVedtaksbrevTekstDto.tekstFraSaksbehandler,
+            ),
+        )
     }
 
     private fun mapTilRevurderingsårsak(
