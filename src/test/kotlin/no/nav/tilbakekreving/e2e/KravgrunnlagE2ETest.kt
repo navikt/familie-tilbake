@@ -41,7 +41,6 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
-import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagMediator
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -67,9 +66,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var tilbakekrevingRepository: TilbakekrevingRepository
-
-    @Autowired
-    private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
 
     @Autowired
     private lateinit var kafkaProducerStub: KafkaProducerStub
@@ -254,11 +250,12 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `statuskode som ikke er støttet blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, kravStatusKode = "ANNU"))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId, kravStatusKode = "ANNU"))
 
         shouldThrow<ModellFeil.UtenforScopeException> {
             tilbakekreving(FagsystemDTO.TS, fagsystemId)
@@ -480,6 +477,25 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
         oppdragRestClient.shouldHaveIverksettelse(BigInteger(vedtakId)) {
             it.kontrollfelt shouldBe kontrollfelt
         }
+    }
+
+    @Test
+    fun `endret kravgrunnlag uten tilbakekreving med samme vedtakId blir liggende ulest`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                kravgrunnlagId = kravgrunnlagId,
+                kravStatusKode = "ENDR",
+            ),
+            forventetAntallUleste = 1,
+        )
+
+        // Unngår at kravgrunnlaget blokkerer lesing i andre tester
+        jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", kravgrunnlagId)
     }
 
     @Test

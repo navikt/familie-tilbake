@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Repository
 class KravgrunnlagBufferRepository(
@@ -25,14 +26,16 @@ class KravgrunnlagBufferRepository(
 
     @Transactional
     fun konsumerKravgrunnlag(callback: (Entity) -> Unit) {
-        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false ORDER BY mottatt FOR UPDATE LIMIT 5;", Mapper)
-        kravgrunnlag.forEach {
+        val kravgrunnlag = jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE lest=false ORDER BY mottatt FOR UPDATE LIMIT 5;") { rs, rowNum ->
+            rs.getObject("id", UUID::class.java) to Mapper.mapRow(rs, rowNum)
+        }
+        kravgrunnlag.forEach { (id, entity) ->
             try {
-                callback(it)
-                jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE kravgrunnlag_id=?;", it.kravgrunnlagId)
+                callback(entity)
+                jdbcTemplate.update("UPDATE kravgrunnlag_buffer SET lest=true WHERE id=?;", id)
             } catch (e: Exception) {
-                log.medContext(SecureLog.Context.utenBehandling(it.fagsystemId)) {
-                    error("Feilet under konsumering av kravgrunnlag, kravgrunnlagId={}", it.kravgrunnlagId, e)
+                log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
+                    error("Feilet under konsumering av kravgrunnlag, kravgrunnlagId={}", entity.kravgrunnlagId, e)
                 }
             }
         }

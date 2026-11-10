@@ -1,8 +1,11 @@
 package no.nav.tilbakekreving.e2e.repository
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
+import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.core.query
@@ -53,5 +56,43 @@ class KravgrunnlagBufferRepositoryE2ETest : TilbakekrevingE2EBase() {
             fagsystemId1 to true,
             fagsystemId2 to true,
         )
+    }
+
+    @Test
+    fun `endret kravgrunnlag med samme kravgrunnlagId blir ikke markert som lest`() {
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlag(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+            ),
+        )
+        // Fyller opp lesingen slik at det endrede kravgrunnlaget ikke blir lest sammen med det første
+        repeat(4) {
+            sendKravgrunnlag(KravgrunnlagGenerator.forTilleggsstønader())
+        }
+        sendKravgrunnlag(
+            KravgrunnlagGenerator.forTilleggsstønader(
+                fagsystemId = fagsystemId,
+                vedtakId = vedtakId,
+                kravgrunnlagId = kravgrunnlagId,
+                kontrollfelt = "2025-12-24-11.12.13.234567",
+                kravStatusKode = "ENDR",
+            ),
+        )
+
+        repeat(2) {
+            kravgrunnlagMediator.lesKravgrunnlag()
+        }
+
+        tilbakekreving(FagsystemDTO.TS, fagsystemId)
+            .shouldNotBeNull()
+            .kravgrunnlagHistorikk
+            .nåværendeKravgrunnlagReferanse()
+            .entry
+            .kravstatuskode shouldBe Kravstatuskode.ENDRET
     }
 }

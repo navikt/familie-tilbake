@@ -50,7 +50,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
     protected lateinit var kravgrunnlagBufferRepository: KravgrunnlagBufferRepository
 
     @Autowired
-    private lateinit var kravgrunnlagMediator: KravgrunnlagMediator
+    protected lateinit var kravgrunnlagMediator: KravgrunnlagMediator
 
     @Autowired
     protected lateinit var tilbakekrevingService: TilbakekrevingService

@@ -6,8 +6,10 @@ import no.nav.tilbakekreving.entity.FieldConverter
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import org.intellij.lang.annotations.Language
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
+import java.math.BigInteger
 import java.util.UUID
 
 sealed interface TilbakekrevingFilter {
@@ -62,6 +64,29 @@ sealed interface TilbakekrevingFilter {
         override fun logContext(): SecureLog.Context = SecureLog.Context.utenBehandling(fagsakId)
     }
 
+    private class VedtakId(
+        private val vedtakId: BigInteger,
+        private val fagsakId: String,
+    ) : TilbakekrevingFilter {
+        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
+            return jdbcTemplate.query("$QUERY;", mapper, vedtakId, vedtakId)
+        }
+
+        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
+            return jdbcTemplate.query("$QUERY FOR UPDATE;", mapper, vedtakId, vedtakId)
+        }
+
+        override fun logContext(): SecureLog.Context = SecureLog.Context.utenBehandling(fagsakId)
+
+        companion object {
+            @Language("PostgreSQL")
+            private const val QUERY = """SELECT * FROM tilbakekreving
+WHERE tilbakekreving.id IN (SELECT tilbakekreving_id FROM tilbakekreving_kravgrunnlag WHERE vedtak_id=?)
+AND (SELECT tk.vedtak_id FROM tilbakekreving_kravgrunnlag tk WHERE tk.tilbakekreving_id=tilbakekreving.id ORDER BY tk.opprettet LIMIT 1)=?
+ORDER BY tilbakekreving.id DESC"""
+        }
+    }
+
     private class TilbakekrevingId(val id: String) : TilbakekrevingFilter {
         override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
             return jdbcTemplate.query(
@@ -86,6 +111,8 @@ sealed interface TilbakekrevingFilter {
         fun behandling(id: UUID): TilbakekrevingFilter = BehandlingId(id)
 
         fun fagsak(fagsakId: String, fagsystem: FagsystemDTO): TilbakekrevingFilter = EksternFagsakId(fagsakId, fagsystem)
+
+        fun vedtakId(vedtakId: BigInteger, fagsakId: String): TilbakekrevingFilter = VedtakId(vedtakId, fagsakId)
 
         fun fagsakEllerTilbakekrevingId(fagsakId: String, fagsystem: FagsystemDTO): TilbakekrevingFilter = when {
             (Ytelse.ytelser().singleOrNull { it.tilFagsystemDTO() == fagsystem }?.brukerEksternFagsakIdForUrl ?: true) -> {

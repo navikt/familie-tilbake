@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.kravgrunnlag
 
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -33,13 +34,15 @@ class KravgrunnlagMediator(
                     tilbakekreving.håndter(kravgrunnlagHendelse, sideeffektContext)
                 }
             } else {
-                val fagsystem = KravgrunnlagMapper.ytelseFor(kravgrunnlag.kodeFagomraade, kravgrunnlag.fagsystemId).tilFagsystemDTO()
                 tilbakekrevingService.hentOgLagreTilbakekreving(
-                    filter = TilbakekrevingFilter.fagsak(kravgrunnlag.fagsystemId, fagsystem),
+                    filter = TilbakekrevingFilter.vedtakId(kravgrunnlag.vedtakId, kravgrunnlag.fagsystemId),
                     validerScope = false,
                 ) { tilbakekreving, context ->
                     tilbakekreving.håndter(kravgrunnlagHendelse, context(Behandler.Vedtaksløsning))
-                }
+                } ?: throw Feil(
+                    message = "Fant ingen tilbakekreving for kravgrunnlag med vedtakId ${kravgrunnlag.vedtakId}",
+                    logContext = SecureLog.Context.utenBehandling(kravgrunnlag.fagsystemId),
+                )
             }
         }
     }
