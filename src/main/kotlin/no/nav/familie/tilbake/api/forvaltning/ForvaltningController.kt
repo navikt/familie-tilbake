@@ -574,6 +574,22 @@ class ForvaltningController(
         return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedFlereNyeKravgrunnlag())
     }
 
+    @Operation(summary = "Hent fagsystem-IDer i ny modell der kravgrunnlag eller statusmeldinger har flere unike vedtak-IDer")
+    @GetMapping(
+        path = ["/fagsystem-ider-med-flere-vedtak-ider"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentFagsystemIderMedFlereVedtakIder(): Ressurs<List<TilbakekrevingRepository.FagsystemIdMedFlereVedtakIder>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente fagsystem-IDer med flere vedtak-IDer",
+                frontendFeilmelding = "Du har ikke tilgang til å hente fagsystem-IDer med flere vedtak-IDer",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedFlereVedtakIder())
+    }
+
     @Operation(summary = "Hent kravgrunnlag i bufferet som ikke er koblet til en tilbakekreving i ny modell")
     @GetMapping(
         path = ["/finn-kravgrunnlag-uten-sak"],

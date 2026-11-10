@@ -187,6 +187,45 @@ ORDER BY antall DESC;""",
         }
     }
 
+    fun hentFagsystemIderMedFlereVedtakIder(): List<FagsystemIdMedFlereVedtakIder> {
+        val iKravgrunnlag = hentTilbakekrevingerMedFlereVedtakIder(
+            """SELECT kg.tilbakekreving_id AS tilbakekreving_ref, ef.ekstern_id_fra_oppdrag, ef.ytelse
+FROM tilbakekreving_kravgrunnlag kg
+         JOIN tilbakekreving_ekstern_fagsak ef ON kg.tilbakekreving_id = ef.tilbakekreving_ref
+GROUP BY kg.tilbakekreving_id, ef.ekstern_id_fra_oppdrag, ef.ytelse
+HAVING COUNT(DISTINCT kg.vedtak_id) > 1;""",
+            erKravgrunnlag = true,
+        )
+        val iStatusmeldinger = hentTilbakekrevingerMedFlereVedtakIder(
+            """SELECT s.tilbakekreving_ref, ef.ekstern_id_fra_oppdrag, ef.ytelse
+FROM tilbakekreving_krav_statusmelding s
+         JOIN tilbakekreving_ekstern_fagsak ef ON s.tilbakekreving_ref = ef.tilbakekreving_ref
+GROUP BY s.tilbakekreving_ref, ef.ekstern_id_fra_oppdrag, ef.ytelse
+HAVING COUNT(DISTINCT s.vedtak_id) > 1;""",
+            erKravgrunnlag = false,
+        )
+        return (iKravgrunnlag + iStatusmeldinger).sortedBy { it.fagsystemId }
+    }
+
+    private fun hentTilbakekrevingerMedFlereVedtakIder(
+        sql: String,
+        erKravgrunnlag: Boolean,
+    ): List<FagsystemIdMedFlereVedtakIder> {
+        return jdbcTemplate.query(sql) { rs, _ ->
+            FagsystemIdMedFlereVedtakIder(
+                fagsystemId = rs.getString("ekstern_id_fra_oppdrag"),
+                ytelse = rs.getString("ytelse"),
+                erKravgrunnlag = erKravgrunnlag,
+            )
+        }
+    }
+
+    data class FagsystemIdMedFlereVedtakIder(
+        val fagsystemId: String,
+        val ytelse: String,
+        val erKravgrunnlag: Boolean,
+    )
+
     data class FagsystemIdMedFlereNyeKravgrunnlag(
         val fagsystemId: String,
         val ytelse: String,
