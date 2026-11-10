@@ -6,14 +6,10 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
-import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
-import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
-import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
-import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.fatteVedtakVurdering
@@ -104,28 +100,5 @@ class BehandlingBigQueryTest {
         }
         bigQuery.vurderinger.shouldBeEmpty()
         bigQuery.behandlinger.shouldHaveSize(1)
-    }
-
-    private fun SideeffektContext.medBigQuery(bigQuery: BigQueryService) = SideeffektContext(
-        behandler,
-        endringObservatør,
-        behovObservatør,
-        bigQuery,
-        features,
-        klokke,
-        behandlingslogg,
-    )
-
-    private class BigQueryOppsamler : BigQueryService {
-        val vurderinger = mutableListOf<BigQueryVilkårsvurderingDataDto>()
-        val behandlinger = mutableListOf<BigQueryBehandlingDataDto>()
-
-        override fun lagreVilkårsvurdering(bigqueryData: BigQueryVilkårsvurderingDataDto) {
-            vurderinger.add(bigqueryData)
-        }
-
-        override fun oppdaterBehandling(bigqueryData: BigQueryBehandlingDataDto) {
-            behandlinger.add(bigqueryData)
-        }
     }
 }

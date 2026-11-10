@@ -149,6 +149,8 @@ class Behandling internal constructor(
             tilbakekrevingId = tilbakekrevingId,
             oppdagetAv = if (faktasteg.oppdagetAv() == Faktasteg.Vurdering.Oppdaget.Av.Bruker) "Bruker" else "Nav",
             forhåndsvarselSendt = forhåndsvarsel.erForhåndsvarselSendt(),
+            revurderingsårsak = revurderingsårsak?.type?.name,
+            revurderingsinstans = revurderingsårsak?.vedtakOmgjortAv?.name,
         )
     }
 

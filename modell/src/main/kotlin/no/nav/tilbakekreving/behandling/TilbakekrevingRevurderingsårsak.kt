@@ -12,6 +12,7 @@ import java.util.UUID
 sealed interface TilbakekrevingRevurderingsårsak {
     val vedtakOmgjortAv: VedtakOmgjortAv?
     val beskrivelse: String
+    val type: TilbakekrevingRevurderingsårsakType
 
     fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity
 
@@ -21,11 +22,13 @@ sealed interface TilbakekrevingRevurderingsårsak {
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
+        override val type: TilbakekrevingRevurderingsårsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE
+
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.ETTER_KLAGE,
+                revurderingsårsakType = type,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -43,11 +46,13 @@ sealed interface TilbakekrevingRevurderingsårsak {
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
+        override val type: TilbakekrevingRevurderingsårsakType = TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET
+
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.FEILUTBETALT_BELØP_ENDRET,
+                revurderingsårsakType = type,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -64,13 +69,15 @@ sealed interface TilbakekrevingRevurderingsårsak {
     data class Foreldelse(
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
+        override val type: TilbakekrevingRevurderingsårsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE
+
         override val vedtakOmgjortAv: VedtakOmgjortAv? = null
 
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.FORELDELSE,
+                revurderingsårsakType = type,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )
@@ -87,11 +94,13 @@ sealed interface TilbakekrevingRevurderingsårsak {
         override val vedtakOmgjortAv: VedtakOmgjortAv,
         override val beskrivelse: String,
     ) : TilbakekrevingRevurderingsårsak {
+        override val type: TilbakekrevingRevurderingsårsakType = TilbakekrevingRevurderingsårsakType.UTEN_KLAGE
+
         override fun tilEntity(behandlingId: UUID): TilbakekrevingRevurderingEntity {
             return TilbakekrevingRevurderingEntity(
                 id = UUID.randomUUID(),
                 behandlingRef = behandlingId,
-                revurderingsårsakType = TilbakekrevingRevurderingsårsakType.UTEN_KLAGE,
+                revurderingsårsakType = type,
                 omgjortAv = vedtakOmgjortAv,
                 beskrivelse = beskrivelse,
             )

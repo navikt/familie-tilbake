@@ -1,6 +1,10 @@
 package no.nav.tilbakekreving.behandling.revurdering
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forAll
+import io.kotest.inspectors.forSingle
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -9,12 +13,15 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.BigQueryOppsamler
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
+import no.nav.tilbakekreving.behandling.medBigQuery
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
+import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
@@ -24,6 +31,7 @@ import no.nav.tilbakekreving.hendelse.JournalføringHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -254,5 +262,76 @@ class RevurderingTest {
                 context,
             )
         }
+    }
+
+    @Test
+    fun `opprettelse av revurdering sendes til BigQuery`() {
+        val bigQuery = BigQueryOppsamler()
+        val context = saksbehandlerContext().medBigQuery(bigQuery)
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        val opprinneligBehandlingId = tilbakekreving.nåværendeBehandlingId()
+        bigQuery.behandlinger.filter { it.revurderingsårsak != null }.shouldBeEmpty()
+
+        tilbakekreving.opprettRevurdering(
+            opprinneligBehandlingId,
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+
+        val revurderingId = tilbakekreving.nåværendeBehandlingId()
+        revurderingId shouldNotBe opprinneligBehandlingId
+        bigQuery.behandlinger.filter { it.behandlingId == revurderingId.toString() }.forSingle {
+            it.tilbakekrevingId shouldBe tilbakekreving.id
+            it.ytelse shouldBe Ytelse.Barnetrygd.hentYtelsesnavn(Språkkode.NB)
+            it.behandlingstype shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING.name
+            it.revurderingsårsak shouldBe "ETTER_KLAGE"
+            it.revurderingsinstans shouldBe "Klageinstansen"
+        }
+        bigQuery.behandlinger.filter { it.behandlingId == opprinneligBehandlingId.toString() }.forAll {
+            it.revurderingsårsak shouldBe null
+            it.revurderingsinstans shouldBe null
+        }
+    }
+
+    @Test
+    fun `oppdatering av revurderingsårsak sendes til BigQuery`() {
+        val bigQuery = BigQueryOppsamler()
+        val context = saksbehandlerContext().medBigQuery(bigQuery)
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        tilbakekreving.opprettRevurdering(
+            tilbakekreving.nåværendeBehandlingId(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+        val revurderingId = tilbakekreving.nåværendeBehandlingId()
+
+        tilbakekreving.oppdaterRevurderingsårsak(
+            revurderingId,
+            TilbakekrevingRevurderingsårsak.UtenKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                beskrivelse = "Begrunnelse fra Førsteinstansen",
+            ),
+            context,
+        )
+        tilbakekreving.oppdaterRevurderingsårsak(
+            revurderingId,
+            TilbakekrevingRevurderingsårsak.Foreldelse(beskrivelse = "Foreldet"),
+            context,
+        )
+
+        val revurderingsrader = bigQuery.behandlinger.filter { it.behandlingId == revurderingId.toString() }
+        revurderingsrader shouldHaveSize 3
+        revurderingsrader.forAll { it.tilbakekrevingId shouldBe tilbakekreving.id }
+        revurderingsrader.map { it.revurderingsårsak to it.revurderingsinstans } shouldBe listOf(
+            "ETTER_KLAGE" to "Klageinstansen",
+            "UTEN_KLAGE" to "Førsteinstansen",
+            "FORELDELSE" to null,
+        )
     }
 }

@@ -18,4 +18,6 @@ data class BigQueryBehandlingDataDto(
     val tilbakekrevingId: String?,
     val oppdagetAv: String?,
     val forhåndsvarselSendt: Boolean?,
+    val revurderingsårsak: String?,
+    val revurderingsinstans: String?,
 )

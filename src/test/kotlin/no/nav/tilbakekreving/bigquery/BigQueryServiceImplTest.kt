@@ -15,6 +15,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -22,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
+import no.nav.tilbakekreving.api.v1.dto.BigQueryBehandlingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingDataDto
 import no.nav.tilbakekreving.api.v1.dto.BigQueryVilkårsvurderingsperiodeDto
 import no.nav.tilbakekreving.applicationProps
@@ -143,6 +145,50 @@ class BigQueryServiceImplTest {
         shouldThrow<IllegalStateException> {
             BigQueryServiceImpl(applicationProps(), klient).lagreVilkårsvurdering(data())
         } shouldBe forventet
+    }
+
+    @Test
+    fun `oppdatering av revurdering sendes med tilbakekrevingId og revurderingsinformasjon`() {
+        val forespørsler = mutableListOf<InsertAllRequest>()
+        val response = mockk<InsertAllResponse>()
+        every { response.hasErrors() } returns false
+        val klient = grensesnittStub<BigQuery> { metode, argumenter ->
+            check(metode == "insertAll") { "Uventet BigQuery-kall: $metode" }
+            forespørsler.add(argumenter.single() as InsertAllRequest)
+            response
+        }
+        val fagsak = Testdata.fagsak()
+        val behandling = Testdata.lagBehandling(fagsak.id)
+        val data = BigQueryBehandlingDataDto(
+            behandlingId = behandling.id.toString(),
+            opprettetDato = null,
+            periode = 1.januar(2021) til 31.januar(2021),
+            behandlingstype = "REVURDERING_TILBAKEKREVING",
+            ytelse = fagsak.fagsystem.navn,
+            beløp = 2000,
+            enhetNavn = null,
+            enhetKode = null,
+            status = null,
+            resultat = null,
+            harTilleggsfrist = null,
+            tilbakekrevingId = fagsak.id.toString(),
+            oppdagetAv = null,
+            forhåndsvarselSendt = null,
+            revurderingsårsak = "ETTER_KLAGE",
+            revurderingsinstans = "Klageinstansen",
+        )
+
+        BigQueryServiceImpl(applicationProps(), klient).oppdaterBehandling(data)
+
+        forespørsler.forSingle { request ->
+            request.table shouldBe TableId.of("test-project", "test-dataset", "bq_behandling")
+            request.rows.forSingle { rad ->
+                rad.content.toList() shouldContain ("tilbakekreving_id" to fagsak.id.toString())
+                rad.content.toList() shouldContain ("behandlingstype" to "REVURDERING_TILBAKEKREVING")
+                rad.content.toList() shouldContain ("revurderingsarsak" to "ETTER_KLAGE")
+                rad.content.toList() shouldContain ("revurderingsinstans" to "Klageinstansen")
+            }
+        }
     }
 
     private fun medLoggfanging(test: (List<ILoggingEvent>) -> Unit) {

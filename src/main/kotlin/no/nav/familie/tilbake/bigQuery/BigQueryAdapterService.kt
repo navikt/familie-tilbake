@@ -66,9 +66,11 @@ class BigQueryAdapterService(
                 status = behandling.status.name,
                 resultat = behandling.sisteResultat?.type?.name,
                 harTilleggsfrist = harTilleggsfrist,
-                tilbakekrevingId = tilbakekreving.id.toString(),
+                tilbakekrevingId = null,
                 oppdagetAv = null,
                 forhåndsvarselSendt = null,
+                revurderingsårsak = null,
+                revurderingsinstans = null,
             ),
         )
     }
