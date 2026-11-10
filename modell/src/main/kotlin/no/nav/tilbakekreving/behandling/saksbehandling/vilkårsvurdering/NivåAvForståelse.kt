@@ -82,6 +82,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr?.påkrevdeVurderinger() ?: setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES)
 
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
+
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr?.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
@@ -159,6 +163,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
+
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return AktsomhetsvurderingEntity(
@@ -222,6 +230,10 @@ interface NivåAvForståelse : ForårsaketAvBruker.Nei {
         }
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = beløpIBehold.påkrevdeVurderinger()
+
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
 
         override fun tilEntity(periodeRef: UUID): AktsomhetsvurderingEntity {
             return AktsomhetsvurderingEntity(

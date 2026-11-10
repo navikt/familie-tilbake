@@ -6,10 +6,13 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.familie.tilbake.api.FagsakController
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
+import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -32,6 +35,9 @@ import java.util.UUID
 class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
     private lateinit var oppdragRestClient: OppdragClientRestMock
+
+    @Autowired
+    private lateinit var fagsakController: FagsakController
 
     @Test
     fun `revurdering av vedtak med full utbetaling fører til ny behandling`() {
@@ -126,6 +132,27 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 )
             }
         }.message shouldBe "Denne behandlingen kan ikke endres fordi den har allerede en revurdering."
+    }
+
+    @Test
+    fun `fagsak hentes uten feil etter at revurdering er opprettet`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val opprinneligBehandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = opprinneligBehandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Klageinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            fagsakController.hentFagsak(FagsystemDTO.TS, fagsystemId).data.shouldBeInstanceOf<FagsakDto>()
+        }
     }
 
     private fun gjørBehandlingKlarTilRevurdering(fagsystemId: String): UUID {

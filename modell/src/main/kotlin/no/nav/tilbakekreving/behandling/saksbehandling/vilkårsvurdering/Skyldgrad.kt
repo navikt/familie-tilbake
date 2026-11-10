@@ -39,6 +39,10 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = kanUnnlates4XRettsgebyr.påkrevdeVurderinger()
 
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
+
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             val reduksjonSærligeGrunner = kanUnnlates4XRettsgebyr.reduksjonMomenter() as? ReduksjonMomenter.ReduksjonSærligeGrunner
             return VurdertUtbetaling.Vilkårsvurdering(
@@ -118,6 +122,10 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES) + reduksjonSærligeGrunner.skalReduseres.påkrevdeVurderingerSærligeGrunner()
 
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
+
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(
                 aktsomhetFørUtbetaling = vurderingstype(),
@@ -192,6 +200,10 @@ sealed interface Skyldgrad : ForårsaketAvBruker.Ja {
         override fun reduksjon(): Reduksjon = Reduksjon.FullstendigTilbakekreving()
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = setOf(VilkårsvurderingBegrunnelse.TILBAKEKREVES, VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER)
+
+        override fun klon(forrigeVurdering: Vilkårsvurderingsteg.Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return this
+        }
 
         override fun oppsummerVurdering(): VurdertUtbetaling.Vilkårsvurdering {
             return VurdertUtbetaling.Vilkårsvurdering(

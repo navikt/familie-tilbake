@@ -33,6 +33,11 @@ interface ForårsaketAvBruker {
 
     fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse>
 
+    fun klon(
+        forrigeVurdering: Vilkårsvurderingsperiode,
+        forrigePeriodeId: UUID?,
+    ): ForårsaketAvBruker
+
     sealed interface Ja : ForårsaketAvBruker
 
     sealed interface Nei : ForårsaketAvBruker
@@ -55,6 +60,10 @@ interface ForårsaketAvBruker {
         }
 
         override fun påkrevdeVurderinger(): Set<VilkårsvurderingBegrunnelse> = emptySet()
+
+        override fun klon(forrigeVurdering: Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return IkkeVurdert()
+        }
 
         override val navn: String
             get() = "IkkeVurdert"
@@ -96,6 +105,10 @@ interface ForårsaketAvBruker {
                 begrunnelseForUnnlatelse = null,
                 forrigePeriodeId = forrigePeriodeId,
             )
+        }
+
+        override fun klon(forrigeVurdering: Vilkårsvurderingsperiode, forrigePeriodeId: UUID?): ForårsaketAvBruker {
+            return KopiertVurdering(forrigeVurdering, forrigePeriodeId)
         }
     }
 }

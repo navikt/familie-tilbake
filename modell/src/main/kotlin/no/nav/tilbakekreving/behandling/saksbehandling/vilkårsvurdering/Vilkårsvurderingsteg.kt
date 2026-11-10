@@ -298,7 +298,7 @@ class Vilkårsvurderingsteg(
                 id = UUID.randomUUID(),
                 periode = periode,
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                _vurdering = _vurdering,
+                _vurdering = _vurdering.klon(this, this.id),
                 endringIKravgrunnnlag = endringIKravgrunnnlag,
                 tilbakeført = null,
             )
