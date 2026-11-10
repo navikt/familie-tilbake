@@ -4,7 +4,6 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
@@ -53,6 +52,33 @@ class KravgrunnlagBufferRepository(
         }, fagsystemId)
     }
 
+    fun finnKravgrunnlagUtenSak(): List<KravgrunnlagUtenSak> {
+        return jdbcTemplate.query(
+            """SELECT kb.fagsystem_id, kb.vedtak_id, kb.kontrollfelt
+FROM (SELECT fagsystem_id,
+             mottatt,
+             (xpath(
+                     '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:vedtakId/text()',
+                     kravgrunnlag::xml,
+                     ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
+              ))[1]::text AS vedtak_id,
+             (xpath(
+                     '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:kontrollfelt/text()',
+                     kravgrunnlag::xml,
+                     ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
+              ))[1]::text AS kontrollfelt
+      FROM kravgrunnlag_buffer) kb
+WHERE NOT EXISTS (SELECT 1 FROM tilbakekreving_kravgrunnlag tk WHERE tk.kontrollfelt = kb.kontrollfelt)
+ORDER BY kb.mottatt;""",
+        ) { rs, _ ->
+            KravgrunnlagUtenSak(
+                fagsystemId = rs.getString("fagsystem_id"),
+                vedtakId = rs.getString("vedtak_id"),
+                kontrollfelt = rs.getString("kontrollfelt"),
+            )
+        }
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -70,6 +96,12 @@ class KravgrunnlagBufferRepository(
         val kravgrunnlag: String,
         val kravgrunnlagId: String,
         val fagsystemId: String,
+    )
+
+    data class KravgrunnlagUtenSak(
+        val fagsystemId: String,
+        val vedtakId: String?,
+        val kontrollfelt: String?,
     )
 
     data class Lagret(

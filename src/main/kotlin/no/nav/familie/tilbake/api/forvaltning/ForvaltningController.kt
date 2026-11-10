@@ -574,6 +574,38 @@ class ForvaltningController(
         return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedFlereNyeKravgrunnlag())
     }
 
+    @Operation(summary = "Hent kravgrunnlag i bufferet som ikke er koblet til en tilbakekreving i ny modell")
+    @GetMapping(
+        path = ["/finn-kravgrunnlag-uten-sak"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun finnKravgrunnlagUtenSak(): Ressurs<List<KravgrunnlagBufferRepository.KravgrunnlagUtenSak>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente kravgrunnlag uten sak",
+                frontendFeilmelding = "Du har ikke tilgang til å hente kravgrunnlag uten sak",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(kravgrunnlagBufferRepository.finnKravgrunnlagUtenSak())
+    }
+
+    @Operation(summary = "Hent statusmeldinger i bufferet som ikke er koblet til en tilbakekreving i ny modell")
+    @GetMapping(
+        path = ["/finn-statusmeldinger-uten-sak"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun finnStatusmeldingerUtenSak(): Ressurs<List<StatusmeldingBufferRepository.StatusmeldingUtenSak>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente statusmeldinger uten sak",
+                frontendFeilmelding = "Du har ikke tilgang til å hente statusmeldinger uten sak",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(statusmeldingBufferRepository.finnStatusmeldingerUtenSak())
+    }
+
     @Operation(summary = "Hent URL for ytelser i gammel modell")
     @GetMapping(
         path = ["/behandling-url"],

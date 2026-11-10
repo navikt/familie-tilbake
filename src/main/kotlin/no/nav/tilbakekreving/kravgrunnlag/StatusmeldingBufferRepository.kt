@@ -54,6 +54,21 @@ class StatusmeldingBufferRepository(
         }, fagsystemId)
     }
 
+    fun finnStatusmeldingerUtenSak(): List<StatusmeldingUtenSak> {
+        return jdbcTemplate.query(
+            """SELECT sb.fagsystem_id, sb.vedtak_id, sb.status
+FROM statusmelding_buffer sb
+WHERE NOT EXISTS (SELECT 1 FROM tilbakekreving_krav_statusmelding ks WHERE ks.id = sb.id)
+ORDER BY sb.mottatt;""",
+        ) { rs, _ ->
+            StatusmeldingUtenSak(
+                fagsystemId = rs.getString("fagsystem_id"),
+                vedtakId = rs.getString("vedtak_id"),
+                kravstatuskode = rs.getString("status"),
+            )
+        }
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -75,6 +90,12 @@ class StatusmeldingBufferRepository(
         val fagsystemId: String,
         val vedtakId: String,
         val status: String,
+    )
+
+    data class StatusmeldingUtenSak(
+        val fagsystemId: String,
+        val vedtakId: String,
+        val kravstatuskode: String,
     )
 
     data class Lagret(
