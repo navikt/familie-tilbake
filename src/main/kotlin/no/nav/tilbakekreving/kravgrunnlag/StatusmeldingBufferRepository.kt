@@ -44,6 +44,16 @@ class StatusmeldingBufferRepository(
         }
     }
 
+    fun hentForFagsystemId(fagsystemId: String): List<Lagret> {
+        return jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE fagsystem_id=? ORDER BY mottatt;", { rs, rowNum ->
+            Lagret(
+                entity = Mapper.mapRow(rs, rowNum),
+                lest = rs.getBoolean("lest"),
+                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
+            )
+        }, fagsystemId)
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -65,5 +75,11 @@ class StatusmeldingBufferRepository(
         val fagsystemId: String,
         val vedtakId: String,
         val status: String,
+    )
+
+    data class Lagret(
+        val entity: Entity,
+        val lest: Boolean,
+        val mottatt: LocalDateTime,
     )
 }

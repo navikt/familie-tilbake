@@ -17,4 +17,6 @@ interface ØkonomiXmlMottattArkivRepository :
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,
     ): List<ØkonomiXmlMottattArkiv>
+
+    fun findByEksternFagsakId(eksternFagsakId: String): List<ØkonomiXmlMottattArkiv>
 }

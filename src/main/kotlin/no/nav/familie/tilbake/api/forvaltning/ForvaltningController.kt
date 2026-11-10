@@ -7,12 +7,15 @@ import no.nav.familie.tilbake.behandling.Fagsystem
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.datavarehus.saksstatistikk.BehandlingTilstandService
 import no.nav.familie.tilbake.forvaltning.ForvaltningService
 import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattArkivRepository
+import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.LogService
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
@@ -32,9 +35,11 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagBufferRepository
 import no.nav.tilbakekreving.kravgrunnlag.StatusmeldingBufferRepository
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -72,6 +77,9 @@ class ForvaltningController(
     private val behandlingRepository: BehandlingRepository,
     private val kravgrunnlagRepository: KravgrunnlagRepository,
     private val statusmeldingBufferRepository: StatusmeldingBufferRepository,
+    private val kravgrunnlagBufferRepository: KravgrunnlagBufferRepository,
+    private val økonomiXmlMottattRepository: ØkonomiXmlMottattRepository,
+    private val økonomiXmlMottattArkivRepository: ØkonomiXmlMottattArkivRepository,
     private val tilgangService: TilgangService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
@@ -274,6 +282,92 @@ class ForvaltningController(
         return Ressurs.success(forvaltningService.hentIkkeArkiverteKravgrunnlag(ytelsestype, eksternFagsakId))
     }
 
+    @Operation(summary = "Hent mottatte og arkiverte meldinger fra økonomi i gammel modell")
+    @GetMapping(
+        path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/mottatte-meldinger"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentMottatteMeldinger(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable eksternFagsakId: String,
+    ): Ressurs<MottatteMeldinger> {
+        tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
+            fagsystem = fagsystem,
+            eksternFagsakId = eksternFagsakId,
+            minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+            auditLoggerEvent = AuditLoggerEvent.NONE,
+            handling = "Henter mottatte og arkiverte meldinger fra økonomi",
+        )
+        return Ressurs.success(
+            MottatteMeldinger(
+                mottatte = økonomiXmlMottattRepository.findByEksternFagsakId(eksternFagsakId).map { xml ->
+                    MottattMelding(
+                        mottattXmlId = xml.id,
+                        ytelsestype = xml.ytelsestype,
+                        eksternKravgrunnlagId = xml.eksternKravgrunnlagId,
+                        vedtakId = xml.vedtakId,
+                        kravstatuskode = xml.kravstatuskode.navn,
+                        referanse = xml.referanse,
+                        sperret = xml.sperret,
+                        opprettetTid = xml.sporbar.opprettetTid,
+                        melding = xml.melding,
+                    )
+                },
+                arkiverte = økonomiXmlMottattArkivRepository.findByEksternFagsakId(eksternFagsakId).map { arkiv ->
+                    ArkivertMelding(
+                        arkivId = arkiv.id,
+                        ytelsestype = arkiv.ytelsestype,
+                        gammelMottattXmlId = arkiv.gammel_okonomi_xml_mottatt_id,
+                        opprettetTid = arkiv.sporbar.opprettetTid,
+                        melding = arkiv.melding,
+                    )
+                },
+            ),
+        )
+    }
+
+    @Operation(summary = "Hent kravgrunnlag og statusmeldinger fra bufferet i ny modell")
+    @GetMapping(
+        path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/buffer-meldinger"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentBufferMeldinger(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable eksternFagsakId: String,
+    ): Ressurs<BufferMeldinger> {
+        tilbakekrevingService.lesTilbakekreving(
+            TilbakekrevingFilter.fagsak(eksternFagsakId, fagsystem),
+            ValideringContext.ForvaltningHentBufferMeldinger,
+            validerScope = false,
+        ) ?: throw Feil(
+            message = "Fant ingen tilbakekreving for fagsystem=$fagsystem og eksternFagsakId=$eksternFagsakId",
+            logContext = SecureLog.Context.utenBehandling(eksternFagsakId),
+            httpStatus = HttpStatus.NOT_FOUND,
+        )
+        return Ressurs.success(
+            BufferMeldinger(
+                kravgrunnlag = kravgrunnlagBufferRepository.hentForFagsystemId(eksternFagsakId).map {
+                    BufferKravgrunnlag(
+                        kravgrunnlagId = it.entity.kravgrunnlagId,
+                        lest = it.lest,
+                        mottatt = it.mottatt,
+                        melding = it.entity.kravgrunnlag,
+                    )
+                },
+                statusmeldinger = statusmeldingBufferRepository.hentForFagsystemId(eksternFagsakId).map {
+                    BufferStatusmelding(
+                        id = it.entity.id,
+                        vedtakId = it.entity.vedtakId,
+                        status = it.entity.status,
+                        lest = it.lest,
+                        mottatt = it.mottatt,
+                        melding = it.entity.statusmelding,
+                    )
+                },
+            ),
+        )
+    }
+
     @Operation(summary = "Oppretter FinnGammelBehandlingUtenOppgaveTask som logger ut gamle behandlinger uten åpen oppgave")
     @PostMapping(
         path = ["/hentBehandlingerUtenOppgave/fagsystem/{fagsystem}"],
@@ -446,6 +540,40 @@ class ForvaltningController(
         )
     }
 
+    @Operation(summary = "Hent URL-er for alle tilbakekrevinger i ny modell for en fagsak")
+    @GetMapping(
+        path = ["/fagsystem/{fagsystem}/fagsak/{eksternFagsakId}/tilbakekreving-url"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentTilbakekrevingUrler(
+        @PathVariable fagsystem: FagsystemDTO,
+        @PathVariable eksternFagsakId: String,
+    ): Ressurs<List<String>> {
+        val behandler = ContextService.hentBehandler(SecureLog.Context.utenBehandling(eksternFagsakId))
+        return Ressurs.success(
+            tilbakekrevingRepository.hentTilbakekrevinger(TilbakekrevingFilter.fagsak(eksternFagsakId, fagsystem))
+                .map { it.fraEntity() }
+                .onEach { tilgangskontrollService.validerTilgangTilbakekreving(it, ValideringContext.ForvaltningHentTilbakekrevingUrler, behandler) }
+                .map { it.hentTilbakekrevingUrl(applicationProperties.frontendUrl) },
+        )
+    }
+
+    @Operation(summary = "Hent fagsystem-IDer i ny modell som har mottatt flere NY-kravgrunnlag")
+    @GetMapping(
+        path = ["/fagsystem-ider-med-flere-nye-kravgrunnlag"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentFagsystemIderMedFlereNyeKravgrunnlag(): Ressurs<List<TilbakekrevingRepository.FagsystemIdMedFlereNyeKravgrunnlag>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente fagsystem-IDer med flere nye kravgrunnlag",
+                frontendFeilmelding = "Du har ikke tilgang til å hente fagsystem-IDer med flere nye kravgrunnlag",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedFlereNyeKravgrunnlag())
+    }
+
     @Operation(summary = "Hent URL for ytelser i gammel modell")
     @GetMapping(
         path = ["/behandling-url"],
@@ -500,6 +628,52 @@ data class Behandlingsinfo(
     val opprettetTid: LocalDateTime,
     val behandlingId: UUID?,
     val behandlingstatus: Behandlingsstatus?,
+)
+
+data class BufferMeldinger(
+    val kravgrunnlag: List<BufferKravgrunnlag>,
+    val statusmeldinger: List<BufferStatusmelding>,
+)
+
+data class BufferKravgrunnlag(
+    val kravgrunnlagId: String,
+    val lest: Boolean,
+    val mottatt: LocalDateTime,
+    val melding: String,
+)
+
+data class BufferStatusmelding(
+    val id: UUID,
+    val vedtakId: String,
+    val status: String,
+    val lest: Boolean,
+    val mottatt: LocalDateTime,
+    val melding: String,
+)
+
+data class MottatteMeldinger(
+    val mottatte: List<MottattMelding>,
+    val arkiverte: List<ArkivertMelding>,
+)
+
+data class MottattMelding(
+    val mottattXmlId: UUID,
+    val ytelsestype: Ytelsestype,
+    val eksternKravgrunnlagId: BigInteger?,
+    val vedtakId: BigInteger,
+    val kravstatuskode: String,
+    val referanse: String,
+    val sperret: Boolean,
+    val opprettetTid: LocalDateTime,
+    val melding: String,
+)
+
+data class ArkivertMelding(
+    val arkivId: UUID,
+    val ytelsestype: Ytelsestype,
+    val gammelMottattXmlId: UUID?,
+    val opprettetTid: LocalDateTime,
+    val melding: String,
 )
 
 data class Kravgrunnlagsinfo(

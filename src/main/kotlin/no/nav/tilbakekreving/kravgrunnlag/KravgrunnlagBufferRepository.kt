@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
+import java.time.LocalDateTime
 
 @Repository
 class KravgrunnlagBufferRepository(
@@ -42,6 +43,16 @@ class KravgrunnlagBufferRepository(
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
     }
 
+    fun hentForFagsystemId(fagsystemId: String): List<Lagret> {
+        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE fagsystem_id=? ORDER BY mottatt;", { rs, rowNum ->
+            Lagret(
+                entity = Mapper.mapRow(rs, rowNum),
+                lest = rs.getBoolean("lest"),
+                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
+            )
+        }, fagsystemId)
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -59,5 +70,11 @@ class KravgrunnlagBufferRepository(
         val kravgrunnlag: String,
         val kravgrunnlagId: String,
         val fagsystemId: String,
+    )
+
+    data class Lagret(
+        val entity: Entity,
+        val lest: Boolean,
+        val mottatt: LocalDateTime,
     )
 }

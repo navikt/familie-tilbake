@@ -115,6 +115,16 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.UPDATE,
         handling = "Henter korrigert kravgrunnlag",
     ),
+    ForvaltningHentBufferMeldinger(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.NONE,
+        handling = "Henter kravgrunnlag og statusmeldinger fra buffer",
+    ),
+    ForvaltningHentTilbakekrevingUrler(
+        minimumBehandlerrolle = Behandlerrolle.FORVALTER,
+        auditLoggerEvent = AuditLoggerEvent.NONE,
+        handling = "Henter URL-er for tilbakekrevinger",
+    ),
     HentVedtaksbrevData(
         minimumBehandlerrolle = Behandlerrolle.VEILEDER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
