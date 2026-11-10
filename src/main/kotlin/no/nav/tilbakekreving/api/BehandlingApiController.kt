@@ -131,6 +131,7 @@ class BehandlingApiController(
                 behandlingId = behandlingId,
                 data = vedtaksbrevRedigerbareDataUpdateDto,
                 info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
+                klokke = SystemKlokke,
             ),
         )
     }

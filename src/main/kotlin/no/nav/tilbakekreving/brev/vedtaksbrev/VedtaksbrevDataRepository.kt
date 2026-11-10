@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.tilbake.kontrakter.objectMapper
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository.PeriodeavsnittEntity.Companion.overskriv
 import no.nav.tilbakekreving.entity.FieldConverter
 import org.springframework.jdbc.core.JdbcTemplate
@@ -14,10 +15,10 @@ import java.util.UUID
 class VedtaksbrevDataRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun oppdaterVedtaksbrevData(behandlingId: UUID, data: VedtaksbrevEntity): Pair<LocalDateTime, VedtaksbrevEntity> {
+    fun oppdaterVedtaksbrevData(behandlingId: UUID, data: VedtaksbrevEntity, klokke: Klokke): Pair<LocalDateTime, VedtaksbrevEntity> {
         val originalePerioder = hentVedtaksbrevData(behandlingId)?.let { (_, data) -> data.avsnitt } ?: emptyList()
         val json = objectMapper.writeValueAsString(data.merge(originalePerioder))
-        jdbcTemplate.update("INSERT INTO tilbakekreving_behandling_vedtaksbrev(behandling_ref, data, sist_oppdatert) VALUES(?, ?::json, ?) ON CONFLICT(behandling_ref) DO UPDATE SET data=EXCLUDED.data;", behandlingId, json, LocalDateTime.now())
+        jdbcTemplate.update("INSERT INTO tilbakekreving_behandling_vedtaksbrev(behandling_ref, data, sist_oppdatert) VALUES(?, ?::json, ?) ON CONFLICT(behandling_ref) DO UPDATE SET data=EXCLUDED.data, sist_oppdatert=EXCLUDED.sist_oppdatert;", behandlingId, json, klokke.nå())
 
         return hentVedtaksbrevData(behandlingId)!!
     }

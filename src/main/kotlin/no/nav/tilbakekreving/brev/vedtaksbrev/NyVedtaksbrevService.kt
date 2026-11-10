@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.kontrakter.journalpost.AvsenderMottakerIdType
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
+import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
@@ -153,6 +154,7 @@ class NyVedtaksbrevService(
         behandlingId: UUID,
         data: VedtaksbrevRedigerbareDataUpdateDto,
         info: VedtaksbrevInfo,
+        klokke: Klokke,
     ): VedtaksbrevRedigerbareDataDto {
         val (sistOppdatert, data) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
             behandlingId,
@@ -168,6 +170,7 @@ class NyVedtaksbrevService(
                     )
                 },
             ),
+            klokke,
         )
         return VedtaksbrevRedigerbareDataDto(
             hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
