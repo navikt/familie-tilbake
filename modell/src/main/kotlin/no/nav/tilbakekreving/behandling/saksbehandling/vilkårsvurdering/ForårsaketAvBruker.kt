@@ -97,5 +97,12 @@ interface ForårsaketAvBruker {
                 forrigePeriodeId = forrigePeriodeId,
             )
         }
+
+        fun klon(forrigeVurdering: Vilkårsvurderingsperiode): KopiertVurdering {
+            return KopiertVurdering(
+                forrigeVurdering = forrigeVurdering,
+                forrigePeriodeId = forrigeVurdering.id,
+            )
+        }
     }
 }

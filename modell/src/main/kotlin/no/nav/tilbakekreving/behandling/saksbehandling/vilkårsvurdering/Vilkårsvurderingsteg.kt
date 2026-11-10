@@ -50,9 +50,13 @@ class Vilkårsvurderingsteg(
     override val type: Behandlingssteg = Behandlingssteg.VILKÅRSVURDERING
 
     fun klon(): Vilkårsvurderingsteg {
+        var forrigeVurdering: Vilkårsvurderingsperiode? = null
         return Vilkårsvurderingsteg(
             id = UUID.randomUUID(),
-            vurderinger = vurderinger.map { it.klon() },
+            vurderinger = vurderinger.map {
+                forrigeVurdering = it.klon(forrigeVurdering)
+                forrigeVurdering
+            },
             tilbakeført = null,
         )
     }
@@ -293,12 +297,17 @@ class Vilkårsvurderingsteg(
     ) : VilkårsvurdertPeriodeAdapter, Comparable<Vilkårsvurderingsperiode> {
         val vurdering get() = _vurdering
 
-        fun klon(): Vilkårsvurderingsperiode {
+        fun klon(forrigeVurdering: Vilkårsvurderingsperiode?): Vilkårsvurderingsperiode {
             return Vilkårsvurderingsperiode(
                 id = UUID.randomUUID(),
                 periode = periode,
                 begrunnelseForTilbakekreving = begrunnelseForTilbakekreving,
-                _vurdering = _vurdering,
+                _vurdering = when (val vurdering = _vurdering) {
+                    is ForårsaketAvBruker.KopiertVurdering -> vurdering.klon(
+                        requireNotNull(forrigeVurdering) { "En kopiert vurdering må ha en forrige klonet periode" },
+                    )
+                    else -> vurdering
+                },
                 endringIKravgrunnnlag = endringIKravgrunnnlag,
                 tilbakeført = null,
             )
