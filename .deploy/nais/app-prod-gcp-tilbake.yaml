@@ -6,6 +6,8 @@ metadata:
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
     nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    haproxy.org/timeout-server: "2h"
+    haproxy.org/timeout-client: "2h"
   labels:
     team: tilbake
 
