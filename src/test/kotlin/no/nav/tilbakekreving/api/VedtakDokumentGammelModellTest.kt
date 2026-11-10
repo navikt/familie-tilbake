@@ -10,18 +10,22 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
+import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigInteger
 import java.util.UUID
 
 @ActiveProfiles("ny-modell")
 class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
+    @MockitoBean
+    private lateinit var vedtaksdokumentTilgang: VedtaksdokumentTilgang
+
     @Autowired
     private lateinit var vedtakDokumentController: VedtakDokumentController
 
@@ -63,9 +67,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val response = somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
-        }
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
@@ -84,9 +86,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val response = somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
-        }
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()

@@ -1,36 +1,47 @@
 package no.nav.tilbakekreving.auth
 
+import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.runBlocking
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import org.springframework.beans.factory.annotation.Value
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Component
 class VedtaksdokumentTilgang(
-    private val tokenValidationContextHolder: TokenValidationContextHolder,
-    @Value("\${AZURE_APP_PRE_AUTHORIZED_APPS:[]}") preAuthorizedApps: String,
-    @Value("\${tilbakekreving.vedtaksdokumenter.maskin-klient:}") private val maskinKlient: String,
+    private val request: HttpServletRequest,
+    private val tokenExchangeService: TokenExchangeService,
 ) {
-    private val forhåndsgodkjenteApper = jacksonObjectMapper().readTree(preAuthorizedApps)
-
     fun validerMaskintilgang() {
-        val claims = tokenValidationContextHolder.getTokenValidationContext().getClaims("azuread")
-        if (claims.getStringClaim("idtyp") != "app") {
-            ingenTilgang()
+        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION).orEmpty()
+        val token = authorization.substringAfter(' ', "").trim()
+        if (!authorization.substringBefore(' ').equals("Bearer", ignoreCase = true) ||
+            token.isBlank() ||
+            token.any(Char::isWhitespace)
+        ) {
+            ugyldigToken()
+        }
+        val claims = runBlocking {
+            tokenExchangeService.introspectToken(token)
+        }
+        if (!claims.active) {
+            ugyldigToken()
         }
 
-        val klientId = claims.getStringClaim("azp")
-        val erGodkjentKlient = maskinKlient.isNotBlank() &&
-            !klientId.isNullOrBlank() &&
-            forhåndsgodkjenteApper.any {
-                it.path("name").asText() == maskinKlient && it.path("clientId").asText() == klientId
-            }
-        if (!erGodkjentKlient || claims.getAsList("roles")?.contains("access_as_application") != true) {
+        if (claims.idtyp != "app" || claims.roles?.contains("tvangsgrunnlag.read") != true) {
             ingenTilgang()
         }
     }
+
+    private fun ugyldigToken(): Nothing = throw Feil(
+        message = "Missing or invalid bearer token",
+        frontendFeilmelding = "Du må være innlogget",
+        httpStatus = HttpStatus.UNAUTHORIZED,
+        logContext = SecureLog.Context.tom(),
+    )
 
     private fun ingenTilgang(): Nothing = throw ForbiddenError(
         message = "Klienten har ikke tilgang til vedtaksdokumenter",

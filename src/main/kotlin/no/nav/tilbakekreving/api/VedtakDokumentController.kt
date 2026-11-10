@@ -1,9 +1,6 @@
 package no.nav.tilbakekreving.api
 
-import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
-import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
 import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
@@ -16,22 +13,21 @@ import org.springframework.validation.annotation.Validated
 import java.math.BigInteger
 
 @Component
-@ProtectedWithClaims(issuer = "azuread")
+@Unprotected
 @Validated
 class VedtakDokumentController(
     private val vedtakDokumentService: VedtakDokumentService,
     private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val tilgangskontrollService: TilgangskontrollService,
     private val vedtaksdokumentTilgang: VedtaksdokumentTilgang,
 ) : DokumenterApi {
     override fun dokumenterHentVedtaksdokumenter(
         vedtakId: String,
     ): ResponseEntity<List<VedtaksdokumentDto>> {
+        vedtaksdokumentTilgang.validerMaskintilgang()
         val id = BigInteger(vedtakId)
         val tilbakekrevingId = vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(id)
         if (tilbakekrevingId != null) {
-            vedtaksdokumentTilgang.validerMaskintilgang()
             val filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)
             val tilbakekreving = tilbakekrevingService.hentTilbakekreving(filter)
                 ?: return ResponseEntity.ok(emptyList())
@@ -44,15 +40,7 @@ class VedtakDokumentController(
         }
 
         val dokumentreferanser = vedtakDokumentService.hentBehandlingIderGammelModell(id)
-            .flatMap { behandlingId ->
-                tilgangskontrollService.validerTilgangBehandlingID(
-                    behandlingId = behandlingId,
-                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                    handling = "Henter dokumentreferanser for iverksatt vedtak",
-                )
-                vedtakDokumentService.hentDokumentreferanserGammelModell(behandlingId)
-            }
+            .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
         return ResponseEntity.ok(dokumentreferanser.distinct())
     }
 }
