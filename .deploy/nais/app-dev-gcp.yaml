@@ -84,6 +84,9 @@ spec:
         - application: tilbakekreving-tvangsgrunnlag
           namespace: tilbake
           cluster: dev-gcp
+          permissions:
+            roles:
+              - tvangsgrunnlag.read
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: dev-gcp

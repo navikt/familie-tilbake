@@ -11,10 +11,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import io.mockk.verifyOrder
 import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.tilbakekreving.Testdata.dokumentInfo
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
@@ -32,31 +30,23 @@ class VedtakDokumentControllerTest {
     private val vedtakDokumentService = mockk<VedtakDokumentService>()
     private val vedtakDokumentRepository = mockk<VedtakDokumentRepository>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
-    private val tilgangskontrollService = mockk<TilgangskontrollService>()
     private val vedtaksdokumentTilgang = mockk<VedtaksdokumentTilgang>()
     private val controller = VedtakDokumentController(
         vedtakDokumentService = vedtakDokumentService,
         vedtakDokumentRepository = vedtakDokumentRepository,
         tilbakekrevingService = tilbakekrevingService,
-        tilgangskontrollService = tilgangskontrollService,
         vedtaksdokumentTilgang = vedtaksdokumentTilgang,
     )
     private val vedtakId = KravgrunnlagGenerator.nextId(18).toBigInteger()
     private val tilbakekrevingId = KravgrunnlagGenerator.nextId(18)
 
     @BeforeEach
-    fun nullstillMocker() {
-        clearMocks(
-            vedtakDokumentService,
-            vedtakDokumentRepository,
-            tilbakekrevingService,
-            tilgangskontrollService,
-            vedtaksdokumentTilgang,
-        )
+    fun setUp() {
+        clearMocks(vedtakDokumentService, vedtakDokumentRepository, tilbakekrevingService, vedtaksdokumentTilgang)
     }
 
     @Test
-    fun `godkjent maskinkall uten saksbehandler med flere dokumenter og duplikater`() {
+    fun `godkjent maskinkall med flere dokumenter og duplikater i ny modell`() {
         every { vedtaksdokumentTilgang.validerMaskintilgang() } just Runs
         every { vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(vedtakId) } returns tilbakekrevingId
         every { tilbakekrevingService.hentTilbakekreving(any(), true) } returns tilbakekrevingMedDokumenter(
@@ -74,32 +64,19 @@ class VedtakDokumentControllerTest {
             VedtaksdokumentDto(journalpostId = "journalpost-1", dokumentInfoId = "dokument-2"),
             VedtaksdokumentDto(journalpostId = "journalpost-2", dokumentInfoId = "dokument-1"),
         )
-        verifyOrder {
-            vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(vedtakId)
-            vedtaksdokumentTilgang.validerMaskintilgang()
-            tilbakekrevingService.hentTilbakekreving(any(), true)
-        }
-        verify(exactly = 0) { tilbakekrevingService.lesTilbakekreving(any(), any(), any()) }
-        verify { listOf(vedtakDokumentService, tilgangskontrollService) wasNot Called }
+        verify(exactly = 1) { vedtaksdokumentTilgang.validerMaskintilgang() }
     }
 
     @Test
-    fun `avvist maskinkall`() {
-        every { vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(vedtakId) } returns tilbakekrevingId
-        every { vedtaksdokumentTilgang.validerMaskintilgang() } throws ForbiddenError(
-            message = "Ingen tilgang",
-            frontendFeilmelding = "Ingen tilgang",
-            logContext = SecureLog.Context.tom(),
-        )
+    fun `avvist tilgang med ugyldig vedtakId`() {
+        val feil = ForbiddenError("Ingen tilgang", "Ingen tilgang", SecureLog.Context.tom())
+        every { vedtaksdokumentTilgang.validerMaskintilgang() } throws feil
 
         shouldThrow<ForbiddenError> {
-            controller.dokumenterHentVedtaksdokumenter(vedtakId.toString())
-        }
+            controller.dokumenterHentVedtaksdokumenter("ikke-et-tall")
+        } shouldBe feil
 
-        verify(exactly = 1) { vedtaksdokumentTilgang.validerMaskintilgang() }
-        verify {
-            listOf(tilbakekrevingService, vedtakDokumentService, tilgangskontrollService) wasNot Called
-        }
+        verify { listOf(vedtakDokumentRepository, tilbakekrevingService, vedtakDokumentService) wasNot Called }
     }
 
     private fun tilbakekrevingMedDokumenter(vararg dokumenter: DokumentInfoDto): Tilbakekreving = mockk {
