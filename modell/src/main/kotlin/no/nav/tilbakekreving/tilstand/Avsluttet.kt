@@ -6,12 +6,10 @@ import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
+import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
-import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
-import java.util.UUID
 
 object Avsluttet : Tilstand {
     override val tidTilPåminnelse: Duration? = null
@@ -30,14 +28,24 @@ object Avsluttet : Tilstand {
         }
     }
 
-    override fun opprettRevurdering(
+    override fun trengerKravgrunnlagForRevurdering(
         tilbakekreving: Tilbakekreving,
         sideeffektContext: SideeffektContext,
-        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-        behandlendeEnhet: String?,
         revurderingsårsak: TilbakekrevingRevurderingsårsak,
     ) {
-        tilbakekreving.klonBehandling(revurderingsårsak, sideeffektContext)
+        tilbakekreving.trengerKravgrunnlagForRevurdering(revurderingsårsak, sideeffektContext)
+    }
+
+    override fun håndter(
+        tilbakekreving: Tilbakekreving,
+        kravgrunnlag: KravgrunnlagHendelse,
+        revurderingsårsak: TilbakekrevingRevurderingsårsak,
+        sideeffektContext: SideeffektContext,
+    ) {
+        if (tilbakekreving.kravgrunnlagHistorikk.nåværende().entry != kravgrunnlag) {
+            tilbakekreving.kravgrunnlagHistorikk.lagre(kravgrunnlag)
+        }
+        tilbakekreving.opprettRevurderingBehandling(revurderingsårsak, sideeffektContext)
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
 }

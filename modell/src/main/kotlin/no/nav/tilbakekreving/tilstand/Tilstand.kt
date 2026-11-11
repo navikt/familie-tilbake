@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.Venter
-import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
@@ -25,10 +24,8 @@ import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.hendelse.SperretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
-import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
-import java.util.UUID
 
 internal sealed interface Tilstand {
     val tidTilPåminnelse: Duration?
@@ -55,6 +52,15 @@ internal sealed interface Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke Kravgrunnlag i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+    }
+
+    fun håndter(
+        tilbakekreving: Tilbakekreving,
+        kravgrunnlag: KravgrunnlagHendelse,
+        revurderingsårsak: TilbakekrevingRevurderingsårsak,
+        sideeffektContext: SideeffektContext,
+    ) {
+        throw ModellFeil.UgyldigOperasjonException("Forventet ikke Kravgrunnlag for revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun håndter(
@@ -159,14 +165,12 @@ internal sealed interface Tilstand {
         throw ModellFeil.UgyldigOperasjonException("Forventet ikke SperretStatusmeldingHendelse i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
-    fun opprettRevurdering(
+    fun trengerKravgrunnlagForRevurdering(
         tilbakekreving: Tilbakekreving,
         sideeffektContext: SideeffektContext,
-        eksternFagsakRevurdering: HistorikkReferanse<UUID, EksternFagsakRevurdering>,
-        behandlendeEnhet: String?,
         revurderingsårsak: TilbakekrevingRevurderingsårsak,
     ) {
-        throw ModellFeil.UgyldigOperasjonException("Kan ikke opprette revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
+        throw ModellFeil.UgyldigOperasjonException("Kan ikke hente kravgrunnlag for revurdering i $tilbakekrevingTilstand", tilbakekreving.sporingsinformasjon())
     }
 
     fun validerInnenforScope(tilbakekreving: Tilbakekreving) {}

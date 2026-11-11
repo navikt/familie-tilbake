@@ -92,6 +92,7 @@ class VedtaksbrevDataRepository(
         enum class Type {
             RENTEKST,
             UNDERAVSNITT,
+            REVURDERING,
         }
     }
 }

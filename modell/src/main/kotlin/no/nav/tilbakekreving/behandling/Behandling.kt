@@ -171,11 +171,6 @@ class Behandling internal constructor(
         }
     }
 
-    internal fun settKravgrunnlagForRevurdering(kravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>) {
-        this.kravgrunnlag = kravgrunnlag
-        nyttKravgrunnlag = null
-    }
-
     override fun faktastegFrontendDto(
         opprettelsesvalg: Opprettelsesvalg,
         tilbakekrevingOpprettet: LocalDateTime,
@@ -307,7 +302,7 @@ class Behandling internal constructor(
         )
     }
 
-    internal fun trengerOrdinærVedtaksbrevJournalføring(
+    internal fun trengerFørstegangVedtaksbrevJournalføring(
         sideeffektContext: SideeffektContext,
         brevId: UUID,
         ytelse: Ytelse,
@@ -346,17 +341,20 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                revurderingVedtaksbrevInfo = RevurderingVedtaksbrevInfo(
-                    brukerdata = bruker.brevmeta(),
-                    ytelse = ytelse.brevmeta(),
-                    signatur = brevSignatur(),
-                    bunntekster = Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER,
-                    tilbakekrevingId = tilbakekrevingId,
-                ),
+                revurderingVedtaksbrevInfo = hentRevurderingVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
             ),
         )
     }
+
+    internal fun hentRevurderingVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String) = RevurderingVedtaksbrevInfo(
+        brukerdata = bruker.brevmeta(),
+        ytelse = ytelse.brevmeta(),
+        signatur = brevSignatur(),
+        bunntekster = Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER,
+        tilbakekrevingId = tilbakekrevingId,
+    )
+
 
     internal fun trengerInfobrevJournalføring(
         sideeffektContext: SideeffektContext,
@@ -1052,7 +1050,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, klokke: Klokke): Behandling {
+    fun klonBehandlingForRevurdering(
+        revurderingsårsak: TilbakekrevingRevurderingsårsak,
+        kravgurnnlagReferanse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        klokke: Klokke,
+    ): Behandling {
         val opprettet = klokke.nå()
 
         return Behandling(
@@ -1064,7 +1066,7 @@ class Behandling internal constructor(
             revurderingsårsak = revurderingsårsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
-            kravgrunnlag = kravgrunnlag,
+            kravgrunnlag = kravgurnnlagReferanse,
             nyttKravgrunnlag = null,
             foreldelsesteg = foreldelsesteg.klon(),
             faktasteg = faktasteg.klon(),
