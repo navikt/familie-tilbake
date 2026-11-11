@@ -127,14 +127,13 @@ class InformasjonsbrevBortfaltKravTest {
 
         shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.opprettRevurdering(
-                tilbakekreving.nåværendeBehandlingId(),
                 TilbakekrevingRevurderingsårsak.EtterKlage(
                     vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                     beskrivelse = "Begrunnelse fra klageinstansen",
                 ),
                 saksbehandlerContext(),
             )
-        }.message shouldBe "Kan ikke opprette revurdering i AVSLUTTET_UTEN_VEDTAK"
+        }.message shouldBe "Kan ikke hente kravgrunnlag for revurdering i AVSLUTTET_UTEN_VEDTAK"
     }
 
     private fun kravBortfaltPå(): FeatureToggles = defaultFeatures(featureOverrides = arrayOf(Toggle.KravBortfalt to true))

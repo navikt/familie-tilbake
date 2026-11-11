@@ -165,7 +165,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,
@@ -216,7 +216,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,
@@ -240,7 +240,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
 
         val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,

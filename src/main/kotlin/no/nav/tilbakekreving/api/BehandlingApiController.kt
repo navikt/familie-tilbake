@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OpprettRevurderingResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevTekstDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
@@ -53,6 +52,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.UUID
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevTypeDto
 
 @Component
 @ProtectedWithClaims(issuer = "azuread")
@@ -109,6 +110,22 @@ class BehandlingApiController(
         )
     }
 
+    override fun behandlingHentRevurderingVedtaksbrev(behandlingId: String): ResponseEntity<RevurderingVedtaksbrevDataDto> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(UUID.fromString(behandlingId)),
+            valideringContext = ValideringContext.HentVedtaksbrevData,
+        ) ?: return ResponseEntity.notFound().build()
+        val beslutter = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
+
+        return ResponseEntity.ok(
+            nyVedtaksbrevService.hentRevurderingVedtaksbrevData(
+                UUID.fromString(behandlingId),
+                tilbakekreving.hentRevurderingVedtaksbrevInfo(UUID.fromString(behandlingId)),
+                beslutter,
+            ),
+        )
+    }
+
     override fun behandlingForeslaaVedtak(behandlingId: UUID): ResponseEntity<Unit> {
         return tilbakekrevingService.endreTilbakekreving(
             behandlingId = behandlingId,
@@ -128,12 +145,21 @@ class BehandlingApiController(
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
-            nyVedtaksbrevService.oppdaterVedtaksbrevData(
-                behandlingId = behandlingId,
-                data = vedtaksbrevRedigerbareDataUpdateDto,
-                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
-                klokke = SystemKlokke,
-            ),
+            when(vedtaksbrevRedigerbareDataUpdateDto.vedtaksbrevType) {
+                VedtaksbrevTypeDto.FØRSTEGANG ->
+                    nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
+                        behandlingId = behandlingId,
+                        data = vedtaksbrevRedigerbareDataUpdateDto,
+                        info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
+                        klokke = SystemKlokke,
+                    )
+                VedtaksbrevTypeDto.REVURDERING ->
+                    nyVedtaksbrevService.oppdatertOgHentRevurderingVedtaksbrevData(
+                        behandlingId = behandlingId,
+                        data = vedtaksbrevRedigerbareDataUpdateDto,
+                        info = tilbakekreving.hentRevurderingVedtaksbrevInfo(behandlingId)
+                    )
+            }
         )
     }
 
@@ -338,7 +364,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
             val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
-            tilbakekreving.opprettRevurdering(behandlingId, revurderingsårsak, context)
+            tilbakekreving.opprettRevurdering(revurderingsårsak, context)
             ResponseEntity.ok(
                 OpprettRevurderingResponseDto(tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
             )
@@ -356,20 +382,6 @@ class BehandlingApiController(
                 tilbakekreving.oppdaterRevurderingsårsak(behandlingId, revurderingsårsak, context),
             )
         } ?: ResponseEntity.notFound().build()
-    }
-
-    override fun behandlingLagreRevurderingVedtaksbrevTekst(behandlingId: UUID, revurderingVedtaksbrevTekstDto: RevurderingVedtaksbrevTekstDto): ResponseEntity<Unit> {
-        tilbakekrevingService.lesTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
-            valideringContext = ValideringContext.OppdaterVedtaksbrev,
-        ) ?: return ResponseEntity.notFound().build()
-
-        return ResponseEntity.ok(
-            nyVedtaksbrevService.lagreRevurderingVedtaksbrevData(
-                behandlingId = behandlingId,
-                data = revurderingVedtaksbrevTekstDto.tekstFraSaksbehandler,
-            ),
-        )
     }
 
     private fun mapTilRevurderingsårsak(
