@@ -4,6 +4,8 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Testdata
@@ -24,7 +26,6 @@ import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -128,6 +129,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `Oppdatering av vedtaksbrev oppdaterer sistOppdatert`() {
+        val klokke = mockk<Klokke>()
+        every { klokke.nå() } returns LocalDateTime.of(2026, 1, 1, 12, 0)
         val behandlingId = lagBehandlingId()
         val info = vedtaksbrevInfo(UUID.randomUUID())
         val førsteData = VedtaksbrevRedigerbareDataUpdateDto(
@@ -137,7 +140,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             ),
             avsnitt = emptyList(),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, førsteData, info, fastKlokke(LocalDateTime.of(2026, 1, 1, 12, 0)))
+        nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, førsteData, info, klokke)
         val førOppdatering = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
         val sisteData = førsteData.copy(
@@ -145,18 +148,13 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 underavsnitt = listOf(RentekstElementDto("Siste tekst")),
             ),
         )
-        val oppdatert = nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, sisteData, info, fastKlokke(LocalDateTime.of(2026, 1, 2, 12, 0)))
+        every { klokke.nå() } returns LocalDateTime.of(2026, 1, 2, 12, 0)
+        val oppdatert = nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, sisteData, info, klokke)
         val hentet = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
         hentet.hovedavsnitt.underavsnitt shouldBe listOf(RentekstElementDto("Siste tekst"))
         hentet.sistOppdatert shouldBe oppdatert.sistOppdatert
         hentet.sistOppdatert shouldBeGreaterThan førOppdatering.sistOppdatert
-    }
-
-    private fun fastKlokke(tidspunkt: LocalDateTime) = object : Klokke {
-        override fun nå(): LocalDateTime = tidspunkt
-
-        override fun dagensDato(): LocalDate = tidspunkt.toLocalDate()
     }
 
     @Test
