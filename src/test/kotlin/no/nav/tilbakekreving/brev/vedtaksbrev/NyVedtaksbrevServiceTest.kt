@@ -24,9 +24,9 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevRedigerbareDataUpdateDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.test.FellesTestdata.ANSVARLIG_BESLUTTER
+import no.nav.tilbakekreving.test.januar
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDateTime
 import java.util.UUID
 
 class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
@@ -130,7 +130,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
     @Test
     fun `Oppdatering av vedtaksbrev oppdaterer sistOppdatert`() {
         val klokke = mockk<Klokke>()
-        every { klokke.nå() } returns LocalDateTime.of(2026, 1, 1, 12, 0)
+        every { klokke.nå() } returns 1.januar(2026).atTime(12, 0)
         val behandlingId = lagBehandlingId()
         val info = vedtaksbrevInfo(UUID.randomUUID())
         val førsteData = VedtaksbrevRedigerbareDataUpdateDto(
@@ -148,7 +148,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 underavsnitt = listOf(RentekstElementDto("Siste tekst")),
             ),
         )
-        every { klokke.nå() } returns LocalDateTime.of(2026, 1, 2, 12, 0)
+        every { klokke.nå() } returns 2.januar(2026).atTime(12, 0)
         val oppdatert = nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, sisteData, info, klokke)
         val hentet = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
