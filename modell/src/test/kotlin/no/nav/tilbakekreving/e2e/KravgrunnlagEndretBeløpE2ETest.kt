@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
@@ -13,6 +14,7 @@ import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.assertions.skalHaStatus
 import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.faktastegVurdering
@@ -35,6 +37,7 @@ import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.vilkårsvurderingsperiodeId
 import no.nav.tilbakekreving.vurderAlleSteg
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 class KravgrunnlagEndretBeløpE2ETest {
     private val features = defaultFeatures(featureOverrides = arrayOf(Toggle.EndretKravgrunnlagVisning to true))
@@ -63,6 +66,29 @@ class KravgrunnlagEndretBeløpE2ETest {
         )
 
         behandlingDto.kanEndres shouldBe true
+    }
+
+    @Test
+    fun `eldre kravgrunnlag som leses på nytt påvirker ikke behandlingen`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val saksbehandlerContext = saksbehandlerContext(features = features)
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            kravgrunnlag = kravgrunnlagMedBeløp(periode to 2000.kroner, opprettet = LocalDateTime.of(2022, 1, 1, 10, 0)),
+        )
+        tilbakekreving.håndter(
+            kravgrunnlagMedBeløp(periode to 3000.kroner, opprettet = LocalDateTime.of(2022, 1, 3, 10, 0)),
+            systemContext(features = features),
+        )
+
+        val behandlingslogg = Behandlingslogg(mutableListOf())
+        tilbakekreving.håndter(
+            kravgrunnlagMedBeløp(periode to 1500.kroner, opprettet = LocalDateTime.of(2022, 1, 2, 10, 0)),
+            systemContext(features = features, behandlingslogg = behandlingslogg),
+        )
+
+        behandlingslogg.tilFrontend().shouldBeEmpty()
+        tilbakekreving.tilFeilutbetalingFrontendDto(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext.klokke)
+            .feilutbetaling.beløp shouldBe 3000
     }
 
     @Test

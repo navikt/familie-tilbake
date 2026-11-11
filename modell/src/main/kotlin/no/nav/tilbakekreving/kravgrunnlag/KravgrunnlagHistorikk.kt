@@ -45,6 +45,14 @@ class KravgrunnlagHistorikk(
         return true
     }
 
+    fun lagreHvisEldreEnnNåværendeKravgrunnlag(kravgrunnlag: KravgrunnlagHendelse): Boolean {
+        val nåværendeKravgrunnlag = historikk.filterIsInstance<KravgrunnlagHendelse>().lastOrNull() ?: return false
+        if (kravgrunnlag.opprettet >= nåværendeKravgrunnlag.opprettet) return false
+
+        historikk.add(historikk.indexOfFirst { it.opprettet > kravgrunnlag.opprettet }, kravgrunnlag)
+        return true
+    }
+
     override fun nåværende(): HistorikkReferanse<UUID, KravHendelse> {
         return HistorikkReferanse(this, historikk.last().id)
     }

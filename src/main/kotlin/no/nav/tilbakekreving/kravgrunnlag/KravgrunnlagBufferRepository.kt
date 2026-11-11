@@ -87,6 +87,19 @@ ORDER BY kb.mottatt;""",
         }
     }
 
+    fun markerSomUlest(kravgrunnlag: List<KravgrunnlagNøkkel>): Int {
+        return jdbcTemplate.batchUpdate(
+            """UPDATE kravgrunnlag_buffer SET lest=false
+WHERE fagsystem_id = ?
+  AND (xpath(
+        '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:kontrollfelt/text()',
+        kravgrunnlag::xml,
+        ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
+      ))[1]::text = ?;""",
+            kravgrunnlag.map { arrayOf(it.fagsystemId, it.kontrollfelt) },
+        ).sum()
+    }
+
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -112,6 +125,11 @@ ORDER BY kb.mottatt;""",
         val fagsystemId: String,
         val vedtakId: String?,
         val kontrollfelt: String?,
+    )
+
+    data class KravgrunnlagNøkkel(
+        val fagsystemId: String,
+        val kontrollfelt: String,
     )
 
     data class Lagret(

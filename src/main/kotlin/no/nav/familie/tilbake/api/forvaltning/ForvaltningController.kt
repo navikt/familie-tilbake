@@ -606,6 +606,24 @@ class ForvaltningController(
         return Ressurs.success(kravgrunnlagBufferRepository.finnKravgrunnlagUtenSak())
     }
 
+    @Operation(summary = "Marker kravgrunnlag i bufferet som ulest slik at de leses på nytt")
+    @PostMapping(
+        path = ["/les-kravgrunnlag-pa-nytt"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun lesKravgrunnlagPåNytt(
+        @RequestBody kravgrunnlag: List<KravgrunnlagBufferRepository.KravgrunnlagNøkkel>,
+    ): Ressurs<Int> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å lese kravgrunnlag på nytt",
+                frontendFeilmelding = "Du har ikke tilgang til å lese kravgrunnlag på nytt",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(kravgrunnlagBufferRepository.markerSomUlest(kravgrunnlag))
+    }
+
     @Operation(summary = "Hent statusmeldinger i bufferet som ikke er koblet til en tilbakekreving i ny modell")
     @GetMapping(
         path = ["/finn-statusmeldinger-uten-sak"],

@@ -106,6 +106,9 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
+        if (kravgrunnlagHistorikk.lagreHvisEldreEnnNåværendeKravgrunnlag(kravgrunnlag)) {
+            return
+        }
         tilstand.håndter(this, kravgrunnlag, sideeffektContext)
         val behandlingsloggType = when (tilstand.tilbakekrevingTilstand) {
             TilbakekrevingTilstand.AVVENTER_FAGSYSTEMINFO -> Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT
