@@ -56,9 +56,8 @@ class KravgrunnlagMediator(
             log.medContext(SecureLog.Context.utenBehandling(entity.fagsystemId)) {
                 info("Leser statusmelding, status={}", entity.status)
             }
-            val fagsystem = KravgrunnlagMapper.ytelseFor(statusmeldingHendelse.kodeFagomraade, statusmeldingHendelse.fagsystemId).tilFagsystemDTO()
             tilbakekrevingService.hentOgLagreTilbakekreving(
-                filter = TilbakekrevingFilter.fagsak(statusmeldingHendelse.fagsystemId, fagsystem),
+                filter = TilbakekrevingFilter.vedtakId(statusmeldingHendelse.vedtakId, statusmeldingHendelse.fagsystemId),
                 validerScope = false,
             ) { tilbakekreving, context ->
                 when (statusmeldingHendelse) {
@@ -72,7 +71,10 @@ class KravgrunnlagMediator(
                         tilbakekreving.håndter(statusmeldingHendelse, context(Behandler.Vedtaksløsning))
                     }
                 }
-            }
+            } ?: throw Feil(
+                message = "Fant ingen tilbakekreving for statusmelding med vedtakId ${statusmeldingHendelse.vedtakId}",
+                logContext = SecureLog.Context.utenBehandling(statusmeldingHendelse.fagsystemId),
+            )
         }
     }
 }

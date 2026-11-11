@@ -25,7 +25,12 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     fun `statusmelding lagres i buffer for senere behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"),
+            forventetAntallUleste = 1,
+        )
+        // Unngår at statusmeldingen blokkerer lesing i andre tester
+        jdbcTemplate.update("UPDATE statusmelding_buffer SET lest=true WHERE fagsystem_id=?;", fagsystemId)
 
         val antallKravgrunnlag = jdbcTemplate.query(
             "SELECT count(1) AS antall FROM kravgrunnlag_buffer WHERE fagsystem_id=?;",
@@ -38,12 +43,13 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `sperr statusmelding blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.hentBehandling(behandlingId = behandlingId).shouldNotBeNull {
@@ -60,13 +66,14 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `sperr blokkering oppheves etter ny statusmelding`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "ENDR", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "ENDR", fagområde = "TILLST"))
 
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingController.hentBehandling(behandlingId = behandlingId).shouldNotBeNull {
@@ -83,12 +90,13 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `annullert kravgrunnlag blokkerer behandling`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
 
         val exception = shouldThrow<ModellFeil.UtenforScopeException> {
             behandlingController.hentBehandling(behandlingId)
@@ -99,12 +107,13 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `statusmeldinger i historikken`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
 
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"))
 
         val tilbakekrevingId = tilbakekreving(behandlingId).id
         val kravstatuskoder = jdbcTemplate.query(
@@ -113,5 +122,58 @@ class StatusmeldingE2ETest : TilbakekrevingE2EBase() {
         ) { rs, _ -> rs.getString("kravstatuskode") }
 
         kravstatuskoder shouldBe listOf(Kravstatuskode.SPERRET.name)
+    }
+
+    /* I praksis burde ikke dette skje, men hvis vi kommer på
+    etterskudd med lesing av statusmeldinger kan det ha bli
+    opprettet en ny sak før statusen blir konsumert */
+    @Test
+    fun `statusmelding på fagsakId med flere tilbakekreving-saker`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId1 = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId2 = KravgrunnlagGenerator.nextPaddedId(6)
+
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId1))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val førsteBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId2))
+        fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
+        val andreBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forFagområdet(
+                vedtakId = vedtakId1,
+                fagsystemId = fagsystemId,
+                kodeStatusKrav = "SPER",
+                fagområde = "TILLST",
+            ),
+        )
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingController.hentBehandling(behandlingId = førsteBehandlingId).shouldNotBeNull {
+                data!!.erBehandlingPåVent shouldBe true
+                data.venter shouldNotBeNull {
+                    grunn shouldBe Ventegrunn.SPERRET_VENTER_PÅ_OPPDATERING_FRA_ØKONOMI
+                }
+            }
+            behandlingController.hentBehandling(behandlingId = andreBehandlingId).shouldNotBeNull {
+                data!!.erBehandlingPåVent shouldBe false
+            }
+        }
+    }
+
+    @Test
+    fun `statusmelding uten tilbakekreving med samme vedtakId blir liggende ulest`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+
+        sendStatusmelding(
+            statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "SPER", fagområde = "TILLST"),
+            forventetAntallUleste = 1,
+        )
+
+        // Unngår at statusmeldingen blokkerer lesing i andre tester
+        jdbcTemplate.update("UPDATE statusmelding_buffer SET lest=true WHERE fagsystem_id=?;", fagsystemId)
     }
 }

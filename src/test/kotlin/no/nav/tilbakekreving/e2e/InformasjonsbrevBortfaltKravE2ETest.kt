@@ -36,14 +36,15 @@ class InformasjonsbrevBortfaltKravE2ETest : TilbakekrevingE2EBase() {
     @Test
     fun `bortfalt krav etter sendt forhåndsvarsel sender informasjonsbrev og avslutter saken`() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
-        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId))
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        sendKravgrunnlagOgAvventLesing(KravgrunnlagGenerator.forTilleggsstønader(fagsystemId = fagsystemId, vedtakId = vedtakId))
         fagsystemIntegrasjonService.håndter(Ytelse.Tilleggsstønad, Testdata.fagsysteminfoSvar(fagsystemId))
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingSendVarselbrev(behandlingId, SendForhaandsvarselDto("Tekst fra saksbehandler"))
         }
 
-        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
+        sendStatusmelding(statusmelding = StatusmeldingGenerator.forFagområdet(vedtakId = vedtakId, fagsystemId = fagsystemId, kodeStatusKrav = "AVSL", fagområde = "TILLST"))
 
         val tilbakekreving = tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), validerScope = false).shouldNotBeNull()
         tilbakekreving.tilEntity().nåværendeTilstand shouldBe TilbakekrevingTilstand.AVSLUTTET_UTEN_VEDTAK
