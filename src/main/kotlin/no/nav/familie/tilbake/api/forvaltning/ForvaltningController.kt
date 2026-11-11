@@ -350,7 +350,7 @@ class ForvaltningController(
                     BufferKravgrunnlag(
                         kravgrunnlagId = it.entity.kravgrunnlagId,
                         lest = it.lest,
-                        mottatt = it.mottatt,
+                        mottatt = it.entity.mottatt,
                         melding = it.entity.kravgrunnlag,
                     )
                 },

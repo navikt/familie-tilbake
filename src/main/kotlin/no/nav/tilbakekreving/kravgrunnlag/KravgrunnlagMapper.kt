@@ -36,7 +36,7 @@ object KravgrunnlagMapper {
         )
     }
 
-    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagReferanseMapping: Map<String, String>, klokke: Klokke): KravgrunnlagHendelse {
+    fun tilKravgrunnlagHendelse(kravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagReferanseMapping: Map<String, String>, opprettet: LocalDateTime): KravgrunnlagHendelse {
         val kravgrunnlagHendelse = KravgrunnlagHendelse(
             id = UUID.randomUUID(),
             vedtakId = kravgrunnlag.vedtakId,
@@ -65,7 +65,7 @@ object KravgrunnlagMapper {
                     )
                 },
             henteårsak = null,
-            opprettet = klokke.nå(),
+            opprettet = opprettet,
         )
         return kravgrunnlagHendelse
     }

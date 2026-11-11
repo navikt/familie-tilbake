@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e.repository
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
 import no.nav.tilbakekreving.hendelse.Kravstatuskode
@@ -20,6 +21,7 @@ class KravgrunnlagBufferRepositoryE2ETest : TilbakekrevingE2EBase() {
                 kravgrunnlag = "",
                 kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(8),
                 fagsystemId = fagsystemId1,
+                mottatt = SystemKlokke.nå(),
             ),
         )
         kravgrunnlagBufferRepository.lagre(
@@ -27,6 +29,7 @@ class KravgrunnlagBufferRepositoryE2ETest : TilbakekrevingE2EBase() {
                 kravgrunnlag = "",
                 kravgrunnlagId = KravgrunnlagGenerator.nextPaddedId(8),
                 fagsystemId = fagsystemId2,
+                mottatt = SystemKlokke.nå(),
             ),
         )
 

@@ -17,7 +17,13 @@ class KravgrunnlagBufferRepository(
     private val log = TracedLogger.getLogger<KravgrunnlagBufferRepository>()
 
     fun lagre(entity: Entity) {
-        jdbcTemplate.update("INSERT INTO kravgrunnlag_buffer(kravgrunnlag_id, kravgrunnlag, fagsystem_id) VALUES (?, ?, ?);", entity.kravgrunnlagId, entity.kravgrunnlag, entity.fagsystemId)
+        jdbcTemplate.update(
+            "INSERT INTO kravgrunnlag_buffer(kravgrunnlag_id, kravgrunnlag, fagsystem_id, mottatt) VALUES (?, ?, ?, ?);",
+            entity.kravgrunnlagId,
+            entity.kravgrunnlag,
+            entity.fagsystemId,
+            entity.mottatt,
+        )
     }
 
     fun hent(): List<Entity> {
@@ -50,7 +56,6 @@ class KravgrunnlagBufferRepository(
             Lagret(
                 entity = Mapper.mapRow(rs, rowNum),
                 lest = rs.getBoolean("lest"),
-                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
             )
         }, fagsystemId)
     }
@@ -91,6 +96,7 @@ ORDER BY kb.mottatt;""",
                 rs.getString("kravgrunnlag"),
                 rs.getString("kravgrunnlag_id"),
                 rs.getString("fagsystem_id"),
+                rs.getTimestamp("mottatt").toLocalDateTime(),
             )
         }
     }
@@ -99,6 +105,7 @@ ORDER BY kb.mottatt;""",
         val kravgrunnlag: String,
         val kravgrunnlagId: String,
         val fagsystemId: String,
+        val mottatt: LocalDateTime,
     )
 
     data class KravgrunnlagUtenSak(
@@ -110,6 +117,5 @@ ORDER BY kb.mottatt;""",
     data class Lagret(
         val entity: Entity,
         val lest: Boolean,
-        val mottatt: LocalDateTime,
     )
 }

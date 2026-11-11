@@ -8,6 +8,7 @@ import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagUtil
 import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
+import no.nav.tilbakekreving.SystemKlokke
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -46,6 +47,7 @@ class KravgrunnlagListener(
                     kravgrunnlag = meldingXML,
                     kravgrunnlagId = kravgrunnlag.kravgrunnlagId.toString(),
                     fagsystemId = kravgrunnlag.fagsystemId,
+                    mottatt = SystemKlokke.nå(),
                 ),
             )
         }

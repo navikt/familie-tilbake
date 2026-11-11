@@ -82,6 +82,7 @@ open class TilbakekrevingE2EBase : E2EBase() {
                 kravgrunnlag = kravgrunnlag,
                 kravgrunnlagId = dto.kravgrunnlagId.toString(),
                 fagsystemId = dto.fagsystemId,
+                mottatt = SystemKlokke.nå(),
             ),
         )
     }
