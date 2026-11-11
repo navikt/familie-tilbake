@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.auth
 
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang.Resultat
+import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang.Tilgang
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.kontrakter.TokenIntrospectionResponse
 import org.junit.jupiter.api.Test
@@ -21,23 +22,23 @@ class VedtaksdokumentTilgangImplTest {
 
     @Test
     fun `aktivt token med påkrevd rolle godkjennes`() {
-        tilgang(maskinSvar).vurder("token") shouldBe Resultat.GODKJENT
+        tilgang(maskinSvar).vurder("token", Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.GODKJENT
     }
 
     @Test
     fun `inaktivt token er ugyldig`() {
-        tilgang(maskinSvar.copy(active = false)).vurder("token") shouldBe Resultat.UGYLDIG_TOKEN
+        tilgang(maskinSvar.copy(active = false)).vurder("token", Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.UGYLDIG_TOKEN
     }
 
     @Test
     fun `manglende eller tomt token er ugyldig`() {
-        tilgang(maskinSvar).vurder(null) shouldBe Resultat.UGYLDIG_TOKEN
-        tilgang(maskinSvar).vurder(" ") shouldBe Resultat.UGYLDIG_TOKEN
+        tilgang(maskinSvar).vurder(null, Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.UGYLDIG_TOKEN
+        tilgang(maskinSvar).vurder(" ", Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.UGYLDIG_TOKEN
     }
 
     @Test
     fun `aktivt token uten påkrevd rolle avvises`() {
-        tilgang(maskinSvar.copy(roles = listOf("annen-rolle"))).vurder("token") shouldBe Resultat.MANGLER_ROLLE
-        tilgang(maskinSvar.copy(roles = null)).vurder("token") shouldBe Resultat.MANGLER_ROLLE
+        tilgang(maskinSvar.copy(roles = listOf("annen-rolle"))).vurder("token", Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.MANGLER_ROLLE
+        tilgang(maskinSvar.copy(roles = null)).vurder("token", Tilgang.TVANGSGRUNNLAG_LES) shouldBe Resultat.MANGLER_ROLLE
     }
 }
