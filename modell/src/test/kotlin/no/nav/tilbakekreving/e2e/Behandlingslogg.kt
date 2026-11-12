@@ -122,9 +122,9 @@ class Behandlingslogg {
         )
         val forhåndsvarsel = behandlingslogg.tilFrontend().filter { it.tittel == "Forhåndsvarsel sendt" }.shouldHaveSize(1)
 
-        val forhåndsvarselEkstraInfo = forhåndsvarsel[0].ekstraInfo as Map<*, *>
-        forhåndsvarselEkstraInfo[EkstraInfo.JOURNALPOST_ID] shouldBe "123"
-        forhåndsvarselEkstraInfo[EkstraInfo.DOKUMENTINFO_ID] shouldBe "321"
+        val forhåndsvarselEkstraInfo = forhåndsvarsel[0].ekstraInfo
+        forhåndsvarselEkstraInfo[EkstraInfo.JOURNALPOST_ID.name] shouldBe "123"
+        forhåndsvarselEkstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] shouldBe "321"
 
         val utsettUttalelse = behandlingslogg.tilFrontend().filter { it.tittel.contains("Ny frist for uttalelse") }.shouldHaveSize(1)
         utsettUttalelse[0].tittel shouldBe "Ny frist for uttalelse: 2027-01-01"

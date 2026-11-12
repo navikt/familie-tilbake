@@ -56,7 +56,7 @@ data class Behandlingslogg(
                 tekst = it.behandlingsloggstype.hentTekst(ekstraInfo),
                 steg = it.behandlingsloggstype.steg.toString(),
                 opprettetTid = it.opprettetTid.atOffset(ZoneOffset.UTC),
-                ekstraInfo = ekstraInfo,
+                ekstraInfo = ekstraInfo.mapKeys { (nøkkel, _) -> nøkkel.name },
             )
         }
     }
