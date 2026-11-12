@@ -45,9 +45,9 @@ class KravgrunnlagHistorikk(
         return true
     }
 
-    fun lagreHvisEldreEnnNåværendeKravgrunnlag(kravgrunnlag: KravgrunnlagHendelse): Boolean {
-        val nåværendeKravgrunnlag = historikk.filterIsInstance<KravgrunnlagHendelse>().lastOrNull() ?: return false
-        if (kravgrunnlag.opprettet >= nåværendeKravgrunnlag.opprettet) return false
+    fun lagreHvisEldreEnnNåværendeHendelse(kravgrunnlag: KravgrunnlagHendelse): Boolean {
+        val nåværendeHendelse = historikk.lastOrNull() ?: return false
+        if (kravgrunnlag.opprettet >= nåværendeHendelse.opprettet) return false
 
         historikk.add(historikk.indexOfFirst { it.opprettet > kravgrunnlag.opprettet }, kravgrunnlag)
         return true

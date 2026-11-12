@@ -106,7 +106,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(kravgrunnlag: KravgrunnlagHendelse, sideeffektContext: SideeffektContext) {
-        if (kravgrunnlagHistorikk.lagreHvisEldreEnnNåværendeKravgrunnlag(kravgrunnlag)) {
+        if (kravgrunnlagHistorikk.lagreHvisEldreEnnNåværendeHendelse(kravgrunnlag)) {
             return
         }
         tilstand.håndter(this, kravgrunnlag, sideeffektContext)
