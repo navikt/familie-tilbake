@@ -140,6 +140,6 @@ class FrontendE2ETest {
             systemContext(),
         )
 
-        tilbakekreving.tilFrontendDto(SystemKlokke).fagsakBehandlingUrl shouldBe "http://saksbehandling-url"
+        Tilbakekreving.tilFrontendDto(SystemKlokke, listOf(tilbakekreving)).fagsakBehandlingUrl shouldBe "http://saksbehandling-url"
     }
 }

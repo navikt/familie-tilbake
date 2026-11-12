@@ -92,6 +92,17 @@ class TilbakekrevingService(
         return tilbakekreving
     }
 
+    fun lesTilbakekrevinger(
+        filter: TilbakekrevingFilter,
+        valideringContext: ValideringContext,
+    ): List<Tilbakekreving> {
+        val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(filter)
+            .map { it.fraEntity() }
+        val behandler = ContextService.hentBehandler(filter.logContext())
+        tilgangskontrollService.validerTilgangTilbakekreving(tilbakekrevinger.first(), valideringContext, behandler)
+        return tilbakekrevinger
+    }
+
     fun hentTilbakekreving(filter: TilbakekrevingFilter, validerScope: Boolean = true): Tilbakekreving? {
         val tilbakekreving = tilbakekrevingRepository.hentTilbakekreving(filter)?.fraEntity() ?: return null
 

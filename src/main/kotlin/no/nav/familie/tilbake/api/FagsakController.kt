@@ -12,6 +12,7 @@ import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.SystemKlokke
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.api.v1.dto.FagsakDto
 import no.nav.tilbakekreving.kontrakter.Behandling
@@ -44,9 +45,9 @@ class FagsakController(
         @PathVariable fagsystem: FagsystemDTO,
         @PathVariable eksternFagsakId: String,
     ): Ressurs<FagsakDto> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(TilbakekrevingFilter.fagsakEllerTilbakekrevingId(eksternFagsakId, fagsystem), ValideringContext.HentFagsak)
-        if (tilbakekreving != null) {
-            return Ressurs.success(tilbakekreving.tilFrontendDto(SystemKlokke))
+        val tilbakekrevinger = tilbakekrevingService.lesTilbakekrevinger(TilbakekrevingFilter.fagsakEllerTilbakekrevingId(eksternFagsakId, fagsystem), ValideringContext.HentFagsak)
+        if (tilbakekrevinger.isNotEmpty()) {
+            return Ressurs.success(Tilbakekreving.tilFrontendDto(SystemKlokke, tilbakekrevinger))
         }
         tilgangskontrollService.validerTilgangFagsystemOgFagsakId(
             fagsystem = fagsystem,

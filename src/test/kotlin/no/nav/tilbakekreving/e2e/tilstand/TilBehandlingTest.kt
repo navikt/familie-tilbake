@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.e2e.tilstand
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v2.Opprettelsesvalg
 import no.nav.tilbakekreving.api.v2.PeriodeDto
 import no.nav.tilbakekreving.api.v2.fagsystem.svar.FagsysteminfoSvarHendelse
@@ -37,7 +38,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
 
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
-        tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        Tilbakekreving.tilFrontendDto(saksbehandlerContext().klokke, listOf(tilbakekreving(behandlingId))).behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
         fagsystemIntegrasjonService.håndter(
             Ytelse.Tilleggsstønad,
             FagsysteminfoSvarHendelse(

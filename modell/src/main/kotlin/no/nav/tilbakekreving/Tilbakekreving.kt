@@ -518,20 +518,6 @@ class Tilbakekreving internal constructor(
         )
     }
 
-    fun tilFrontendDto(klokke: Klokke): FagsakDto {
-        val eksternFagsakDto = eksternFagsak.tilFrontendDto()
-        return FagsakDto(
-            tilbakekrevingSakId = tilbakekrevingSakId(),
-            eksternFagsakId = eksternFagsakDto.eksternId,
-            ytelsestype = eksternFagsakDto.ytelsestype,
-            fagsystem = eksternFagsakDto.fagsystem,
-            språkkode = bruker?.språkkode ?: Språkkode.NB,
-            bruker = bruker.tilNullableFrontendDto(),
-            behandlinger = behandlingHistorikk.tilOppsummeringDto(tilstand, klokke),
-            fagsakBehandlingUrl = eksternFagsak.saksbehandlingUrl(),
-        )
-    }
-
     fun faktastegFrontendDto(behandlingId: UUID): FaktaFeilutbetalingDto = hentBehandling(behandlingId).faktastegFrontendDto(opprettelsesvalg, opprettet)
 
     fun påminnNåværendePeriode(sideeffektContext: SideeffektContext) {
@@ -686,6 +672,23 @@ class Tilbakekreving internal constructor(
     }
 
     companion object {
+        fun tilFrontendDto(klokke: Klokke, tilbakekrevinger: List<Tilbakekreving>): FagsakDto {
+            val gjeldende = tilbakekrevinger.first()
+            val eksternFagsakDto = gjeldende.eksternFagsak.tilFrontendDto()
+            return FagsakDto(
+                tilbakekrevingSakId = gjeldende.tilbakekrevingSakId(),
+                eksternFagsakId = eksternFagsakDto.eksternId,
+                ytelsestype = eksternFagsakDto.ytelsestype,
+                fagsystem = eksternFagsakDto.fagsystem,
+                språkkode = gjeldende.bruker?.språkkode ?: Språkkode.NB,
+                bruker = gjeldende.bruker.tilNullableFrontendDto(),
+                behandlinger = tilbakekrevinger.reversed().flatMap {
+                    it.behandlingHistorikk.tilOppsummeringDto(it.tilstand, klokke)
+                },
+                fagsakBehandlingUrl = gjeldende.eksternFagsak.saksbehandlingUrl(),
+            )
+        }
+
         fun opprett(
             id: String,
             opprettTilbakekrevingEvent: OpprettTilbakekrevingHendelse,

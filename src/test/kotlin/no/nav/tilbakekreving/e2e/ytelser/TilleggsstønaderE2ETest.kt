@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.config.PdlClientMock
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
@@ -70,11 +71,11 @@ class TilleggsstønaderE2ETest : TilbakekrevingE2EBase() {
             ),
         )
 
-        val frontendDto = tilbakekreving(FagsystemDTO.TS, fagsystemId)
-            .shouldNotBeNull()
-            .tilFrontendDto(saksbehandlerContext().klokke)
-        frontendDto.behandlinger shouldHaveSize 1
-        frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        tilbakekreving(FagsystemDTO.TS, fagsystemId).shouldNotBeNull {
+            val frontendDto = Tilbakekreving.tilFrontendDto(saksbehandlerContext().klokke, listOf(this))
+            frontendDto.behandlinger shouldHaveSize 1
+            frontendDto.behandlinger.single().status shouldBe Behandlingsstatus.UTREDES
+        }
         val behandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
         tilbakekreving(behandlingId) kanBehandle Behandlingssteg.FAKTA

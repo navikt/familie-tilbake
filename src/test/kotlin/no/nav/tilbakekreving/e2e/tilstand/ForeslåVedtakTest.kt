@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.e2e.tilstand
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
+import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.e2e.BehandlingsstegGenerator
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.e2e.TilbakekrevingE2EBase
@@ -47,6 +48,6 @@ class ForeslåVedtakTest : TilbakekrevingE2EBase() {
             response.statusCode shouldBe HttpStatus.OK
         }
 
-        tilbakekreving(behandlingId).tilFrontendDto(saksbehandlerContext().klokke).behandlinger.single().status shouldBe Behandlingsstatus.FATTER_VEDTAK
+        Tilbakekreving.tilFrontendDto(saksbehandlerContext().klokke, listOf(tilbakekreving(behandlingId))).behandlinger.single().status shouldBe Behandlingsstatus.FATTER_VEDTAK
     }
 }

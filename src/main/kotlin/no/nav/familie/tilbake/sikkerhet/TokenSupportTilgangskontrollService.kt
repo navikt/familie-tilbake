@@ -51,7 +51,7 @@ class TokenSupportTilgangskontrollService(
         valideringContext: ValideringContext,
         behandler: Behandler,
     ): Behandlerrolle {
-        val dto = tilbakekreving.tilFrontendDto(SystemKlokke)
+        val dto = Tilbakekreving.tilFrontendDto(SystemKlokke, listOf(tilbakekreving))
         return validerTilgangTilbakekreving(
             fagsystem = dto.fagsystem,
             fagsystemId = dto.eksternFagsakId,
