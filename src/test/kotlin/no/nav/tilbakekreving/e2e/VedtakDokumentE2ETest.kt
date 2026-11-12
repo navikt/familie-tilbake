@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.VedtakDokumentController
+import no.nav.tilbakekreving.auth.VedtaksdokumentTilgangStub
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -42,7 +43,7 @@ class VedtakDokumentE2ETest : TilbakekrevingE2EBase() {
         tilbakekrevVedtak(behandlingId, listOf(periode))
 
         val response = ContextServiceHelpers.somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId)
+            vedtakDokumentController.dokumenterHentVedtaksdokumenter("Bearer ${VedtaksdokumentTilgangStub.GODKJENT_TOKEN}", vedtakId)
         }
 
         response.statusCode shouldBe HttpStatus.OK

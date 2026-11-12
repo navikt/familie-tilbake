@@ -16,15 +16,14 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgangStub
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 import java.math.BigInteger
 import java.util.UUID
 
@@ -45,25 +44,35 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
 
+    @Autowired
+    private lateinit var webApplicationContext: WebApplicationContext
+
+    private var authorization = ""
+
     @BeforeEach
     fun medToken() = medAuthorization("Bearer ${VedtaksdokumentTilgangStub.GODKJENT_TOKEN}")
-
-    @AfterEach
-    fun ryddOpp() = RequestContextHolder.resetRequestAttributes()
 
     @Test
     fun `manglende token gir 401`() {
         medAuthorization(null)
 
-        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(nyttVedtakId().toString()) }
+        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, nyttVedtakId().toString()) }
             .httpStatus shouldBe HttpStatus.UNAUTHORIZED
+    }
+
+    @Test
+    fun `manglende Authorization-header i HTTP-kall gir 401`() {
+        val mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+
+        mockMvc.get("/api/v1/dokumenter/vedtak/{vedtakId}", nyttVedtakId().toString())
+            .andExpect { status { isUnauthorized() } }
     }
 
     @Test
     fun `token uten påkrevd rolle gir 403`() {
         medAuthorization("Bearer ${VedtaksdokumentTilgangStub.UTEN_ROLLE_TOKEN}")
 
-        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(nyttVedtakId().toString()) }
+        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, nyttVedtakId().toString()) }
     }
 
     @Test
@@ -92,7 +101,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
@@ -111,16 +120,14 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()
     }
 
     private fun medAuthorization(verdi: String?) {
-        val request = MockHttpServletRequest()
-        verdi?.let { request.addHeader("Authorization", it) }
-        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
+        authorization = verdi.orEmpty()
     }
 
     private fun opprettBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {

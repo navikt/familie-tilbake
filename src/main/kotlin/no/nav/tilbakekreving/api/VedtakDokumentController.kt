@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.api
 
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
@@ -8,7 +7,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -22,13 +20,13 @@ class VedtakDokumentController(
     private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vedtaksdokumentTilgang: VedtaksdokumentTilgang,
-    private val request: HttpServletRequest,
 ) : DokumenterApi {
     override fun dokumenterHentVedtaksdokumenter(
+        authorization: String,
         vedtakId: String,
     ): ResponseEntity<List<VedtaksdokumentDto>> {
-        val token = request.getHeader(HttpHeaders.AUTHORIZATION)
-            ?.takeIf { it.startsWith(BEARER_PREFIX, ignoreCase = true) }
+        val token = authorization
+            .takeIf { it.startsWith(BEARER_PREFIX, ignoreCase = true) }
             ?.substring(BEARER_PREFIX.length)
             ?.trim()
         vedtaksdokumentTilgang.valider(token, VedtaksdokumentTilgang.Tilgang.TVANGSGRUNNLAG_LES)
