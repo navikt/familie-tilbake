@@ -587,7 +587,7 @@ class ForvaltningController(
                 logContext = SecureLog.Context.tom(),
             )
         }
-        return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedFlereVedtakIder())
+        return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderMedStatusmeldingPåFeilSak())
     }
 
     @Operation(summary = "Hent kravgrunnlag i bufferet som ikke er koblet til en tilbakekreving i ny modell")
