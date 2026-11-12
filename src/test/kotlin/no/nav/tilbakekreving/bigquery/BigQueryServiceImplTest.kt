@@ -15,7 +15,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
