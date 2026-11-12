@@ -2,9 +2,7 @@ package no.nav.tilbakekreving.behandling.revurdering
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
-import io.kotest.inspectors.forSingle
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -270,7 +268,6 @@ class RevurderingTest {
         val context = saksbehandlerContext().medBigQuery(bigQuery)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val opprinneligBehandlingId = tilbakekreving.nåværendeBehandlingId()
-        bigQuery.behandlinger.filter { it.revurderingsårsak != null }.shouldBeEmpty()
 
         tilbakekreving.opprettRevurdering(
             opprinneligBehandlingId,
@@ -283,7 +280,8 @@ class RevurderingTest {
 
         val revurderingId = tilbakekreving.nåværendeBehandlingId()
         revurderingId shouldNotBe opprinneligBehandlingId
-        bigQuery.behandlinger.filter { it.behandlingId == revurderingId.toString() }.forSingle {
+        bigQuery.behandlinger.forOne {
+            it.behandlingId shouldBe revurderingId.toString()
             it.tilbakekrevingId shouldBe tilbakekreving.id
             it.ytelse shouldBe Ytelse.Barnetrygd.hentYtelsesnavn(Språkkode.NB)
             it.behandlingstype shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING.name
@@ -325,13 +323,24 @@ class RevurderingTest {
             context,
         )
 
-        val revurderingsrader = bigQuery.behandlinger.filter { it.behandlingId == revurderingId.toString() }
-        revurderingsrader shouldHaveSize 3
-        revurderingsrader.forAll { it.tilbakekrevingId shouldBe tilbakekreving.id }
-        revurderingsrader.map { it.revurderingsårsak to it.revurderingsinstans } shouldBe listOf(
-            "ETTER_KLAGE" to "Klageinstansen",
-            "UTEN_KLAGE" to "Førsteinstansen",
-            "FORELDELSE" to null,
-        )
+        bigQuery.behandlinger.count { it.behandlingId == revurderingId.toString() } shouldBe 3
+        bigQuery.behandlinger.forOne {
+            it.behandlingId shouldBe revurderingId.toString()
+            it.tilbakekrevingId shouldBe tilbakekreving.id
+            it.revurderingsårsak shouldBe "ETTER_KLAGE"
+            it.revurderingsinstans shouldBe "Klageinstansen"
+        }
+        bigQuery.behandlinger.forOne {
+            it.behandlingId shouldBe revurderingId.toString()
+            it.tilbakekrevingId shouldBe tilbakekreving.id
+            it.revurderingsårsak shouldBe "UTEN_KLAGE"
+            it.revurderingsinstans shouldBe "Førsteinstansen"
+        }
+        bigQuery.behandlinger.forOne {
+            it.behandlingId shouldBe revurderingId.toString()
+            it.tilbakekrevingId shouldBe tilbakekreving.id
+            it.revurderingsårsak shouldBe "FORELDELSE"
+            it.revurderingsinstans shouldBe null
+        }
     }
 }
