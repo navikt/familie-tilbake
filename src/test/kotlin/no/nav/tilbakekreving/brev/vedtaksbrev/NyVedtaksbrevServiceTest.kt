@@ -4,9 +4,7 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
@@ -129,8 +127,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
     @Test
     fun `Oppdatering av vedtaksbrev oppdaterer sistOppdatert`() {
-        val klokke = mockk<Klokke>()
-        every { klokke.nå() } returns 1.januar(2026).atTime(12, 0)
+        val klokke = KlokkeStub(1.januar(2026))
         val behandlingId = lagBehandlingId()
         val info = vedtaksbrevInfo(UUID.randomUUID())
         val førsteData = VedtaksbrevRedigerbareDataUpdateDto(
@@ -148,7 +145,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 underavsnitt = listOf(RentekstElementDto("Siste tekst")),
             ),
         )
-        every { klokke.nå() } returns 2.januar(2026).atTime(12, 0)
+        klokke.settTid(2.januar(2026))
         val oppdatert = nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, sisteData, info, klokke)
         val hentet = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
