@@ -9,9 +9,11 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.frontend.models.ErrorDto
 import org.springframework.core.NestedExceptionUtils
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
@@ -147,6 +149,21 @@ class ApiExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(Ressurs.failure(errorMessage = feilmelding.toString(), frontendFeilmelding = feilmelding.toString()))
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException::class)
+    fun handleThrowable(feil: MissingRequestHeaderException): ResponseEntity<Ressurs<Nothing>> {
+        logger.medContext(SecureLog.Context.springContext()) {
+            info("Mangler påkrevd header: {}", feil.headerName)
+        }
+        if (feil.headerName.equals(HttpHeaders.AUTHORIZATION, ignoreCase = true)) {
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Ressurs.failure(errorMessage = "Missing or invalid bearer token", frontendFeilmelding = "Du må være innlogget"))
+        }
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(Ressurs.failure(errorMessage = feil.message, frontendFeilmelding = "Mangler påkrevd header"))
     }
 
     @ExceptionHandler(UgyldigKravgrunnlagFeil::class)
