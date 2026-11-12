@@ -39,6 +39,7 @@ sealed class EksternFagsakRevurdering(
         override val vedtaksdato: LocalDate,
         private val utvidedePerioder: List<UtvidetPeriode>,
         override val url: String?,
+        private val brukerInformertOmFeilutbetaling: Boolean?,
         opprettet: LocalDateTime,
     ) : EksternFagsakRevurdering(id, opprettet) {
         override fun utvidPeriode(periode: Datoperiode): Datoperiode {
@@ -58,6 +59,7 @@ sealed class EksternFagsakRevurdering(
                 utvidedePerioder = utvidedePerioder.map { it.tilEntity(id) },
                 vedtaksdato = vedtaksdato,
                 url = url,
+                brukerInformertOmFeilutbetaling = brukerInformertOmFeilutbetaling,
                 opprettet = opprettet,
             )
         }
@@ -116,6 +118,7 @@ sealed class EksternFagsakRevurdering(
                 vedtaksdato = null,
                 utvidedePerioder = null,
                 url = null,
+                brukerInformertOmFeilutbetaling = null,
                 opprettet = opprettet,
             )
         }

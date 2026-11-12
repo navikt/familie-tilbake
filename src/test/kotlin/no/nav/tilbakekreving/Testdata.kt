@@ -35,6 +35,7 @@ object Testdata {
             årsakTilFeilutbetaling = årsakTilFeilutbetaling,
             vedtaksdato = LocalDate.now(),
             url = "http://localhost:8080",
+            brukerInformertOmFeilutbetaling = null,
         ),
         utvidPerioder = utvidPerioder,
         behandlendeEnhet = "0425",

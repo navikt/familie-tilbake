@@ -48,6 +48,11 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
         EksternFagsakBehandlingEntity::url,
         FieldConverter.StringConverter,
     )
+    val brukerInformertOmFeilutbetaling = field(
+        "bruker_informert_om_feilutbetaling",
+        EksternFagsakBehandlingEntity::brukerInformertOmFeilutbetaling,
+        FieldConverter.BooleanConverter,
+    )
     val opprettet = field(
         "opprettet",
         EksternFagsakBehandlingEntity::opprettet,
@@ -65,6 +70,7 @@ object EksternFagsakBehandlingMapper : Entity<EksternFagsakBehandlingEntity, UUI
             vedtaksdato = resultSet[vedtaksdato],
             utvidedePerioder = utvidetPerioder,
             url = resultSet[url],
+            brukerInformertOmFeilutbetaling = resultSet[brukerInformertOmFeilutbetaling],
             opprettet = resultSet[opprettet],
         )
     }

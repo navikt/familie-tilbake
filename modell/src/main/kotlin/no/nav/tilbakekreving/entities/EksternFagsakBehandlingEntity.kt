@@ -15,6 +15,7 @@ data class EksternFagsakBehandlingEntity(
     val vedtaksdato: LocalDate?,
     val utvidedePerioder: List<UtvidetPeriodeEntity>?,
     val url: String?,
+    val brukerInformertOmFeilutbetaling: Boolean?,
     override val opprettet: LocalDateTime,
 ) : HistorikkInnslagEntity<UUID> {
     fun fraEntity(): EksternFagsakRevurdering {
@@ -29,6 +30,7 @@ data class EksternFagsakBehandlingEntity(
                     .sortedBy { it.kravgrunnlagPeriode }
                     .map { it.fraEntity() },
                 url = url,
+                brukerInformertOmFeilutbetaling = brukerInformertOmFeilutbetaling,
                 opprettet = opprettet,
             )
             EksternFagsakBehandlingType.UKJENT -> EksternFagsakRevurdering.Ukjent(id = id, eksternId = eksternId, null, opprettet = opprettet)

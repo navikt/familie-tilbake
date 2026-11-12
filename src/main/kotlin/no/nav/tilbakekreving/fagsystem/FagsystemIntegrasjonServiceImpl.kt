@@ -32,6 +32,7 @@ class FagsystemIntegrasjonServiceImpl(
                         årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling,
                         url = fagsysteminfo.revurdering.url,
                         vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
+                        brukerInformertOmFeilutbetaling = fagsysteminfo.revurdering.brukerInformertOmFeilutbetaling,
                     ),
                     utvidPerioder = fagsysteminfo.utvidPerioder?.map {
                         FagsysteminfoHendelse.UtvidetPeriode(

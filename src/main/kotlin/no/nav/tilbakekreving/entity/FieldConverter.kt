@@ -189,8 +189,8 @@ interface FieldConverter<T, DbPrimitive> {
             return value
         }
 
-        override fun convert(resultSet: ResultSet, column: String): Boolean {
-            return resultSet.getBoolean(column)
+        override fun convert(resultSet: ResultSet, column: String): Boolean? {
+            return resultSet.getObject(column, Boolean::class.javaObjectType)
         }
 
         override fun setColumn(index: Int, preparedStatement: PreparedStatement, value: Boolean?) {

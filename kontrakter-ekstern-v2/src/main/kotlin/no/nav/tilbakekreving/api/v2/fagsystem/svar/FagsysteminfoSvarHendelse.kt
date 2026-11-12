@@ -34,6 +34,7 @@ data class FagsysteminfoSvarHendelse(
         val årsakTilFeilutbetaling: String?,
         val vedtaksdato: LocalDate,
         val url: String?,
+        val brukerInformertOmFeilutbetaling: Boolean?,
     ) {
         enum class Årsak {
             NYE_OPPLYSNINGER,

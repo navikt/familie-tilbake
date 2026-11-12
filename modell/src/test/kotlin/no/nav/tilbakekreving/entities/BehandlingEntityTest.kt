@@ -44,6 +44,7 @@ class BehandlingEntityTest {
                 vedtaksdato = LocalDate.now(),
                 utvidedePerioder = emptyList(),
                 url = "http://localhost:8080",
+                brukerInformertOmFeilutbetaling = null,
                 opprettet = LocalDateTime.now(),
             ),
         ) as HistorikkReferanse<UUID, EksternFagsakRevurdering>

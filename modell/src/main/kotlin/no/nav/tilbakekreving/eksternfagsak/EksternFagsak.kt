@@ -45,6 +45,7 @@ class EksternFagsak(
                     )
                 } ?: emptyList(),
                 url = fagsysteminfo.revurdering.url,
+                brukerInformertOmFeilutbetaling = fagsysteminfo.revurdering.brukerInformertOmFeilutbetaling,
                 opprettet = klokke.nå(),
             ),
         )

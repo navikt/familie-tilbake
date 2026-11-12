@@ -85,6 +85,7 @@ class BehovE2ETest : TilbakekrevingE2EBase() {
                     årsakTilFeilutbetaling = "Heisann",
                     vedtaksdato = LocalDate.now(),
                     url = "http://localhost:8080",
+                    brukerInformertOmFeilutbetaling = null,
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(

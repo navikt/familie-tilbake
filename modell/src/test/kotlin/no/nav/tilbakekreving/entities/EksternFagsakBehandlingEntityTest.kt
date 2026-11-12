@@ -36,6 +36,7 @@ class EksternFagsakBehandlingEntityTest {
                 ),
             ),
             url = null,
+            brukerInformertOmFeilutbetaling = null,
             opprettet = LocalDateTime.now(),
         )
 

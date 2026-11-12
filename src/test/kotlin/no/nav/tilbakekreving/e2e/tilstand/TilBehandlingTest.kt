@@ -55,6 +55,7 @@ class TilBehandlingTest : TilbakekrevingE2EBase() {
                     årsakTilFeilutbetaling = "ingen",
                     vedtaksdato = LocalDate.now(),
                     url = "http://localhost:8080",
+                    brukerInformertOmFeilutbetaling = null,
                 ),
                 utvidPerioder = listOf(
                     FagsysteminfoSvarHendelse.UtvidetPeriodeDto(

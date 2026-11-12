@@ -149,6 +149,7 @@ fun fagsysteminfoHendelse(
         årsakTilFeilutbetaling = "",
         vedtaksdato = LocalDate.now(),
         url = url,
+        brukerInformertOmFeilutbetaling = null,
     ),
     utvidPerioder = utvidPerioder,
     behandlendeEnhet = behandlendeEnhet,
@@ -177,6 +178,7 @@ fun eksternFagsakBehandling(
         vedtaksdato = vedtaksdato,
         utvidedePerioder = utvidPerioder,
         url = "http://localhost:8080",
+        brukerInformertOmFeilutbetaling = null,
         opprettet = opprettet,
     )
 }
