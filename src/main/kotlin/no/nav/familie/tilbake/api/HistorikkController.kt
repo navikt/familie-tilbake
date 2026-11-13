@@ -45,7 +45,7 @@ class HistorikkController(
                 tilbakekrevingService
                     .hentHistorikk(tilbakekreving.id)
                     .map { innslag ->
-                        val ekstraInfo = innslag.ekstraInfo as Map<*, *>
+                        val ekstraInfo = innslag.ekstraInfo
                         HistorikkinnslagDto(
                             behandlingId = innslag.behandlingId,
                             type = Historikkinnslagstype.valueOf(innslag.type),
@@ -54,12 +54,12 @@ class HistorikkController(
                             tittel = innslag.tittel,
                             tekst = innslag.tekst,
                             steg = innslag.steg,
-                            journalpostId = ekstraInfo[EkstraInfo.JOURNALPOST_ID] as String?,
-                            dokumentId = ekstraInfo[EkstraInfo.DOKUMENTINFO_ID] as String?,
+                            journalpostId = ekstraInfo[EkstraInfo.JOURNALPOST_ID.name] as String?,
+                            dokumentId = ekstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] as String?,
                             opprettetTid = innslag.opprettetTid.toLocalDateTime(),
-                            nyFrist = (ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE] as? String)
+                            nyFrist = (ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] as? String)
                                 ?.let { LocalDate.parse(it) },
-                            begrunnelseForUtsattFrist = ekstraInfo[EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST] as String?,
+                            begrunnelseForUtsattFrist = ekstraInfo[EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST.name] as String?,
                         )
                     },
             )
