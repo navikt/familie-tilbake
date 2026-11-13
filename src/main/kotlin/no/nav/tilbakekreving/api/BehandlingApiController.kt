@@ -23,6 +23,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FeilutbetaltBelopEndretDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForeldelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HendelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OpprettRevurderingResponseDto
@@ -152,6 +153,15 @@ class BehandlingApiController(
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(tilbakekrevingService.hentHistorikk(tilbakekreving.id))
+    }
+
+    override fun behandlingHentHistorikk(behandlingId: UUID): ResponseEntity<List<HendelseDto>> {
+        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
+            filter = TilbakekrevingFilter.behandling(behandlingId),
+            valideringContext = ValideringContext.HentHistorikk,
+        ) ?: return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(tilbakekrevingService.hentHendelser(tilbakekreving.id))
     }
 
     override fun behandlingForhandsvarsel(behandlingId: UUID): ResponseEntity<ForhaandsvarselResponseDto> {

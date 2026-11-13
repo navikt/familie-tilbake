@@ -6,7 +6,9 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
+import no.nav.tilbakekreving.kontrakter.frontend.models.HendelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RolleDto
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
 import java.time.ZoneOffset
 import java.util.UUID
@@ -56,7 +58,24 @@ data class Behandlingslogg(
                 tekst = it.behandlingsloggstype.hentTekst(ekstraInfo),
                 steg = it.behandlingsloggstype.steg.toString(),
                 opprettetTid = it.opprettetTid.atOffset(ZoneOffset.UTC),
-                ekstraInfo = ekstraInfo,
+                ekstraInfo = ekstraInfo.mapKeys { (key, _) -> key.name },
+            )
+        }
+    }
+
+    fun tilHendelserDto(): List<HendelseDto> {
+        return historikk.map {
+            HendelseDto(
+                tittel = it.behandlingsloggstype.hentTittel(it.ekstraInfo),
+                opprettet = it.opprettetTid.atOffset(ZoneOffset.UTC),
+                rolle = when (it.rolle) {
+                    Rolle.SAKSBEHANDLER -> RolleDto.SAKSBEHANDLER
+                    Rolle.BESLUTTER -> RolleDto.BESLUTTER
+                    Rolle.VEDTAKSLØSNING -> RolleDto.VEDTAKSLØSNING
+                },
+                rolleIdent = it.behandlerIdent,
+                beskrivelse = it.behandlingsloggstype.hentTekst(it.ekstraInfo),
+                ekstraInfo = it.ekstraInfo.entries.associate { (key, value) -> key.name to value.toString() },
             )
         }
     }
