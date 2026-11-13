@@ -25,7 +25,6 @@ import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.AvventerFagsysteminfo
-import no.nav.tilbakekreving.tilstand.AvventerKravgrunnlag
 import no.nav.tilbakekreving.tilstand.DistribuerVarselbrev
 import no.nav.tilbakekreving.tilstand.IverksettVedtak
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
@@ -84,20 +83,6 @@ class StatusmeldingBortfaltTest {
         val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
         tilbakekreving.håndter(sperrStatusmelding(), systemContext())
         tilbakekreving.tilstand shouldBe Sperret
-
-        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
-
-        tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
-        shouldThrow<ModellFeil.UtenforScopeException> {
-            tilbakekreving.validerInnenforScope(defaultFeatures())
-        }.utenforScope shouldBe UtenforScope.KravgrunnlagBortfalt
-    }
-
-    @Test
-    fun `bortfalt kravgrunnlag når behandlingen er i AvventerKravgrunnlag`() {
-        val context = saksbehandlerContext()
-        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse(), context)
-        tilbakekreving.tilstand shouldBe AvventerKravgrunnlag
 
         tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
 

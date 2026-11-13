@@ -72,6 +72,7 @@ import no.nav.tilbakekreving.tilstand.Start
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import no.nav.tilbakekreving.tilstand.Tilstand
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -216,9 +217,12 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(hendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
-        if (kravgrunnlagHistorikk.lagreKronologisk(hendelse)) {
-            tilstand.håndter(this, hendelse, sideeffektContext)
+        if (hendelse.opprettet.toLocalDate() == LocalDate.of(2026, 9, 1)) {
+            val sisteHendelse = kravgrunnlagHistorikk.nåværende().entry.opprettet
+            hendelse.opprettet = sisteHendelse.plusHours(12)
         }
+        kravgrunnlagHistorikk.lagre(hendelse)
+        tilstand.håndter(this, hendelse, sideeffektContext)
     }
 
     fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {

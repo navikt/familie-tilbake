@@ -58,7 +58,7 @@ data class SperretStatusmeldingHendelse(
 
 data class AvsluttetStatusmeldingHendelse(
     override val id: UUID,
-    override val opprettet: LocalDateTime,
+    override var opprettet: LocalDateTime,
     override val vedtakId: BigInteger,
     override val kravstatuskode: Kravstatuskode,
     override val vedtakGjelder: Aktør,
