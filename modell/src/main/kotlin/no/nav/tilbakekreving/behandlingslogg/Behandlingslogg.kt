@@ -66,7 +66,7 @@ data class Behandlingslogg(
     fun tilHendelserDto(): List<HendelseDto> {
         return historikk.map {
             HendelseDto(
-                tittel = it.behandlingsloggstype.hentTittel(it.ekstraInfo),
+                tittel = it.behandlingsloggstype.tittel,
                 opprettet = it.opprettetTid.atOffset(ZoneOffset.UTC),
                 rolle = when (it.rolle) {
                     Rolle.SAKSBEHANDLER -> RolleDto.SAKSBEHANDLER
