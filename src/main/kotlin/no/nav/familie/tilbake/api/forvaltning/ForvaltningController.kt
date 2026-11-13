@@ -640,6 +640,22 @@ class ForvaltningController(
         return Ressurs.success(statusmeldingBufferRepository.finnStatusmeldingerUtenSak())
     }
 
+    @Operation(summary = "Hent statusmeldinger i bufferet mottatt før 2026-09-02")
+    @GetMapping(
+        path = ["/finn-statusmeldinger-uten-riktig-mottatt-dato"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun finnStatusmeldingerUtenRiktigMottattDato(): Ressurs<List<StatusmeldingBufferRepository.StatusmeldingUtenMelding>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente statusmeldinger mottatt før backfill",
+                frontendFeilmelding = "Du har ikke tilgang til å hente statusmeldinger mottatt før backfill",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(statusmeldingBufferRepository.finnStatusmeldingerUtenRiktigMottattDato())
+    }
+
     @Operation(summary = "Marker statusmeldinger i bufferet som ulest slik at de leses på nytt")
     @PostMapping(
         path = ["/les-statusmeldinger-pa-nytt"],
