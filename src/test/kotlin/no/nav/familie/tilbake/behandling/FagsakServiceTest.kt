@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.familie.prosessering.domene.Task
@@ -18,8 +19,10 @@ import no.nav.familie.tilbake.behandling.task.TracableTaskService
 import no.nav.familie.tilbake.common.repository.findByIdOrThrow
 import no.nav.familie.tilbake.config.Constants
 import no.nav.familie.tilbake.data.Testdata
+import no.nav.familie.tilbake.kontrakter.Ressurs
 import no.nav.familie.tilbake.kravgrunnlag.ØkonomiXmlMottattRepository
 import no.nav.familie.tilbake.log.SecureLog
+import no.nav.familie.tilbake.sikkerhet.NyTilgangskontrollServiceTest
 import no.nav.tilbakekreving.FagsystemUtil
 import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
@@ -91,6 +94,19 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
         behandlingsoppsummeringtDto.eksternBrukId shouldBe behandling.eksternBrukId
         behandlingsoppsummeringtDto.status shouldBe behandling.status
         behandlingsoppsummeringtDto.type shouldBe behandling.type
+    }
+
+    @Test
+    fun `hentFagsak via controller for fagsak som kun finnes i gammel modell`() {
+        val eksternFagsakId = UUID.randomUUID().toString()
+        opprettBehandling(Ytelsestype.BARNETRYGD, eksternFagsakId)
+
+        val response = somSaksbehandler(grupper = listOf(NyTilgangskontrollServiceTest.BARNETRYGD_SAKSBEHANDLER_ROLLE)) {
+            fagsakController.hentFagsak(FagsystemDTO.BA, eksternFagsakId)
+        }
+
+        response.status shouldBe Ressurs.Status.SUKSESS
+        response.data.shouldNotBeNull()
     }
 
     @Test

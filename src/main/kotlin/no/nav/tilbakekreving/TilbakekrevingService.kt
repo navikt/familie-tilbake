@@ -98,6 +98,7 @@ class TilbakekrevingService(
     ): List<Tilbakekreving> {
         val tilbakekrevinger = tilbakekrevingRepository.hentTilbakekrevinger(filter)
             .map { it.fraEntity() }
+        if (tilbakekrevinger.isEmpty()) return emptyList()
         val behandler = ContextService.hentBehandler(filter.logContext())
         tilgangskontrollService.validerTilgangTilbakekreving(tilbakekrevinger.first(), valideringContext, behandler)
         return tilbakekrevinger
