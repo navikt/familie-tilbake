@@ -75,7 +75,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 
 class Tilbakekreving internal constructor(
     val id: String,
@@ -550,14 +549,6 @@ class Tilbakekreving internal constructor(
 
     fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
-            bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
-            ytelse = eksternFagsak.ytelse,
-            tilbakekrevingId = id,
-        )
-    }
-
-    fun hentRevurderingVedtaksbrevInfo(behandlingId: UUID): RevurderingVedtaksbrevInfo {
-        return behandlingHistorikk.entry(behandlingId).hentRevurderingVedtaksbrevInfo(
             bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
             ytelse = eksternFagsak.ytelse,
             tilbakekrevingId = id,

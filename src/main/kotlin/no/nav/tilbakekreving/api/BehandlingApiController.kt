@@ -52,8 +52,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import java.util.UUID
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevTypeDto
 
 @Component
 @ProtectedWithClaims(issuer = "azuread")
@@ -100,27 +98,10 @@ class BehandlingApiController(
             valideringContext = ValideringContext.HentVedtaksbrevData,
         ) ?: return ResponseEntity.notFound().build()
         val beslutter = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-
         return ResponseEntity.ok(
             nyVedtaksbrevService.hentVedtaksbrevData(
                 UUID.fromString(behandlingId),
                 tilbakekreving.hentVedtaksbrevInfo(UUID.fromString(behandlingId)),
-                beslutter,
-            ),
-        )
-    }
-
-    override fun behandlingHentRevurderingVedtaksbrev(behandlingId: String): ResponseEntity<RevurderingVedtaksbrevDataDto> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(UUID.fromString(behandlingId)),
-            valideringContext = ValideringContext.HentVedtaksbrevData,
-        ) ?: return ResponseEntity.notFound().build()
-        val beslutter = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-
-        return ResponseEntity.ok(
-            nyVedtaksbrevService.hentRevurderingVedtaksbrevData(
-                UUID.fromString(behandlingId),
-                tilbakekreving.hentRevurderingVedtaksbrevInfo(UUID.fromString(behandlingId)),
                 beslutter,
             ),
         )
@@ -143,23 +124,13 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OppdaterVedtaksbrev,
         ) ?: return ResponseEntity.notFound().build()
-
         return ResponseEntity.ok(
-            when(vedtaksbrevRedigerbareDataUpdateDto.vedtaksbrevType) {
-                VedtaksbrevTypeDto.FØRSTEGANG ->
-                    nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
-                        behandlingId = behandlingId,
-                        data = vedtaksbrevRedigerbareDataUpdateDto,
-                        info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
-                        klokke = SystemKlokke,
-                    )
-                VedtaksbrevTypeDto.REVURDERING ->
-                    nyVedtaksbrevService.oppdatertOgHentRevurderingVedtaksbrevData(
-                        behandlingId = behandlingId,
-                        data = vedtaksbrevRedigerbareDataUpdateDto,
-                        info = tilbakekreving.hentRevurderingVedtaksbrevInfo(behandlingId)
-                    )
-            }
+            nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
+                behandlingId = behandlingId,
+                data = vedtaksbrevRedigerbareDataUpdateDto,
+                info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
+                klokke = SystemKlokke,
+            ),
         )
     }
 

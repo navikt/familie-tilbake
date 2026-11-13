@@ -1,8 +1,6 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
-import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler.Companion.forBegrunnelse
@@ -51,18 +49,14 @@ object BrevFormatterer {
             else -> "Dette er grunnen til at du har fått for mye utbetalt"
         }
 
-    fun lagHovedavsnittTittel(info: VedtaksbrevInfo) = when {
-        info.skalTilbakekreves -> "Du må betale tilbake ${info.ytelse.ubestemtEntall}"
-        else -> "Du må ikke betale tilbake ${info.ytelse.ubestemtEntall}"
-    }
-
-    fun lagHovedavsnittTittelForRevurdering(info: RevurderingVedtaksbrevInfo) = "Vi har endret vedtaket ditt om tilbakekreving av ${info.ytelse.ubestemtEntall}"
-
     fun lagVedtakHjemmelAvsnitt(
         hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
         språkkode: Språkkode,
     ): String {
-        return "Vedtaket er gjort etter ${hjemlerForTilbakekreving.formatter(språkkode)}."
+        return when {
+            hjemlerForTilbakekreving.isEmpty() -> ""
+            else -> "Vedtaket er gjort etter ${hjemlerForTilbakekreving.formatter(språkkode)}."
+        }
     }
 
     fun lagForhåndsvarselHjemmelAvsnitt(

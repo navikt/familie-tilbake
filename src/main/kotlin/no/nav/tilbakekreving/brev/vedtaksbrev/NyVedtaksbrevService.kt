@@ -13,11 +13,12 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.aktør.Brukerinfo
 import no.nav.tilbakekreving.behov.RevurderingVedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
+import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
@@ -39,7 +40,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.OppsummertPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PakrevdBegrunnelseUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RentekstElementDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RotElementUpdateItemDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SignaturDto
@@ -56,9 +56,6 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.tilbakekreving.aktør.Brukerinfo
-import no.nav.tilbakekreving.breeeev.Signatur
-import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevTypeDto
 
 @Service
 class NyVedtaksbrevService(
@@ -76,8 +73,11 @@ class NyVedtaksbrevService(
         val hovedavsnitt = lagredeData?.let {
             mapHovedavsnitt(it.hovedavsnitt, vedtaksbrevInfo)
         } ?: HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
-            forklaring = Forklaringstekster.HOVEDAVSNITT,
+            tittel = vedtaksbrevInfo.tittel,
+            forklaring = when {
+                vedtaksbrevInfo.erRevurdering -> Forklaringstekster.HOVEDAVSNITT_REVURDERING
+                else -> Forklaringstekster.HOVEDAVSNITT
+            },
             underavsnitt = listOf(RentekstElementDto("")),
             hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
         )
@@ -110,39 +110,15 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = mapSignatur(vedtaksbrevInfo.signatur, beslutter),
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = OppsummeringsdataDto(
-                beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
-                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
-                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
-            ),
-            vedtaksbrevType = VedtaksbrevTypeDto.FØRSTEGANG,
-        )
-    }
-
-    fun hentRevurderingVedtaksbrevData(behandlingId: UUID, revurderingVedtaksbrevInfo: RevurderingVedtaksbrevInfo, beslutter: Behandler): RevurderingVedtaksbrevDataDto {
-        val lagredeData = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId)
-        val hovedavsnitt = lagredeData?.let { (_, data) ->
-            mapHovedavsnitt(data.hovedavsnitt, revurderingVedtaksbrevInfo)
-        } ?: HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittelForRevurdering(revurderingVedtaksbrevInfo),
-            forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
-            underavsnitt = listOf(RentekstElementDto(STANDARDTEKST_REVURDERING)),
-            hjemler = "",
-        )
-        val sistOppdatert = lagredeData?.first?.atOffset(ZoneOffset.UTC) ?: OffsetDateTime.now()
-
-        return RevurderingVedtaksbrevDataDto(
-            hovedavsnitt = hovedavsnitt,
-            avsnitt = emptyList(),
-            brevGjelder = revurderingVedtaksbrevInfo.brukerdata,
-            ytelse = revurderingVedtaksbrevInfo.ytelse,
-            sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
-            sistOppdatert = sistOppdatert,
-            bunntekster = revurderingVedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
-            signatur = mapSignatur(revurderingVedtaksbrevInfo.signatur, beslutter),
-            saksnummer = revurderingVedtaksbrevInfo.tilbakekrevingId,
-            vedtaksbrevType = VedtaksbrevTypeDto.REVURDERING,
+            oppsummeringstabell = when {
+                vedtaksbrevInfo.erRevurdering -> null
+                else -> OppsummeringsdataDto(
+                    beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
+                    perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
+                    sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
+                    sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
+                )
+            },
         )
     }
 
@@ -166,10 +142,11 @@ class NyVedtaksbrevService(
         return if (beløp > 0) "$fortegn$formatertBeløp" else formatertBeløp
     }
 
-
     private fun oppdaterVedtaksbrevData(
         behandlingId: UUID,
-        data: VedtaksbrevRedigerbareDataUpdateDto,klokke: Klokke,) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
+        data: VedtaksbrevRedigerbareDataUpdateDto,
+        klokke: Klokke,
+    ) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
         behandlingId,
         VedtaksbrevDataRepository.VedtaksbrevEntity(
             hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
@@ -190,47 +167,17 @@ class NyVedtaksbrevService(
         behandlingId: UUID,
         data: VedtaksbrevRedigerbareDataUpdateDto,
         info: VedtaksbrevInfo,
+        klokke: Klokke,
     ): VedtaksbrevRedigerbareDataDto {
         val (sistOppdatert, data) = oppdaterVedtaksbrevData(
             behandlingId = behandlingId,
             data = data,
+            klokke = klokke,
         )
         return VedtaksbrevRedigerbareDataDto(
             hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
             avsnitt = info.perioder.map { mapAvsnitt(it, data.avsnitt) },
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
-            vedtaksbrevType = VedtaksbrevTypeDto.FØRSTEGANG,
-        )
-    }
-
-
-    fun oppdatertOgHentRevurderingVedtaksbrevData(
-        behandlingId: UUID,
-        data: VedtaksbrevRedigerbareDataUpdateDto,
-        info: RevurderingVedtaksbrevInfo,
-    ): VedtaksbrevRedigerbareDataDto {
-        val (sistOppdatert, data) = oppdaterVedtaksbrevData(
-            behandlingId = behandlingId,
-            data = data,
-        )
-
-        return VedtaksbrevRedigerbareDataDto(
-            hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
-            avsnitt = listOf(),
-            sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
-            vedtaksbrevType = VedtaksbrevTypeDto.REVURDERING,
-        )
-    }
-
-    fun mapHovedavsnitt(
-        data: VedtaksbrevDataRepository.HovedavsnittEntity,
-        info: RevurderingVedtaksbrevInfo,
-    ): HovedavsnittDto {
-        return HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittelForRevurdering(info),
-            forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
-            underavsnitt = data.underavsnitt.map(::mapUnderavsnitt),
-            hjemler = "",
         )
     }
 
@@ -239,7 +186,7 @@ class NyVedtaksbrevService(
         info: VedtaksbrevInfo,
     ): HovedavsnittDto {
         return HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittel(info),
+            tittel = info.tittel,
             forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
@@ -303,7 +250,7 @@ class NyVedtaksbrevService(
         }
     }
 
-    fun mapSignatur(signatur: Signatur, beslutter: Behandler):  SignaturDto {
+    fun mapSignatur(signatur: Signatur, beslutter: Behandler): SignaturDto {
         val beslutter = beslutter.takeIf { it.ident != signatur.ansvarligSaksbehandlerIdent }
         return SignaturDto(
             enhetNavn = signatur.ansvarligEnhet,
@@ -370,7 +317,7 @@ class NyVedtaksbrevService(
         return dokarkivClient.opprettOgSendJournalpostRequest(
             arkiverDokument = opprettArkiverDokumentRequest(
                 bruker = behov.bruker,
-                pdfDocument = pdfGenClient.hentPdfForRevurderingVedtak(hentRevurderingVedtaksbrevData(behov.behandlingId, behov.revurderingVedtaksbrevInfo, behov.beslutter)),
+                pdfDocument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.revurderingVedtaksbrevInfo, behov.beslutter)),
                 fagsakId = behov.fagsakId,
                 tittel = TITTEL_REVURDERING_TILBAKEKREVING,
                 journalførendeEnhet = behov.journalførendeEnhet,
@@ -453,6 +400,5 @@ class NyVedtaksbrevService(
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
         private const val TITTEL_REVURDERING_TILBAKEKREVING = "Vedtak om revurdering av tilbakekreving "
-        private const val STANDARDTEKST_REVURDERING = "Standardtekst som kan endres av saksbehandler. "
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
@@ -42,7 +42,6 @@ fun vedtaksbrevInfo(
         ),
     ),
     bunntekster = emptySet(),
-    skalTilbakekreves = skalTilbakerkeves,
     tilbakekrevingId = UUID.randomUUID().toString(),
     beregningsresultat = listOf(
         BeregningsresultatsperiodeDto(
@@ -59,9 +58,11 @@ fun vedtaksbrevInfo(
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
     beregnerSkatt = true,
+    tittel = "Du må betale tilbake arbeidsavklaringspenger",
+    erRevurdering = false,
 )
 
-fun revurderingVedtaksbrevInfo() = RevurderingVedtaksbrevInfo(
+fun vedtaksbrevInfoForRevurdering() = VedtaksbrevInfo(
     brukerdata = brevmottaker,
     ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
     signatur = Signatur(
@@ -69,6 +70,12 @@ fun revurderingVedtaksbrevInfo() = RevurderingVedtaksbrevInfo(
         ansvarligBeslutterIdent = null,
         ansvarligEnhet = "NAV Arbeid og Ytelser",
     ),
-    bunntekster = emptySet(),
+    perioder = emptyList(),
+    bunntekster = Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER,
     tilbakekrevingId = UUID.randomUUID().toString(),
+    beregningsresultat = emptyList(),
+    hjemlerForTilbakekreving = emptyList(),
+    beregnerSkatt = false,
+    tittel = "Vedtak om revurdering av tilbakekreving arbeidsavklaringspenger",
+    erRevurdering = true,
 )

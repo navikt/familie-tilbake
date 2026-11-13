@@ -51,10 +51,10 @@ import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.InfobrevData
 import no.nav.tilbakekreving.breeeev.Infobrevavsnitt
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
@@ -95,6 +95,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -341,20 +342,11 @@ class Behandling internal constructor(
                 bruker = bruker.hentBrukerinfo(),
                 fagsakId = fagsakId,
                 journalførendeEnhet = enhet!!.kode,
-                revurderingVedtaksbrevInfo = hentRevurderingVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
+                revurderingVedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
             ),
         )
     }
-
-    internal fun hentRevurderingVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String) = RevurderingVedtaksbrevInfo(
-        brukerdata = bruker.brevmeta(),
-        ytelse = ytelse.brevmeta(),
-        signatur = brevSignatur(),
-        bunntekster = Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER,
-        tilbakekrevingId = tilbakekrevingId,
-    )
-
 
     internal fun trengerInfobrevJournalføring(
         sideeffektContext: SideeffektContext,
@@ -972,21 +964,48 @@ class Behandling internal constructor(
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
         val resultat = lagBeregning().oppsummer()
+        val ytelseDto = ytelse.brevmeta()
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
-            ytelse = ytelse.brevmeta(),
+            ytelse = ytelseDto,
             signatur = brevSignatur(),
-            perioder = vurdertePerioderForBrev(),
-            bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
-            skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
+            perioder = when {
+                erRevurdering() -> emptyList()
+                else -> vurdertePerioderForBrev()
+            },
+            bunntekster = when {
+                erRevurdering() -> Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER
+                else -> Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse)
+            },
+            tittel = lagHovedavsnittTittel(resultat, ytelseDto),
             tilbakekrevingId = tilbakekrevingId,
-            beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
-            hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
-                ytelse.hjemlerForTilbakekreving() +
-                foreldelsesteg.hjemlerForTilbakekreving() +
-                vilkårsvurderingsteg.hjemlerForTilbakekreving(),
-            beregnerSkatt = ytelse.beregnerSkatt,
+            beregningsresultat = when {
+                erRevurdering() -> emptyList()
+                else -> resultat.tilFrontendDto().beregningsresultatsperioder
+            },
+            hjemlerForTilbakekreving = when {
+                erRevurdering() -> emptyList()
+                else -> {
+                    listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
+                        ytelse.hjemlerForTilbakekreving() +
+                        foreldelsesteg.hjemlerForTilbakekreving() +
+                        vilkårsvurderingsteg.hjemlerForTilbakekreving()
+                }
+            },
+            beregnerSkatt = when {
+                erRevurdering() -> false
+                else -> ytelse.beregnerSkatt
+            },
+            erRevurdering = erRevurdering(),
         )
+    }
+
+    private fun lagHovedavsnittTittel(result: Beregningsresultat, ytelse: YtelseDto): String {
+        if (erRevurdering()) return "Vedtak om revurdering av tilbakekreving ${ytelse.ubestemtEntall}"
+        return when {
+            result.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING -> "Du må betale tilbake ${ytelse.ubestemtEntall}"
+            else -> "Du må ikke betale tilbake ${ytelse.ubestemtEntall}"
+        }
     }
 
     private fun SideeffektContext.logg(
