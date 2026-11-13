@@ -84,20 +84,20 @@ class ForvaltningController(
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
 
-    @Operation(summary = "Hent behandlings-ID-er med behandlingsårsak REVURDERING_ANNEN_ÅRSAK")
-    @GetMapping(
-        path = ["/behandlingsarsak/revurdering-annen-arsak/behandlinger"],
+    @Operation(summary = "Korriger behandlingsårsak for to bestemte behandlinger til feilutbetalt beløp helt eller delvis bortfalt")
+    @PutMapping(
+        path = ["/behandlingsarsak/korriger-revurdering-arsak"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): Ressurs<List<UUID>> {
+    fun korrigerRevurderingsårsak(): Ressurs<Int> {
         if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
             throw ForbiddenError(
-                message = "Mangler forvaltertilgang til å hente behandlings-ID-er med revurdering annen årsak",
-                frontendFeilmelding = "Du har ikke tilgang til å hente behandlings-ID-er med revurdering annen årsak",
+                message = "Mangler forvaltertilgang til å korrigere behandlingsårsak",
+                frontendFeilmelding = "Du har ikke tilgang til å korrigere behandlingsårsak",
                 logContext = SecureLog.Context.tom(),
             )
         }
-        return Ressurs.success(behandlingRepository.hentBehandlingsIderMedRevurderingAnnenÅrsak())
+        return Ressurs.success(behandlingRepository.korrigerRevurderingsårsak())
     }
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
