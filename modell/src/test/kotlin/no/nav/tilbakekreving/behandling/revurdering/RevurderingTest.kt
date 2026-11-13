@@ -2,6 +2,9 @@ package no.nav.tilbakekreving.behandling.revurdering
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -18,6 +21,7 @@ import no.nav.tilbakekreving.behandling.medBigQuery
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
@@ -30,6 +34,7 @@ import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
+import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -56,12 +61,19 @@ class RevurderingTest {
         tilbakekreving.tilstand.behandlingsstatus(behandling, context.klokke) shouldBe BehandlingsstatusModell.AVSLUTTET
 
         tilbakekreving.opprettRevurdering(
-            tilbakekreving.nåværendeBehandlingId(),
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
             saksbehandlerContext(),
+        )
+        tilbakekreving.håndter(
+            kravgrunnlag(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
         )
 
         val revurderingBehandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
@@ -131,14 +143,13 @@ class RevurderingTest {
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER).kanRevurderingOpprettes shouldBe false
         shouldThrow<ModellFeil.UgyldigOperasjonException> {
             tilbakekreving.opprettRevurdering(
-                tilbakekreving.nåværendeBehandlingId(),
                 TilbakekrevingRevurderingsårsak.EtterKlage(
                     vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                     beskrivelse = "Begrunnelse fra klageinstansen",
                 ),
                 saksbehandlerContext(),
             )
-        }.message shouldBe "Kan ikke opprette revurdering i TIL_BEHANDLING"
+        }.message shouldBe "Kan ikke hente kravgrunnlag for revurdering i TIL_BEHANDLING"
     }
 
     private fun tilbakekrevingTilAvsluttet(
@@ -211,12 +222,20 @@ class RevurderingTest {
         val context = saksbehandlerContext()
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurdering(
-            tilbakekreving.nåværendeBehandlingId(),
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
             saksbehandlerContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
         )
 
         tilbakekreving.oppdaterRevurderingsårsak(
@@ -264,8 +283,7 @@ class RevurderingTest {
         val bigQuery = BigQueryOppsamler()
         val context = saksbehandlerContext().medBigQuery(bigQuery)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
-        tilbakekreving.opprettRevurdering(
-            tilbakekreving.nåværendeBehandlingId(),
+        tilbakekreving.opprettRevurderingBehandling(
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
@@ -307,5 +325,51 @@ class RevurderingTest {
             it.revurderingsårsak shouldBe "FORELDELSE"
             it.revurderingsinstans shouldBe null
         }
+    }
+
+    @Test
+    fun `VedtaksbrevInfo for revurdering`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        tilbakekreving.opprettRevurdering(
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+
+        val info = tilbakekreving.hentVedtaksbrevInfo(tilbakekreving.nåværendeBehandlingId())
+        info.erRevurdering shouldBe true
+        info.perioder.shouldBeEmpty()
+        info.bunntekster shouldBe Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER
+        info.tittel shouldBe "Vedtak om revurdering av tilbakekreving barnetrygd"
+        info.beregningsresultat.shouldBeEmpty()
+        info.hjemlerForTilbakekreving.shouldBeEmpty()
+        info.beregnerSkatt shouldBe false
+    }
+
+    @Test
+    fun `VedtaksbrevInfo for opprinnelig behandling`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+
+        val info = tilbakekreving.hentVedtaksbrevInfo(tilbakekreving.nåværendeBehandlingId())
+        info.erRevurdering shouldBe false
+        info.perioder.shouldNotBeEmpty()
+        info.bunntekster shouldContain Bunntekst.SKATT
+        info.tittel shouldBe "Du må betale tilbake barnetrygd"
+        info.beregningsresultat.shouldNotBeEmpty()
+        info.hjemlerForTilbakekreving.shouldNotBeEmpty()
+        info.beregnerSkatt shouldBe true
     }
 }

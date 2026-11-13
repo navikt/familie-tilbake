@@ -44,12 +44,14 @@ import no.nav.tilbakekreving.behandlingslogg.Rolle
 import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
+import no.nav.tilbakekreving.behov.RevurderingVedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beregning.Beregning
 import no.nav.tilbakekreving.beregning.delperiode.Delperiode
+import no.nav.tilbakekreving.beregning.modell.Beregningsresultat
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.InfobrevData
 import no.nav.tilbakekreving.breeeev.Infobrevavsnitt
@@ -93,6 +95,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UttalelsesfristDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.YtelseDto
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode.Companion.overordnet
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -300,7 +303,7 @@ class Behandling internal constructor(
         )
     }
 
-    internal fun trengerVedtaksbrevJournalføring(
+    internal fun trengerFørstegangVedtaksbrevJournalføring(
         sideeffektContext: SideeffektContext,
         brevId: UUID,
         ytelse: Ytelse,
@@ -318,6 +321,28 @@ class Behandling internal constructor(
                 journalførendeEnhet = enhet!!.kode,
                 vedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 vedtaksresultat = hentVedtaksresultat(sideeffektContext.klokke)!!,
+                beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
+            ),
+        )
+    }
+
+    internal fun trengerRevurderingVedtaksbrevJournalføring(
+        sideeffektContext: SideeffektContext,
+        brevId: UUID,
+        ytelse: Ytelse,
+        bruker: Bruker,
+        fagsakId: String,
+        tilbakekrevingId: String,
+    ) {
+        sideeffektContext.behovObservatør.håndter(
+            RevurderingVedtaksbrevJournalføringBehov(
+                brevId = brevId,
+                behandlingId = id,
+                ytelse = ytelse,
+                bruker = bruker.hentBrukerinfo(),
+                fagsakId = fagsakId,
+                journalførendeEnhet = enhet!!.kode,
+                revurderingVedtaksbrevInfo = hentVedtaksbrevInfo(bruker, ytelse, tilbakekrevingId),
                 beslutter = fatteVedtakSteg.ansvarligBeslutter!!,
             ),
         )
@@ -939,21 +964,48 @@ class Behandling internal constructor(
 
     internal fun hentVedtaksbrevInfo(bruker: Bruker, ytelse: Ytelse, tilbakekrevingId: String): VedtaksbrevInfo {
         val resultat = lagBeregning().oppsummer()
+        val ytelseDto = ytelse.brevmeta()
         return VedtaksbrevInfo(
             brukerdata = bruker.brevmeta(),
-            ytelse = ytelse.brevmeta(),
+            ytelse = ytelseDto,
             signatur = brevSignatur(),
-            perioder = vurdertePerioderForBrev(),
-            bunntekster = Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse),
-            skalTilbakekreves = resultat.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING,
+            perioder = when {
+                erRevurdering() -> emptyList()
+                else -> vurdertePerioderForBrev()
+            },
+            bunntekster = when {
+                erRevurdering() -> Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER
+                else -> Bunntekst.finnTekster(lagBeregning().oppsummer(), ytelse)
+            },
+            tittel = lagHovedavsnittTittel(resultat, ytelseDto),
             tilbakekrevingId = tilbakekrevingId,
-            beregningsresultat = resultat.tilFrontendDto().beregningsresultatsperioder,
-            hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
-                ytelse.hjemlerForTilbakekreving() +
-                foreldelsesteg.hjemlerForTilbakekreving() +
-                vilkårsvurderingsteg.hjemlerForTilbakekreving(),
-            beregnerSkatt = ytelse.beregnerSkatt,
+            beregningsresultat = when {
+                erRevurdering() -> emptyList()
+                else -> resultat.tilFrontendDto().beregningsresultatsperioder
+            },
+            hjemlerForTilbakekreving = when {
+                erRevurdering() -> emptyList()
+                else -> {
+                    listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15) +
+                        ytelse.hjemlerForTilbakekreving() +
+                        foreldelsesteg.hjemlerForTilbakekreving() +
+                        vilkårsvurderingsteg.hjemlerForTilbakekreving()
+                }
+            },
+            beregnerSkatt = when {
+                erRevurdering() -> false
+                else -> ytelse.beregnerSkatt
+            },
+            erRevurdering = erRevurdering(),
         )
+    }
+
+    private fun lagHovedavsnittTittel(result: Beregningsresultat, ytelse: YtelseDto): String {
+        if (erRevurdering()) return "Vedtak om revurdering av tilbakekreving ${ytelse.ubestemtEntall}"
+        return when {
+            result.vedtaksresultat != Vedtaksresultat.INGEN_TILBAKEBETALING -> "Du må betale tilbake ${ytelse.ubestemtEntall}"
+            else -> "Du må ikke betale tilbake ${ytelse.ubestemtEntall}"
+        }
     }
 
     private fun SideeffektContext.logg(
@@ -1017,7 +1069,11 @@ class Behandling internal constructor(
         )
     }
 
-    fun klonBehandlingForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, klokke: Klokke): Behandling {
+    fun klonBehandlingForRevurdering(
+        revurderingsårsak: TilbakekrevingRevurderingsårsak,
+        kravgurnnlagReferanse: HistorikkReferanse<UUID, KravgrunnlagHendelse>,
+        klokke: Klokke,
+    ): Behandling {
         val opprettet = klokke.nå()
 
         return Behandling(
@@ -1029,7 +1085,7 @@ class Behandling internal constructor(
             revurderingsårsak = revurderingsårsak,
             ansvarligSaksbehandler = ansvarligSaksbehandler,
             eksternFagsakRevurdering = eksternFagsakRevurdering,
-            kravgrunnlag = kravgrunnlag,
+            kravgrunnlag = kravgurnnlagReferanse,
             nyttKravgrunnlag = null,
             foreldelsesteg = foreldelsesteg.klon(),
             faktasteg = faktasteg.klon(),
@@ -1042,11 +1098,13 @@ class Behandling internal constructor(
     }
 
     fun oppdaterRevurderingsårsak(oppdatertÅrsak: TilbakekrevingRevurderingsårsak) {
-        if (revurderingsårsak == null) {
+        if (!erRevurdering()) {
             throw ModellFeil.UgyldigOperasjonException("Behandling med id $id er ikke en revurdering", sporingsinformasjon())
         }
         revurderingsårsak = oppdatertÅrsak
     }
+
+    internal fun erRevurdering() = revurderingsårsak != null
 
     companion object {
         internal fun nyBehandling(

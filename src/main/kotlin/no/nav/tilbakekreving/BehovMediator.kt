@@ -16,6 +16,7 @@ import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.behov.IverksettelseBehov
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.behov.KravgrunnlagForRevurderingBehov
+import no.nav.tilbakekreving.behov.RevurderingVedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VarselbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VarselbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
@@ -234,8 +235,42 @@ class BehovMediator(
             }
 
             is InfobrevDistribusjonBehov -> distribuerInformasjonsbrev(behov, tilbakekreving, sideeffektContext, logContext)
-            is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), sideeffektContext)
+            is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), behov.revurderingsårsak, sideeffektContext)
+            is RevurderingVedtaksbrevJournalføringBehov -> journalføringAvRevurderingsvedtaksbrev(behov, tilbakekreving, sideeffektContext)
         }
+    }
+
+    private fun journalføringAvRevurderingsvedtaksbrev(
+        behov: RevurderingVedtaksbrevJournalføringBehov,
+        tilbakekreving: Tilbakekreving,
+        sideeffektContext: SideeffektContext,
+    ) {
+        val journalpost = vedtaksbrevService.journalførRevurderingVedtaksbrev(behov)
+        if (journalpost.journalpostId == null) {
+            throw Feil(
+                message = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mislyktes med denne meldingen: ${journalpost.melding}",
+                frontendFeilmelding = "journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mislyktes med denne meldingen: ${journalpost.melding}",
+                logContext = SecureLog.Context.fra(tilbakekreving),
+            )
+        }
+        if (journalpost.dokumenter.isNullOrEmpty()) {
+            throw Feil(
+                message = "Response fra journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                frontendFeilmelding = "Response fra journalføring av revurdering vedtaksbrev til behandlingId ${behov.behandlingId} mangler dokumenter. Dokumenter er enten null eller tom. ${journalpost.melding}",
+                logContext = SecureLog.Context.fra(tilbakekreving),
+            )
+        }
+
+        tilbakekreving.håndter(
+            JournalføringHendelse(
+                brevId = behov.brevId,
+                behandlingId = behov.behandlingId,
+                journalpostId = journalpost.journalpostId,
+                fagsakId = behov.fagsakId,
+                dokumentInfoId = journalpost.dokumenter[0].dokumentInfoId!!,
+            ),
+            sideeffektContext,
+        )
     }
 
     internal fun hentKorrigertKravgrunnlag(behov: KorrigertKravgrunnlagBehov): KravgrunnlagHendelse {

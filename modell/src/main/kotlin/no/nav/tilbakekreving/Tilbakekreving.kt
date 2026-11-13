@@ -121,6 +121,14 @@ class Tilbakekreving internal constructor(
         )
     }
 
+    fun håndter(kravgrunnlag: KravgrunnlagHendelse, revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, kravgrunnlag, revurderingsårsak, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
+            behandlingId = null,
+        )
+    }
+
     fun håndter(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, fagsysteminfo, sideeffektContext)
         sideeffektContext.logg(
@@ -287,12 +295,10 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
-    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
-        tilstand.opprettRevurdering(
+    fun opprettRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+        tilstand.trengerKravgrunnlagForRevurdering(
             tilbakekreving = this,
             sideeffektContext = sideeffektContext,
-            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
-            behandlendeEnhet = hentBehandling(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
             revurderingsårsak = revurderingsårsak,
         )
     }
@@ -304,9 +310,13 @@ class Tilbakekreving internal constructor(
             }
     }
 
-    fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+    fun opprettRevurderingBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
-        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
+        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(
+            revurderingsårsak = revurderingsårsak,
+            kravgurnnlagReferanse = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
+            klokke = sideeffektContext.klokke,
+        )
         klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(klonetBehandling)
             sideeffektContext.logg(
@@ -314,13 +324,13 @@ class Tilbakekreving internal constructor(
                 behandlingId = klonetBehandling.id,
             )
         }
-        trengerKravgrunnlagForRevurdering(sideeffektContext)
     }
 
-    fun trengerKravgrunnlagForRevurdering(sideeffektContext: SideeffektContext) {
+    fun trengerKravgrunnlagForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         sideeffektContext.behovObservatør.håndter(
             KravgrunnlagForRevurderingBehov(
                 kravgrunnlagId = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
+                revurderingsårsak = revurderingsårsak,
             ),
         )
     }
@@ -406,11 +416,34 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettVedtaksbrev(klokke: Klokke) {
-        brevHistorikk.lagre(Vedtaksbrev.opprett(klokke))
+        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
+            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.REVURDERING))
+        } else {
+            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG))
+        }
     }
 
     fun trengerVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
-        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
+        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
+            trengerRevurderingVedtaksbrevJournalføring(sideeffektContext)
+        } else {
+            trengerFørstegangVedtaksbrevJournalføring(sideeffektContext)
+        }
+    }
+
+    private fun trengerFørstegangVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.trengerFørstegangVedtaksbrevJournalføring(
+            sideeffektContext = sideeffektContext,
+            brevId = brevHistorikk.nåværende().entry.id,
+            ytelse = eksternFagsak.ytelse,
+            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
+            fagsakId = eksternFagsak.eksternId(),
+            tilbakekrevingId = id,
+        )
+    }
+
+    private fun trengerRevurderingVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
+        behandlingHistorikk.nåværende().entry.trengerRevurderingVedtaksbrevJournalføring(
             sideeffektContext = sideeffektContext,
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,

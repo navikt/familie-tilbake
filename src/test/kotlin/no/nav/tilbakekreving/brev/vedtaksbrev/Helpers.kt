@@ -4,8 +4,10 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
+import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
 import no.nav.tilbakekreving.breeeev.standardtekster.HjemmelForTilbakekreving
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatVurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakerDto
@@ -22,6 +24,7 @@ fun vedtaksbrevInfo(
     periodeId: UUID = UUID.randomUUID(),
     vararg påkrevdeBegrunnelser: VilkårsvurderingBegrunnelse = arrayOf(VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER),
     skalTilbakerkeves: Boolean = true,
+    behandlingstype: Behandlingstype = Behandlingstype.TILBAKEKREVING,
 ) = VedtaksbrevInfo(
     brukerdata = brevmottaker,
     ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
@@ -39,7 +42,6 @@ fun vedtaksbrevInfo(
         ),
     ),
     bunntekster = emptySet(),
-    skalTilbakekreves = skalTilbakerkeves,
     tilbakekrevingId = UUID.randomUUID().toString(),
     beregningsresultat = listOf(
         BeregningsresultatsperiodeDto(
@@ -56,4 +58,24 @@ fun vedtaksbrevInfo(
     ),
     hjemlerForTilbakekreving = listOf(HjemmelForTilbakekreving.FOLKETRYGDLOVEN_22_15),
     beregnerSkatt = true,
+    tittel = "Du må betale tilbake arbeidsavklaringspenger",
+    erRevurdering = false,
+)
+
+fun vedtaksbrevInfoForRevurdering() = VedtaksbrevInfo(
+    brukerdata = brevmottaker,
+    ytelse = Ytelse.Arbeidsavklaringspenger.brevmeta(),
+    signatur = Signatur(
+        ansvarligSaksbehandlerIdent = "Z999999",
+        ansvarligBeslutterIdent = null,
+        ansvarligEnhet = "NAV Arbeid og Ytelser",
+    ),
+    perioder = emptyList(),
+    bunntekster = Bunntekst.REVURDERING_STANDARD_BUNNTEKSTER,
+    tilbakekrevingId = UUID.randomUUID().toString(),
+    beregningsresultat = emptyList(),
+    hjemlerForTilbakekreving = emptyList(),
+    beregnerSkatt = false,
+    tittel = "Vedtak om revurdering av tilbakekreving arbeidsavklaringspenger",
+    erRevurdering = true,
 )

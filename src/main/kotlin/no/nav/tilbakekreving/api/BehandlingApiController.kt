@@ -98,7 +98,6 @@ class BehandlingApiController(
             valideringContext = ValideringContext.HentVedtaksbrevData,
         ) ?: return ResponseEntity.notFound().build()
         val beslutter = ContextService.hentBehandler(SecureLog.Context.fra(tilbakekreving))
-
         return ResponseEntity.ok(
             nyVedtaksbrevService.hentVedtaksbrevData(
                 UUID.fromString(behandlingId),
@@ -125,9 +124,8 @@ class BehandlingApiController(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OppdaterVedtaksbrev,
         ) ?: return ResponseEntity.notFound().build()
-
         return ResponseEntity.ok(
-            nyVedtaksbrevService.oppdaterVedtaksbrevData(
+            nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
                 behandlingId = behandlingId,
                 data = vedtaksbrevRedigerbareDataUpdateDto,
                 info = tilbakekreving.hentVedtaksbrevInfo(behandlingId),
@@ -337,7 +335,7 @@ class BehandlingApiController(
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
             val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
-            tilbakekreving.opprettRevurdering(behandlingId, revurderingsårsak, context)
+            tilbakekreving.opprettRevurdering(revurderingsårsak, context)
             ResponseEntity.ok(
                 OpprettRevurderingResponseDto(tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
             )

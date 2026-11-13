@@ -13,9 +13,12 @@ import no.nav.familie.tilbake.log.SecureLog
 import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.familie.tilbake.log.callId
 import no.nav.tilbakekreving.Klokke
+import no.nav.tilbakekreving.aktør.Brukerinfo
+import no.nav.tilbakekreving.behov.RevurderingVedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
+import no.nav.tilbakekreving.breeeev.Signatur
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster
 import no.nav.tilbakekreving.breeeev.begrunnelse.MeldingTilSaksbehandler
@@ -65,68 +68,57 @@ class NyVedtaksbrevService(
     private val log = TracedLogger.getLogger<NyVedtaksbrevService>()
 
     fun hentVedtaksbrevData(behandlingId: UUID, vedtaksbrevInfo: VedtaksbrevInfo, beslutter: Behandler): VedtaksbrevDataDto {
-        val beslutter = beslutter.takeIf { it.ident != vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent }
-
-        val signatur = SignaturDto(
-            enhetNavn = vedtaksbrevInfo.signatur.ansvarligEnhet,
-            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(vedtaksbrevInfo.signatur.ansvarligSaksbehandlerIdent),
-            besluttendeSaksbehandler = beslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it.ident) },
-        )
-
-        val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
-            hovedavsnitt = HovedavsnittDto(
-                tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
-                forklaring = Forklaringstekster.HOVEDAVSNITT,
-                underavsnitt = listOf(RentekstElementDto("")),
-                hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
-            ),
-            avsnitt = vedtaksbrevInfo.perioder.map {
-                BrevFormatterer.lagAvsnitt(
-                    periode = it,
-                    flerePerioder = vedtaksbrevInfo.perioder.size > 1,
-                )
+        val lagretBrev = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId)
+        val lagredeData = lagretBrev?.second
+        val hovedavsnitt = lagredeData?.let {
+            mapHovedavsnitt(it.hovedavsnitt, vedtaksbrevInfo)
+        } ?: HovedavsnittDto(
+            tittel = vedtaksbrevInfo.tittel,
+            forklaring = when {
+                vedtaksbrevInfo.erRevurdering -> Forklaringstekster.HOVEDAVSNITT_REVURDERING
+                else -> Forklaringstekster.HOVEDAVSNITT
             },
-            sistOppdatert = OffsetDateTime.now(),
-            brevGjelder = vedtaksbrevInfo.brukerdata,
-            sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
-            ytelse = vedtaksbrevInfo.ytelse,
-            bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
-            signatur = signatur,
-            saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = OppsummeringsdataDto(
-                beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
-                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
-                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
-            ),
+            underavsnitt = listOf(RentekstElementDto("")),
+            hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
         )
+        val avsnitt = vedtaksbrevInfo.perioder.map { periode ->
+            if (lagredeData != null) {
+                mapAvsnitt(periode, lagredeData.avsnitt)
+            } else {
+                BrevFormatterer.lagAvsnitt(periode, flerePerioder = vedtaksbrevInfo.perioder.size > 1)
+            }
+        }
+        val sistOppdatert = lagretBrev?.first?.atOffset(ZoneOffset.UTC) ?: OffsetDateTime.now()
 
-        val lagredeIder = lagredeData.avsnitt.map { it.id }
-        val behandlingIder = vedtaksbrevInfo.perioder.map { it.id }
-        if (lagredeIder != behandlingIder) {
-            log.medContext(SecureLog.Context.medBehandling(null, behandlingId.toString())) {
-                info("Behandling krever avsnitt for {}, det finnes lagrede avsnitt for {}", behandlingId, lagredeIder)
+        if (lagredeData != null) {
+            val lagredeIder = lagredeData.avsnitt.map { it.id }
+            val behandlingIder = vedtaksbrevInfo.perioder.map { it.id }
+            if (lagredeIder != behandlingIder) {
+                log.medContext(SecureLog.Context.medBehandling(null, behandlingId.toString())) {
+                    info("Behandling krever avsnitt for {}, det finnes lagrede avsnitt for {}", behandlingId, lagredeIder)
+                }
             }
         }
 
         return VedtaksbrevDataDto(
-            hovedavsnitt = mapHovedavsnitt(lagredeData.hovedavsnitt, vedtaksbrevInfo),
-            avsnitt = vedtaksbrevInfo.perioder.map {
-                mapAvsnitt(it, lagredeData.avsnitt)
-            },
+            hovedavsnitt = hovedavsnitt,
+            avsnitt = avsnitt,
             brevGjelder = vedtaksbrevInfo.brukerdata,
             ytelse = vedtaksbrevInfo.ytelse,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
-            sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
+            sistOppdatert = sistOppdatert,
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
-            signatur = signatur,
+            signatur = mapSignatur(vedtaksbrevInfo.signatur, beslutter),
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = OppsummeringsdataDto(
-                beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
-                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
-                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
-            ),
+            oppsummeringstabell = when {
+                vedtaksbrevInfo.erRevurdering -> null
+                else -> OppsummeringsdataDto(
+                    beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
+                    perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
+                    sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
+                    sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
+                )
+            },
         )
     }
 
@@ -150,27 +142,37 @@ class NyVedtaksbrevService(
         return if (beløp > 0) "$fortegn$formatertBeløp" else formatertBeløp
     }
 
-    fun oppdaterVedtaksbrevData(
+    private fun oppdaterVedtaksbrevData(
+        behandlingId: UUID,
+        data: VedtaksbrevRedigerbareDataUpdateDto,
+        klokke: Klokke,
+    ) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
+        behandlingId,
+        VedtaksbrevDataRepository.VedtaksbrevEntity(
+            hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
+                underavsnitt = data.hovedavsnitt.underavsnitt.mapNotNull(::tilEntity),
+            ),
+            avsnitt = data.avsnitt.map {
+                VedtaksbrevDataRepository.PeriodeavsnittEntity(
+                    id = it.id,
+                    underavsnitt = it.underavsnitt.mapNotNull(::tilEntity),
+                    påkrevdBegrunnelser = it.underavsnitt.mapNotNull(::tilPåkrevdBegrunnelseEntities),
+                )
+            },
+        ),
+        klokke,
+    )
+
+    fun oppdaterOgHentVedtaksbrevData(
         behandlingId: UUID,
         data: VedtaksbrevRedigerbareDataUpdateDto,
         info: VedtaksbrevInfo,
         klokke: Klokke,
     ): VedtaksbrevRedigerbareDataDto {
-        val (sistOppdatert, data) = vedtaksbrevDataRepository.oppdaterVedtaksbrevData(
-            behandlingId,
-            VedtaksbrevDataRepository.VedtaksbrevEntity(
-                hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
-                    underavsnitt = data.hovedavsnitt.underavsnitt.mapNotNull(::tilEntity),
-                ),
-                avsnitt = data.avsnitt.map {
-                    VedtaksbrevDataRepository.PeriodeavsnittEntity(
-                        id = it.id,
-                        underavsnitt = it.underavsnitt.mapNotNull(::tilEntity),
-                        påkrevdBegrunnelser = it.underavsnitt.mapNotNull(::tilPåkrevdBegrunnelseEntities),
-                    )
-                },
-            ),
-            klokke,
+        val (sistOppdatert, data) = oppdaterVedtaksbrevData(
+            behandlingId = behandlingId,
+            data = data,
+            klokke = klokke,
         )
         return VedtaksbrevRedigerbareDataDto(
             hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
@@ -184,7 +186,7 @@ class NyVedtaksbrevService(
         info: VedtaksbrevInfo,
     ): HovedavsnittDto {
         return HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittel(info),
+            tittel = info.tittel,
             forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
@@ -241,36 +243,87 @@ class NyVedtaksbrevService(
                 tittel = avsnitt.tittel!!,
                 underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
             )
+            VedtaksbrevDataRepository.UnderavsnittEntity.Type.REVURDERING -> UnderavsnittElementDto(
+                tittel = avsnitt.tittel!!,
+                underavsnitt = avsnitt.underavsnitt!!.map { RentekstElementDto(it.tekst!!) },
+            )
         }
     }
+
+    fun mapSignatur(signatur: Signatur, beslutter: Behandler): SignaturDto {
+        val beslutter = beslutter.takeIf { it.ident != signatur.ansvarligSaksbehandlerIdent }
+        return SignaturDto(
+            enhetNavn = signatur.ansvarligEnhet,
+            ansvarligSaksbehandler = eksterneDataForBrevService.hentSaksbehandlernavn(signatur.ansvarligSaksbehandlerIdent),
+            besluttendeSaksbehandler = beslutter?.let { eksterneDataForBrevService.hentSaksbehandlernavn(it.ident) },
+        )
+    }
+
+    private fun opprettArkiverDokumentRequest(
+        bruker: Brukerinfo,
+        pdfDocument: ByteArray,
+        fagsakId: String,
+        tittel: String,
+        journalførendeEnhet: String,
+        eksternReferanseId: String,
+        filnavn: String,
+    ): ArkiverDokumentRequest =
+        ArkiverDokumentRequest(
+            fnr = bruker.ident,
+            forsøkFerdigstill = true,
+            hoveddokumentvarianter = listOf(
+                Dokument(
+                    dokument = pdfDocument,
+                    filtype = Filtype.PDFA,
+                    filnavn = filnavn,
+                    tittel = tittel,
+                    dokumenttype = null,
+                ),
+            ),
+            fagsakId = fagsakId,
+            journalførendeEnhet = journalførendeEnhet,
+            eksternReferanseId = eksternReferanseId,
+            avsenderMottaker = AvsenderMottaker(
+                id = bruker.ident,
+                idType = AvsenderMottakerIdType.FNR,
+                navn = bruker.navn,
+            ),
+        )
 
     fun journalførVedtaksbrev(
         behov: VedtaksbrevJournalføringBehov,
     ): OpprettJournalpostResponse {
-        val arkiverDokumentRequest = ArkiverDokumentRequest(
-            fnr = behov.bruker.ident,
-            forsøkFerdigstill = true,
-            hoveddokumentvarianter = listOf(
-                Dokument(
-                    dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
-                    filtype = Filtype.PDFA,
-                    filnavn = "vedtak.pdf",
-                    tittel = lagTittel(behov),
-                    dokumenttype = null,
-                ),
-            ),
-            fagsakId = behov.fagsakId,
-            journalførendeEnhet = behov.journalførendeEnhet,
-            eksternReferanseId = lagEksternReferanseId(behov.behandlingId, Brevtype.VEDTAK, Brevmottager.BRUKER),
-            avsenderMottaker = AvsenderMottaker(
-                id = behov.bruker.ident,
-                idType = AvsenderMottakerIdType.FNR,
-                navn = behov.bruker.navn,
-            ),
-        )
-
         return dokarkivClient.opprettOgSendJournalpostRequest(
-            arkiverDokument = arkiverDokumentRequest,
+            arkiverDokument = opprettArkiverDokumentRequest(
+                bruker = behov.bruker,
+                pdfDocument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
+                fagsakId = behov.fagsakId,
+                tittel = lagTittel(behov),
+                journalførendeEnhet = behov.journalførendeEnhet,
+                eksternReferanseId = lagEksternReferanseId(behov.behandlingId, Brevtype.VEDTAK, Brevmottager.BRUKER),
+                filnavn = "vedtak.pdf",
+            ),
+            fagsaksystem = behov.ytelse.tilDokarkivFagsaksystem(),
+            brevkode = behov.ytelse.tilFagsystemDTO().name + "-TILB",
+            tema = behov.ytelse.tilTema(),
+            dokuemntkategori = DokumentKlasse.VB,
+            behandlingId = behov.behandlingId,
+        )
+    }
+
+    fun journalførRevurderingVedtaksbrev(
+        behov: RevurderingVedtaksbrevJournalføringBehov,
+    ): OpprettJournalpostResponse {
+        return dokarkivClient.opprettOgSendJournalpostRequest(
+            arkiverDokument = opprettArkiverDokumentRequest(
+                bruker = behov.bruker,
+                pdfDocument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.revurderingVedtaksbrevInfo, behov.beslutter)),
+                fagsakId = behov.fagsakId,
+                tittel = TITTEL_REVURDERING_TILBAKEKREVING,
+                journalførendeEnhet = behov.journalførendeEnhet,
+                eksternReferanseId = lagEksternReferanseId(behov.behandlingId, Brevtype.VEDTAK, Brevmottager.BRUKER),
+                filnavn = "revurdering_vedtak.pdf",
+            ),
             fagsaksystem = behov.ytelse.tilDokarkivFagsaksystem(),
             brevkode = behov.ytelse.tilFagsystemDTO().name + "-TILB",
             tema = behov.ytelse.tilTema(),
@@ -346,5 +399,6 @@ class NyVedtaksbrevService(
     companion object {
         private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
         private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
+        private const val TITTEL_REVURDERING_TILBAKEKREVING = "Vedtak om revurdering av tilbakekreving "
     }
 }

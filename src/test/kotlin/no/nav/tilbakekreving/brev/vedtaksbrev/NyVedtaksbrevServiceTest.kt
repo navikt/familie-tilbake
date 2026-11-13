@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.brev.vedtaksbrev
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
@@ -71,7 +72,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val behandlingId = lagBehandlingId()
         val periodeId = UUID.randomUUID()
         val vedtaksbrevInfo = vedtaksbrevInfo(periodeId)
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = HovedavsnittUpdateDto(
@@ -137,7 +138,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             ),
             avsnitt = emptyList(),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, førsteData, info, klokke)
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(behandlingId, førsteData, info, klokke)
         val førOppdatering = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
         val sisteData = førsteData.copy(
@@ -146,7 +147,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             ),
         )
         klokke.settTid(2.januar(2026))
-        val oppdatert = nyVedtaksbrevService.oppdaterVedtaksbrevData(behandlingId, sisteData, info, klokke)
+        val oppdatert = nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(behandlingId, sisteData, info, klokke)
         val hentet = nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER)
 
         hentet.hovedavsnitt.underavsnitt shouldBe listOf(RentekstElementDto("Siste tekst"))
@@ -165,7 +166,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,
@@ -216,7 +217,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                 RentekstElementDto("Vi oppdaget at du stjal penger"),
             ),
         )
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,
@@ -240,7 +241,7 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
 
         val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
-        nyVedtaksbrevService.oppdaterVedtaksbrevData(
+        nyVedtaksbrevService.oppdaterOgHentVedtaksbrevData(
             behandlingId,
             VedtaksbrevRedigerbareDataUpdateDto(
                 hovedavsnitt = hovedavsnitt,
@@ -312,6 +313,23 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     meldingerTilSaksbehandler = emptyList(),
                 ),
             )
+        }
+    }
+
+    @Test
+    fun `VedtaksbrevDataDto for revurdering`() {
+        val vedtaksbrevInfo = vedtaksbrevInfoForRevurdering()
+        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
+            it.hovedavsnitt shouldBe HovedavsnittDto(
+                tittel = "Vedtak om revurdering av tilbakekreving arbeidsavklaringspenger",
+                forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
+                underavsnitt = listOf(RentekstElementDto("")),
+                hjemler = "",
+            )
+            it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
+            it.signatur shouldBe expectedSignatur
+            it.avsnitt.shouldBeEmpty()
+            it.oppsummeringstabell shouldBe null
         }
     }
 

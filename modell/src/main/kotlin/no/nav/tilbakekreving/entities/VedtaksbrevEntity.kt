@@ -10,6 +10,7 @@ data class VedtaksbrevEntity(
     val journalpostId: String?,
     val dokumentInfoId: String?,
     val sendtTid: LocalDate,
+    val vedtaksbrevtype: Vedtaksbrev.Vedtaksbrevtype,
 ) {
     fun fraEntity(id: UUID, opprettet: LocalDateTime) = Vedtaksbrev(
         id = id,
@@ -17,5 +18,6 @@ data class VedtaksbrevEntity(
         dokumentInfoId = dokumentInfoId,
         sendtTid = sendtTid,
         opprettet = opprettet,
+        vedtaksbrevType = vedtaksbrevtype,
     )
 }

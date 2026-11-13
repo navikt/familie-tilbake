@@ -23,6 +23,16 @@ class VedtaksbrevDataRepository(
         return hentVedtaksbrevData(behandlingId)!!
     }
 
+    fun lagreRevurderingVedtaksbrevData(behandlingId: UUID, data: String) {
+        jdbcTemplate.update("INSERT INTO tilbakekreving_revurdering_behandling_vedtaksbrev(behandling_ref, data, sist_oppdatert) VALUES(?, ?, ?) ON CONFLICT(behandling_ref) DO UPDATE SET data=EXCLUDED.data, sist_oppdatert=EXCLUDED.sist_oppdatert;", behandlingId, data, LocalDateTime.now())
+    }
+
+    fun hentRevurderingVedtaksbrevData(behandlingId: UUID): Pair<LocalDateTime, String>? {
+        return jdbcTemplate.query("SELECT * FROM tilbakekreving_revurdering_behandling_vedtaksbrev WHERE behandling_ref=?;", behandlingId) { rs, _ ->
+            FieldConverter.LocalDateTimeConverter.required().convert(rs, "sist_oppdatert") to rs.getString("data")
+        }.singleOrNull()
+    }
+
     fun hentVedtaksbrevData(behandlingId: UUID): Pair<LocalDateTime, VedtaksbrevEntity>? {
         return jdbcTemplate.query("SELECT * FROM tilbakekreving_behandling_vedtaksbrev WHERE behandling_ref=?;", behandlingId) { rs, _ ->
             FieldConverter.LocalDateTimeConverter.required().convert(rs, "sist_oppdatert") to objectMapper.readValue<VedtaksbrevEntity>(rs.getString("data"))
@@ -82,6 +92,7 @@ class VedtaksbrevDataRepository(
         enum class Type {
             RENTEKST,
             UNDERAVSNITT,
+            REVURDERING,
         }
     }
 }
