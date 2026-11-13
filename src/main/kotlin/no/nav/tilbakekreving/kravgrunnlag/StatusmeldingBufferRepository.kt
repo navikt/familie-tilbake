@@ -56,17 +56,25 @@ class StatusmeldingBufferRepository(
 
     fun finnStatusmeldingerUtenSak(): List<StatusmeldingUtenSak> {
         return jdbcTemplate.query(
-            """SELECT sb.fagsystem_id, sb.vedtak_id, sb.status
+            """SELECT sb.id, sb.fagsystem_id, sb.vedtak_id, sb.status
 FROM statusmelding_buffer sb
 WHERE NOT EXISTS (SELECT 1 FROM tilbakekreving_krav_statusmelding ks WHERE ks.id = sb.id)
 ORDER BY sb.mottatt;""",
         ) { rs, _ ->
             StatusmeldingUtenSak(
+                id = UUID.fromString(rs.getString("id")),
                 fagsystemId = rs.getString("fagsystem_id"),
                 vedtakId = rs.getString("vedtak_id"),
                 kravstatuskode = rs.getString("status"),
             )
         }
+    }
+
+    fun markerSomUlest(statusmeldingIder: List<UUID>): Int {
+        return jdbcTemplate.batchUpdate(
+            "UPDATE statusmelding_buffer SET lest=false WHERE id=?;",
+            statusmeldingIder.map { arrayOf(it) },
+        ).sum()
     }
 
     object Mapper : RowMapper<Entity> {
@@ -93,6 +101,7 @@ ORDER BY sb.mottatt;""",
     )
 
     data class StatusmeldingUtenSak(
+        val id: UUID,
         val fagsystemId: String,
         val vedtakId: String,
         val kravstatuskode: String,

@@ -640,6 +640,24 @@ class ForvaltningController(
         return Ressurs.success(statusmeldingBufferRepository.finnStatusmeldingerUtenSak())
     }
 
+    @Operation(summary = "Marker statusmeldinger i bufferet som ulest slik at de leses på nytt")
+    @PostMapping(
+        path = ["/les-statusmeldinger-pa-nytt"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun lesStatusmeldingerPåNytt(
+        @RequestBody statusmeldingIder: List<UUID>,
+    ): Ressurs<Int> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å lese statusmeldinger på nytt",
+                frontendFeilmelding = "Du har ikke tilgang til å lese statusmeldinger på nytt",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(statusmeldingBufferRepository.markerSomUlest(statusmeldingIder))
+    }
+
     @Operation(summary = "Hent URL for ytelser i gammel modell")
     @GetMapping(
         path = ["/behandling-url"],
