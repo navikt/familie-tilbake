@@ -16,7 +16,6 @@ import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgangStub
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -47,16 +46,9 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var webApplicationContext: WebApplicationContext
 
-    private var authorization = ""
-
-    @BeforeEach
-    fun medToken() = medAuthorization("Bearer ${VedtaksdokumentTilgangStub.GODKJENT_TOKEN}")
-
     @Test
     fun `manglende token gir 401`() {
-        medAuthorization(null)
-
-        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, nyttVedtakId().toString()) }
+        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter("", nyttVedtakId().toString()) }
             .httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
@@ -70,9 +62,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `token uten påkrevd rolle gir 403`() {
-        medAuthorization("Bearer ${VedtaksdokumentTilgangStub.UTEN_ROLLE_TOKEN}")
-
-        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, nyttVedtakId().toString()) }
+        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(UTEN_ROLLE, nyttVedtakId().toString()) }
     }
 
     @Test
@@ -101,7 +91,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, vedtakId.toString())
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
@@ -120,14 +110,10 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(authorization, vedtakId.toString())
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()
-    }
-
-    private fun medAuthorization(verdi: String?) {
-        authorization = verdi.orEmpty()
     }
 
     private fun opprettBehandling(fagsakId: UUID, vedtakId: BigInteger): UUID {
@@ -138,4 +124,9 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     private fun nyttVedtakId(): BigInteger =
         BigInteger.valueOf(8_000_000_000_000_000_000L) + KravgrunnlagGenerator.nextId(18).toBigInteger()
+
+    private companion object {
+        const val GODKJENT = "Bearer ${VedtaksdokumentTilgangStub.GODKJENT_TOKEN}"
+        const val UTEN_ROLLE = "Bearer ${VedtaksdokumentTilgangStub.UTEN_ROLLE_TOKEN}"
+    }
 }

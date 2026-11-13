@@ -1,21 +1,37 @@
 package no.nav.tilbakekreving.auth
 
 import kotlinx.coroutines.runBlocking
-import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang.Resultat
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
+import no.nav.familie.tilbake.log.SecureLog
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang.Tilgang
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
 class VedtaksdokumentTilgangImpl(
     private val tokenExchangeService: TokenExchangeService,
 ) : VedtaksdokumentTilgang {
-    override fun vurder(token: String?, tilgang: Tilgang): Resultat {
-        if (token.isNullOrBlank()) return Resultat.UGYLDIG_TOKEN
+    override fun valider(token: String?, tilgang: Tilgang) {
+        if (token.isNullOrBlank()) throw ugyldigToken()
 
         val claims = runBlocking { tokenExchangeService.introspectToken(token) }
-        if (!claims.active) return Resultat.UGYLDIG_TOKEN
+        if (!claims.active) throw ugyldigToken()
 
-        return if (claims.roles?.contains(tilgang.rolle) == true) Resultat.GODKJENT else Resultat.MANGLER_ROLLE
+        if (claims.roles?.contains(tilgang.rolle) != true) {
+            throw ForbiddenError(
+                message = tilgang.feilmelding,
+                frontendFeilmelding = tilgang.frontendFeilmelding,
+                logContext = SecureLog.Context.tom(),
+            )
+        }
     }
+
+    private fun ugyldigToken() = Feil(
+        message = "Missing or invalid bearer token",
+        frontendFeilmelding = "Du må være innlogget",
+        httpStatus = HttpStatus.UNAUTHORIZED,
+        logContext = SecureLog.Context.tom(),
+    )
 }
