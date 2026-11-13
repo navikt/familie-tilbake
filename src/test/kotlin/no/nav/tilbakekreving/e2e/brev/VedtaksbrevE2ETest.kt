@@ -127,7 +127,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull()
         }
         avsnittFørOppdatering.hovedavsnitt shouldBe assertions.hovedavsnitt
-        avsnittFørOppdatering.avsnitt.shouldMatchEach(assertions.periodeAvsnitt) { actual, expected ->
+        avsnittFørOppdatering.avsnitt!!.shouldMatchEach(assertions.periodeAvsnitt) { actual, expected ->
             actual.shouldBeEqualToIgnoringFields(expected, AvsnittDto::id, AvsnittDto::underavsnitt, AvsnittDto::meldingerTilSaksbehandler)
             actual.meldingerTilSaksbehandler shouldContainExactly expected.meldingerTilSaksbehandler
             actual.underavsnitt shouldContainExactly expected.underavsnitt
@@ -146,7 +146,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             VedtaksbrevDataDto::sistOppdatert,
             VedtaksbrevDataDto::avsnitt,
         )
-        avsnittEtterOppdatering.avsnitt.shouldMatchEach(avsnittFørOppdatering.avsnitt) { actual, expected ->
+        avsnittEtterOppdatering.avsnitt!!.shouldMatchEach(avsnittFørOppdatering.avsnitt!!) { actual, expected ->
             actual.shouldBeEqualToIgnoringFields(expected, AvsnittDto::underavsnitt, AvsnittDto::meldingerTilSaksbehandler, AvsnittDto::id)
             actual.meldingerTilSaksbehandler shouldContainExactly expected.meldingerTilSaksbehandler
             actual.underavsnitt shouldContainExactly expected.underavsnitt
@@ -193,7 +193,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             vurderinger = arrayOf(forårsaketAvNav().godTro()),
         )
         val avsnittFørOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
+            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt!!.single()
         }
 
         håndterVilkårsvurdering(
@@ -203,7 +203,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
         )
 
         val avsnittEtterOppdatering = somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.single()
+            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt!!.single()
         }
 
         avsnittEtterOppdatering.id shouldBe avsnittFørOppdatering.id
@@ -248,7 +248,7 @@ class VedtaksbrevE2ETest : TilbakekrevingE2EBase() {
             vurderinger = arrayOf(forårsaketAvNav().burdeForstått().copy(periode = 1.januar(2021) til 28.januar(2021))),
         )
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
-            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt.size shouldBe 1
+            behandlingApiController.behandlingHentVedtaksbrev(behandlingId.toString()).body.shouldNotBeNull().avsnitt!!.size shouldBe 1
         }
     }
 

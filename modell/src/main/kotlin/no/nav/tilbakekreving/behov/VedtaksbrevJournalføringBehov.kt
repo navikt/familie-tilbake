@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.behov
 import no.nav.tilbakekreving.aktør.Brukerinfo
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
 import no.nav.tilbakekreving.fagsystem.Ytelse
-import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import java.util.UUID
 
@@ -15,6 +14,6 @@ class VedtaksbrevJournalføringBehov(
     val fagsakId: String,
     val journalførendeEnhet: String,
     val vedtaksbrevInfo: VedtaksbrevInfo,
-    val vedtaksresultat: Vedtaksresultat,
+    val tittel: String,
     val beslutter: Behandler,
 ) : Behov

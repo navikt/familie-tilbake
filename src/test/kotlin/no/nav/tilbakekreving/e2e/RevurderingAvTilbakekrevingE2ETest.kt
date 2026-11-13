@@ -3,6 +3,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -13,6 +14,7 @@ import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
 import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT_REVURDERING
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPeriodeDto
@@ -181,6 +183,57 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         tilbakekreving(revurderingBehandlingId).brevHistorikk.sisteVedtaksbrev().shouldBeInstanceOf<Vedtaksbrev> {
             it.vedtaksbrevType shouldBe Vedtaksbrev.Vedtaksbrevtype.REVURDERING
         }
+    }
+
+    @Test
+    fun `riktig vedtaksbrevdata hentes for revurdering`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val vedtakId = KravgrunnlagGenerator.nextPaddedId(6)
+        val opprinneligBehandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId, vedtakId)
+
+        tilbakekreving(opprinneligBehandlingId).brevHistorikk.sisteVedtaksbrev().shouldBeInstanceOf<Vedtaksbrev> {
+            it.vedtaksbrevType shouldBe Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG
+        }
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = opprinneligBehandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Klageinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        utførSteg(
+            revurderingBehandlingId,
+            BehandlingsstegForeslåVedtaksstegDto(
+                fritekstavsnitt = FritekstavsnittDto(
+                    oppsummeringstekst = null,
+                    perioderMedTekst = emptyList(),
+                ),
+            ),
+        )
+
+        utførSteg(
+            ident = BESLUTTER_IDENT,
+            behandlingId = revurderingBehandlingId,
+            stegData = BehandlingsstegGenerator.lagGodkjennVedtakVurdering(),
+        )
+
+        val vedtaksbrevData = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingHentVedtaksbrev(revurderingBehandlingId.toString()).body.shouldNotBeNull()
+        }
+
+        vedtaksbrevData.avsnitt.shouldBeNull()
+        vedtaksbrevData.oppsummeringstabell.shouldBeNull()
+        vedtaksbrevData.hovedavsnitt.hjemler.shouldBeNull()
+        vedtaksbrevData.hovedavsnitt.tittel shouldBe "Vedtak om revurdering av tilbakekreving tilleggsstønad"
+        vedtaksbrevData.hovedavsnitt.forklaring shouldBe HOVEDAVSNITT_REVURDERING
     }
 
     private fun gjørBehandlingKlarTilRevurdering(fagsystemId: String, vedtakId: String = KravgrunnlagGenerator.nextPaddedId(6)): UUID {

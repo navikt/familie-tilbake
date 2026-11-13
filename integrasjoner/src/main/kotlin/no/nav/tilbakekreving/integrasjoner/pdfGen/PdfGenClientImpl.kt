@@ -4,14 +4,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
-import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.frontend.models.InformasjonsbrevDataDto
-import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingVedtaksbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarselbrevDataDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksbrevDataDto
 
@@ -22,12 +19,6 @@ class PdfGenClientImpl(
     override fun hentPdfForVedtak(vedtaksbrevData: VedtaksbrevDataDto): ByteArray {
         return runBlocking {
             hentVedtaksbrevPdf(vedtaksbrevData)
-        }
-    }
-
-    override fun hentPdfForRevurderingVedtak(vedtaksbrevData: RevurderingVedtaksbrevDataDto): ByteArray {
-        return runBlocking {
-            hentRevurderingVedtaksbrevPdf(vedtaksbrevData)
         }
     }
 
@@ -52,24 +43,6 @@ class PdfGenClientImpl(
         }
         if (!response.status.isSuccess()) {
             throw RuntimeException("Feil fra PDF-service: ${response.status}")
-        }
-        return response.body()
-    }
-
-    private suspend fun hentRevurderingVedtaksbrevPdf(vedtaksbrevData: RevurderingVedtaksbrevDataDto): ByteArray {
-        val baseUrl = config.baseUrl
-
-        val response = httpClient.post("$baseUrl/api/v1/brev/revurdering/pdf") {
-            contentType(ContentType.Application.Json)
-            setBody(vedtaksbrevData)
-        }
-        if (!response.status.isSuccess()) {
-            throw UnexpectedResponseException(
-                message = "Feil fra PDF-service: ${response.status}",
-                endpoint = "$baseUrl/api/v1/brev/revurdering/pdf",
-                statusCode = response.status,
-                response = response.bodyAsText(),
-            )
         }
         return response.body()
     }

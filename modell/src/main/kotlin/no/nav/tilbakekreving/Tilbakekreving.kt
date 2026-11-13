@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Informasjonsbrev
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
 import no.nav.tilbakekreving.brev.VarselbrevInfo
-import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -75,7 +74,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.tilbakekreving.breeeev.RevurderingVedtaksbrevInfo
 
 class Tilbakekreving internal constructor(
     val id: String,
@@ -417,34 +415,11 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettVedtaksbrev(klokke: Klokke) {
-        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
-            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.REVURDERING))
-        } else {
-            brevHistorikk.lagre(Vedtaksbrev.opprett(klokke, Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG))
-        }
+        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVedtaksbrev(klokke))
     }
 
     fun trengerVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
-        if (behandlingHistorikk.nåværende().entry.erRevurdering()) {
-            trengerRevurderingVedtaksbrevJournalføring(sideeffektContext)
-        } else {
-            trengerFørstegangVedtaksbrevJournalføring(sideeffektContext)
-        }
-    }
-
-    private fun trengerFørstegangVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
-        behandlingHistorikk.nåværende().entry.trengerFørstegangVedtaksbrevJournalføring(
-            sideeffektContext = sideeffektContext,
-            brevId = brevHistorikk.nåværende().entry.id,
-            ytelse = eksternFagsak.ytelse,
-            bruker = requireNotNull(bruker) { "Bruker kreves for journalføring av vedtaksbrev." },
-            fagsakId = eksternFagsak.eksternId(),
-            tilbakekrevingId = id,
-        )
-    }
-
-    private fun trengerRevurderingVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {
-        behandlingHistorikk.nåværende().entry.trengerRevurderingVedtaksbrevJournalføring(
+        behandlingHistorikk.nåværende().entry.trengerVedtaksbrevJournalføring(
             sideeffektContext = sideeffektContext,
             brevId = brevHistorikk.nåværende().entry.id,
             ytelse = eksternFagsak.ytelse,
@@ -550,14 +525,6 @@ class Tilbakekreving internal constructor(
 
     fun hentVedtaksbrevInfo(behandlingId: UUID): VedtaksbrevInfo {
         return behandlingHistorikk.entry(behandlingId).hentVedtaksbrevInfo(
-            bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
-            ytelse = eksternFagsak.ytelse,
-            tilbakekrevingId = id,
-        )
-    }
-
-    fun hentRevurderingVedtaksbrevInfo(behandlingId: UUID): RevurderingVedtaksbrevInfo {
-        return behandlingHistorikk.entry(behandlingId).hentRevurderingVedtaksbrevInfo(
             bruker = requireNotNull(bruker) { { "Bruker kreves for å hente vedtaksbrev informajson." } },
             ytelse = eksternFagsak.ytelse,
             tilbakekrevingId = id,

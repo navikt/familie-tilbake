@@ -9,23 +9,16 @@ import java.time.LocalDate
 
 data class VedtaksbrevInfo(
     val brukerdata: BrevmottakerDto,
-    val skalTilbakekreves: Boolean,
+    val tittelForHovedavsnitt: String,
     val ytelse: YtelseDto,
     val signatur: Signatur,
-    val perioder: List<BegrunnetPeriode>,
+    val perioder: List<BegrunnetPeriode>?,
     val bunntekster: Set<Bunntekst>,
     val tilbakekrevingId: String,
-    val beregningsresultat: List<BeregningsresultatsperiodeDto>,
-    val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>,
+    val beregningsresultat: List<BeregningsresultatsperiodeDto>?,
+    val hjemlerForTilbakekreving: List<HjemmelForTilbakekreving>?,
     val beregnerSkatt: Boolean,
-)
-
-data class RevurderingVedtaksbrevInfo(
-    val brukerdata: BrevmottakerDto,
-    val ytelse: YtelseDto,
-    val signatur: Signatur,
-    val bunntekster: Set<Bunntekst>,
-    val tilbakekrevingId: String,
+    val forklaringstekst: String,
 )
 
 data class InfobrevData(
