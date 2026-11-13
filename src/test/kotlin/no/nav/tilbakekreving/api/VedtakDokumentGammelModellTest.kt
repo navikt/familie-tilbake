@@ -13,7 +13,6 @@ import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.tilbakekreving.auth.VedtaksdokumentTilgangStub
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import org.junit.jupiter.api.Test
@@ -126,7 +125,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
         BigInteger.valueOf(8_000_000_000_000_000_000L) + KravgrunnlagGenerator.nextId(18).toBigInteger()
 
     private companion object {
-        const val GODKJENT = "Bearer ${VedtaksdokumentTilgangStub.GODKJENT_TOKEN}"
-        const val UTEN_ROLLE = "Bearer ${VedtaksdokumentTilgangStub.UTEN_ROLLE_TOKEN}"
+        const val GODKJENT = "Bearer godkjent-token"
+        const val UTEN_ROLLE = "Bearer uten-rolle-token"
     }
 }
