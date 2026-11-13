@@ -2,6 +2,7 @@ package no.nav.tilbakekreving.e2e
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
@@ -142,6 +143,7 @@ class Behandlingslogg {
             it.rolle shouldBe RolleDto.SAKSBEHANDLER
             it.beskrivelse shouldBe "Begrunnelse"
             it.ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] shouldBe "2027-01-01"
+            it.ekstraInfo.keys shouldNotContain EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST.name
         }
     }
 }

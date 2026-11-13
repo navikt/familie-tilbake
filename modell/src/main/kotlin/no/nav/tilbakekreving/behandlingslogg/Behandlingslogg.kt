@@ -75,7 +75,9 @@ data class Behandlingslogg(
                 },
                 rolleIdent = it.behandlerIdent,
                 beskrivelse = it.behandlingsloggstype.hentTekst(it.ekstraInfo),
-                ekstraInfo = it.ekstraInfo.entries.associate { (key, value) -> key.name to value.toString() },
+                ekstraInfo = it.ekstraInfo
+                    .filterKeys { key -> key != EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST }
+                    .entries.associate { (key, value) -> key.name to value.toString() },
             )
         }
     }
