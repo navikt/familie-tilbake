@@ -22,6 +22,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
+import no.nav.tilbakekreving.kontrakter.frontend.models.HendelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.repository.TilbakekrevingRepository
@@ -248,5 +249,9 @@ class TilbakekrevingService(
 
     fun hentHistorikk(tilbakekrevingId: String): List<LogginnslagDto> {
         return tilbakekrevingRepository.hentBehandlingslogg(tilbakekrevingId).tilFrontend()
+    }
+
+    fun hentHendelser(tilbakekrevingId: String): List<HendelseDto> {
+        return tilbakekrevingRepository.hentBehandlingslogg(tilbakekrevingId).tilHendelserDto()
     }
 }

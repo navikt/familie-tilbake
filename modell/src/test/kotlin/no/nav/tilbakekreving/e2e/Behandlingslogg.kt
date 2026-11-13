@@ -1,4 +1,5 @@
 package no.nav.tilbakekreving.e2e
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -14,6 +15,7 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
+import no.nav.tilbakekreving.kontrakter.frontend.models.RolleDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -129,5 +131,17 @@ class Behandlingslogg {
         val utsettUttalelse = behandlingslogg.tilFrontend().filter { it.tittel.contains("Ny frist for uttalelse") }.shouldHaveSize(1)
         utsettUttalelse[0].tittel shouldBe "Ny frist for uttalelse: 2027-01-01"
         utsettUttalelse[0].tekst shouldBe "Begrunnelse"
+
+        val hendelser = behandlingslogg.tilHendelserDto()
+        hendelser.filter { it.tittel == "Forhåndsvarsel sendt" }.forSingle {
+            it.rolle shouldBe RolleDto.VEDTAKSLØSNING
+            it.ekstraInfo[EkstraInfo.JOURNALPOST_ID.name] shouldBe "123"
+            it.ekstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] shouldBe "321"
+        }
+        hendelser.filter { it.tittel == "Ny frist for uttalelse: 2027-01-01" }.forSingle {
+            it.rolle shouldBe RolleDto.SAKSBEHANDLER
+            it.beskrivelse shouldBe "Begrunnelse"
+            it.ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] shouldBe "2027-01-01"
+        }
     }
 }
