@@ -138,7 +138,7 @@ class Behandlingslogg {
             it.ekstraInfo[EkstraInfo.JOURNALPOST_ID.name] shouldBe "123"
             it.ekstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] shouldBe "321"
         }
-        hendelser.filter { it.tittel == "Ny frist for uttalelse: 2027-01-01" }.forSingle {
+        hendelser.filter { it.tittel == "Ny frist for uttalelse" }.forSingle {
             it.rolle shouldBe RolleDto.SAKSBEHANDLER
             it.beskrivelse shouldBe "Begrunnelse"
             it.ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] shouldBe "2027-01-01"
