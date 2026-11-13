@@ -1,11 +1,14 @@
 package no.nav.tilbakekreving.integrasjoner.tokenexchange
 
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
+import no.nav.tilbakekreving.integrasjoner.tokenexchange.kontrakter.TokenIntrospectionResponse
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.kontrakter.TokenResponse
 
 internal class TokenExchangeServiceImpl(
     private val texasClient: TexasClient,
 ) : TokenExchangeService {
+    override suspend fun introspectToken(token: String): TokenIntrospectionResponse = texasClient.introspectToken(token)
+
     override suspend fun onBehalfOfToken(
         userToken: String,
         targetScope: String,

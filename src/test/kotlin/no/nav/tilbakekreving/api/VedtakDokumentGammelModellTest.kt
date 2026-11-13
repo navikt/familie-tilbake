@@ -1,22 +1,27 @@
 package no.nav.tilbakekreving.api
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.familie.tilbake.OppslagSpringRunnerTest
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
+import no.nav.familie.tilbake.common.exceptionhandler.Feil
+import no.nav.familie.tilbake.common.exceptionhandler.ForbiddenError
 import no.nav.familie.tilbake.data.Testdata
 import no.nav.familie.tilbake.dokumentbestilling.felles.BrevsporingRepository
 import no.nav.familie.tilbake.dokumentbestilling.felles.domain.Brevtype
 import no.nav.familie.tilbake.kravgrunnlag.KravgrunnlagRepository
-import no.nav.tilbakekreving.e2e.ContextServiceHelpers.somSaksbehandler
 import no.nav.tilbakekreving.e2e.KravgrunnlagGenerator
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 import java.math.BigInteger
 import java.util.UUID
 
@@ -36,6 +41,28 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var kravgrunnlagRepository: KravgrunnlagRepository
+
+    @Autowired
+    private lateinit var webApplicationContext: WebApplicationContext
+
+    @Test
+    fun `manglende token gir 401`() {
+        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter("", nyttVedtakId().toString()) }
+            .httpStatus shouldBe HttpStatus.UNAUTHORIZED
+    }
+
+    @Test
+    fun `manglende Authorization-header i HTTP-kall gir 401`() {
+        val mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+
+        mockMvc.get("/api/v1/dokumenter/vedtak/{vedtakId}", nyttVedtakId().toString())
+            .andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `token uten påkrevd rolle gir 403`() {
+        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(UTEN_ROLLE, nyttVedtakId().toString()) }
+    }
 
     @Test
     fun `flere brev for en behandling og brev for andre behandlinger`() {
@@ -63,9 +90,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val response = somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
-        }
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
@@ -84,9 +109,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val response = somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter(vedtakId.toString())
-        }
+        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()
@@ -100,4 +123,9 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     private fun nyttVedtakId(): BigInteger =
         BigInteger.valueOf(8_000_000_000_000_000_000L) + KravgrunnlagGenerator.nextId(18).toBigInteger()
+
+    private companion object {
+        const val GODKJENT = "Bearer godkjent-token"
+        const val UTEN_ROLLE = "Bearer uten-rolle-token"
+    }
 }

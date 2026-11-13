@@ -50,6 +50,7 @@ spec:
       claims:
         extra:
           - "NAVident"
+          - "idtyp"
         groups:
           - id: d21e00a4-969d-4b28-8782-dc818abfae65 # 0000-GA-Barnetrygd
           - id: 9449c153-5a1e-44a7-84c6-7cc7a8867233 # 0000-GA-Barnetrygd-Beslutter
@@ -80,6 +81,12 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: tilbakekreving-tvangsgrunnlag
+          namespace: tilbake
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - tvangsgrunnlag.read
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: dev-gcp

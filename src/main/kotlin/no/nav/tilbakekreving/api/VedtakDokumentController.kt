@@ -1,11 +1,8 @@
 package no.nav.tilbakekreving.api
 
-import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
-import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
-import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
-import no.nav.familie.tilbake.sikkerhet.ValideringContext
-import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
 import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
@@ -16,24 +13,29 @@ import org.springframework.validation.annotation.Validated
 import java.math.BigInteger
 
 @Component
-@ProtectedWithClaims(issuer = "azuread")
+@Unprotected
 @Validated
 class VedtakDokumentController(
     private val vedtakDokumentService: VedtakDokumentService,
     private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val tilgangskontrollService: TilgangskontrollService,
+    private val vedtaksdokumentTilgang: VedtaksdokumentTilgang,
 ) : DokumenterApi {
     override fun dokumenterHentVedtaksdokumenter(
+        authorization: String,
         vedtakId: String,
     ): ResponseEntity<List<VedtaksdokumentDto>> {
+        val token = authorization
+            .takeIf { it.startsWith(BEARER_PREFIX, ignoreCase = true) }
+            ?.substring(BEARER_PREFIX.length)
+            ?.trim()
+        vedtaksdokumentTilgang.valider(token, VedtaksdokumentTilgang.Tilgang.TVANGSGRUNNLAG_LES)
         val id = BigInteger(vedtakId)
         val tilbakekrevingId = vedtakDokumentRepository.findTilbakekrevingIdByVedtakId(id)
         if (tilbakekrevingId != null) {
-            val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
-                filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),
-                valideringContext = ValideringContext.ListJournalposter,
-            ) ?: return ResponseEntity.ok(emptyList())
+            val filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId)
+            val tilbakekreving = tilbakekrevingService.hentTilbakekreving(filter)
+                ?: return ResponseEntity.ok(emptyList())
 
             return ResponseEntity.ok(
                 tilbakekreving.brevHistorikk.alleSendteDokumenter()
@@ -43,15 +45,11 @@ class VedtakDokumentController(
         }
 
         val dokumentreferanser = vedtakDokumentService.hentBehandlingIderGammelModell(id)
-            .flatMap { behandlingId ->
-                tilgangskontrollService.validerTilgangBehandlingID(
-                    behandlingId = behandlingId,
-                    minimumBehandlerrolle = Behandlerrolle.VEILEDER,
-                    auditLoggerEvent = AuditLoggerEvent.ACCESS,
-                    handling = "Henter dokumentreferanser for iverksatt vedtak",
-                )
-                vedtakDokumentService.hentDokumentreferanserGammelModell(behandlingId)
-            }
+            .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
         return ResponseEntity.ok(dokumentreferanser.distinct())
+    }
+
+    private companion object {
+        const val BEARER_PREFIX = "Bearer "
     }
 }
