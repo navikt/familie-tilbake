@@ -22,27 +22,30 @@ class VedtaksdokumentTilgangImplTest {
         },
     )
 
-    private val maskinSvar = TokenIntrospectionResponse(active = true, idtyp = "app", roles = listOf("tvangsgrunnlag.read"))
+    private fun introspeksjon(
+        active: Boolean = true,
+        roles: List<String>? = listOf(Tilgang.TVANGSGRUNNLAG_LES.rolle),
+    ) = TokenIntrospectionResponse(active = active, idtyp = "app", roles = roles)
 
     @Test
     fun `aktivt token med påkrevd rolle godkjennes`() {
-        shouldNotThrowAny { tilgang(maskinSvar).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+        shouldNotThrowAny { tilgang(introspeksjon()).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
     }
 
     @Test
     fun `inaktivt token er ugyldig`() {
-        shouldThrow<Feil> { tilgang(maskinSvar.copy(active = false)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+        shouldThrow<Feil> { tilgang(introspeksjon(active = false)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
     @Test
     fun `manglende eller tomt token er ugyldig`() {
-        shouldThrow<Feil> { tilgang(maskinSvar).valider(null, Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
-        shouldThrow<Feil> { tilgang(maskinSvar).valider(" ", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+        shouldThrow<Feil> { tilgang(introspeksjon()).valider(null, Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+        shouldThrow<Feil> { tilgang(introspeksjon()).valider(" ", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
     @Test
     fun `aktivt token uten påkrevd rolle avvises`() {
-        shouldThrow<ForbiddenError> { tilgang(maskinSvar.copy(roles = listOf("annen-rolle"))).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
-        shouldThrow<ForbiddenError> { tilgang(maskinSvar.copy(roles = null)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+        shouldThrow<ForbiddenError> { tilgang(introspeksjon(roles = listOf("annen-rolle"))).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+        shouldThrow<ForbiddenError> { tilgang(introspeksjon(roles = null)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
     }
 }
