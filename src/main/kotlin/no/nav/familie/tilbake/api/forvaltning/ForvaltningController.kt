@@ -444,6 +444,22 @@ class ForvaltningController(
         )
     }
 
+    @Operation(summary = "Hent fagsystem-IDer for alle tilbakekrevinger i ny modell som er i tilstand SPERRET")
+    @GetMapping(
+        path = ["/sperrede-tilbakekrevinger/fagsystem-ider"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentFagsystemIderForSperredeTilbakekrevinger(): Ressurs<List<String>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente fagsystem-IDer for sperrede tilbakekrevinger",
+                frontendFeilmelding = "Du har ikke tilgang til å hente fagsystem-IDer for sperrede tilbakekrevinger",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(tilbakekrevingRepository.hentFagsystemIderITilstand(TilbakekrevingTilstand.SPERRET))
+    }
+
     @Operation(summary = "Hent statusmeldinger i bufferet som ikke er koblet til en tilbakekreving i ny modell")
     @GetMapping(
         path = ["/finn-statusmeldinger-uten-sak"],

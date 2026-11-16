@@ -161,6 +161,17 @@ WHERE tbk.neste_påminnelse < ?;""",
         }.toList()
     }
 
+    fun hentFagsystemIderITilstand(tilstand: TilbakekrevingTilstand): List<String> {
+        return jdbcTemplate.query(
+            """SELECT DISTINCT ef.ekstern_id_fra_oppdrag
+FROM tilbakekreving t
+         JOIN tilbakekreving_ekstern_fagsak ef ON t.id = ef.tilbakekreving_ref
+WHERE t.nåværende_tilstand = ?
+ORDER BY ef.ekstern_id_fra_oppdrag;""",
+            FieldConverter.EnumConverter.of<TilbakekrevingTilstand>().convert(tilstand),
+        ) { rs, _ -> rs.getString("ekstern_id_fra_oppdrag") }
+    }
+
     data class TilbakekrevingForPåminnelse(
         val tilbakekrevingId: String,
         val fagsystemId: String,
