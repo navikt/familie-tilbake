@@ -40,8 +40,8 @@ class BeregningController(
     )
     fun beregnBeløp(
         @PathVariable("behandlingId") behandlingId: UUID,
-        @Valid @RequestBody
-        perioder: List<Datoperiode>,
+        @RequestBody
+        perioder: List<@Valid Datoperiode>,
     ): Ressurs<BeregnetPerioderDto> {
         tilgangskontrollService.validerTilgangBehandlingID(
             behandlingId = behandlingId,

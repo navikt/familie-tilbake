@@ -170,8 +170,7 @@ data class FritekstavsnittDto(
     @Size(max = 10000, message = "Oppsummeringstekst er for lang")
     var oppsummeringstekst: String? = null,
     @Size(max = 100, message = "For mange perioder")
-    @Valid
-    var perioderMedTekst: List<PeriodeMedTekstDto>,
+    var perioderMedTekst: List<@Valid PeriodeMedTekstDto>,
 )
 
 @JsonTypeName(BehandlingsstegFatteVedtaksstegDto.STEGNAVN)
