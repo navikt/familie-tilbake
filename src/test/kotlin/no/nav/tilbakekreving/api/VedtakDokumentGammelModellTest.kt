@@ -46,13 +46,13 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     private lateinit var webApplicationContext: WebApplicationContext
 
     @Test
-    fun `manglende token gir 401`() {
+    fun `tomt token`() {
         shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter("", nyttVedtakId().toString()) }
             .httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
     @Test
-    fun `manglende Authorization-header i HTTP-kall gir 401`() {
+    fun `HTTP-kall uten Authorization-header`() {
         val mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
 
         mockMvc.get("/api/v1/dokumenter/vedtak/{vedtakId}", nyttVedtakId().toString())
@@ -60,7 +60,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `token uten påkrevd rolle gir 403`() {
+    fun `token uten påkrevd rolle`() {
         shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(UTEN_ROLLE, nyttVedtakId().toString()) }
     }
 

@@ -22,30 +22,30 @@ class VedtaksdokumentTilgangImplTest {
         },
     )
 
-    private fun introspeksjon(
+    private fun introspection(
         active: Boolean = true,
         roles: List<String>? = listOf(Tilgang.TVANGSGRUNNLAG_LES.rolle),
     ) = TokenIntrospectionResponse(active = active, idtyp = "app", roles = roles)
 
     @Test
-    fun `aktivt token med påkrevd rolle godkjennes`() {
-        shouldNotThrowAny { tilgang(introspeksjon()).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+    fun `aktivt token med påkrevd rolle`() {
+        shouldNotThrowAny { tilgang(introspection()).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
     }
 
     @Test
-    fun `inaktivt token er ugyldig`() {
-        shouldThrow<Feil> { tilgang(introspeksjon(active = false)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+    fun `inaktivt token`() {
+        shouldThrow<Feil> { tilgang(introspection(active = false)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
     @Test
-    fun `manglende eller tomt token er ugyldig`() {
-        shouldThrow<Feil> { tilgang(introspeksjon()).valider(null, Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
-        shouldThrow<Feil> { tilgang(introspeksjon()).valider(" ", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+    fun `manglende eller tomt token`() {
+        shouldThrow<Feil> { tilgang(introspection()).valider(null, Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
+        shouldThrow<Feil> { tilgang(introspection()).valider(" ", Tilgang.TVANGSGRUNNLAG_LES) }.httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
     @Test
-    fun `aktivt token uten påkrevd rolle avvises`() {
-        shouldThrow<ForbiddenError> { tilgang(introspeksjon(roles = listOf("annen-rolle"))).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
-        shouldThrow<ForbiddenError> { tilgang(introspeksjon(roles = null)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+    fun `aktivt token uten påkrevd rolle`() {
+        shouldThrow<ForbiddenError> { tilgang(introspection(roles = listOf("annen-rolle"))).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
+        shouldThrow<ForbiddenError> { tilgang(introspection(roles = null)).valider("token", Tilgang.TVANGSGRUNNLAG_LES) }
     }
 }
