@@ -141,6 +141,7 @@ class TilbakekrevingService(
         lateinit var logContext: SecureLog.Context
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
             val tilbakekreving = it.fraEntity()
+            logContext = SecureLog.Context.fra(tilbakekreving)
             if (validerScope) {
                 try {
                     tilbakekreving.validerInnenforScope(featureService.modellFeatures)
@@ -158,7 +159,6 @@ class TilbakekrevingService(
                     return@hentOgLagreResultat tilbakekreving.tilEntity()
                 }
             }
-            logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->
                 sideeffektContext(behandler, observatør, behandlingslogg)
             }
