@@ -96,6 +96,7 @@ Flyway-migrasjoner ligger under `src/main/resources/db/migration/`. Nye migrasjo
 - Bruk `Klokke`-interfacet (`no.nav.tilbakekreving.Klokke`) i stedet for `LocalDate.now()` / `LocalDateTime.now()` i modellen. `SystemKlokke` er produksjonsimplementasjonen. I tester brukes `KlokkeStub` (med fast tid) for tidssensitive tester, og `SystemKlokke` for tester som ikke er tidssensitive.
 - Les, skriv og kjør kun kommandoer mot filer under arbeidsmappen (prosjektmappen). Forsøk aldri å nå filer utenfor prosjektet (f.eks. `/home/runner`, `/tmp` eller lignende) – bruk kun stier relative til arbeidsmappen.
 - Skriv aldri filer utenfor prosjektmappen (f.eks. ikke `/tmp`). Midlertidige filer og skript skal legges under `build/`-mappen og ryddes opp etterpå.
+- Gjør kodeendringer direkte med redigeringsverktøyene. Bruk aldri skript (f.eks. Python, `sed` eller heredocs) for å endre eller opprette kode med mindre det er repetitive endringer.
 
 ## CI/CD
 
