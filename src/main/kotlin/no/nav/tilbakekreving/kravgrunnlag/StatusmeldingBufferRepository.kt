@@ -44,16 +44,6 @@ class StatusmeldingBufferRepository(
         }
     }
 
-    fun hentForFagsystemId(fagsystemId: String): List<Lagret> {
-        return jdbcTemplate.query("SELECT * FROM statusmelding_buffer WHERE fagsystem_id=? ORDER BY mottatt;", { rs, rowNum ->
-            Lagret(
-                entity = Mapper.mapRow(rs, rowNum),
-                lest = rs.getBoolean("lest"),
-                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
-            )
-        }, fagsystemId)
-    }
-
     fun finnStatusmeldingerUtenSak(): List<StatusmeldingUtenSak> {
         return jdbcTemplate.query(
             """SELECT sb.id, sb.fagsystem_id, sb.vedtak_id, sb.status, sb.mottatt
@@ -66,24 +56,6 @@ ORDER BY sb.mottatt;""",
                 fagsystemId = rs.getString("fagsystem_id"),
                 vedtakId = rs.getString("vedtak_id"),
                 kravstatuskode = rs.getString("status"),
-                mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
-            )
-        }
-    }
-
-    fun finnStatusmeldingerUtenRiktigMottattDato(): List<StatusmeldingUtenMelding> {
-        return jdbcTemplate.query(
-            """SELECT s.id, s.fagsystem_id, s.vedtak_id, s.status, s.lest, s.mottatt
-FROM statusmelding_buffer s
-WHERE s.mottatt <= '2026-09-02'::date
-ORDER BY s.mottatt;""",
-        ) { rs, _ ->
-            StatusmeldingUtenMelding(
-                id = UUID.fromString(rs.getString("id")),
-                fagsystemId = rs.getString("fagsystem_id"),
-                vedtakId = rs.getString("vedtak_id"),
-                status = rs.getString("status"),
-                lest = rs.getBoolean("lest"),
                 mottatt = rs.getTimestamp("mottatt").toLocalDateTime(),
             )
         }
@@ -124,21 +96,6 @@ ORDER BY s.mottatt;""",
         val fagsystemId: String,
         val vedtakId: String,
         val kravstatuskode: String,
-        val mottatt: LocalDateTime,
-    )
-
-    data class StatusmeldingUtenMelding(
-        val id: UUID,
-        val fagsystemId: String,
-        val vedtakId: String,
-        val status: String,
-        val lest: Boolean,
-        val mottatt: LocalDateTime,
-    )
-
-    data class Lagret(
-        val entity: Entity,
-        val lest: Boolean,
         val mottatt: LocalDateTime,
     )
 }

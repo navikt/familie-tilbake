@@ -32,8 +32,6 @@ interface ØkonomiXmlMottattRepository :
         ytelsestype: Ytelsestype,
     ): List<ØkonomiXmlMottatt>
 
-    fun findByEksternFagsakId(eksternFagsakId: String): List<ØkonomiXmlMottatt>
-
     fun existsByEksternFagsakIdAndYtelsestypeAndReferanse(
         eksternFagsakId: String,
         ytelsestype: Ytelsestype,

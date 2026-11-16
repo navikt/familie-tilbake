@@ -51,55 +51,6 @@ class KravgrunnlagBufferRepository(
         return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE kravgrunnlag_id=?;", Mapper, kravgrunnlagId)
     }
 
-    fun hentForFagsystemId(fagsystemId: String): List<Lagret> {
-        return jdbcTemplate.query("SELECT * FROM kravgrunnlag_buffer WHERE fagsystem_id=? ORDER BY mottatt;", { rs, rowNum ->
-            Lagret(
-                entity = Mapper.mapRow(rs, rowNum),
-                lest = rs.getBoolean("lest"),
-            )
-        }, fagsystemId)
-    }
-
-    fun finnKravgrunnlagUtenSak(): List<KravgrunnlagUtenSak> {
-        return jdbcTemplate.query(
-            """SELECT kb.fagsystem_id, kb.vedtak_id, kb.kontrollfelt
-FROM (SELECT fagsystem_id,
-             mottatt,
-             (xpath(
-                     '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:vedtakId/text()',
-                     kravgrunnlag::xml,
-                     ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
-              ))[1]::text AS vedtak_id,
-             (xpath(
-                     '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:kontrollfelt/text()',
-                     kravgrunnlag::xml,
-                     ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
-              ))[1]::text AS kontrollfelt
-      FROM kravgrunnlag_buffer) kb
-WHERE NOT EXISTS (SELECT 1 FROM tilbakekreving_kravgrunnlag tk WHERE tk.kontrollfelt = kb.kontrollfelt)
-ORDER BY kb.mottatt;""",
-        ) { rs, _ ->
-            KravgrunnlagUtenSak(
-                fagsystemId = rs.getString("fagsystem_id"),
-                vedtakId = rs.getString("vedtak_id"),
-                kontrollfelt = rs.getString("kontrollfelt"),
-            )
-        }
-    }
-
-    fun markerSomUlest(kravgrunnlag: List<KravgrunnlagNøkkel>): Int {
-        return jdbcTemplate.batchUpdate(
-            """UPDATE kravgrunnlag_buffer SET lest=false
-WHERE fagsystem_id = ?
-  AND (xpath(
-        '/urn:detaljertKravgrunnlagMelding/urn:detaljertKravgrunnlag/urn:kontrollfelt/text()',
-        kravgrunnlag::xml,
-        ARRAY [ARRAY ['urn', 'urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1']]
-      ))[1]::text = ?;""",
-            kravgrunnlag.map { arrayOf(it.fagsystemId, it.kontrollfelt) },
-        ).sum()
-    }
-
     object Mapper : RowMapper<Entity> {
         override fun mapRow(
             rs: ResultSet,
@@ -119,21 +70,5 @@ WHERE fagsystem_id = ?
         val kravgrunnlagId: String,
         val fagsystemId: String,
         val mottatt: LocalDateTime,
-    )
-
-    data class KravgrunnlagUtenSak(
-        val fagsystemId: String,
-        val vedtakId: String?,
-        val kontrollfelt: String?,
-    )
-
-    data class KravgrunnlagNøkkel(
-        val fagsystemId: String,
-        val kontrollfelt: String,
-    )
-
-    data class Lagret(
-        val entity: Entity,
-        val lest: Boolean,
     )
 }
