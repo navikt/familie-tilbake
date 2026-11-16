@@ -28,7 +28,6 @@ import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Informasjonsbrev
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
 import no.nav.tilbakekreving.brev.VarselbrevInfo
-import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsak
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakBehandlingHistorikk
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
@@ -117,6 +116,14 @@ class Tilbakekreving internal constructor(
         }
         sideeffektContext.logg(
             behandlingsloggstype = behandlingsloggType,
+            behandlingId = null,
+        )
+    }
+
+    fun håndter(kravgrunnlag: KravgrunnlagHendelse, revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+        tilstand.håndter(this, kravgrunnlag, revurderingsårsak, sideeffektContext)
+        sideeffektContext.logg(
+            behandlingsloggstype = Behandlingsloggstype.KRAVGRUNNLAG_MOTTATT,
             behandlingId = null,
         )
     }
@@ -287,12 +294,10 @@ class Tilbakekreving internal constructor(
         return behandlingHistorikk.finn(behandlingId, Sporing(id, behandlingId.toString())).entry
     }
 
-    fun opprettRevurdering(behandlingId: UUID, revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
-        tilstand.opprettRevurdering(
+    fun opprettRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+        tilstand.trengerKravgrunnlagForRevurdering(
             tilbakekreving = this,
             sideeffektContext = sideeffektContext,
-            eksternFagsakRevurdering = eksternFagsak.behandlinger.nåværende(),
-            behandlendeEnhet = hentBehandling(behandlingId).hentBehandlingsinformasjon().enhet!!.kode,
             revurderingsårsak = revurderingsårsak,
         )
     }
@@ -304,9 +309,13 @@ class Tilbakekreving internal constructor(
             }
     }
 
-    fun klonBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+    fun opprettRevurderingBehandling(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         val opprinnegliBehandling = behandlingHistorikk.nåværende().entry
-        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(revurderingsårsak = revurderingsårsak, klokke = sideeffektContext.klokke)
+        val klonetBehandling = opprinnegliBehandling.klonBehandlingForRevurdering(
+            revurderingsårsak = revurderingsårsak,
+            kravgurnnlagReferanse = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse(),
+            klokke = sideeffektContext.klokke,
+        )
         klonetBehandling.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             behandlingHistorikk.lagre(klonetBehandling)
             sideeffektContext.logg(
@@ -314,13 +323,13 @@ class Tilbakekreving internal constructor(
                 behandlingId = klonetBehandling.id,
             )
         }
-        trengerKravgrunnlagForRevurdering(sideeffektContext)
     }
 
-    fun trengerKravgrunnlagForRevurdering(sideeffektContext: SideeffektContext) {
+    fun trengerKravgrunnlagForRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
         sideeffektContext.behovObservatør.håndter(
             KravgrunnlagForRevurderingBehov(
                 kravgrunnlagId = kravgrunnlagHistorikk.nåværendeKravgrunnlagReferanse().entry.kravgrunnlagId,
+                revurderingsårsak = revurderingsårsak,
             ),
         )
     }
@@ -406,7 +415,7 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettVedtaksbrev(klokke: Klokke) {
-        brevHistorikk.lagre(Vedtaksbrev.opprett(klokke))
+        brevHistorikk.lagre(behandlingHistorikk.nåværende().entry.opprettVedtaksbrev(klokke))
     }
 
     fun trengerVedtaksbrevJournalføring(sideeffektContext: SideeffektContext) {

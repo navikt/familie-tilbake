@@ -4,12 +4,17 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
+import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
+import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.VedtaksbrevJournalføringBehov
 import no.nav.tilbakekreving.beslutterContext
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT
+import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT_REVURDERING
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.brukerinfoHendelse
+import no.nav.tilbakekreving.distribusjon
 import no.nav.tilbakekreving.endring.EndringObservatørOppsamler
 import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.faktastegVurdering
@@ -51,6 +56,7 @@ class JournalførVedtakTest {
                 dokumentInfoId = null,
                 sendtTid = LocalDate.now(),
                 opprettet = brev.opprettet,
+                vedtaksbrevType = Vedtaksbrev.Vedtaksbrevtype.FØRSTEGANG,
             ),
         )
         brev.id shouldBe oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>().first().brevId
@@ -94,6 +100,79 @@ class JournalførVedtakTest {
             systemContext(),
         )
         tilbakekreving.tilstand shouldBe DistribuerVedtak
+    }
+
+    @Test
+    fun `journalføringsbrehov er riktig når det er førstegangsvedtak`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
+        tilbakekreving.håndter(
+            iverksettelse(),
+            systemContext(behovObservatør = oppsamler),
+        )
+
+        val behov = oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>().shouldHaveSize(1).first()
+        behov.tittel shouldBe "Vedtak tilbakebetaling "
+        behov.vedtaksbrevInfo.tittelForHovedavsnitt shouldBe "Du må betale tilbake barnetrygd"
+        behov.vedtaksbrevInfo.forklaringstekst shouldBe HOVEDAVSNITT
+    }
+
+    @Test
+    fun `journalføringsbrehov er riktig når det er revurderingsvedtak`() {
+        val oppsamler = BehovObservatørOppsamler()
+        val endringOppsamler = EndringObservatørOppsamler()
+        val opprettTilbakekrevingEvent = opprettTilbakekrevingHendelse()
+        val tilbakekreving = tilbakekrevingKlarTilJournalføring(opprettTilbakekrevingEvent, oppsamler)
+        tilbakekreving.håndter(
+            iverksettelse(),
+            systemContext(behovObservatør = oppsamler),
+        )
+
+        val brevId = (oppsamler.behovListe.last() as VedtaksbrevJournalføringBehov).brevId
+        tilbakekreving.håndter(
+            journalføring(brevId, tilbakekreving.eksternFagsak.eksternId()),
+            systemContext(),
+        )
+        tilbakekreving.håndter(
+            distribusjon(
+                brevId = brevId,
+                fagsakId = tilbakekreving.eksternFagsak.eksternId(),
+            ),
+            systemContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag = kravgrunnlag(),
+            revurderingsårsak = TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                beskrivelse = "Beskrivelse",
+            ),
+            sideeffektContext = systemContext(),
+        )
+
+        tilbakekreving.apply {
+            gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(endringOppsamler)) {
+                lagreForhåndsvarselUnntak(BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG, "Forhåndsvarsel er ikke nødvendig i testen")
+                lagreUttalelse(UttalelseVurdering.JA, null, "")
+                vurderFakta(faktastegVurdering())
+                vurderForeldelse(periode = 1.januar(2021) til 31.januar(2021), vurdering = foreldelseVurdering())
+                vurderVilkår(periode = 1.januar(2021) til 31.januar(2021), vurdering = forårsaketAvBruker().uaktsomt())
+                foreslåVedtak()
+                gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), beslutterContext(endringOppsamler)) {
+                    fatteVedtak(godkjenning())
+                }
+            }
+        }
+        tilbakekreving.håndter(
+            iverksettelse(),
+            systemContext(behovObservatør = oppsamler),
+        )
+
+        val behov = oppsamler.behovListe.filterIsInstance<VedtaksbrevJournalføringBehov>().last()
+        behov.tittel shouldBe "Vedtak om revurdering av tilbakekreving "
+        behov.vedtaksbrevInfo.tittelForHovedavsnitt shouldBe "Vedtak om revurdering av tilbakekreving barnetrygd"
+        behov.vedtaksbrevInfo.forklaringstekst shouldBe HOVEDAVSNITT_REVURDERING
     }
 
     private fun tilbakekrevingKlarTilJournalføring(

@@ -234,7 +234,7 @@ class BehovMediator(
             }
 
             is InfobrevDistribusjonBehov -> distribuerInformasjonsbrev(behov, tilbakekreving, sideeffektContext, logContext)
-            is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), sideeffektContext)
+            is KravgrunnlagForRevurderingBehov -> tilbakekreving.håndter(hentKravgrunnlagForRevurdering(behov), behov.revurderingsårsak, sideeffektContext)
         }
     }
 

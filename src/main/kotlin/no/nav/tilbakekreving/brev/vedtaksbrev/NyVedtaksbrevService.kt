@@ -27,7 +27,6 @@ import no.nav.tilbakekreving.integrasjoner.dokarkiv.DokarkivClient
 import no.nav.tilbakekreving.integrasjoner.dokarkiv.domain.OpprettJournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.dokdistfordeling.DokdistClient
 import no.nav.tilbakekreving.integrasjoner.pdfGen.PdfGenClient
-import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.AvsnittDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatsperiodeDto
@@ -75,15 +74,15 @@ class NyVedtaksbrevService(
 
         val (sistOppdatert, lagredeData) = vedtaksbrevDataRepository.hentVedtaksbrevData(behandlingId) ?: return VedtaksbrevDataDto(
             hovedavsnitt = HovedavsnittDto(
-                tittel = BrevFormatterer.lagHovedavsnittTittel(vedtaksbrevInfo),
-                forklaring = Forklaringstekster.HOVEDAVSNITT,
+                tittel = vedtaksbrevInfo.tittelForHovedavsnitt,
+                forklaring = vedtaksbrevInfo.forklaringstekst,
                 underavsnitt = listOf(RentekstElementDto("")),
-                hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(vedtaksbrevInfo.hjemlerForTilbakekreving, Språkkode.NB),
+                hjemler = vedtaksbrevInfo.hjemlerForTilbakekreving?.let { BrevFormatterer.lagVedtakHjemmelAvsnitt(it, Språkkode.NB) },
             ),
-            avsnitt = vedtaksbrevInfo.perioder.map {
+            avsnitt = vedtaksbrevInfo.perioder?.map {
                 BrevFormatterer.lagAvsnitt(
                     periode = it,
-                    flerePerioder = vedtaksbrevInfo.perioder.size > 1,
+                    flerePerioder = vedtaksbrevInfo.perioder!!.size > 1,
                 )
             },
             sistOppdatert = OffsetDateTime.now(),
@@ -93,16 +92,13 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = OppsummeringsdataDto(
-                beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
-                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
-                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
-            ),
+            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat?.let { oppsummeringstabell(vedtaksbrevInfo.beregnerSkatt, it) },
         )
 
         val lagredeIder = lagredeData.avsnitt.map { it.id }
-        val behandlingIder = vedtaksbrevInfo.perioder.map { it.id }
+        val behandlingIder = vedtaksbrevInfo.perioder?.map {
+            it.id
+        }
         if (lagredeIder != behandlingIder) {
             log.medContext(SecureLog.Context.medBehandling(null, behandlingId.toString())) {
                 info("Behandling krever avsnitt for {}, det finnes lagrede avsnitt for {}", behandlingId, lagredeIder)
@@ -111,9 +107,7 @@ class NyVedtaksbrevService(
 
         return VedtaksbrevDataDto(
             hovedavsnitt = mapHovedavsnitt(lagredeData.hovedavsnitt, vedtaksbrevInfo),
-            avsnitt = vedtaksbrevInfo.perioder.map {
-                mapAvsnitt(it, lagredeData.avsnitt)
-            },
+            avsnitt = vedtaksbrevInfo.perioder?.map { mapAvsnitt(it, lagredeData.avsnitt) },
             brevGjelder = vedtaksbrevInfo.brukerdata,
             ytelse = vedtaksbrevInfo.ytelse,
             sendtDato = BrevFormatterer.norskDato(LocalDate.now()),
@@ -121,12 +115,16 @@ class NyVedtaksbrevService(
             bunntekster = vedtaksbrevInfo.bunntekster.map(::tilStandardtekst),
             signatur = signatur,
             saksnummer = vedtaksbrevInfo.tilbakekrevingId,
-            oppsummeringstabell = OppsummeringsdataDto(
-                beregnerSkatt = vedtaksbrevInfo.beregnerSkatt,
-                perioder = mapOppsummeringsperioder(vedtaksbrevInfo.beregningsresultat),
-                sumFeilutbetaltBeløp = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.feilutbetaltBeløp }),
-                sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(vedtaksbrevInfo.beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
-            ),
+            oppsummeringstabell = vedtaksbrevInfo.beregningsresultat?.let { oppsummeringstabell(vedtaksbrevInfo.beregnerSkatt, it) },
+        )
+    }
+
+    private fun oppsummeringstabell(beregnerSkatt: Boolean, beregningsresultat: List<BeregningsresultatsperiodeDto>): OppsummeringsdataDto {
+        return OppsummeringsdataDto(
+            beregnerSkatt = beregnerSkatt,
+            perioder = mapOppsummeringsperioder(beregningsresultat),
+            sumFeilutbetaltBeløp = BrevFormatterer.beløpString(beregningsresultat.sumOf { it.feilutbetaltBeløp }),
+            sumTilbakekrevesBeløpEtterSkatt = BrevFormatterer.beløpString(beregningsresultat.sumOf { it.tilbakekrevingsbeløp }),
         )
     }
 
@@ -162,7 +160,7 @@ class NyVedtaksbrevService(
                 hovedavsnitt = VedtaksbrevDataRepository.HovedavsnittEntity(
                     underavsnitt = data.hovedavsnitt.underavsnitt.mapNotNull(::tilEntity),
                 ),
-                avsnitt = data.avsnitt.map {
+                avsnitt = data.avsnitt.orEmpty().map {
                     VedtaksbrevDataRepository.PeriodeavsnittEntity(
                         id = it.id,
                         underavsnitt = it.underavsnitt.mapNotNull(::tilEntity),
@@ -174,7 +172,7 @@ class NyVedtaksbrevService(
         )
         return VedtaksbrevRedigerbareDataDto(
             hovedavsnitt = mapHovedavsnitt(data.hovedavsnitt, info),
-            avsnitt = info.perioder.map { mapAvsnitt(it, data.avsnitt) },
+            avsnitt = info.perioder?.map { mapAvsnitt(it, data.avsnitt) },
             sistOppdatert = sistOppdatert.atOffset(ZoneOffset.UTC),
         )
     }
@@ -184,12 +182,12 @@ class NyVedtaksbrevService(
         info: VedtaksbrevInfo,
     ): HovedavsnittDto {
         return HovedavsnittDto(
-            tittel = BrevFormatterer.lagHovedavsnittTittel(info),
+            tittel = info.tittelForHovedavsnitt,
             forklaring = Forklaringstekster.HOVEDAVSNITT,
             underavsnitt = data.underavsnitt.map {
                 mapUnderavsnitt(it)
             },
-            hjemler = BrevFormatterer.lagVedtakHjemmelAvsnitt(info.hjemlerForTilbakekreving, Språkkode.NB),
+            hjemler = info.hjemlerForTilbakekreving?.let { BrevFormatterer.lagVedtakHjemmelAvsnitt(it, Språkkode.NB) },
         )
     }
 
@@ -255,7 +253,7 @@ class NyVedtaksbrevService(
                     dokument = pdfGenClient.hentPdfForVedtak(hentVedtaksbrevData(behov.behandlingId, behov.vedtaksbrevInfo, behov.beslutter)),
                     filtype = Filtype.PDFA,
                     filnavn = "vedtak.pdf",
-                    tittel = lagTittel(behov),
+                    tittel = behov.tittel,
                     dokumenttype = null,
                 ),
             ),
@@ -328,23 +326,8 @@ class NyVedtaksbrevService(
         else -> null
     }
 
-    private fun lagTittel(vedtaksbrevBehov: VedtaksbrevJournalføringBehov): String {
-        val tittel =
-            when (vedtaksbrevBehov.vedtaksresultat) {
-                Vedtaksresultat.INGEN_TILBAKEBETALING -> TITTEL_VEDTAK_INGEN_TILBAKEBETALING
-                else -> TITTEL_VEDTAK_TILBAKEBETALING
-            }
-
-        return "$tittel ${vedtaksbrevBehov.ytelse.hentYtelsesnavn(Språkkode.NB)}"
-    }
-
     fun tilStandardtekst(bunntekst: Bunntekst) = StandardtekstDto(
         tittel = bunntekst.tittel,
         underavsnitt = bunntekst.avsnitt.map(::RentekstElementDto),
     )
-
-    companion object {
-        private const val TITTEL_VEDTAK_TILBAKEBETALING = "Vedtak tilbakebetaling "
-        private const val TITTEL_VEDTAK_INGEN_TILBAKEBETALING = "Vedtak ingen tilbakebetaling "
-    }
 }

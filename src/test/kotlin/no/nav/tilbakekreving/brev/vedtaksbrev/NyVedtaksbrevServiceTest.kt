@@ -52,8 +52,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
             it.signatur shouldBe expectedSignatur
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
                 PakrevdBegrunnelseDto(
                     tittel = VilkårsvurderingBegrunnelse.IKKE_REDUSERT_SÆRLIGE_GRUNNER.tittel,
@@ -110,8 +110,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
             )
             it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
             it.signatur shouldBe expectedSignatur
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
                 PakrevdBegrunnelseDto(
@@ -190,8 +190,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
 
         val midlertidigVedtaksbrevInfo = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.REDUSERT_SÆRLIGE_GRUNNER)
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
                 PakrevdBegrunnelseDto(
@@ -264,8 +264,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         )
 
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, midlertidigVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
                 PakrevdBegrunnelseDto(
@@ -279,8 +279,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         }
 
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, originalVedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto("Det var jo litt uaktsomt..."),
                 RentekstElementDto("Derfor må du betale tilbake"),
                 PakrevdBegrunnelseDto(
@@ -301,8 +301,8 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
         val info = vedtaksbrevInfo(periodeId, VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR)
 
         nyVedtaksbrevService.hentVedtaksbrevData(behandlingId, info, ANSVARLIG_BESLUTTER).should {
-            it.avsnitt[0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
-            it.avsnitt[0].underavsnitt shouldBe listOf(
+            it.avsnitt!![0].tittel shouldBe "Dette er grunnen til at du har fått for mye utbetalt"
+            it.avsnitt!![0].underavsnitt shouldBe listOf(
                 RentekstElementDto(""),
                 PakrevdBegrunnelseDto(
                     begrunnelseType = VilkårsvurderingBegrunnelse.SKAL_IKKE_UNNLATES_4_RETTSGEBYR.name,
@@ -312,6 +312,23 @@ class NyVedtaksbrevServiceTest : TilbakekrevingE2EBase() {
                     meldingerTilSaksbehandler = emptyList(),
                 ),
             )
+        }
+    }
+
+    @Test
+    fun `VedtaksbrevDataDto for revurdering`() {
+        val vedtaksbrevInfo = vedtaksbrevInfoForRevurdering()
+        nyVedtaksbrevService.hentVedtaksbrevData(lagBehandlingId(), vedtaksbrevInfo, ANSVARLIG_BESLUTTER).should {
+            it.hovedavsnitt shouldBe HovedavsnittDto(
+                tittel = "Vedtak om revurdering av tilbakekreving arbeidsavklaringspenger",
+                forklaring = Forklaringstekster.HOVEDAVSNITT_REVURDERING,
+                underavsnitt = listOf(RentekstElementDto("")),
+                hjemler = null,
+            )
+            it.ytelse shouldBe Ytelse.Arbeidsavklaringspenger.brevmeta()
+            it.signatur shouldBe expectedSignatur
+            it.avsnitt shouldBe null
+            it.oppsummeringstabell shouldBe null
         }
     }
 
