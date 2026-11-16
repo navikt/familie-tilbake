@@ -212,8 +212,8 @@ class Tilbakekreving internal constructor(
     }
 
     fun håndter(påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {
-        tilstand.håndter(this, påminnelse, sideeffektContext)
         oppdaterPåminnelsestidspunkt(sideeffektContext.klokke)
+        tilstand.håndter(this, påminnelse, sideeffektContext)
     }
 
     fun håndter(hendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
