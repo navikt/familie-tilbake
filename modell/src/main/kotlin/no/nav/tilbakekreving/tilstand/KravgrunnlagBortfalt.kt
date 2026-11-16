@@ -7,6 +7,7 @@ import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.Påminnelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.Duration
@@ -20,6 +21,8 @@ object KravgrunnlagBortfalt : Tilstand {
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
+
+    override fun håndter(tilbakekreving: Tilbakekreving, statusmeldingHendelse: AvsluttetStatusmeldingHendelse, sideeffektContext: SideeffektContext) {}
 
     override fun validerInnenforScope(tilbakekreving: Tilbakekreving) {
         throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBortfalt, tilbakekreving.sporingsinformasjon())
