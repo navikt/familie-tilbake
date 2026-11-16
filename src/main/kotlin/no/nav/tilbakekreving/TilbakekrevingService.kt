@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.familie.tilbake.common.ContextService
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.log.SecureLog
@@ -17,6 +18,7 @@ import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.bigquery.BigQueryService
 import no.nav.tilbakekreving.config.FeatureService
 import no.nav.tilbakekreving.endring.EndringObservatørService
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.kontrakter.foreldelse.Foreldelsesvurderingstype
@@ -140,7 +142,21 @@ class TilbakekrevingService(
         tilbakekrevingRepository.hentOgLagreResultat(filter) { it, behandlingslogg ->
             val tilbakekreving = it.fraEntity()
             if (validerScope) {
-                tilbakekreving.validerInnenforScope(featureService.modellFeatures)
+                try {
+                    tilbakekreving.validerInnenforScope(featureService.modellFeatures)
+                } catch (e: ModellFeil.UtenforScopeException) {
+                    logger.medContext(logContext) {
+                        warn(
+                            "Prøvde å påminne sak utenfor scope, {} {} og {}",
+                            keyValue("grunn", e.utenforScope),
+                            keyValue("tilbakekrevingId", tilbakekreving.id),
+                            keyValue("ytelse", tilbakekreving.eksternFagsak.hentYtelse().tilYtelseDTO()),
+                            keyValue("fagsystemId", tilbakekreving.eksternFagsak.eksternId()),
+                            e,
+                        )
+                    }
+                    return@hentOgLagreResultat tilbakekreving.tilEntity()
+                }
             }
             logContext = SecureLog.Context.fra(tilbakekreving)
             result = callback(tilbakekreving) { behandler ->
