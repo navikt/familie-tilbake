@@ -156,6 +156,7 @@ class TilbakekrevingService(
                             e,
                         )
                     }
+                    tilbakekreving.oppdaterPåminnelsestidspunkt(SystemKlokke)
                     return@hentOgLagreResultat tilbakekreving.tilEntity()
                 }
             }
