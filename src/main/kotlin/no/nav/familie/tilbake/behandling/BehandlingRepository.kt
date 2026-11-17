@@ -3,6 +3,7 @@ package no.nav.familie.tilbake.behandling
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -129,12 +130,16 @@ interface BehandlingRepository :
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
 
+    @Modifying
     @Query(
         """
-            SELECT DISTINCT behandling_id
-            FROM behandlingsarsak
-            WHERE type = 'REVURDERING_ANNEN_ÅRSAK'
+            UPDATE behandlingsarsak
+            SET type = 'REVURDERING_FEILUTBETALT_BELØP_HELT_ELLER_DELVIS_BORTFALT'
+            WHERE behandling_id IN (
+                'b8514cf1-4242-4326-9345-2f904ec2e53d',
+                'fc1d9db8-a203-4455-9305-bc8e8f5c04ab'
+            )
         """,
     )
-    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): List<UUID>
+    fun korrigerRevurderingsårsak(): Int
 }
