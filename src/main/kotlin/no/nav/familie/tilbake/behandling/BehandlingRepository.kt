@@ -142,4 +142,13 @@ interface BehandlingRepository :
         """,
     )
     fun korrigerRevurderingsårsak(): Int
+
+    @Query(
+        """
+            SELECT DISTINCT behandling_id
+            FROM behandlingsarsak
+            WHERE type = 'REVURDERING_ANNEN_ÅRSAK'
+        """,
+    )
+    fun hentBehandlingsIderMedRevurderingAnnenÅrsak(): List<UUID>
 }
