@@ -1,5 +1,5 @@
 package no.nav.tilbakekreving.e2e
-import io.kotest.inspectors.forSingle
+import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -133,12 +133,14 @@ class Behandlingslogg {
         utsettUttalelse[0].tekst shouldBe "Begrunnelse"
 
         val hendelser = behandlingslogg.tilHendelserDto()
-        hendelser.filter { it.tittel == "Forhåndsvarsel sendt" }.forSingle {
+        hendelser.forOne {
+            it.tittel shouldBe "Forhåndsvarsel sendt"
             it.rolle shouldBe RolleDto.VEDTAKSLØSNING
             it.ekstraInfo[EkstraInfo.JOURNALPOST_ID.name] shouldBe "123"
             it.ekstraInfo[EkstraInfo.DOKUMENTINFO_ID.name] shouldBe "321"
         }
-        hendelser.filter { it.tittel == "Ny frist for uttalelse" }.forSingle {
+        hendelser.forOne {
+            it.tittel shouldBe "Ny frist for uttalelse"
             it.rolle shouldBe RolleDto.SAKSBEHANDLER
             it.beskrivelse shouldBe "Begrunnelse"
             it.ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] shouldBe "2027-01-01"
