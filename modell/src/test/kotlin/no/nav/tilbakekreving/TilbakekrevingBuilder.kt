@@ -3,6 +3,7 @@ package no.nav.tilbakekreving
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
+import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
@@ -24,12 +25,13 @@ fun opprettTilbakekreving(
 fun tilbakekrevingTilBehandling(
     opprettTilbakekrevingHendelse: OpprettTilbakekrevingHendelse = opprettTilbakekrevingHendelse(),
     kravgrunnlag: KravgrunnlagHendelse = kravgrunnlag(),
+    fagsysteminfo: FagsysteminfoHendelse = fagsysteminfoHendelse(),
     context: SideeffektContext = systemContext(),
 ): Tilbakekreving {
     val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse, context)
     tilbakekreving.apply {
         håndter(kravgrunnlag, context)
-        håndter(fagsysteminfoHendelse(), context)
+        håndter(fagsysteminfo, context)
         håndter(brukerinfoHendelse(), context)
     }
     return tilbakekreving

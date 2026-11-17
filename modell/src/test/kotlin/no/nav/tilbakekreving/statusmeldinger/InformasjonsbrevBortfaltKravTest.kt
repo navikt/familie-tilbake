@@ -22,13 +22,17 @@ import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
 import no.nav.tilbakekreving.bortfaltStatusmelding
 import no.nav.tilbakekreving.brev.Informasjonsbrev
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
+import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.fagsysteminfoHendelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.InfobrevDistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
+import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.nåværendeBehandlingId
+import no.nav.tilbakekreving.opprettTilbakekreving
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
 import no.nav.tilbakekreving.sendOgDistribuerForhåndsvarsel
@@ -37,11 +41,15 @@ import no.nav.tilbakekreving.test.juni
 import no.nav.tilbakekreving.test.mai
 import no.nav.tilbakekreving.tilbakekrevingTilBehandling
 import no.nav.tilbakekreving.tilstand.AvsluttetUtenVedtak
+import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.DistribuerInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
 import no.nav.tilbakekreving.tilstand.TilBehandling
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 class InformasjonsbrevBortfaltKravTest {
@@ -80,9 +88,34 @@ class InformasjonsbrevBortfaltKravTest {
     }
 
     @Test
-    fun `bortfalt krav uten sendt forhåndsvarsel`() {
+    fun `bortfalt krav uten forhåndsvarsel når bruker ikke er informert`() {
         val oppsamler = BehovObservatørOppsamler()
-        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            opprettTilbakekrevingHendelse(),
+            fagsysteminfo = fagsysteminfoHendelse(brukerInformertOmFeilutbetaling = false),
+        )
+        tilbakekreving.tilstand shouldBe TilBehandling
+
+        tilbakekreving.håndter(
+            bortfaltStatusmelding(),
+            systemContext(behovObservatør = oppsamler, features = kravBortfaltPå()),
+        )
+
+        tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
+        oppsamler.behovListe.filterIsInstance<InfobrevJournalføringBehov>().shouldBeEmpty()
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = [true])
+    fun `bortfalt krav uten forhåndsvarsel når bruker er informert eller det er ukjent om bruker er informert`(
+        brukerInformertOmFeilutbetaling: Boolean?,
+    ) {
+        val oppsamler = BehovObservatørOppsamler()
+        val tilbakekreving = tilbakekrevingTilBehandling(
+            opprettTilbakekrevingHendelse(),
+            fagsysteminfo = fagsysteminfoHendelse(brukerInformertOmFeilutbetaling = brukerInformertOmFeilutbetaling),
+        )
         tilbakekreving.tilstand shouldBe TilBehandling
 
         tilbakekreving.håndter(
@@ -92,6 +125,22 @@ class InformasjonsbrevBortfaltKravTest {
 
         tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
         oppsamler.behovListe.filterIsInstance<InfobrevJournalføringBehov>().shouldBeEmpty()
+    }
+
+    @Test
+    fun `bortfalt krav mens saken venter på brukerinfo`() {
+        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse()).apply {
+            håndter(kravgrunnlag(), systemContext())
+            håndter(fagsysteminfoHendelse(brukerInformertOmFeilutbetaling = false), systemContext())
+        }
+        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
+
+        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext(features = kravBortfaltPå()))
+        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
+
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext(features = kravBortfaltPå()))
+
+        tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
     }
 
     @Test

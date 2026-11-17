@@ -61,7 +61,6 @@ object AvventerFagsysteminfo : Tilstand {
         statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.kravgrunnlagBortfalt(sideeffektContext)
     }
 
     override fun håndter(

@@ -65,6 +65,7 @@ import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tilstand.Avsluttet
+import no.nav.tilbakekreving.tilstand.AvsluttetUtenVedtak
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
@@ -445,11 +446,17 @@ class Tilbakekreving internal constructor(
     }
 
     internal fun kravgrunnlagBortfalt(sideeffektContext: SideeffektContext) {
-        val forhåndsvarselSendt = brevHistorikk.sisteVarselbrev() != null
-        if (sideeffektContext.features[Toggle.KravBortfalt] && forhåndsvarselSendt) {
-            byttTilstand(JournalførInfobrevForBortfaltKrav, sideeffektContext)
-        } else {
+        if (!sideeffektContext.features[Toggle.KravBortfalt]) {
             byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
+            return
+        }
+        val forhåndsvarselSendt = brevHistorikk.sisteVarselbrev() != null
+        when {
+            forhåndsvarselSendt -> byttTilstand(JournalførInfobrevForBortfaltKrav, sideeffektContext)
+            eksternFagsak.kanAvsluttesUtenBrev() -> behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+                byttTilstand(AvsluttetUtenVedtak, sideeffektContext)
+            }
+            else -> byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
         }
     }
 

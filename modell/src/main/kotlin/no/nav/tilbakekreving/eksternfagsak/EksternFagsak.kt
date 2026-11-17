@@ -101,6 +101,8 @@ class EksternFagsak(
 
     fun hentYtelse() = ytelse
 
+    fun kanAvsluttesUtenBrev(): Boolean = behandlinger.nåværende().entry.kanAvsluttesUtenBrev()
+
     fun saksbehandlingUrl(): String? {
         if (!behandlinger.harBehandling()) return null
         return behandlinger.nåværende().entry.url
