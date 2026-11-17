@@ -39,6 +39,10 @@ object AvventerBrukerinfo : Tilstand {
             tilbakekreving.byttTilstand(Sperret, sideeffektContext)
             return
         }
+        if (sisteKravHendelse is AvsluttetStatusmeldingHendelse) {
+            tilbakekreving.kravgrunnlagBortfalt(sideeffektContext)
+            return
+        }
         // todo her kan vi bytte til SendVarselbrev tilstand når Automatisk varselbrev er på plass
         tilbakekreving.byttTilstand(TilBehandling, sideeffektContext)
     }
@@ -48,7 +52,6 @@ object AvventerBrukerinfo : Tilstand {
         statusmeldingHendelse: AvsluttetStatusmeldingHendelse,
         sideeffektContext: SideeffektContext,
     ) {
-        tilbakekreving.byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
     }
 
     override fun håndter(
