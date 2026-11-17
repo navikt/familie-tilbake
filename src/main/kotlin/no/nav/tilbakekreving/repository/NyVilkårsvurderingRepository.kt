@@ -11,7 +11,6 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.ForskjellEntityMapper
 import no.nav.tilbakekreving.entity.VilkårsvurderingEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -24,7 +23,7 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     fun hentVilkårsvurdering(behandlingId: UUID): VilkårsvurderingstegEntity {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering WHERE behandling_ref=?;", behandlingId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering", "SELECT * FROM tilbakekreving_vilkårsvurdering WHERE behandling_ref=?;", behandlingId) { resultSet, _ ->
             val vurderingId = resultSet[VilkårsvurderingEntityMapper.id]
             VilkårsvurderingEntityMapper.map(resultSet, hentVurdertePerioder(vurderingId))
         }.single()
@@ -53,7 +52,7 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentVurdertePerioder(vurderingId: UUID): List<VilkårsvurderingsperiodeEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode WHERE vurdering_ref=?", vurderingId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering_periode", "SELECT * FROM tilbakekreving_vilkårsvurdering_periode WHERE vurdering_ref=?", vurderingId) { resultSet, _ ->
             val periodeId = resultSet[VilkårsvurderingEntityMapper.VilkårsvurdertPeriodeEntityMapper.id]
             VilkårsvurderingEntityMapper.VilkårsvurdertPeriodeEntityMapper.map(
                 resultSet,
@@ -67,7 +66,8 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentEndretAvKravgrunnlag(vilkårsvurderingPeriodeId: UUID): ForskjellEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_kravgrunnlag_forskjell.by_vilkårsvurdering_periode_ref",
             "SELECT * FROM tilbakekreving_kravgrunnlag_forskjell WHERE vilkårsvurdering_periode_ref=?",
             vilkårsvurderingPeriodeId,
         ) { resultSet, _ ->
@@ -80,13 +80,13 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentGodTroVurdering(periodeId: UUID): GodTroEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_god_tro WHERE id=?;", periodeId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering_periode_god_tro", "SELECT * FROM tilbakekreving_vilkårsvurdering_periode_god_tro WHERE id=?;", periodeId) { resultSet, _ ->
             VilkårsvurderingEntityMapper.GodTroEntityMapper.map(resultSet)
         }.singleOrNull()
     }
 
     private fun hentAktsomhetvurdering(periodeId: UUID): VurdertAktsomhetEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_aktsomhet WHERE id=?;", periodeId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering_periode_aktsomhet", "SELECT * FROM tilbakekreving_vilkårsvurdering_periode_aktsomhet WHERE id=?;", periodeId) { resultSet, _ ->
             VilkårsvurderingEntityMapper.AktsomhetMapper.map(resultSet)
         }.singleOrNull()
     }
@@ -104,13 +104,13 @@ class NyVilkårsvurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentMottakersForståelse(periodeId: UUID): MottakersForståelseEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_mottakers_forståelse WHERE id=?;", periodeId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering_periode_mottakers_forståelse", "SELECT * FROM tilbakekreving_vilkårsvurdering_periode_mottakers_forståelse WHERE id=?;", periodeId) { resultSet, _ ->
             VilkårsvurderingEntityMapper.MottakersForståelseMapper.map(resultSet)
         }.singleOrNull()
     }
 
     private fun hentSærligeGrunnerVurdering(periodeId: UUID): ReduksjonMomenterEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_vilkårsvurdering_periode_særlige_grunner WHERE id=?;", periodeId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_vilkårsvurdering_periode_særlige_grunner", "SELECT * FROM tilbakekreving_vilkårsvurdering_periode_særlige_grunner WHERE id=?;", periodeId) { resultSet, _ ->
             VilkårsvurderingEntityMapper.ReduksjonMomenterMapper.map(resultSet)
         }.singleOrNull()
     }

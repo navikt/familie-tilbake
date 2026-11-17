@@ -8,24 +8,24 @@ import no.nav.tilbakekreving.fagsystem.Ytelsestype
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import org.intellij.lang.annotations.Language
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.RowMapper
 import java.math.BigInteger
+import java.sql.ResultSet
 import java.util.UUID
 
 sealed interface TilbakekrevingFilter {
-    fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity>
+    fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity>
 
-    fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity>
+    fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity>
 
     fun logContext(): SecureLog.Context
 
     private class BehandlingId(val id: UUID) : TilbakekrevingFilter {
-        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=?;", mapper, id)
+        override fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery("tilbakekreving.by_behandling_id", "SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=?;", id, mapper = mapper)
         }
 
-        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query("SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=? FOR UPDATE;", mapper, id)
+        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery("tilbakekreving.by_behandling_id.for_update", "SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=? FOR UPDATE;", id, mapper = mapper)
         }
 
         override fun logContext(): SecureLog.Context = SecureLog.Context.medBehandling(null, id.toString())
@@ -43,21 +43,23 @@ sealed interface TilbakekrevingFilter {
             FagsystemDTO.DP -> Ytelsestype.DAGPENGER
         }.name
 
-        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
+        override fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery(
+                "tilbakekreving.by_ekstern_id_fra_oppdrag_and_ytelse",
                 "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id_fra_oppdrag=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC;",
-                mapper,
                 fagsakId,
                 ytelse(),
+                mapper = mapper,
             )
         }
 
-        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
+        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery(
+                "tilbakekreving.by_ekstern_id_fra_oppdrag_and_ytelse.for_update",
                 "SELECT * FROM tilbakekreving JOIN tilbakekreving_ekstern_fagsak ef ON tilbakekreving.id=ef.tilbakekreving_ref WHERE ef.ekstern_id_fra_oppdrag=? AND ef.ytelse=? ORDER BY tilbakekreving.id DESC FOR UPDATE;",
-                mapper,
                 fagsakId,
                 ytelse(),
+                mapper = mapper,
             )
         }
 
@@ -68,12 +70,12 @@ sealed interface TilbakekrevingFilter {
         private val vedtakId: BigInteger,
         private val fagsakId: String,
     ) : TilbakekrevingFilter {
-        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query("$QUERY;", mapper, vedtakId, vedtakId)
+        override fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery("tilbakekreving.by_vedtak_id", "$QUERY;", vedtakId, vedtakId, mapper = mapper)
         }
 
-        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query("$QUERY FOR UPDATE;", mapper, vedtakId, vedtakId)
+        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery("tilbakekreving.by_vedtak_id.for_update", "$QUERY FOR UPDATE;", vedtakId, vedtakId, mapper = mapper)
         }
 
         override fun logContext(): SecureLog.Context = SecureLog.Context.utenBehandling(fagsakId)
@@ -88,19 +90,21 @@ ORDER BY tilbakekreving.id DESC"""
     }
 
     private class TilbakekrevingId(val id: String) : TilbakekrevingFilter {
-        override fun select(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
+        override fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery(
+                "tilbakekreving.by_id",
                 "SELECT * FROM tilbakekreving WHERE id=?;",
-                mapper,
                 FieldConverter.NumericId.convert(id),
+                mapper = mapper,
             )
         }
 
-        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: RowMapper<TilbakekrevingEntity>): List<TilbakekrevingEntity> {
-            return jdbcTemplate.query(
+        override fun selectForUpdate(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
+            return jdbcTemplate.timedQuery(
+                "tilbakekreving.by_id.for_update",
                 "SELECT * FROM tilbakekreving WHERE id=? FOR UPDATE;",
-                mapper,
                 FieldConverter.NumericId.convert(id),
+                mapper = mapper,
             )
         }
 

@@ -70,7 +70,7 @@ class TilbakekrevingRepository(
     }
 
     fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving") { rs, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving.all", "SELECT * FROM tilbakekreving") { rs, _ ->
             hentTilbakekrevingEntity(rs)
         }
     }

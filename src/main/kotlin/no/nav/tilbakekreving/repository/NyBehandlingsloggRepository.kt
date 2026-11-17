@@ -4,7 +4,6 @@ import no.nav.tilbakekreving.entities.LoggInnlagEntity
 import no.nav.tilbakekreving.entity.BehandlingsloggMapper
 import no.nav.tilbakekreving.entity.FieldConverter
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -12,7 +11,8 @@ class NyBehandlingsloggRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentBehandlingslogg(tilbakekrevingId: String): List<LoggInnlagEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_behandlingslogg",
             "SELECT * FROM tilbakekreving_behandlingslogg WHERE tilbakekreving_ref=?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->

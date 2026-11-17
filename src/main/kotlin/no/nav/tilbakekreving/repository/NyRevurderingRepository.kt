@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.repository
 import no.nav.tilbakekreving.entities.TilbakekrevingRevurderingEntity
 import no.nav.tilbakekreving.entity.TilbakekrevingRevurderingEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -12,7 +11,8 @@ class NyRevurderingRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentTilbakekrevingRevurdering(behandlingRef: UUID): TilbakekrevingRevurderingEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_revurdering",
             "SELECT * FROM tilbakekreving_revurdering WHERE behandling_ref = ?",
             behandlingRef,
         ) { resultSet, _ ->

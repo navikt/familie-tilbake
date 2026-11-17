@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.ForeldelsesvurderingEntityMapper
 import no.nav.tilbakekreving.entity.ForskjellEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -16,7 +15,8 @@ class NyForeldelseRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentForeldelsesvurdering(behandlingId: UUID): ForeldelsesstegEntity {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_foreldelsesvurdering",
             "SELECT * FROM tilbakekreving_foreldelsesvurdering WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
@@ -26,7 +26,8 @@ class NyForeldelseRepository(
     }
 
     private fun hentPerioder(vurderingId: UUID): List<ForeldelseperiodeEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_foreldelsesvurdering_periode",
             "SELECT * FROM tilbakekreving_foreldelsesvurdering_periode WHERE foreldelsesvurdering_ref=?",
             vurderingId,
         ) { resultSet, _ ->
@@ -51,7 +52,8 @@ class NyForeldelseRepository(
     }
 
     private fun hentEndringIKravgrunnlag(foreldelsesvurderingPeriodeId: UUID): ForskjellEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_kravgrunnlag_forskjell.by_foreldelsesvurdering_periode_ref",
             "SELECT * FROM tilbakekreving_kravgrunnlag_forskjell WHERE foreldelsesvurdering_periode_ref=?",
             foreldelsesvurderingPeriodeId,
         ) { resultSet, _ ->

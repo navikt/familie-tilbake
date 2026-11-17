@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.repository
 import no.nav.tilbakekreving.entities.ForhåndsvarselUnntakEntity
 import no.nav.tilbakekreving.entity.ForhåndsvarselUnntakEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -12,7 +11,8 @@ class NyForhåndsvarselUnntakRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentForhåndsvarselUnntak(behandlingRef: UUID): ForhåndsvarselUnntakEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_forhåndsvarsel_unntak",
             "SELECT * FROM tilbakekreving_forhåndsvarsel_unntak WHERE behandling_ref=?",
             behandlingRef,
         ) { resultSet, _ ->

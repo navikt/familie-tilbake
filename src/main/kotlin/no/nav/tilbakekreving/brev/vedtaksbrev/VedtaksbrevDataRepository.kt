@@ -5,8 +5,8 @@ import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.tilbakekreving.Klokke
 import no.nav.tilbakekreving.brev.vedtaksbrev.VedtaksbrevDataRepository.PeriodeavsnittEntity.Companion.overskriv
 import no.nav.tilbakekreving.entity.FieldConverter
+import no.nav.tilbakekreving.repository.timedQuery
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -24,7 +24,11 @@ class VedtaksbrevDataRepository(
     }
 
     fun hentVedtaksbrevData(behandlingId: UUID): Pair<LocalDateTime, VedtaksbrevEntity>? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_behandling_vedtaksbrev WHERE behandling_ref=?;", behandlingId) { rs, _ ->
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_behandling_vedtaksbrev",
+            "SELECT * FROM tilbakekreving_behandling_vedtaksbrev WHERE behandling_ref=?;",
+            behandlingId,
+        ) { rs, _ ->
             FieldConverter.LocalDateTimeConverter.required().convert(rs, "sist_oppdatert") to objectMapper.readValue<VedtaksbrevEntity>(rs.getString("data"))
         }.singleOrNull()
     }

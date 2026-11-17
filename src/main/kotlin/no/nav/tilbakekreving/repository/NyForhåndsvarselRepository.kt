@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.repository
 import no.nav.tilbakekreving.entities.ForhåndsvarselEntity
 import no.nav.tilbakekreving.entity.ForhåndsvarselEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -15,7 +14,8 @@ class NyForhåndsvarselRepository(
     private val utsettUttalelseRepository: NyUtsettUttalelseRepository,
 ) {
     fun hentForhåndsvarsel(behandlingId: UUID): ForhåndsvarselEntity {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_forhåndsvarsel",
             "SELECT * FROM tilbakekreving_forhåndsvarsel WHERE id = ?",
             behandlingId,
         ) { resultSet, _ ->

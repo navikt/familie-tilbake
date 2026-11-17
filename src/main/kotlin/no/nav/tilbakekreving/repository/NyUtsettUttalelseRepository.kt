@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.repository
 import no.nav.tilbakekreving.entities.UttalelsesfristEntity
 import no.nav.tilbakekreving.entity.FristUtsettelseEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -12,7 +11,8 @@ class NyUtsettUttalelseRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentUtsettUttalelseFrist(behandlingId: UUID): UttalelsesfristEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_uttalelsesfrist",
             "SELECT * FROM tilbakekreving_uttalelsesfrist WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->

@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.entity.BrevEntityMapper
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 import kotlin.collections.singleOrNull
@@ -19,7 +18,8 @@ class NyBrevRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentBrev(tilbakekrevingId: String): List<BrevEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_brev",
             "SELECT * FROM tilbakekreving_brev WHERE tilbakekreving_ref = ?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->
@@ -29,7 +29,8 @@ class NyBrevRepository(
     }
 
     fun hentVarselbrev(brevId: UUID): VarselbrevEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_varselbrev",
             "SELECT * FROM tilbakekreving_varselbrev WHERE id = ?",
             brevId,
         ) { resultSet, _ ->
@@ -38,7 +39,8 @@ class NyBrevRepository(
     }
 
     fun hentVedtaksbrev(brevId: UUID): VedtaksbrevEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_vedtaksbrev",
             "SELECT * FROM tilbakekreving_vedtaksbrev WHERE id = ?",
             brevId,
         ) { resultSet, _ ->
@@ -47,7 +49,8 @@ class NyBrevRepository(
     }
 
     fun hentInformasjonsbrev(brevId: UUID): InformasjonsbrevEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_informasjonsbrev",
             "SELECT * FROM tilbakekreving_informasjonsbrev WHERE id = ?",
             brevId,
         ) { resultSet, _ ->

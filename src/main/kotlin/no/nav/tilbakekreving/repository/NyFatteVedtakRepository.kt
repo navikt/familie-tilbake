@@ -5,7 +5,6 @@ import no.nav.tilbakekreving.entities.VurdertStegEntity
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FatteVedtakStegEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -16,7 +15,8 @@ class NyFatteVedtakRepository(
     fun hentVedtaksvurdering(
         behandlingId: UUID,
     ): FatteVedtakStegEntity {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_totrinnsvurdering",
             "SELECT * FROM tilbakekreving_totrinnsvurdering WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
@@ -29,7 +29,8 @@ class NyFatteVedtakRepository(
     }
 
     private fun hentVurderinger(totrinnsvurderingRef: UUID): List<VurdertStegEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_totrinnsvurdering_vurdertsteg",
             "SELECT * FROM tilbakekreving_totrinnsvurdering_vurdertsteg WHERE totrinnsvurdering_ref=?",
             totrinnsvurderingRef,
         ) { resultSet, _ ->

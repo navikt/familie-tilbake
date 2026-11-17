@@ -6,7 +6,6 @@ import no.nav.tilbakekreving.entity.BehandlingsloggMapper.behandlingId
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FieldConverter
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -23,7 +22,8 @@ class NyBehandlingRepository(
     fun hentBehandlinger(
         tilbakekrevingId: String,
     ): List<BehandlingEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_behandling",
             "SELECT * FROM tilbakekreving_behandling WHERE tilbakekreving_id = ?",
             FieldConverter.NumericId.convert(tilbakekrevingId),
         ) { resultSet, _ ->

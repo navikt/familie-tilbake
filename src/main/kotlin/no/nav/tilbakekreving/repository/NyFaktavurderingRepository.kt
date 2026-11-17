@@ -6,14 +6,14 @@ import no.nav.tilbakekreving.entity.Entity.Companion.get
 import no.nav.tilbakekreving.entity.FaktavurderingEntityMapper
 import no.nav.tilbakekreving.entity.ForskjellEntityMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
 class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     fun hentFaktavurdering(behandlingId: UUID): FaktastegEntity {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_faktavurdering",
             "SELECT * FROM tilbakekreving_faktavurdering WHERE behandling_ref=?",
             behandlingId,
         ) { resultSet, _ ->
@@ -27,7 +27,7 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentOppdagetVurdering(faktavurderingRef: UUID): FaktastegEntity.OppdagetEntity? {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_faktavurdering_feilutbetaling_oppdaget WHERE faktavurdering_ref=?;", faktavurderingRef) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_faktavurdering_feilutbetaling_oppdaget", "SELECT * FROM tilbakekreving_faktavurdering_feilutbetaling_oppdaget WHERE faktavurdering_ref=?;", faktavurderingRef) { resultSet, _ ->
             FaktavurderingEntityMapper.OppdagetEntityMapper.map(resultSet)
         }.singleOrNull()
     }
@@ -47,7 +47,8 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentPerioder(faktavurderingRef: UUID): List<FaktastegEntity.FaktaPeriodeEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_faktavurdering_periode",
             "SELECT * FROM tilbakekreving_faktavurdering_periode WHERE faktavurdering_ref=?",
             faktavurderingRef,
         ) { resultSet, _ ->
@@ -71,7 +72,8 @@ class NyFaktavurderingRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentEndringIKravgrunnlag(faktavurderingPeriodeId: UUID): ForskjellEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_kravgrunnlag_forskjell.by_faktavurdering_periode_ref",
             "SELECT * FROM tilbakekreving_kravgrunnlag_forskjell WHERE faktavurdering_periode_ref=?",
             faktavurderingPeriodeId,
         ) { resultSet, _ ->

@@ -5,7 +5,6 @@ import no.nav.tilbakekreving.entities.UttalelseInfoEntity
 import no.nav.tilbakekreving.entity.BrukerUttalelseEntityMapper
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -14,7 +13,8 @@ class NyUttalelseRepository(
     private val jdbcTemplate: JdbcTemplate,
 ) {
     fun hentBrukerUttalelsen(behandlingId: UUID): BrukeruttalelseEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_brukeruttalelse",
             "SELECT * FROM tilbakekreving_brukeruttalelse WHERE behandling_ref = ?",
             behandlingId,
         ) { resultSet, _ ->
@@ -24,7 +24,8 @@ class NyUttalelseRepository(
     }
 
     private fun hentUttalelseInfo(brukeruttalelseRef: UUID): UttalelseInfoEntity? {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_uttalelse_informasjon",
             "SELECT * FROM tilbakekreving_uttalelse_informasjon WHERE brukeruttalelse_ref=?",
             brukeruttalelseRef,
         ) { resultSet, _ ->

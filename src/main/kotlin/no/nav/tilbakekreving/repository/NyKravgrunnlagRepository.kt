@@ -11,7 +11,6 @@ import no.nav.tilbakekreving.entity.KravgrunnlagBeløpMapper
 import no.nav.tilbakekreving.entity.KravgrunnlagHendelseMapper
 import no.nav.tilbakekreving.entity.KravgrunnlagPeriodeMapper
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -36,13 +35,13 @@ class NyKravgrunnlagRepository(
     }
 
     private fun hentKravgrunnlag(tilbakekrevingId: String): List<KravgrunnlagHendelseEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_kravgrunnlag WHERE tilbakekreving_id=?", tilbakekrevingId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_kravgrunnlag", "SELECT * FROM tilbakekreving_kravgrunnlag WHERE tilbakekreving_id=?", tilbakekrevingId) { resultSet, _ ->
             KravgrunnlagHendelseMapper.map(resultSet, hentPerioder(resultSet[KravgrunnlagHendelseMapper.id]))
         }
     }
 
     private fun hentStatusmeldinger(tilbakekrevingId: String): List<KravStatusmeldingEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_ref=?", tilbakekrevingId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_krav_statusmelding", "SELECT * FROM tilbakekreving_krav_statusmelding WHERE tilbakekreving_ref=?", tilbakekrevingId) { resultSet, _ ->
             KravStatusmeldingMapper.map(resultSet)
         }
     }
@@ -55,7 +54,7 @@ class NyKravgrunnlagRepository(
     }
 
     private fun hentPerioder(kravgrunnlagId: UUID): List<KravgrunnlagPeriodeEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_kravgrunnlag_periode WHERE kravgrunnlag_id=?", kravgrunnlagId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_kravgrunnlag_periode", "SELECT * FROM tilbakekreving_kravgrunnlag_periode WHERE kravgrunnlag_id=?", kravgrunnlagId) { resultSet, _ ->
             KravgrunnlagPeriodeMapper.map(resultSet, hentBeløp(resultSet[KravgrunnlagPeriodeMapper.id]))
         }
     }
@@ -67,7 +66,7 @@ class NyKravgrunnlagRepository(
     }
 
     private fun hentBeløp(periodeId: UUID): List<BeløpEntity> {
-        return jdbcTemplate.query("SELECT * FROM tilbakekreving_kravgrunnlag_beløp WHERE kravgrunnlag_periode_id=?", periodeId) { resultSet, _ ->
+        return jdbcTemplate.timedQuery("tilbakekreving_kravgrunnlag_beløp", "SELECT * FROM tilbakekreving_kravgrunnlag_beløp WHERE kravgrunnlag_periode_id=?", periodeId) { resultSet, _ ->
             KravgrunnlagBeløpMapper.map(resultSet)
         }
     }

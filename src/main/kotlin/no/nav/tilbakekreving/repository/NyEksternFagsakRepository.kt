@@ -9,14 +9,14 @@ import no.nav.tilbakekreving.entity.EksternFagsakBehandlingMapper
 import no.nav.tilbakekreving.entity.EksternFagsakMapper
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
 class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     fun hentEksternFagsak(tilbakekrevingId: String): EksternFagsakEntity {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_ekstern_fagsak",
             "SELECT * FROM tilbakekreving_ekstern_fagsak WHERE tilbakekreving_ref = ?",
             tilbakekrevingId,
         ) { resultSet, _ ->
@@ -32,7 +32,8 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentBehandling(eksternFagsakId: UUID): List<EksternFagsakBehandlingEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_ekstern_fagsak_behandling",
             "SELECT * FROM tilbakekreving_ekstern_fagsak_behandling WHERE ekstern_fagsak_ref = ?",
             eksternFagsakId,
         ) { resultSet, _ ->
@@ -53,7 +54,8 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     }
 
     private fun hentUtvidetPerioder(behandlingId: UUID): List<UtvidetPeriodeEntity> {
-        return jdbcTemplate.query(
+        return jdbcTemplate.timedQuery(
+            "tilbakekreving_ekstern_fagsak_behandling_utvidet_periode",
             "SELECT * FROM tilbakekreving_ekstern_fagsak_behandling_utvidet_periode WHERE ekstern_fagsak_behandling_ref = ?",
             behandlingId,
         ) { resultSet, _ ->
