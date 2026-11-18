@@ -3,7 +3,9 @@ package no.nav.tilbakekreving.behandling.revurdering
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -28,9 +30,12 @@ import no.nav.tilbakekreving.foreldelseVurdering
 import no.nav.tilbakekreving.hendelse.DistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.IverksettelseHendelse
 import no.nav.tilbakekreving.hendelse.JournalføringHendelse
+import no.nav.tilbakekreving.hendelse.Kravstatuskode
 import no.nav.tilbakekreving.hendelse.OpprettTilbakekrevingHendelse
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
+import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -369,5 +374,99 @@ class RevurderingTest {
         info.beregningsresultat.shouldNotBeEmpty()
         info.hjemlerForTilbakekreving.shouldNotBeEmpty()
         info.beregnerSkatt shouldBe true
+    }
+
+    @Test
+    fun `opprinnelig behandling og revurdering har riktig status i frontend`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        val opprinnelingBehandlingId = tilbakekreving.nåværendeBehandlingId()
+
+        tilbakekreving.opprettRevurdering(
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(kravstatuskode = Kravstatuskode.BEHANDLET),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            status shouldBe Behandlingsstatus.UTREDES
+        }
+
+        tilbakekreving.frontendDtoForBehandling(opprinnelingBehandlingId, context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            status shouldBe Behandlingsstatus.AVSLUTTET
+        }
+    }
+
+    @Test
+    fun `fagsakDto har riktig status for alle behandlinger`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        val opprinnelingBehandlingId = tilbakekreving.nåværendeBehandlingId()
+
+        tilbakekreving.opprettRevurdering(
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(kravstatuskode = Kravstatuskode.BEHANDLET),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+        val revurderingBehandlingId = tilbakekreving.nåværendeBehandlingId()
+
+        Tilbakekreving.tilFrontendDto(context.klokke, listOf(tilbakekreving)) shouldNotBeNull {
+            behandlinger.shouldHaveSize(2)
+            behandlinger.first().behandlingId shouldBe opprinnelingBehandlingId
+            behandlinger.first().status shouldBe Behandlingsstatus.AVSLUTTET
+            behandlinger.last().behandlingId shouldBe revurderingBehandlingId
+            behandlinger.last().status shouldBe Behandlingsstatus.UTREDES
+        }
+    }
+
+    @Test
+    fun `behandlingssteginfo skal ikke inneholde FattevedtakSteg for nyopprettet revurdering`() {
+        val context = saksbehandlerContext()
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        tilbakekreving.opprettRevurdering(
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            saksbehandlerContext(),
+        )
+
+        tilbakekreving.håndter(
+            kravgrunnlag(),
+            TilbakekrevingRevurderingsårsak.EtterKlage(
+                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                beskrivelse = "Begrunnelse fra klageinstansen",
+            ),
+            context,
+        )
+
+        tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            behandlingsstegsinfo.shouldHaveSize(6)
+            behandlingsstegsinfo.last().behandlingssteg shouldBe Behandlingssteg.FORESLÅ_VEDTAK
+            behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+            behandlingsstegsinfo.shouldNotContain(Behandlingssteg.FATTE_VEDTAK)
+        }
     }
 }

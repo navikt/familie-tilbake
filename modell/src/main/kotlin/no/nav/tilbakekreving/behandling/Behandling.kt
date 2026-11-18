@@ -76,6 +76,7 @@ import no.nav.tilbakekreving.hendelse.KravgrunnlagHendelse
 import no.nav.tilbakekreving.historikk.Historikk
 import no.nav.tilbakekreving.historikk.HistorikkReferanse
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsresultatstype
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandling.Saksbehandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
@@ -547,12 +548,16 @@ class Behandling internal constructor(
         }
     }
 
-    internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke): BehandlingsoppsummeringDto {
+    internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke, gjeldendeBehandlingId: UUID): BehandlingsoppsummeringDto {
         return BehandlingsoppsummeringDto(
             behandlingId = id,
             eksternBrukId = id,
             type = type,
-            status = tilstand.behandlingsstatus(this, klokke).gammelFrontendDTO,
+            status = if (id == gjeldendeBehandlingId) {
+                tilstand.behandlingsstatus(this, klokke).gammelFrontendDTO
+            } else {
+                Behandlingsstatus.AVSLUTTET
+            },
         )
     }
 
