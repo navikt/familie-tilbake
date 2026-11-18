@@ -11,33 +11,19 @@ import java.util.UUID
 class EksternFagsakBehandlingHistorikk(
     private val historikk: MutableList<EksternFagsakRevurdering>,
 ) : Historikk<UUID, EksternFagsakRevurdering> {
-    private val erstattet = mutableMapOf<UUID, UUID>()
-
-    init {
-        historikk.sortedByDescending { it.opprettet }
-            .zipWithNext()
-            .forEach { (forrige, neste) ->
-                if (forrige is EksternFagsakRevurdering.Revurdering && (neste as? EksternFagsakRevurdering.Revurdering)?.erDuplikat(forrige) == true) {
-                    erstattet[neste.id] = erstattet[forrige.id] ?: forrige.id
-                    historikk.remove(neste)
-                }
-            }
-    }
-
     override fun <T : EksternFagsakRevurdering> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         historikk.add(innslag)
         return HistorikkReferanse(this, innslag.id) as HistorikkReferanse<UUID, T>
     }
 
     override fun finn(id: UUID, sporing: Sporing): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
-        val gjeldendeId = erstattet[id] ?: id
-        if (historikk.none { it.id == gjeldendeId }) {
+        if (historikk.none { it.id == id }) {
             throw ModellFeil.UgyldigOperasjonException(
                 "Fant ikke ekstern fagsak behandling med historikk-id $id",
                 sporing,
             )
         }
-        return HistorikkReferanse(this, gjeldendeId)
+        return HistorikkReferanse(this, id)
     }
 
     override fun entry(id: UUID): EksternFagsakRevurdering {

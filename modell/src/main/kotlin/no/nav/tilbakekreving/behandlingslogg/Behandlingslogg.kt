@@ -16,18 +16,6 @@ import java.util.UUID
 data class Behandlingslogg(
     private val historikk: MutableList<LoggInnslag>,
 ) : Historikk<UUID, LoggInnslag> {
-    private val typerSomKanDupliseres = setOf(Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT, Behandlingsloggstype.BEHANDLING_NULLSTILLT)
-
-    init {
-        val lignende = mutableSetOf<Behandlingsloggstype>()
-        historikk.sortedByDescending { it.opprettetTid }.forEach { innslag ->
-            when {
-                innslag.behandlingsloggstype !in typerSomKanDupliseres -> lignende.clear()
-                !lignende.add(innslag.behandlingsloggstype) -> historikk.remove(innslag)
-            }
-        }
-    }
-
     override fun <T : LoggInnslag> lagre(innslag: T): HistorikkReferanse<UUID, T> {
         if (innslag.behandlingsloggstype.type == Historikkinnslagstype.AUTOMATISK_VURDERING) {
             val eksisterende = historikk.lastOrNull { it.behandlingsloggstype == innslag.behandlingsloggstype }

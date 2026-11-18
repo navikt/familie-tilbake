@@ -9,7 +9,6 @@ import no.nav.tilbakekreving.entity.EksternFagsakBehandlingMapper
 import no.nav.tilbakekreving.entity.EksternFagsakMapper
 import no.nav.tilbakekreving.entity.Entity.Companion.get
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -30,20 +29,6 @@ class NyEksternFagsakRepository(private val jdbcTemplate: JdbcTemplate) {
     fun lagre(eksternFagsak: EksternFagsakEntity) {
         EksternFagsakMapper.upsertQuery(jdbcTemplate, eksternFagsak)
         lagreBehandlinger(eksternFagsak.behandlinger.innslag)
-    }
-
-    fun slettFjernedeBehandlinger(eksternFagsak: EksternFagsakEntity): Int {
-        val gjenstående = eksternFagsak.behandlinger.innslag.map { it.id }.toSet()
-        val eksisterende = jdbcTemplate.query(
-            "SELECT id FROM tilbakekreving_ekstern_fagsak_behandling WHERE ekstern_fagsak_ref = ?",
-            eksternFagsak.id,
-        ) { rs, _ -> UUID.fromString(rs.getString("id")) }
-        eksisterende.filter { it !in gjenstående }
-            .forEach { id ->
-                jdbcTemplate.update("DELETE FROM tilbakekreving_ekstern_fagsak_behandling_utvidet_periode WHERE ekstern_fagsak_behandling_ref = ?", id)
-                jdbcTemplate.update("DELETE FROM tilbakekreving_ekstern_fagsak_behandling WHERE id = ?", id)
-            }
-        return eksisterende.size - gjenstående.size
     }
 
     private fun hentBehandling(eksternFagsakId: UUID): List<EksternFagsakBehandlingEntity> {

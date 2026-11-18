@@ -20,11 +20,10 @@ class NyBehandlingsloggRepository(
         }
     }
 
-    fun lagre(behandlingslogg: List<LoggInnlagEntity>, tilbakekrevingId: String): Int {
-        val slettet = jdbcTemplate.update("DELETE FROM tilbakekreving_behandlingslogg WHERE tilbakekreving_ref=?;", tilbakekrevingId)
+    fun lagre(behandlingslogg: List<LoggInnlagEntity>, tilbakekrevingId: String) {
+        jdbcTemplate.update("DELETE FROM tilbakekreving_behandlingslogg WHERE tilbakekreving_ref=?;", tilbakekrevingId)
         for (behandlingslogg in behandlingslogg) {
             BehandlingsloggMapper.insertQuery(jdbcTemplate, behandlingslogg)
         }
-        return slettet - behandlingslogg.size
     }
 }

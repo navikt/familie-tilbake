@@ -2,8 +2,6 @@ package no.nav.tilbakekreving.repository
 
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
-import no.nav.familie.tilbake.log.SecureLog
-import no.nav.familie.tilbake.log.TracedLogger
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.entities.HistorikkEntity
 import no.nav.tilbakekreving.entities.LoggInnlagEntity
@@ -30,7 +28,6 @@ class TilbakekrevingRepository(
     private val brukerRepository: NyBrukerRepository,
     private val behandlingsloggRepository: NyBehandlingsloggRepository,
 ) {
-    private val logger = TracedLogger.getLogger<TilbakekrevingRepository>()
     private val modelReadTimer = Timer.builder("tilbakekreving_load_time")
         .publishPercentiles(0.5, 0.9, 0.95, 0.99)
         .tag("readonly", "true")
@@ -125,20 +122,9 @@ class TilbakekrevingRepository(
         eksternFagsakRepository.lagre(entity.eksternFagsak)
         kravgrunnlagRepository.lagre(entity.kravgrunnlagHistorikkEntities.innslag)
         behandlingRepository.lagreBehandlinger(entity.behandlingHistorikkEntities.innslag)
-        val antallFjernedeEksternFagsakBehandlinger = eksternFagsakRepository.slettFjernedeBehandlinger(entity.eksternFagsak)
         brevRepository.lagre(entity.brevHistorikkEntities.innslag, entity.id)
         entity.bruker?.let { brukerRepository.lagre(it) }
-        val antallFjernedeLogginnslag = behandlingsloggRepository.lagre(behandlingslogg.tilEntity(entity.id).innslag, entity.id)
-        if (antallFjernedeEksternFagsakBehandlinger > 0 || antallFjernedeLogginnslag > 0) {
-            logger.medContext(SecureLog.Context.utenBehandling(entity.eksternFagsak.eksternIdFraOppdrag)) {
-                info(
-                    "Fjernet duplikater for tilbakekreving {}: {} eksterne behandlinger og {} logginnslag",
-                    entity.id,
-                    antallFjernedeEksternFagsakBehandlinger,
-                    antallFjernedeLogginnslag,
-                )
-            }
-        }
+        behandlingsloggRepository.lagre(behandlingslogg.tilEntity(entity.id).innslag, entity.id)
     }
 
     fun antallSakerPerTilstand(): List<ForenkletTilstandStatistikk> {
