@@ -11,6 +11,7 @@ import no.nav.tilbakekreving.assertions.skalHaSteg
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
+import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.eksternFagsak
@@ -240,6 +241,21 @@ class TilBehandlingTest {
             }
         }
         exception.melding shouldBe "Kan ikke utføre saksbehandling i JOURNALFØR_VEDTAK"
+    }
+
+    @Test
+    fun `samme fagsysteminfo mottatt på nytt`() {
+        val context = systemContext(behandlingslogg = Behandlingslogg(mutableListOf()))
+        val tilbakekreving = opprettTilbakekreving(opprettTilbakekrevingHendelse(), context)
+        tilbakekreving.håndter(kravgrunnlag(), context)
+        tilbakekreving.håndter(fagsysteminfoHendelse(behandlingId = "1"), context)
+        tilbakekreving.håndter(brukerinfoHendelse(), context)
+        tilbakekreving.tilstand shouldBe TilBehandling
+        val hendelseslogg = context.behandlingslogg.tilHendelserDto()
+
+        tilbakekreving.håndter(fagsysteminfoHendelse(behandlingId = "1"), context)
+
+        context.behandlingslogg.tilHendelserDto() shouldBe hendelseslogg
     }
 
     private fun tilbakekrevingTilGodkjenning(

@@ -28,27 +28,32 @@ class EksternFagsak(
         )
     }
 
-    fun lagre(fagsysteminfo: FagsysteminfoHendelse, klokke: Klokke): HistorikkReferanse<UUID, EksternFagsakRevurdering> {
+    fun lagre(fagsysteminfo: FagsysteminfoHendelse, klokke: Klokke): HistorikkReferanse<UUID, EksternFagsakRevurdering>? {
         eksternId = fagsysteminfo.overstyrtEksternFagsakId
-        return behandlinger.lagre(
-            EksternFagsakRevurdering.Revurdering(
-                id = UUID.randomUUID(),
-                eksternId = fagsysteminfo.revurdering.behandlingId,
-                revurderingsårsak = fagsysteminfo.revurdering.årsak,
-                årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling ?: "Ukjent",
-                vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
-                utvidedePerioder = fagsysteminfo.utvidPerioder?.map {
-                    EksternFagsakRevurdering.UtvidetPeriode(
-                        id = UUID.randomUUID(),
-                        kravgrunnlagPeriode = it.kravgrunnlagPeriode,
-                        vedtaksperiode = it.vedtaksperiode,
-                    )
-                } ?: emptyList(),
-                url = fagsysteminfo.revurdering.url,
-                brukerInformertOmFeilutbetaling = fagsysteminfo.revurdering.brukerInformertOmFeilutbetaling,
-                opprettet = klokke.nå(),
-            ),
+        val nyRevurdering = EksternFagsakRevurdering.Revurdering(
+            id = UUID.randomUUID(),
+            eksternId = fagsysteminfo.revurdering.behandlingId,
+            revurderingsårsak = fagsysteminfo.revurdering.årsak,
+            årsakTilFeilutbetaling = fagsysteminfo.revurdering.årsakTilFeilutbetaling ?: "Ukjent",
+            vedtaksdato = fagsysteminfo.revurdering.vedtaksdato,
+            utvidedePerioder = fagsysteminfo.utvidPerioder?.map {
+                EksternFagsakRevurdering.UtvidetPeriode(
+                    id = UUID.randomUUID(),
+                    kravgrunnlagPeriode = it.kravgrunnlagPeriode,
+                    vedtaksperiode = it.vedtaksperiode,
+                )
+            } ?: emptyList(),
+            url = fagsysteminfo.revurdering.url,
+            brukerInformertOmFeilutbetaling = fagsysteminfo.revurdering.brukerInformertOmFeilutbetaling,
+            opprettet = klokke.nå(),
         )
+        if (behandlinger.harBehandling()) {
+            val nåværende = behandlinger.nåværende().entry
+            if (nåværende is EksternFagsakRevurdering.Revurdering && nyRevurdering.erDuplikat(nåværende)) {
+                return null
+            }
+        }
+        return behandlinger.lagre(nyRevurdering)
     }
 
     fun lagreTomBehandling(

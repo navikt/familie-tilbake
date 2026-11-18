@@ -130,10 +130,6 @@ class Tilbakekreving internal constructor(
 
     fun håndter(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, fagsysteminfo, sideeffektContext)
-        sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
-            behandlingId = null,
-        )
     }
 
     fun håndter(brukerinfo: BrukerinfoHendelse, sideeffektContext: SideeffektContext) {
@@ -271,11 +267,18 @@ class Tilbakekreving internal constructor(
     }
 
     fun oppdaterFagsysteminfo(fagsysteminfo: FagsysteminfoHendelse, sideeffektContext: SideeffektContext) {
-        val eksternFagsak = eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
         val behandling = behandlingHistorikk.nåværende().entry
-        behandling.oppdaterEksternFagsak(eksternFagsak, sideeffektContext)
         if (fagsysteminfo.behandlendeEnhet != null) {
             behandling.oppdaterBehandlendeEnhet(fagsysteminfo.behandlendeEnhet)
+        }
+
+        val eksternFagsak = eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
+        if (eksternFagsak != null) {
+            behandling.oppdaterEksternFagsak(eksternFagsak, sideeffektContext)
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
+                behandlingId = null,
+            )
         }
     }
 

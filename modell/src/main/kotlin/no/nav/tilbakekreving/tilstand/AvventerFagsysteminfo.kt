@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
+import no.nav.tilbakekreving.behandlingslogg.Behandlingsloggstype
 import no.nav.tilbakekreving.hendelse.AvsluttetStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.EndretStatusmeldingHendelse
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
@@ -42,7 +43,13 @@ object AvventerFagsysteminfo : Tilstand {
         sideeffektContext: SideeffektContext,
     ) {
         val eksternBehandling = tilbakekreving.eksternFagsak.lagre(fagsysteminfo, sideeffektContext.klokke)
-        tilbakekreving.opprettBehandling(eksternBehandling, sideeffektContext, fagsysteminfo.behandlendeEnhet, Behandlingstype.TILBAKEKREVING)
+        with(tilbakekreving) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.FAGSYSTEMINFO_OPPDATERT,
+                behandlingId = null,
+            )
+        }
+        tilbakekreving.opprettBehandling(eksternBehandling!!, sideeffektContext, fagsysteminfo.behandlendeEnhet, Behandlingstype.TILBAKEKREVING)
         if (fagsysteminfo.aktør != null) {
             tilbakekreving.opprettBruker(fagsysteminfo.aktør)
         }
