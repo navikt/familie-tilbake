@@ -36,6 +36,8 @@ class OppdragClientRestMock : OppdragRestClient {
 
     private val mockKravgrunnlagPerioder = ConcurrentHashMap<BigInteger, List<DetaljerPeriodeDto>>()
 
+    private val mockKravstatuskoder = ConcurrentHashMap<BigInteger, Kravstatuskode>()
+
     override fun iverksettVedtak(request: TilbakekrevingsvedtakRequestDto): TilbakekrevingsvedtakResponseDto {
         iverksettelseRequests.add(request)
         return mockIverksettelseSvar.remove(request.vedtakId) ?: TilbakekrevingsvedtakResponseDto(
@@ -60,7 +62,7 @@ class OppdragClientRestMock : OppdragRestClient {
                 saksbehandlerId = "",
                 kodeFagomraade = Fagområdekode.BA.name,
                 vedtakId = 0,
-                kodeStatusKrav = Kravstatuskode.NYTT.kode,
+                kodeStatusKrav = (mockKravstatuskoder.remove(kravgrunnlagId) ?: Kravstatuskode.NYTT).kode,
                 fagsystemId = "0",
                 datoVedtakFagsystem = 1.januar(2021),
                 vedtakIdOmgjort = 0,
@@ -90,8 +92,13 @@ class OppdragClientRestMock : OppdragRestClient {
         callback(iverksettelseRequests.single { it.vedtakId == vedtakId })
     }
 
-    fun mockHentKravgrunnlag(kravgrunnlagId: BigInteger, perioder: List<DetaljerPeriodeDto>) {
+    fun mockHentKravgrunnlag(
+        kravgrunnlagId: BigInteger,
+        perioder: List<DetaljerPeriodeDto>,
+        kravstatuskode: Kravstatuskode = Kravstatuskode.NYTT,
+    ) {
         mockKravgrunnlagPerioder[kravgrunnlagId] = perioder
+        mockKravstatuskoder[kravgrunnlagId] = kravstatuskode
     }
 
     internal fun mockIversettelse(vedtakId: BigInteger, alvorlighetsgrad: String, kodeMelding: String) {

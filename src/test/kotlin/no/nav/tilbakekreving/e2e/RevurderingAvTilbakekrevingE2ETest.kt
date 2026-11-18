@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.OppdragClientRestMock
+import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.tilbakekreving.Testdata
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.api.v1.dto.BehandlingsstegForeslåVedtaksstegDto
@@ -300,6 +301,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                     },
                 ),
             ),
+            kravstatuskode = Kravstatuskode.BEHANDLET,
         )
         return behandlingId
     }

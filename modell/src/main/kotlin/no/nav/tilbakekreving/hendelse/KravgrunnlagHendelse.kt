@@ -46,7 +46,7 @@ class KravgrunnlagHendelse(
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagBrukerIkkeLikMottaker, sporing)
         }
 
-        if (kravstatuskode !in arrayOf(Kravstatuskode.NY, Kravstatuskode.ENDRET)) {
+        if (kravstatuskode !in arrayOf(Kravstatuskode.NY, Kravstatuskode.ENDRET, Kravstatuskode.BEHANDLET)) {
             throw ModellFeil.UtenforScopeException(UtenforScope.KravgrunnlagStatusIkkeStøttet, sporing)
         }
     }
