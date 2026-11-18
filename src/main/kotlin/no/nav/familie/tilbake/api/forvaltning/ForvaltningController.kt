@@ -354,8 +354,8 @@ class ForvaltningController(
     @Operation(summary = "Tvinger en migrering av alle saker i ny modell")
     @PostMapping("/migrer-alle-saker")
     fun migrerAlleSaker() {
-        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { entity ->
-            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingFilter.tilbakekreving(entity.id)) { it, _ ->
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.forEach { id ->
+            tilbakekrevingRepository.hentOgLagreResultat(TilbakekrevingFilter.tilbakekreving(id)) { it, _ ->
                 val tilbakekreving = it.fraEntity()
                 logger.medContext(SecureLog.Context.fra(tilbakekreving)) {
                     info("Migrerer sak {}", tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl))

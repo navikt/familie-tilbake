@@ -125,7 +125,9 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
 
         kravgrunnlagMediator.lesKravgrunnlag()
 
-        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 1
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()
+            .mapNotNull { tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.tilbakekreving(it)) }
+            .count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 1
     }
 
     @Test
@@ -139,7 +141,9 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             }.joinAll()
         }
 
-        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 1
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()
+            .mapNotNull { tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.tilbakekreving(it)) }
+            .count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 1
     }
 
     @RepeatedTest(5)
@@ -244,7 +248,9 @@ class KravgrunnlagE2ETest : TilbakekrevingE2EBase() {
             }
         }
 
-        tilbakekrevingRepository.hentAlleTilbakekrevinger()?.count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 0
+        tilbakekrevingRepository.hentAlleTilbakekrevinger()
+            .mapNotNull { tilbakekrevingRepository.hentTilbakekreving(TilbakekrevingFilter.tilbakekreving(it)) }
+            .count { it.eksternFagsak.eksternIdFraOppdrag == fagsystemId } shouldBe 0
     }
 
     @Test

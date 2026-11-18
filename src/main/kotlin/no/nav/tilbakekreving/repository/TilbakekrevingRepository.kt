@@ -72,9 +72,9 @@ class TilbakekrevingRepository(
         }
     }
 
-    fun hentAlleTilbakekrevinger(): List<TilbakekrevingEntity>? {
-        return jdbcTemplate.timedQuery("tilbakekreving.all", "SELECT * FROM tilbakekreving") { rs, _ ->
-            hentTilbakekrevingEntity(rs)
+    fun hentAlleTilbakekrevinger(): List<String> {
+        return jdbcTemplate.timedQuery("tilbakekreving.all", "SELECT id FROM tilbakekreving") { rs, _ ->
+            FieldConverter.NumericId.convert(rs, "id")
         }
     }
 
