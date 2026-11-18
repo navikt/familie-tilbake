@@ -93,7 +93,7 @@ class FatteVedtakSteg internal constructor(
             return VurdertSteg(
                 id = UUID.randomUUID(),
                 steg = steg,
-                vurdering = vurdering,
+                vurdering = Vurdering.IkkeVurdert,
             )
         }
 

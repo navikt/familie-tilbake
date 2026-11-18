@@ -63,6 +63,7 @@ import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
 import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagHistorikk
 import no.nav.tilbakekreving.saksbehandler.Behandler
+import no.nav.tilbakekreving.tilstand.Avsluttet
 import no.nav.tilbakekreving.tilstand.AvventerBrukerinfo
 import no.nav.tilbakekreving.tilstand.JournalførInfobrevForBortfaltKrav
 import no.nav.tilbakekreving.tilstand.KravgrunnlagBortfalt
@@ -547,7 +548,16 @@ class Tilbakekreving internal constructor(
         sideeffektContext: LesContext,
         kanBeslutte: Boolean,
         behandlerRolle: BehandlerRolle,
-    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(tilstand, sideeffektContext, kanBeslutte, behandlerRolle, erGjeldendeBehandling(behandlingId))
+    ) = behandlingHistorikk.finn(behandlingId, sporingsinformasjon(behandlingId)).entry.tilFrontendDto(
+        tilstand = when {
+            erGjeldendeBehandling(behandlingId) -> tilstand
+            else -> Avsluttet
+        },
+        sideeffektContext,
+        kanBeslutte,
+        behandlerRolle,
+        erGjeldendeBehandling(behandlingId),
+    )
 
     fun tilEntity(): TilbakekrevingEntity {
         return TilbakekrevingEntity(

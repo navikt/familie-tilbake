@@ -34,7 +34,7 @@ class BehandlingHistorikk(
     }
 
     internal fun tilOppsummeringDto(tilstand: Tilstand, klokke: Klokke): List<BehandlingsoppsummeringDto> {
-        return historikk.map { it.tilOppsummeringDto(tilstand, klokke) }
+        return historikk.map { it.tilOppsummeringDto(tilstand, klokke, nåværende().entry.id) }
     }
 
     override fun nåværende(): HistorikkReferanse<UUID, Behandling> {
