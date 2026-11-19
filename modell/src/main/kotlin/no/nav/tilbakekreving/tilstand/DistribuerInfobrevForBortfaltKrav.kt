@@ -20,7 +20,6 @@ object DistribuerInfobrevForBortfaltKrav : Tilstand {
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
-        tilbakekreving.oppdaterBigQuery(sideeffektContext)
         tilbakekreving.trengerInfobrevDistribusjon(sideeffektContext)
     }
 

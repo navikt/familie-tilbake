@@ -19,9 +19,7 @@ object KravgrunnlagBortfalt : Tilstand {
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
-    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
-        tilbakekreving.oppdaterBigQuery(sideeffektContext)
-    }
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
 

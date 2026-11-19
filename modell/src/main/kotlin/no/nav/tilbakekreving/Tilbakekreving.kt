@@ -155,12 +155,15 @@ class Tilbakekreving internal constructor(
 
     fun håndter(hendelse: InfobrevJournalføringHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
-        sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_JOURNALFØRT,
-            behandlingId = behandlingHistorikk.nåværende().entry.id,
-            EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
-            EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-        )
+
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_JOURNALFØRT,
+                behandlingId = id,
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+            )
+        }
     }
 
     fun håndter(hendelse: InfobrevDistribusjonHendelse, sideeffektContext: SideeffektContext) {
@@ -227,6 +230,10 @@ class Tilbakekreving internal constructor(
         }
         kravgrunnlagHistorikk.lagre(hendelse)
         tilstand.håndter(this, hendelse, sideeffektContext)
+
+        if (behandlingHistorikk.harBehandling()) {
+            behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {}
+        }
     }
 
     fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {
@@ -446,11 +453,6 @@ class Tilbakekreving internal constructor(
         } else {
             byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
         }
-    }
-
-    internal fun oppdaterBigQuery(sideeffektContext: SideeffektContext) {
-        if (!behandlingHistorikk.harBehandling()) return
-        behandlingHistorikk.nåværende().entry.oppdaterBigQuery(tilstand, sideeffektContext, eksternFagsak.ytelse, id, erInfobrevSendt = false)
     }
 
     fun opprettInfobrev(klokke: Klokke) {

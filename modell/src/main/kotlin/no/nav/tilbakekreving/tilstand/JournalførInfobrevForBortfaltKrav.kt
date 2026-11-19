@@ -18,7 +18,6 @@ object JournalførInfobrevForBortfaltKrav : Tilstand {
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
-        tilbakekreving.oppdaterBigQuery(sideeffektContext)
         tilbakekreving.opprettInfobrev(sideeffektContext.klokke)
         tilbakekreving.trengerInfobrevJournalføring(sideeffektContext)
     }

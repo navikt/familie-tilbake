@@ -167,24 +167,6 @@ class Behandling internal constructor(
         )
     }
 
-    internal fun oppdaterBigQuery(
-        tilstand: Tilstand,
-        sideeffektContext: SideeffektContext,
-        ytelse: Ytelse,
-        tilbakekrevingId: String,
-        erInfobrevSendt: Boolean,
-    ) {
-        sideeffektContext.bigQueryService.oppdaterBehandling(
-            bigqueryData(
-                tilstand = tilstand,
-                erInfobrevSendt = erInfobrevSendt,
-                ytelse = ytelse.hentYtelsesnavn(Språkkode.NB),
-                tilbakekrevingId = tilbakekrevingId,
-                klokke = sideeffektContext.klokke,
-            ),
-        )
-    }
-
     override fun nullstillForhåndsvarselUnntakOgUttalelse() = forhåndsvarsel.nullstillUnntakOgUttalelse()
 
     internal fun oppdaterKravgrunnlag(oppdatertKravgrunnlag: HistorikkReferanse<UUID, KravgrunnlagHendelse>, context: SideeffektContext) {
@@ -678,7 +660,7 @@ class Behandling internal constructor(
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
-        oppdaterBigQuery(tilstand(), sideeffektContext, ytelse, tilbakekrevingId, erInfobrevSendt)
+        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(tilstand(), erInfobrevSendt, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
         sendVilkårsvurderingHvisVedtakBleGodkjent(vedtakGodkjentFør, sideeffektContext, ytelse)
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter
