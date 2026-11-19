@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.OppdragClientRestMock
@@ -52,7 +53,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
         val behandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId)
 
-        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+        val revurderingUrl = somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingOpprettRevurdering(
                 behandlingId = behandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
@@ -62,8 +63,11 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                     ),
                 ),
             )
-        }
+        }.body!!.url
+
         val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        revurderingUrl shouldContain (revurderingBehandlingId.toString())
         revurderingBehandlingId shouldNotBe behandlingId
         tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
             status shouldBe Behandlingsstatus.UTREDES

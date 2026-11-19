@@ -340,16 +340,18 @@ class BehandlingApiController(
     }
 
     override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<OpprettRevurderingResponseDto> {
-        return tilbakekrevingService.endreTilbakekreving(
+        tilbakekrevingService.endreTilbakekreving(
             behandlingId = behandlingId,
             valideringContext = ValideringContext.OpprettRevurdering,
         ) { tilbakekreving, context ->
             val revurderingsårsak = mapTilRevurderingsårsak(revurderingDto.revurderingsarsak)
             tilbakekreving.opprettRevurdering(revurderingsårsak, context)
-            ResponseEntity.ok(
-                OpprettRevurderingResponseDto(tilbakekreving.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
-            )
-        } ?: ResponseEntity.notFound().build()
+            tilbakekreving
+        } ?: return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(
+            OpprettRevurderingResponseDto(tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(behandlingId))!!.hentTilbakekrevingUrl(applicationProperties.frontendUrl)),
+        )
     }
 
     override fun behandlingOppdaterRevurderingsarsak(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
