@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.e2e
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forOne
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeSingle
@@ -8,6 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.familie.tilbake.api.HistorikkController
 import no.nav.familie.tilbake.api.forvaltning.ForvaltningController
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.kontrakter.Ressurs
@@ -20,7 +22,10 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrukeruttalelseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.EndretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TidligereBrukeruttalelseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingIkkeVurdertDto
@@ -50,6 +55,9 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
 
     @Autowired
     lateinit var oppdragRestClient: OppdragClientRestMock
+
+    @Autowired
+    lateinit var historikkController: HistorikkController
 
     @Test
     fun `henting av patchet kravgrunnlag`() {
@@ -499,6 +507,59 @@ class KravgrunnlagEndretE2ETest : TilbakekrevingE2EBase() {
             behandlingApiController.behandlingVilkaarsvurderingsperioder(behandlingId).body.shouldNotBeNull {
                 map { it.periode.fom til it.periode.tom } shouldBe listOf(nyPeriode, eksisterendePeriode)
             }
+        }
+    }
+
+    @Test
+    fun `behandlingslogg inneholder EndretKravgrunnlag`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        val tilleggsperiode = 1.februar(2021) til 28.februar(2021)
+        val context = opprettBehandling(periode)
+        oppdragRestClient.mockHentKravgrunnlag(
+            kravgrunnlagId = context.kravgrunnlagId.toBigInteger(),
+            perioder = listOf(
+                OppdragClientRestMock.kravgrunnlagPeriode(periode, feilutbetaltBeløp = 4000.kroner),
+                OppdragClientRestMock.kravgrunnlagPeriode(tilleggsperiode, feilutbetaltBeløp = 2000.kroner),
+            ),
+        )
+
+        val response = ContextServiceHelpers.somSaksbehandler(SAKSBEHANDLER_IDENT, listOf(NyTilgangskontrollServiceTest.TEAMFAMILIE_FORVALTER_ROLLE)) {
+            forvaltningController.korrigerKravgrunnlag(context.behandlingId)
+        }
+
+        response.status shouldBe Ressurs.Status.SUKSESS
+        response.data shouldBe "OK"
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingBenyttNyesteKravgrunnlag(context.behandlingId)
+        }
+        val historikk = somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            historikkController.hentHistorikkinnslag(context.behandlingId)
+        }.data.shouldNotBeNull().map { it.shouldNotBeNull() }
+
+        historikk.filter { it.tittel == "Nytt kravgrunnlag er lagt til grunn" }.forSingle { innslag ->
+            innslag.endretKravgrunnlag.shouldNotBeNull {
+                gammeltBeløp shouldBe 3000
+                nyttBeløp shouldBe 6000
+                gammelPeriode shouldBe periode
+                nyPeriode shouldBe (periode.fom til tilleggsperiode.tom)
+                endringer shouldBe listOf(
+                    EndretPeriodeDto(
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        gammelPeriode = PeriodeDto(periode.fom, periode.tom),
+                        gammeltBeløp = 3000,
+                        nyttBeløp = 4000,
+                    ),
+                    NyPeriodeDto(
+                        fom = tilleggsperiode.fom,
+                        tom = tilleggsperiode.tom,
+                        beløp = 2000,
+                    ),
+                )
+            }
+        }
+        historikk.filterNot { it.tittel == "Nytt kravgrunnlag er lagt til grunn" }.forAll {
+            it.endretKravgrunnlag.shouldBeNull()
         }
     }
 

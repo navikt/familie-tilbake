@@ -921,11 +921,22 @@ class Behandling internal constructor(
 
         fun brukNyesteKravgrunnlag() {
             val nyesteKravgrunnlag = nyttKravgrunnlag?.entry ?: return
-            val sammenligning = kravgrunnlag.entry.sammenlign(nyesteKravgrunnlag, sporingsinformasjon())
+            val gammeltKravgrunnlag = kravgrunnlag.entry
+            val sammenligning = gammeltKravgrunnlag.sammenlign(nyesteKravgrunnlag, sporingsinformasjon())
             sammenligning.oppdaterSteg(steg())
             kravgrunnlag = nyttKravgrunnlag!!
             nyttKravgrunnlag = null
             oppdaterAutomatiskeBehandlinger(context)
+            context.logg(
+                behandlingsloggstype = Behandlingsloggstype.NYTT_KRAVGRUNNLAG_ER_ANVENDT,
+                EkstraInfo.NYTT_KRAVGRUNNLAG_ER_ANVENDT to EndretKravgrunnlag(
+                    gammeltBeløp = gammeltKravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+                    nyttBeløp = nyesteKravgrunnlag.feilutbetaltBeløpForAllePerioder().toInt(),
+                    gammelPeriode = gammeltKravgrunnlag.perioder().map { it.periode() }.overordnet(),
+                    nyPeriode = nyesteKravgrunnlag.perioder().map { it.periode() }.overordnet(),
+                    endringer = sammenligning.sammendrag(),
+                ),
+            )
         }
     }
 

@@ -17,6 +17,7 @@ data class HistorikkinnslagDto(
     val opprettetTid: LocalDateTime,
     val nyFrist: LocalDate?,
     val begrunnelseForUtsattFrist: String?,
+    val endretKravgrunnlag: EndretKravgrunnlag?,
 ) {
     enum class AktørDto {
         SAKSBEHANDLER,

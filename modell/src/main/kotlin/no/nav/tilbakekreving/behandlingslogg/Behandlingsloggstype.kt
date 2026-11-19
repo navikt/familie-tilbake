@@ -22,6 +22,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    NYTT_KRAVGRUNNLAG_ER_ANVENDT(
+        tittel = "Nytt kravgrunnlag er lagt til grunn",
+        tekst = "Se endringer",
+        type = Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     TILBAKEKREVING_OPPRETTET(
         tittel = "Tilbakekreving opprettet",
         tekst = null,
@@ -222,4 +228,5 @@ enum class EkstraInfo() {
     BEGRUNNELSE_FOR_UTSATT_FRIST,
     JOURNALPOST_ID,
     DOKUMENTINFO_ID,
+    NYTT_KRAVGRUNNLAG_ER_ANVENDT,
 }

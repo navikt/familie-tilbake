@@ -80,4 +80,5 @@ fun Historikkinnslag.tilDto() =
         opprettetTid = opprettetTid,
         nyFrist = null,
         begrunnelseForUtsattFrist = null,
+        endretKravgrunnlag = null,
     )

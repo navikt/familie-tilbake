@@ -1,10 +1,15 @@
 package no.nav.tilbakekreving.e2e
+
 import io.kotest.inspectors.forOne
+import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvBruker
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.behandling.UttalelseVurdering
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandlingslogg.Behandlingslogg
@@ -15,7 +20,9 @@ import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.hendelse.FagsysteminfoHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevDistribueringHendelse
 import no.nav.tilbakekreving.hendelse.VarselbrevJournalføringHendelse
+import no.nav.tilbakekreving.kontrakter.frontend.models.NyPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RolleDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UendretPeriodeDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -31,7 +38,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-class Behandlingslogg {
+class BehandlingsloggTest {
     @Test
     fun `lagring av behandlingslogg i historikken`() {
         val behandlingslogg = Behandlingslogg(mutableListOf())
@@ -109,6 +116,10 @@ class Behandlingslogg {
             systemContext(behandlingslogg = behandlingslogg),
         )
 
+        tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), saksbehandlerContext(behandlingslogg = behandlingslogg)) {
+            brukNyesteKravgrunnlag()
+        }
+
         behandlingslogg.tilFrontend().map { it.tittel } shouldContainAll listOf(
             "Kravgrunnlag mottatt",
             "Tilbakekreving opprettet",
@@ -121,6 +132,7 @@ class Behandlingslogg {
             "Foreldelse vurdert",
             "Vilkår vurdert",
             "Nytt kravgrunnlag mottatt",
+            "Nytt kravgrunnlag er lagt til grunn",
         )
         val forhåndsvarsel = behandlingslogg.tilFrontend().filter { it.tittel == "Forhåndsvarsel sendt" }.shouldHaveSize(1)
 
@@ -144,6 +156,31 @@ class Behandlingslogg {
             it.rolle shouldBe RolleDto.SAKSBEHANDLER
             it.beskrivelse shouldBe "Begrunnelse"
             it.ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] shouldBe "2027-01-01"
+        }
+        hendelser.forOne {
+            it.tittel shouldBe "Nytt kravgrunnlag er lagt til grunn"
+            it.rolle shouldBe RolleDto.SAKSBEHANDLER
+            it.beskrivelse shouldBe null
+            it.ekstraInfo[EkstraInfo.NYTT_KRAVGRUNNLAG_ER_ANVENDT.name] shouldContain "EndretKravgrunnlag(gammeltBeløp="
+        }
+        behandlingslogg.tilFrontend().filter { it.tittel == "Nytt kravgrunnlag er lagt til grunn" }.forSingle {
+            val endretKravgrunnlag = it.ekstraInfo[EkstraInfo.NYTT_KRAVGRUNNLAG_ER_ANVENDT.name].shouldBeInstanceOf<EndretKravgrunnlag>()
+            endretKravgrunnlag.gammeltBeløp shouldBe 4000
+            endretKravgrunnlag.nyttBeløp shouldBe 6000
+            endretKravgrunnlag.gammelPeriode shouldBe (3.januar(2021) til 1.februar(2021))
+            endretKravgrunnlag.nyPeriode shouldBe (3.januar(2021) til 1.mars(2021))
+            endretKravgrunnlag.endringer shouldBe listOf(
+                UendretPeriodeDto(
+                    fom = 3.januar(2021),
+                    tom = 1.februar(2021),
+                    beløp = 4000,
+                ),
+                NyPeriodeDto(
+                    fom = 1.mars(2021),
+                    tom = 1.mars(2021),
+                    beløp = 2000,
+                ),
+            )
         }
     }
 }

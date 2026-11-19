@@ -1,14 +1,17 @@
 package no.nav.familie.tilbake.api
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.familie.tilbake.historikkinnslag.HistorikkService
 import no.nav.familie.tilbake.historikkinnslag.tilDto
 import no.nav.familie.tilbake.kontrakter.Ressurs
+import no.nav.familie.tilbake.kontrakter.objectMapper
 import no.nav.familie.tilbake.sikkerhet.AuditLoggerEvent
 import no.nav.familie.tilbake.sikkerhet.Behandlerrolle
 import no.nav.familie.tilbake.sikkerhet.TilgangskontrollService
 import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.api.v1.dto.EndretKravgrunnlag
 import no.nav.tilbakekreving.api.v1.dto.HistorikkinnslagDto
 import no.nav.tilbakekreving.behandlingslogg.EkstraInfo
 import no.nav.tilbakekreving.kontrakter.historikk.Historikkinnslagstype
@@ -60,6 +63,8 @@ class HistorikkController(
                             nyFrist = (ekstraInfo[EkstraInfo.NY_FRIST_FOR_UTTALELSE.name] as? String)
                                 ?.let { LocalDate.parse(it) },
                             begrunnelseForUtsattFrist = ekstraInfo[EkstraInfo.BEGRUNNELSE_FOR_UTSATT_FRIST.name] as String?,
+                            endretKravgrunnlag = ekstraInfo[EkstraInfo.NYTT_KRAVGRUNNLAG_ER_ANVENDT.name]
+                                ?.let { objectMapper.convertValue<EndretKravgrunnlag>(it) },
                         )
                     },
             )
