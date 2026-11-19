@@ -13,10 +13,12 @@ import java.time.Duration
 object JournalførInfobrevForBortfaltKrav : Tilstand {
     override val tidTilPåminnelse: Duration? = Duration.ofHours(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV
+    override val erKravgrunnlagBortfalt: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
     override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
+        tilbakekreving.oppdaterBigQuery(sideeffektContext)
         tilbakekreving.opprettInfobrev(sideeffektContext.klokke)
         tilbakekreving.trengerInfobrevJournalføring(sideeffektContext)
     }

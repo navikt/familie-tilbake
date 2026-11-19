@@ -137,7 +137,13 @@ class Behandling internal constructor(
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto =
         faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev, klokke)
 
-    private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String, tilbakekrevingId: String, klokke: Klokke): BigQueryBehandlingDataDto {
+    private fun bigqueryData(
+        tilstand: Tilstand,
+        erInfobrevSendt: Boolean,
+        ytelse: String,
+        tilbakekrevingId: String,
+        klokke: Klokke,
+    ): BigQueryBehandlingDataDto {
         return BigQueryBehandlingDataDto(
             behandlingId = id.toString(),
             opprettetDato = opprettet,
@@ -147,7 +153,7 @@ class Behandling internal constructor(
             beløp = totaltFeilutbetaltBeløp().toLong(),
             enhetNavn = enhet?.navn,
             enhetKode = enhet?.kode,
-            status = behandlingsstatus.gammelFrontendDTO.name,
+            status = tilstand.behandlingsstatus(this, klokke).gammelFrontendDTO.name,
             resultat = hentVedtaksresultat(klokke)?.name,
             harTilleggsfrist = foreldelsesteg.harTilleggsfrist(),
             tilbakekrevingId = tilbakekrevingId,
@@ -155,6 +161,27 @@ class Behandling internal constructor(
             forhåndsvarselSendt = forhåndsvarsel.erForhåndsvarselSendt(),
             revurderingsårsak = revurderingsårsak?.type?.name,
             revurderingsinstans = revurderingsårsak?.vedtakOmgjortAv?.name,
+            tilstand = tilstand.tilbakekrevingTilstand,
+            erInfobrevSendt = erInfobrevSendt,
+            erKravgrunnlagBortfalt = tilstand.erKravgrunnlagBortfalt || erInfobrevSendt,
+        )
+    }
+
+    internal fun oppdaterBigQuery(
+        tilstand: Tilstand,
+        sideeffektContext: SideeffektContext,
+        ytelse: Ytelse,
+        tilbakekrevingId: String,
+        erInfobrevSendt: Boolean,
+    ) {
+        sideeffektContext.bigQueryService.oppdaterBehandling(
+            bigqueryData(
+                tilstand = tilstand,
+                erInfobrevSendt = erInfobrevSendt,
+                ytelse = ytelse.hentYtelsesnavn(Språkkode.NB),
+                tilbakekrevingId = tilbakekrevingId,
+                klokke = sideeffektContext.klokke,
+            ),
         )
     }
 
@@ -634,6 +661,16 @@ class Behandling internal constructor(
         ytelse: Ytelse,
         tilbakekrevingId: String,
         callback: Behandling.() -> T,
+    ): T = utførEndring(tilstand, sideeffektContext, observatør, ytelse, tilbakekrevingId, erInfobrevSendt = false, callback)
+
+    internal fun <T> utførEndring(
+        tilstand: () -> Tilstand,
+        sideeffektContext: SideeffektContext,
+        observatør: BehandlingObservatør,
+        ytelse: Ytelse,
+        tilbakekrevingId: String,
+        erInfobrevSendt: Boolean,
+        callback: Behandling.() -> T,
     ): T {
         val statusFør = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         val vedtakGodkjentFør = kanUtbetales(sideeffektContext.klokke)
@@ -641,7 +678,7 @@ class Behandling internal constructor(
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
-        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
+        oppdaterBigQuery(tilstand(), sideeffektContext, ytelse, tilbakekrevingId, erInfobrevSendt)
         sendVilkårsvurderingHvisVedtakBleGodkjent(vedtakGodkjentFør, sideeffektContext, ytelse)
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter

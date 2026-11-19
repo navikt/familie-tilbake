@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.api.v1.dto
 
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import java.time.LocalDateTime
 
 data class BigQueryBehandlingDataDto(
@@ -20,4 +21,7 @@ data class BigQueryBehandlingDataDto(
     val forhåndsvarselSendt: Boolean?,
     val revurderingsårsak: String?,
     val revurderingsinstans: String?,
+    val tilstand: TilbakekrevingTilstand?,
+    val erInfobrevSendt: Boolean?,
+    val erKravgrunnlagBortfalt: Boolean?,
 )

@@ -15,10 +15,13 @@ import java.time.Duration
 object KravgrunnlagBortfalt : Tilstand {
     override val tidTilPåminnelse: Duration = Duration.ofDays(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT
+    override val erKravgrunnlagBortfalt: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 
-    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {}
+    override fun entering(tilbakekreving: Tilbakekreving, sideeffektContext: SideeffektContext) {
+        tilbakekreving.oppdaterBigQuery(sideeffektContext)
+    }
 
     override fun håndter(tilbakekreving: Tilbakekreving, påminnelse: Påminnelse, sideeffektContext: SideeffektContext) {}
 

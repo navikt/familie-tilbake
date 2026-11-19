@@ -166,7 +166,7 @@ class Tilbakekreving internal constructor(
     fun håndter(hendelse: InfobrevDistribusjonHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
 
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id, erInfobrevSendt = true) {
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_SENDT,
                 behandlingId = id,
@@ -446,6 +446,11 @@ class Tilbakekreving internal constructor(
         } else {
             byttTilstand(KravgrunnlagBortfalt, sideeffektContext)
         }
+    }
+
+    internal fun oppdaterBigQuery(sideeffektContext: SideeffektContext) {
+        if (!behandlingHistorikk.harBehandling()) return
+        behandlingHistorikk.nåværende().entry.oppdaterBigQuery(tilstand, sideeffektContext, eksternFagsak.ytelse, id, erInfobrevSendt = false)
     }
 
     fun opprettInfobrev(klokke: Klokke) {
