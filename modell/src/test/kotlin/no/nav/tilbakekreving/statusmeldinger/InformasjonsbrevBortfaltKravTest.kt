@@ -131,7 +131,7 @@ class InformasjonsbrevBortfaltKravTest {
                     vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                     beskrivelse = "Begrunnelse fra klageinstansen",
                 ),
-                saksbehandlerContext(),
+                saksbehandlerContext(features = defaultFeatures(featureOverrides = arrayOf(Toggle.Revurdering to true))),
             )
         }.message shouldBe "Kan ikke hente kravgrunnlag for revurdering i AVSLUTTET_UTEN_VEDTAK"
     }

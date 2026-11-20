@@ -42,7 +42,10 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @TestPropertySource(
-    properties = ["tilbakekreving.toggles.nyModell.EndretKravgrunnlagVisning=true"],
+    properties = [
+        "tilbakekreving.toggles.nyModell.EndretKravgrunnlagVisning=true",
+        "tilbakekreving.toggles.nyModell.Revurdering=true",
+    ],
 )
 class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
     @Autowired
