@@ -230,10 +230,6 @@ class Tilbakekreving internal constructor(
         }
         kravgrunnlagHistorikk.lagre(hendelse)
         tilstand.håndter(this, hendelse, sideeffektContext)
-
-        if (behandlingHistorikk.harBehandling()) {
-            behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {}
-        }
     }
 
     fun håndter(hendelse: EndretStatusmeldingHendelse, sideeffektContext: SideeffektContext) {

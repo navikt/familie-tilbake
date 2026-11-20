@@ -142,19 +142,6 @@ class InformasjonsbrevBortfaltKravTest {
     }
 
     @Test
-    fun `bigquery-data for bortfalt krav uten sendt forhåndsvarsel`() {
-        val bigQuery = BigQueryOppsamler()
-        val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
-
-        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext(features = kravBortfaltPå()).medBigQuery(bigQuery))
-
-        tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
-        bigQuery.behandlinger.last().should {
-            it.tilstand shouldBe TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT
-        }
-    }
-
-    @Test
     fun `bigquery-data for bortfalt krav etter forhåndsvarsel og distribuert infobrev`() {
         val bigQuery = BigQueryOppsamler()
         val tilbakekreving = tilbakekrevingMedForhåndsvarsel(varsletDato = 17.mai(2026))
