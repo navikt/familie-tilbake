@@ -12,3 +12,6 @@
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/KravgrunnlagForskjellDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/UttalelseVurderingDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilbakekrevingRevurderingsarsakDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/HovedmottakerAddresseDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilleggsmottakerAdresseDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilleggsmottakerDto.kt
