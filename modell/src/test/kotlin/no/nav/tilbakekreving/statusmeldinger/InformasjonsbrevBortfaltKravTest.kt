@@ -152,7 +152,7 @@ class InformasjonsbrevBortfaltKravTest {
 
         tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
         bigQuery.behandlinger.forOne {
-            it.tilstand shouldBe TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV
+            it.tilstand shouldBe TilbakekrevingTilstand.DISTRIBUER_INFOBREV_FOR_BORTFALT_KRAV
         }
         bigQuery.behandlinger.last().should {
             it.tilstand shouldBe TilbakekrevingTilstand.AVSLUTTET_UTEN_VEDTAK
