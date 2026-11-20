@@ -169,7 +169,7 @@ class Tilbakekreving internal constructor(
     fun håndter(hendelse: InfobrevDistribusjonHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
 
-        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id, erInfobrevSendt = true) {
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
             sideeffektContext.logg(
                 behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_SENDT,
                 behandlingId = id,

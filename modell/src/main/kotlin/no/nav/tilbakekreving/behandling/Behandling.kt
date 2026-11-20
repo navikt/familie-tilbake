@@ -139,7 +139,6 @@ class Behandling internal constructor(
 
     private fun bigqueryData(
         tilstand: Tilstand,
-        erInfobrevSendt: Boolean,
         ytelse: String,
         tilbakekrevingId: String,
         klokke: Klokke,
@@ -162,8 +161,6 @@ class Behandling internal constructor(
             revurderingsårsak = revurderingsårsak?.type?.name,
             revurderingsinstans = revurderingsårsak?.vedtakOmgjortAv?.name,
             tilstand = tilstand.tilbakekrevingTilstand,
-            erInfobrevSendt = erInfobrevSendt,
-            erKravgrunnlagBortfalt = tilstand.erKravgrunnlagBortfalt || erInfobrevSendt,
         )
     }
 
@@ -643,16 +640,6 @@ class Behandling internal constructor(
         ytelse: Ytelse,
         tilbakekrevingId: String,
         callback: Behandling.() -> T,
-    ): T = utførEndring(tilstand, sideeffektContext, observatør, ytelse, tilbakekrevingId, erInfobrevSendt = false, callback)
-
-    internal fun <T> utførEndring(
-        tilstand: () -> Tilstand,
-        sideeffektContext: SideeffektContext,
-        observatør: BehandlingObservatør,
-        ytelse: Ytelse,
-        tilbakekrevingId: String,
-        erInfobrevSendt: Boolean,
-        callback: Behandling.() -> T,
     ): T {
         val statusFør = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         val vedtakGodkjentFør = kanUtbetales(sideeffektContext.klokke)
@@ -660,7 +647,7 @@ class Behandling internal constructor(
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
-        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(tilstand(), erInfobrevSendt, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
+        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(tilstand(), ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
         sendVilkårsvurderingHvisVedtakBleGodkjent(vedtakGodkjentFør, sideeffektContext, ytelse)
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter

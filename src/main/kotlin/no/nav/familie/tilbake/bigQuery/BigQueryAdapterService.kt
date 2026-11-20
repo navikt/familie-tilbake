@@ -72,8 +72,6 @@ class BigQueryAdapterService(
                 revurderingsårsak = null,
                 revurderingsinstans = null,
                 tilstand = null,
-                erInfobrevSendt = null,
-                erKravgrunnlagBortfalt = null,
             ),
         )
     }

@@ -151,8 +151,6 @@ class InformasjonsbrevBortfaltKravTest {
         tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
         bigQuery.behandlinger.last().should {
             it.tilstand shouldBe TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT
-            it.erKravgrunnlagBortfalt shouldBe true
-            it.erInfobrevSendt shouldBe false
         }
     }
 
@@ -168,13 +166,9 @@ class InformasjonsbrevBortfaltKravTest {
         tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
         bigQuery.behandlinger.forOne {
             it.tilstand shouldBe TilbakekrevingTilstand.JOURNALFØR_INFOBREV_FOR_BORTFALT_KRAV
-            it.erKravgrunnlagBortfalt shouldBe true
-            it.erInfobrevSendt shouldBe false
         }
         bigQuery.behandlinger.last().should {
             it.tilstand shouldBe TilbakekrevingTilstand.AVSLUTTET_UTEN_VEDTAK
-            it.erKravgrunnlagBortfalt shouldBe true
-            it.erInfobrevSendt shouldBe true
         }
     }
 

@@ -15,7 +15,6 @@ import java.time.Duration
 object KravgrunnlagBortfalt : Tilstand {
     override val tidTilPåminnelse: Duration = Duration.ofDays(1)
     override val tilbakekrevingTilstand: TilbakekrevingTilstand = TilbakekrevingTilstand.KRAVGRUNNLAG_BORTFALT
-    override val erKravgrunnlagBortfalt: Boolean = true
 
     override fun behandlingsstatus(behandling: Behandling, klokke: Klokke): BehandlingsstatusModell = BehandlingsstatusModell.TIL_BEHANDLING
 

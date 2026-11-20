@@ -22,6 +22,4 @@ data class BigQueryBehandlingDataDto(
     val revurderingsårsak: String?,
     val revurderingsinstans: String?,
     val tilstand: TilbakekrevingTilstand?,
-    val erInfobrevSendt: Boolean?,
-    val erKravgrunnlagBortfalt: Boolean?,
 )

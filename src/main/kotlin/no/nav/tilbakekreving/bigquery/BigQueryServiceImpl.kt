@@ -87,8 +87,6 @@ class BigQueryServiceImpl(
             "revurderingsarsak" to bigqueryData.revurderingsårsak,
             "revurderingsinstans" to bigqueryData.revurderingsinstans,
             "tilstand" to bigqueryData.tilstand?.name,
-            "er_infobrev_sendt" to bigqueryData.erInfobrevSendt,
-            "er_kravgrunnlag_bortfalt" to bigqueryData.erKravgrunnlagBortfalt,
         )
 
         val tableId = TableId.of(prosjektId, dataset, "bq_behandling")
