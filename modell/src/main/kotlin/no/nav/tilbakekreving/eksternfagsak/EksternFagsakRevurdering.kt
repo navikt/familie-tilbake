@@ -31,6 +31,8 @@ sealed class EksternFagsakRevurdering(
      */
     abstract fun behandlingId(): String?
 
+    abstract fun brukerErInformertOmFeilutbetaling(): Boolean?
+
     class Revurdering(
         id: UUID,
         override val eksternId: String,
@@ -57,6 +59,8 @@ sealed class EksternFagsakRevurdering(
                 brukerInformertOmFeilutbetaling == annen.brukerInformertOmFeilutbetaling &&
                 utvidedePerioder.size == annen.utvidedePerioder.size &&
                 utvidedePerioder.all { periode -> annen.utvidedePerioder.any { periode.erDuplikat(it) } }
+
+        override fun brukerErInformertOmFeilutbetaling(): Boolean? = brukerInformertOmFeilutbetaling
 
         override fun tilEntity(eksternFagsakRef: UUID): EksternFagsakBehandlingEntity {
             return EksternFagsakBehandlingEntity(
@@ -118,6 +122,8 @@ sealed class EksternFagsakRevurdering(
         override val url: String? = null
 
         override fun behandlingId(): String? = null
+
+        override fun brukerErInformertOmFeilutbetaling(): Boolean? = null
 
         override fun utvidPeriode(periode: Datoperiode): Datoperiode = periode
 

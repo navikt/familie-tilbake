@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.bortfaltStatusmelding
+import no.nav.tilbakekreving.brukerinfoHendelse
 import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.e2e.kravgrunnlagMedBeløp
 import no.nav.tilbakekreving.fagsysteminfoHendelse
@@ -101,6 +102,10 @@ class StatusmeldingBortfaltTest {
         tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
 
         tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
+        tilbakekreving.tilstand shouldBe AvventerFagsysteminfo
+
+        tilbakekreving.håndter(fagsysteminfoHendelse(), systemContext())
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
         tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
         shouldThrow<ModellFeil.UtenforScopeException> {
@@ -118,6 +123,9 @@ class StatusmeldingBortfaltTest {
         tilbakekreving.tilstand shouldBe AvventerBrukerinfo
 
         tilbakekreving.håndter(bortfaltStatusmelding(), systemContext())
+        tilbakekreving.tilstand shouldBe AvventerBrukerinfo
+
+        tilbakekreving.håndter(brukerinfoHendelse(), systemContext())
 
         tilbakekreving.tilstand shouldBe KravgrunnlagBortfalt
         shouldThrow<ModellFeil.UtenforScopeException> {
