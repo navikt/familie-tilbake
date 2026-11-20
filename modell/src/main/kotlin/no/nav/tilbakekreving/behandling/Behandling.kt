@@ -137,7 +137,12 @@ class Behandling internal constructor(
     internal fun nyFaktastegFrontendDto(varselbrev: Varselbrev?, klokke: Klokke): FaktaOmFeilutbetalingDto =
         faktasteg.nyTilFrontendDto(kravgrunnlag.entry, eksternFagsakRevurdering.entry, varselbrev, klokke)
 
-    private fun bigqueryData(behandlingsstatus: BehandlingsstatusModell, ytelse: String, tilbakekrevingId: String, klokke: Klokke): BigQueryBehandlingDataDto {
+    private fun bigqueryData(
+        tilstand: Tilstand,
+        ytelse: String,
+        tilbakekrevingId: String,
+        klokke: Klokke,
+    ): BigQueryBehandlingDataDto {
         return BigQueryBehandlingDataDto(
             behandlingId = id.toString(),
             opprettetDato = opprettet,
@@ -147,7 +152,7 @@ class Behandling internal constructor(
             beløp = totaltFeilutbetaltBeløp().toLong(),
             enhetNavn = enhet?.navn,
             enhetKode = enhet?.kode,
-            status = behandlingsstatus.gammelFrontendDTO.name,
+            status = tilstand.behandlingsstatus(this, klokke).gammelFrontendDTO.name,
             resultat = hentVedtaksresultat(klokke)?.name,
             harTilleggsfrist = foreldelsesteg.harTilleggsfrist(),
             tilbakekrevingId = tilbakekrevingId,
@@ -155,6 +160,7 @@ class Behandling internal constructor(
             forhåndsvarselSendt = forhåndsvarsel.erForhåndsvarselSendt(),
             revurderingsårsak = revurderingsårsak?.type?.name,
             revurderingsinstans = revurderingsårsak?.vedtakOmgjortAv?.name,
+            tilstand = tilstand.tilbakekrevingTilstand,
         )
     }
 
@@ -641,7 +647,7 @@ class Behandling internal constructor(
         oppdaterAutomatiskeBehandlinger(sideeffektContext)
         val statusEtter = tilstand().behandlingsstatus(this, sideeffektContext.klokke)
         sendBehandlingsstatus(tilstand(), sideeffektContext, observatør)
-        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(statusEtter, ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
+        sideeffektContext.bigQueryService.oppdaterBehandling(bigqueryData(tilstand(), ytelse.hentYtelsesnavn(Språkkode.NB), tilbakekrevingId, sideeffektContext.klokke))
         sendVilkårsvurderingHvisVedtakBleGodkjent(vedtakGodkjentFør, sideeffektContext, ytelse)
         if (statusFør != statusEtter || statusFør != forrigeBehandlingsstatus) {
             forrigeBehandlingsstatus = statusEtter

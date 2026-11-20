@@ -1,17 +1,21 @@
 package no.nav.tilbakekreving.statusmeldinger
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forOne
 import io.kotest.inspectors.forSingle
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.tilbakekreving.FeatureToggles
 import no.nav.tilbakekreving.KlokkeStub
 import no.nav.tilbakekreving.Tilbakekreving
 import no.nav.tilbakekreving.Toggle
+import no.nav.tilbakekreving.behandling.BigQueryOppsamler
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
+import no.nav.tilbakekreving.behandling.medBigQuery
 import no.nav.tilbakekreving.behov.BehovObservatørOppsamler
 import no.nav.tilbakekreving.behov.InfobrevDistribusjonBehov
 import no.nav.tilbakekreving.behov.InfobrevJournalføringBehov
@@ -23,6 +27,7 @@ import no.nav.tilbakekreving.fagsystem.Ytelse
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.hendelse.InfobrevDistribusjonHendelse
 import no.nav.tilbakekreving.hendelse.InfobrevJournalføringHendelse
+import no.nav.tilbakekreving.kontrakter.tilstand.TilbakekrevingTilstand
 import no.nav.tilbakekreving.nåværendeBehandlingId
 import no.nav.tilbakekreving.opprettTilbakekrevingHendelse
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -134,6 +139,24 @@ class InformasjonsbrevBortfaltKravTest {
                 saksbehandlerContext(features = defaultFeatures(featureOverrides = arrayOf(Toggle.Revurdering to true))),
             )
         }.message shouldBe "Kan ikke hente kravgrunnlag for revurdering i AVSLUTTET_UTEN_VEDTAK"
+    }
+
+    @Test
+    fun `bigquery-data for bortfalt krav etter forhåndsvarsel og distribuert infobrev`() {
+        val bigQuery = BigQueryOppsamler()
+        val tilbakekreving = tilbakekrevingMedForhåndsvarsel(varsletDato = 17.mai(2026))
+        tilbakekreving.håndter(bortfaltStatusmelding(), systemContext(features = kravBortfaltPå()).medBigQuery(bigQuery))
+        val brevId = tilbakekreving.brevHistorikk.nåværende().entry.id
+        tilbakekreving.håndter(InfobrevJournalføringHendelse(brevId, "infobrev-journalpost", "infobrev-dokument"), systemContext().medBigQuery(bigQuery))
+        tilbakekreving.håndter(InfobrevDistribusjonHendelse(brevId, "infobrev-journalpost", "infobrev-dokument"), systemContext().medBigQuery(bigQuery))
+
+        tilbakekreving.tilstand shouldBe AvsluttetUtenVedtak
+        bigQuery.behandlinger.forOne {
+            it.tilstand shouldBe TilbakekrevingTilstand.DISTRIBUER_INFOBREV_FOR_BORTFALT_KRAV
+        }
+        bigQuery.behandlinger.last().should {
+            it.tilstand shouldBe TilbakekrevingTilstand.AVSLUTTET_UTEN_VEDTAK
+        }
     }
 
     private fun kravBortfaltPå(): FeatureToggles = defaultFeatures(featureOverrides = arrayOf(Toggle.KravBortfalt to true))

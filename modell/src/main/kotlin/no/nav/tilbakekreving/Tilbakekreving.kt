@@ -155,12 +155,15 @@ class Tilbakekreving internal constructor(
 
     fun håndter(hendelse: InfobrevJournalføringHendelse, sideeffektContext: SideeffektContext) {
         tilstand.håndter(this, hendelse, sideeffektContext)
-        sideeffektContext.logg(
-            behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_JOURNALFØRT,
-            behandlingId = behandlingHistorikk.nåværende().entry.id,
-            EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
-            EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
-        )
+
+        behandlingHistorikk.nåværende().entry.utførEndring(::tilstand, sideeffektContext, this, eksternFagsak.ytelse, tilbakekrevingId = id) {
+            sideeffektContext.logg(
+                behandlingsloggstype = Behandlingsloggstype.INFORMASJONSBREV_JOURNALFØRT,
+                behandlingId = id,
+                EkstraInfo.JOURNALPOST_ID to hendelse.journalpostId,
+                EkstraInfo.DOKUMENTINFO_ID to hendelse.dokumentInfoId,
+            )
+        }
     }
 
     fun håndter(hendelse: InfobrevDistribusjonHendelse, sideeffektContext: SideeffektContext) {
