@@ -57,7 +57,7 @@ subprojects {
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("io.kotest:kotest-assertions-core:6.2.6")
+        testImplementation("io.kotest:kotest-assertions-core:6.2.7")
     }
 
     tasks.test {
@@ -84,7 +84,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktorVersion")
-    implementation("com.google.cloud:google-cloud-bigquery:2.74.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.76.0")
 
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
     api("org.springdoc:springdoc-openapi-starter-common:$springDocVersion")
@@ -140,14 +140,14 @@ dependencies {
     api("org.flywaydb:flyway-core")
     api("org.flywaydb:flyway-gcp-bigquery")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.7.0")
+    implementation("com.google.cloud:google-cloud-bigquery-jdbc:1.9.0")
 
     testImplementation(project(":testdata"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.mockk:mockk-jvm:1.14.11")
+    testImplementation("io.mockk:mockk-jvm:1.14.12")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
