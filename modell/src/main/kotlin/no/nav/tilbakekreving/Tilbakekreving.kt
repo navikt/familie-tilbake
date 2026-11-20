@@ -299,6 +299,12 @@ class Tilbakekreving internal constructor(
     }
 
     fun opprettRevurdering(revurderingsårsak: TilbakekrevingRevurderingsårsak, sideeffektContext: SideeffektContext) {
+        if (!sideeffektContext.features[Toggle.Revurdering]) {
+            throw ModellFeil.UtenforScopeException(
+                UtenforScope.Revurdering,
+                sporingsinformasjon(),
+            )
+        }
         tilstand.trengerKravgrunnlagForRevurdering(
             tilbakekreving = this,
             sideeffektContext = sideeffektContext,

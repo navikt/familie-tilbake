@@ -13,6 +13,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.tilbakekreving.ModellTestdata.forårsaketAvNav
 import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.Tilbakekreving
+import no.nav.tilbakekreving.Toggle
 import no.nav.tilbakekreving.api.v1.dto.BehandlerRolle
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.BigQueryOppsamler
@@ -24,6 +25,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.BehandlingsstatusModell
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.breeeev.standardtekster.Bunntekst
+import no.nav.tilbakekreving.defaultFeatures
 import no.nav.tilbakekreving.faktastegVurdering
 import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.foreldelseVurdering
@@ -53,9 +55,11 @@ import java.math.BigInteger
 import java.util.UUID
 
 class RevurderingTest {
+    private val features = defaultFeatures(featureOverrides = arrayOf(Toggle.Revurdering to true))
+
     @Test
     fun `Revurdering opprettes riktig for avsluttet sak`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val behandling = tilbakekreving.hentBehandling(tilbakekreving.nåværendeBehandlingId())
         val opprinneligFakta = tilbakekreving.tilFeilutbetalingFrontendDto(behandling.id, context.klokke)
@@ -70,7 +74,7 @@ class RevurderingTest {
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
         tilbakekreving.håndter(
             kravgrunnlag(),
@@ -137,7 +141,7 @@ class RevurderingTest {
 
     @Test
     fun `opprettelse av revurdering for ikke avsluttet sak skal feile`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilBehandling(opprettTilbakekrevingHendelse())
         tilbakekreving.gjørSaksbehandling(tilbakekreving.nåværendeBehandlingId(), context) {
             vurderFakta(faktastegVurdering())
@@ -152,7 +156,7 @@ class RevurderingTest {
                     vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                     beskrivelse = "Begrunnelse fra klageinstansen",
                 ),
-                saksbehandlerContext(),
+                context,
             )
         }.message shouldBe "Kan ikke hente kravgrunnlag for revurdering i TIL_BEHANDLING"
     }
@@ -175,7 +179,7 @@ class RevurderingTest {
             }
         }
         tilbakekreving.apply {
-            gjørSaksbehandling(nåværendeBehandlingId(), beslutterContext()) {
+            gjørSaksbehandling(nåværendeBehandlingId(), beslutterContext(features = features)) {
                 fatteVedtak(
                     listOf(
                         Behandlingssteg.FAKTA to FatteVedtakSteg.Vurdering.Godkjent,
@@ -224,14 +228,14 @@ class RevurderingTest {
 
     @Test
     fun `oppdaterer revurderingsårsak for revurdering`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurdering(
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
 
         tilbakekreving.håndter(
@@ -265,7 +269,7 @@ class RevurderingTest {
 
     @Test
     fun `kan ikke oppdaterer revurderingsårsak når det ikke er revurdering`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
@@ -286,7 +290,7 @@ class RevurderingTest {
     @Test
     fun `oppdatering av revurderingsårsak sendes til BigQuery`() {
         val bigQuery = BigQueryOppsamler()
-        val context = saksbehandlerContext().medBigQuery(bigQuery)
+        val context = saksbehandlerContext(features = features).medBigQuery(bigQuery)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurderingBehandling(
             TilbakekrevingRevurderingsårsak.EtterKlage(
@@ -334,14 +338,14 @@ class RevurderingTest {
 
     @Test
     fun `VedtaksbrevInfo for revurdering`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurdering(
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
 
         tilbakekreving.håndter(
@@ -364,7 +368,7 @@ class RevurderingTest {
 
     @Test
     fun `VedtaksbrevInfo for opprinnelig behandling`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
 
         val info = tilbakekreving.hentVedtaksbrevInfo(tilbakekreving.nåværendeBehandlingId())
@@ -378,7 +382,7 @@ class RevurderingTest {
 
     @Test
     fun `opprinnelig behandling og revurdering har riktig status i frontend`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val opprinnelingBehandlingId = tilbakekreving.nåværendeBehandlingId()
 
@@ -387,7 +391,7 @@ class RevurderingTest {
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
 
         tilbakekreving.håndter(
@@ -410,7 +414,7 @@ class RevurderingTest {
 
     @Test
     fun `fagsakDto har riktig status for alle behandlinger`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         val opprinnelingBehandlingId = tilbakekreving.nåværendeBehandlingId()
 
@@ -419,7 +423,7 @@ class RevurderingTest {
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
 
         tilbakekreving.håndter(
@@ -443,14 +447,14 @@ class RevurderingTest {
 
     @Test
     fun `behandlingssteginfo skal ikke inneholde FattevedtakSteg for nyopprettet revurdering`() {
-        val context = saksbehandlerContext()
+        val context = saksbehandlerContext(features = features)
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurdering(
             TilbakekrevingRevurderingsårsak.EtterKlage(
                 vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
                 beskrivelse = "Begrunnelse fra klageinstansen",
             ),
-            saksbehandlerContext(),
+            context,
         )
 
         tilbakekreving.håndter(
@@ -468,5 +472,20 @@ class RevurderingTest {
             behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
             behandlingsstegsinfo.shouldNotContain(Behandlingssteg.FATTE_VEDTAK)
         }
+    }
+
+    @Test
+    fun `oppretting av revurdering feiler når toggle er avslått`() {
+        val context = saksbehandlerContext(features = defaultFeatures(featureOverrides = arrayOf(Toggle.Revurdering to false)))
+        val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            tilbakekreving.opprettRevurdering(
+                TilbakekrevingRevurderingsårsak.EtterKlage(
+                    vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
+                    beskrivelse = "Begrunnelse fra klageinstansen",
+                ),
+                context,
+            )
+        }.message shouldBe "Revurdering er ikke støttet"
     }
 }

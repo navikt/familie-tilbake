@@ -28,6 +28,7 @@ tilbakekreving:
       ForhandsvarselTypst: false
       EndretKravgrunnlagVisning: true
       KravBortfalt: true
+      Revurdering: true
   tilgangsstyring:
     grupper:
       ts:
