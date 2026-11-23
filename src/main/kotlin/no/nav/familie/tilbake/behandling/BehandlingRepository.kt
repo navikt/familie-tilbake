@@ -1,8 +1,10 @@
 package no.nav.familie.tilbake.behandling
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.tilbake.behandling.domain.Behandling
 import no.nav.familie.tilbake.common.repository.InsertUpdateRepository
 import no.nav.familie.tilbake.common.repository.RepositoryInterface
+import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -128,4 +130,35 @@ interface BehandlingRepository :
     fun finnAlleGamleBehandlingerUtenKravgrunnlag(utgaattDato: LocalDate): List<Behandling>
 
     fun findByEksternBrukId(eksternBrukId: UUID): Behandling?
+
+    @Query(
+        """
+            SELECT type,
+                   COUNT(*) FILTER (WHERE opprettet_tid < TIMESTAMP '2026-01-01') AS antall2025,
+                   COUNT(*) FILTER (WHERE opprettet_tid >= TIMESTAMP '2026-01-01') AS antall2026
+            FROM behandlingsarsak
+            WHERE opprettet_tid >= TIMESTAMP '2025-01-01'
+              AND opprettet_tid < TIMESTAMP '2027-01-01'
+            GROUP BY type
+        """,
+    )
+    fun hentRevurderingsårsaksoversikt(): List<Revurderingsårsaksoversikt>
+}
+
+data class Revurderingsårsaksoversikt(
+    val type: Behandlingsårsakstype,
+    val antall2025: Long,
+    val antall2026: Long,
+) {
+    @get:JsonProperty("totalt")
+    val totalt: Long get() = antall2025 + antall2026
+
+    companion object {
+        fun medAlleÅrsakstyper(antall: List<Revurderingsårsaksoversikt>): List<Revurderingsårsaksoversikt> {
+            val antallPerType = antall.associateBy { it.type }
+            return Behandlingsårsakstype.entries.map { type ->
+                antallPerType[type] ?: Revurderingsårsaksoversikt(type, 0, 0)
+            }
+        }
+    }
 }

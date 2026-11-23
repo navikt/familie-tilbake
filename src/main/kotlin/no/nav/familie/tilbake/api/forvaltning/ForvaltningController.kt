@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.tilbake.behandling.BehandlingRepository
 import no.nav.familie.tilbake.behandling.FagsakRepository
 import no.nav.familie.tilbake.behandling.Fagsystem
+import no.nav.familie.tilbake.behandling.Revurderingsårsaksoversikt
 import no.nav.familie.tilbake.behandling.Ytelsestype
 import no.nav.familie.tilbake.behandling.domain.Institusjon
 import no.nav.familie.tilbake.common.ContextService
@@ -75,6 +76,24 @@ class ForvaltningController(
     private val tilgangService: TilgangService,
 ) {
     private val logger = TracedLogger.getLogger<ForvaltningController>()
+
+    @Operation(summary = "Hent antall per revurderingsårsak for 2025 og 2026 med totalsum basert på behandlingsarsak.opprettet_tid")
+    @GetMapping(
+        path = ["/revurderingsarsaker"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun hentRevurderingsårsaksoversikt(): Ressurs<List<Revurderingsårsaksoversikt>> {
+        if (!tilgangService.harInnloggetBrukerForvalterRolle()) {
+            throw ForbiddenError(
+                message = "Mangler forvaltertilgang til å hente oversikt over revurderingsårsaker",
+                frontendFeilmelding = "Du har ikke tilgang til å hente oversikt over revurderingsårsaker",
+                logContext = SecureLog.Context.tom(),
+            )
+        }
+        return Ressurs.success(
+            Revurderingsårsaksoversikt.medAlleÅrsakstyper(behandlingRepository.hentRevurderingsårsaksoversikt()),
+        )
+    }
 
     @Operation(summary = "Hent korrigert kravgrunnlag")
     @PutMapping(
