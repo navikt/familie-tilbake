@@ -4,7 +4,6 @@
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ForhaandsvarselStegDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/AktsomhetDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/BelopIBeholdDto.kt
-/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ReduksjonDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ReduksjonArsakerDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/UnnlatelseDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/VilkaarsvurderingValgDto.kt
@@ -13,5 +12,7 @@
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/UttalelseVurderingDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilbakekrevingRevurderingsarsakDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/HovedmottakerAddresseDto.kt
-/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilleggsmottakerAdresseDto.kt
 /src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/TilleggsmottakerDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/ManuellMottakerDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/VergeMottakerDto.kt
+/src/main/generated/no/nav/tilbakekreving/kontrakter/frontend/models/FullmektigMottakerDto.kt

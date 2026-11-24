@@ -5,6 +5,7 @@ import no.nav.tilbakekreving.behandling.Behandling
 import no.nav.tilbakekreving.brev.Brev
 import no.nav.tilbakekreving.entities.BehandlingEntity
 import no.nav.tilbakekreving.entities.BrevEntity
+import no.nav.tilbakekreving.entities.BrevmottakereEntity
 import no.nav.tilbakekreving.entities.BrukerEntity
 import no.nav.tilbakekreving.entities.EksternFagsakEntity
 import no.nav.tilbakekreving.entities.HistorikkEntity
@@ -48,6 +49,7 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
         kravgrunnlagHistorikk: HistorikkEntity<UUID, KravHendelseEntity, KravHendelse>,
         brevHistorikk: HistorikkEntity<UUID, BrevEntity, Brev>,
         bruker: BrukerEntity?,
+        brevmottakere: BrevmottakereEntity,
     ): TilbakekrevingEntity {
         return TilbakekrevingEntity(
             id = resultSet[id],
@@ -60,6 +62,7 @@ object TilbakekrevingEntityMapper : Entity<TilbakekrevingEntity, String, Long>(
             opprettelsesvalg = resultSet[opprettelsesvalg],
             nestePåminnelse = resultSet[nestePåminnelse],
             bruker = bruker,
+            brevmottakere = brevmottakere,
         )
     }
 }

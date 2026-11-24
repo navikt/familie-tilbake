@@ -13,4 +13,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(value = NorskAdresseDto::class, name = "norsk"),
     JsonSubTypes.Type(value = UtenlandskAdresseDto::class, name = "utenlandsk"),
 )
-sealed interface TilleggsmottakerAdresseDto
+sealed interface ManuellMottakerDto

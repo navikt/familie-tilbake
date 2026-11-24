@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.behov.KorrigertKravgrunnlagBehov
 import no.nav.tilbakekreving.behov.KravgrunnlagForRevurderingBehov
 import no.nav.tilbakekreving.breeeev.VedtaksbrevInfo
+import no.nav.tilbakekreving.breeeev.mottaker.Brevmottakere
 import no.nav.tilbakekreving.brev.BrevHistorikk
 import no.nav.tilbakekreving.brev.Informasjonsbrev
 import no.nav.tilbakekreving.brev.Informasjonsbrevtype
@@ -86,6 +87,7 @@ class Tilbakekreving internal constructor(
     private var nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     var bruker: Bruker? = null,
+    private val brevmottakere: Brevmottakere,
     internal var tilstand: Tilstand,
 ) : BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand, sideeffektContext: SideeffektContext) {
@@ -580,6 +582,7 @@ class Tilbakekreving internal constructor(
             opprettelsesvalg = this.opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
             bruker = this.bruker?.tilEntity(id),
+            brevmottakere = this.brevmottakere.tilEntity(id),
         )
     }
 
@@ -745,6 +748,7 @@ class Tilbakekreving internal constructor(
                 behandlingHistorikk = BehandlingHistorikk(mutableListOf()),
                 kravgrunnlagHistorikk = KravgrunnlagHistorikk(mutableListOf()),
                 brevHistorikk = BrevHistorikk(mutableListOf()),
+                brevmottakere = Brevmottakere.opprett(),
                 tilstand = Start,
             )
             tilbakekreving.håndter(opprettTilbakekrevingEvent, sideeffektContext)

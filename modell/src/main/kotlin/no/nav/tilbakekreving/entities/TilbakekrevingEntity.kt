@@ -40,6 +40,7 @@ data class TilbakekrevingEntity(
     val nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     val bruker: BrukerEntity?,
+    val brevmottakere: BrevmottakereEntity,
 ) {
     fun fraEntity(): Tilbakekreving {
         val kravgrunnlagHistorikk = KravgrunnlagHistorikk(
@@ -72,6 +73,7 @@ data class TilbakekrevingEntity(
             opprettelsesvalg = opprettelsesvalg,
             nestePåminnelse = nestePåminnelse,
             bruker = bruker?.fraEntity(),
+            brevmottakere = brevmottakere.fraEntity(),
             tilstand = when (nåværendeTilstand) {
                 TilbakekrevingTilstand.START -> Start
                 TilbakekrevingTilstand.AVVENTER_KRAVGRUNNLAG -> AvventerKravgrunnlag
