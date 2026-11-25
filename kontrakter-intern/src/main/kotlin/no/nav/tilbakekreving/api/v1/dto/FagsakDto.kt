@@ -4,6 +4,7 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.bruker.FrontendBrukerDto
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
+import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakereDto
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.util.UUID
@@ -16,6 +17,7 @@ data class FagsakDto(
     val språkkode: Språkkode,
     val bruker: FrontendBrukerDto,
     val behandlinger: List<BehandlingsoppsummeringDto>,
+    val brevmottakere: BrevmottakereDto?,
     val institusjon: InstitusjonDto? = null,
     val fagsakBehandlingUrl: String?,
 )

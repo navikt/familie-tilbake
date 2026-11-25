@@ -723,6 +723,7 @@ class Tilbakekreving internal constructor(
                 behandlinger = tilbakekrevinger.reversed().flatMap {
                     it.behandlingHistorikk.tilOppsummeringDto(it.tilstand, klokke)
                 },
+                brevmottakere = gjeldende.brevmottakere.tilFrontendDto(),
                 fagsakBehandlingUrl = gjeldende.eksternFagsak.saksbehandlingUrl(),
             )
         }

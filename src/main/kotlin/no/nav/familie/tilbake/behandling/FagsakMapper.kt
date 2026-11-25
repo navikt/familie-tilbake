@@ -54,6 +54,7 @@ object FagsakMapper {
             språkkode = fagsak.bruker.språkkode,
             bruker = bruker,
             behandlinger = behandlingListe,
+            brevmottakere = null,
             institusjon = institusjon,
             fagsakBehandlingUrl = null,
         )
