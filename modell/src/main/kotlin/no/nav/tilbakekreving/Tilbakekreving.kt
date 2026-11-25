@@ -714,6 +714,7 @@ class Tilbakekreving internal constructor(
             val gjeldende = tilbakekrevinger.first()
             val eksternFagsakDto = gjeldende.eksternFagsak.tilFrontendDto()
             return FagsakDto(
+                tilbakekrevingId = gjeldende.id,
                 tilbakekrevingSakId = gjeldende.tilbakekrevingSakId(),
                 eksternFagsakId = eksternFagsakDto.eksternId,
                 ytelsestype = eksternFagsakDto.ytelsestype,

@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.kontrakter.ytelse.YtelsestypeDTO
 import java.util.UUID
 
 data class FagsakDto(
+    val tilbakekrevingId: String,
     val tilbakekrevingSakId: String,
     val eksternFagsakId: String,
     val ytelsestype: YtelsestypeDTO,
