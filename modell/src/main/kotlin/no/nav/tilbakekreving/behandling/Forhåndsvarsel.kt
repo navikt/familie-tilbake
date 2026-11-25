@@ -253,6 +253,7 @@ class Forhåndsvarsel internal constructor(
             return MåVurderesPåNytt(
                 brukeruttalelse = brukeruttalelse?.trengerNyVurdering(),
                 uttalelsesfrist = uttalelsesfrist,
+                tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
             )
         }
 
@@ -283,20 +284,22 @@ class Forhåndsvarsel internal constructor(
             tilbakeført = null,
         )
 
-        override fun klon(): Vurdering = VarselSendt(
-            uttalelsesfrist = uttalelsesfrist.klon(),
+        override fun klon(): Vurdering = MåVurderesPåNytt(
             brukeruttalelse = brukeruttalelse?.klon(),
-            tilbakeført = null,
+            uttalelsesfrist = uttalelsesfrist?.klon(),
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
         )
     }
 
     internal class MåVurderesPåNytt(
         private val brukeruttalelse: Brukeruttalelse?,
         private var uttalelsesfrist: Uttalelsesfrist?,
+        private var tilbakeført: ÅrsakTilTilbakeføring,
     ) : Vurdering {
         override fun klon(): Vurdering = MåVurderesPåNytt(
             brukeruttalelse = brukeruttalelse?.klon(),
             uttalelsesfrist = uttalelsesfrist?.klon(),
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
         )
 
         override val behandlingsstatus = BehandlingsstatusModell.TIL_FORHÅNDSVARSEL
@@ -305,7 +308,7 @@ class Forhåndsvarsel internal constructor(
 
         override fun erPåbegynt() = false
 
-        override fun trengerNyVurdering(): ÅrsakTilTilbakeføring = ÅrsakTilTilbakeføring.NyttKravgrunnlag
+        override fun trengerNyVurdering(): ÅrsakTilTilbakeføring = tilbakeført
 
         override fun underkjenn() {}
 
@@ -344,7 +347,7 @@ class Forhåndsvarsel internal constructor(
             forhaandsvarselSteg = IkkeVurdertDto,
             brukeruttalelse = brukeruttalelse?.nyTilFrontendDto(),
             ferdigvurdert = false,
-            tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag.frontendDto,
+            tilbakeført = tilbakeført.frontendDto,
             sendtVarselbrev = varselbrev?.tilFrontendDto(),
             uttalelsesfrist = uttalelsesfrist?.nyTilFrontendDto(),
         )
@@ -357,7 +360,7 @@ class Forhåndsvarsel internal constructor(
             brukeruttalelseEntity = brukeruttalelse?.tilEntity(behandlingRef),
             forhåndsvarselUnntakEntity = null,
             uttalelsesfristEntity = uttalelsesfrist?.tilEntity(behandlingRef),
-            tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
+            tilbakeført = tilbakeført,
         )
     }
 
@@ -373,9 +376,7 @@ class Forhåndsvarsel internal constructor(
 
         override fun erPåbegynt() = true
 
-        override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? {
-            return tilbakeført
-        }
+        override fun trengerNyVurdering(): ÅrsakTilTilbakeføring? = tilbakeført
 
         override fun underkjenn() {
             tilbakeført = ÅrsakTilTilbakeføring.Underkjent
@@ -413,6 +414,7 @@ class Forhåndsvarsel internal constructor(
                 return MåVurderesPåNytt(
                     brukeruttalelse = brukeruttalelse?.trengerNyVurdering(),
                     uttalelsesfrist = uttalelsesfrist,
+                    tilbakeført = ÅrsakTilTilbakeføring.NyttKravgrunnlag,
                 )
             }
             return this
@@ -438,11 +440,10 @@ class Forhåndsvarsel internal constructor(
             tilbakeført = tilbakeført,
         )
 
-        override fun klon(): Vurdering = Unntak(
-            forhåndsvarselUnntak = forhåndsvarselUnntak.klon(),
+        override fun klon(): Vurdering = MåVurderesPåNytt(
             brukeruttalelse = brukeruttalelse?.klon(),
             uttalelsesfrist = uttalelsesfrist?.klon(),
-            tilbakeført = null,
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
         )
     }
 }

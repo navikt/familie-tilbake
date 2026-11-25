@@ -38,6 +38,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingssteg
 import no.nav.tilbakekreving.kontrakter.behandlingskontroll.Behandlingsstegstatus
+import no.nav.tilbakekreving.kontrakter.frontend.models.ArsakTilTilbakeforingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.IkkeVurdertDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.periode.til
@@ -114,11 +116,11 @@ class RevurderingTest {
         }
 
         revurderingForhåndsvarsel shouldNotBeNull {
-            forhaandsvarselSteg shouldBe opprinneligForhåndsvarsel.forhaandsvarselSteg
+            forhaandsvarselSteg shouldBe IkkeVurdertDto
             brukeruttalelse shouldBe opprinneligForhåndsvarsel.brukeruttalelse
             sendtVarselbrev shouldBe opprinneligForhåndsvarsel.sendtVarselbrev
             uttalelsesfrist shouldBe opprinneligForhåndsvarsel.uttalelsesfrist
-            tilbakeført shouldBe null
+            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
         }
 
         revurderingForeldelse shouldNotBeNull {
@@ -469,7 +471,7 @@ class RevurderingTest {
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
             behandlingsstegsinfo.shouldHaveSize(6)
             behandlingsstegsinfo.last().behandlingssteg shouldBe Behandlingssteg.FORESLÅ_VEDTAK
-            behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.KLAR
+            behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
             behandlingsstegsinfo.shouldNotContain(Behandlingssteg.FATTE_VEDTAK)
         }
     }

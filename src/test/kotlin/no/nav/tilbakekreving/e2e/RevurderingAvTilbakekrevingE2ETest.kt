@@ -26,6 +26,8 @@ import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
 import no.nav.tilbakekreving.saksbehandlerContext
@@ -173,6 +175,16 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
 
         val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
 
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingLagreForhaandsvarselUnntak(
+                behandlingId = revurderingBehandlingId,
+                unntakDto = UnntakDto(
+                    begrunnelseForUnntak = VarslingsunntakDto.ÅPENBART_UNØDVENDIG,
+                    beskrivelse = "Unntak beskrivelse",
+                ),
+            )
+        }
+
         utførSteg(
             revurderingBehandlingId,
             BehandlingsstegForeslåVedtaksstegDto(
@@ -216,6 +228,15 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         }
 
         val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingLagreForhaandsvarselUnntak(
+                behandlingId = revurderingBehandlingId,
+                unntakDto = UnntakDto(
+                    begrunnelseForUnntak = VarslingsunntakDto.ÅPENBART_UNØDVENDIG,
+                    beskrivelse = "Unntak beskrivelse",
+                ),
+            )
+        }
 
         utførSteg(
             revurderingBehandlingId,

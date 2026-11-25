@@ -14,6 +14,7 @@ import java.util.UUID
 enum class ÅrsakTilTilbakeføring(val frontendDto: ArsakTilTilbakeforingDto) {
     NyttKravgrunnlag(ArsakTilTilbakeforingDto.NyttKravgrunnlag),
     Underkjent(ArsakTilTilbakeforingDto.TilbakemeldingFraSaksbehandler),
+    Revurdering(ArsakTilTilbakeforingDto.Revurdering),
 }
 
 internal interface Saksbehandlingsteg : EndretKravgrunnlagObservatør {
