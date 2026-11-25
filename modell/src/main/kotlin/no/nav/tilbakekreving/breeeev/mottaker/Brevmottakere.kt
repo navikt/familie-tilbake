@@ -1,10 +1,12 @@
 package no.nav.tilbakekreving.breeeev.mottaker
 
+import no.nav.tilbakekreving.SideeffektContext
 import no.nav.tilbakekreving.entities.BrevmottakereEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakereDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.HovedmottakerAddresseDto
 
 class Brevmottakere(
-    private val hovedmottaker: Hovedmottaker,
+    private var hovedmottaker: Hovedmottaker,
     private val tilleggsmottaker: Tilleggsmottaker?,
 ) {
     companion object {
@@ -19,6 +21,11 @@ class Brevmottakere(
         hovedmottaker = hovedmottaker.tilEntity(tilbakekrevingRef, null, null),
         tilleggsmottaker = tilleggsmottaker?.tilEntity(tilbakekrevingRef),
     )
+
+    fun oppdaterBrevmottaker(sideeffektContext: SideeffektContext, hovedmottaker: Hovedmottaker): HovedmottakerAddresseDto {
+        this.hovedmottaker = hovedmottaker
+        return hovedmottaker.tilFrontendDto()
+    }
 
     fun tilFrontendDto() = BrevmottakereDto(
         hovedmottaker = hovedmottaker.tilFrontendDto(),

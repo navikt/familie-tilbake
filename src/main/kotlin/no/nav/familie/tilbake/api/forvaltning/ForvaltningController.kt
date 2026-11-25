@@ -122,7 +122,7 @@ class ForvaltningController(
     fun korrigerKravgrunnlag(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.ForvaltningHentKorrigertKravgrunnlag) { tilbakekreving, context ->
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningHentKorrigertKravgrunnlag) { tilbakekreving, context ->
             val behov = tilbakekreving.trengerKorrigertKravgrunnlag()
             val korrigertKravgrunnlag = behovMediator.hentKorrigertKravgrunnlag(behov)
             tilbakekreving.håndter(korrigertKravgrunnlag, context)
@@ -183,7 +183,7 @@ class ForvaltningController(
     fun flyttBehandlingTilFakta(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.ForvaltningFlyttTilFakta) { tilbakekreving, context ->
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningFlyttTilFakta) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
                 flyttTilbakeTilFakta()
             }
@@ -395,7 +395,7 @@ class ForvaltningController(
     fun oppdaterFagsysteminfo(
         @PathVariable behandlingId: UUID,
     ) {
-        tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.ForvaltningOppdaterFagsysteminfo) { tilbakekreving, context ->
+        tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.ForvaltningOppdaterFagsysteminfo) { tilbakekreving, context ->
             tilbakekreving.trengerFagsysteminfo(context)
         }
     }

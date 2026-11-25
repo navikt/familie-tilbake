@@ -35,7 +35,6 @@ import no.nav.tilbakekreving.kontrakter.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsårsakstype
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import no.nav.tilbakekreving.repository.TilbakekrevingFilter.Companion.behandling
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -117,7 +116,7 @@ class BehandlingController(
             throw IllegalArgumentException("REVURDERING_ANNEN_ÅRSAK er ikke støttet for revurdering.")
         }
 
-        if (tilbakekrevingService.hentTilbakekreving(behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
+        if (tilbakekrevingService.hentTilbakekreving(TilbakekrevingFilter.behandling(opprettRevurderingDto.originalBehandlingId)) != null) {
             throw ModellFeil.UtenforScopeException(
                 UtenforScope.Revurdering,
                 Sporing("Ukjent", opprettRevurderingDto.originalBehandlingId.toString()),
@@ -173,7 +172,7 @@ class BehandlingController(
         behandlingsstegDto: BehandlingsstegDto,
     ): Ressurs<String> {
         val nyModell = tilbakekrevingService.endreTilbakekreving(
-            behandlingId = behandlingId,
+            filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = when (behandlingsstegDto) {
                 is BehandlingsstegFatteVedtaksstegDto -> ValideringContext.FatteVedtak
                 else -> ValideringContext.UtførSteg
@@ -309,7 +308,7 @@ class BehandlingController(
     fun angreSendTilBeslutter(
         @PathVariable("behandlingId") behandlingId: UUID,
     ): Ressurs<String> {
-        val response = tilbakekrevingService.endreTilbakekreving(behandlingId, ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
+        val response = tilbakekrevingService.endreTilbakekreving(TilbakekrevingFilter.behandling(behandlingId), ValideringContext.TrekkTilbakeFraGodkjenning) { tilbakekreving, context ->
             tilbakekreving.gjørSaksbehandling(behandlingId, context) {
                 trekkTilbakeFraGodkjenning()
             }

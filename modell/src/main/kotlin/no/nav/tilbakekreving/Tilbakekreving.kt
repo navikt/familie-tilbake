@@ -87,7 +87,7 @@ class Tilbakekreving internal constructor(
     private var nestePåminnelse: LocalDateTime?,
     val opprettelsesvalg: Opprettelsesvalg,
     var bruker: Bruker? = null,
-    private val brevmottakere: Brevmottakere,
+    val brevmottakere: Brevmottakere,
     internal var tilstand: Tilstand,
 ) : BehandlingObservatør {
     internal fun byttTilstand(nyTilstand: Tilstand, sideeffektContext: SideeffektContext) {

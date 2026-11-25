@@ -19,7 +19,7 @@ sealed interface TilbakekrevingFilter {
 
     fun logContext(): SecureLog.Context
 
-    private class BehandlingId(val id: UUID) : TilbakekrevingFilter {
+    class BehandlingId(val id: UUID) : TilbakekrevingFilter {
         override fun select(jdbcTemplate: JdbcTemplate, mapper: (ResultSet, Int) -> TilbakekrevingEntity): List<TilbakekrevingEntity> {
             return jdbcTemplate.timedQuery("tilbakekreving.by_behandling_id", "SELECT * FROM tilbakekreving JOIN tilbakekreving_behandling tb ON tilbakekreving.id=tb.tilbakekreving_id WHERE tb.id=?;", id, mapper = mapper)
         }
