@@ -123,7 +123,7 @@ class TilbakekrevingService(
     ): T? {
         return hentOgLagreTilbakekreving(filter) { tilbakekreving, sideeffektContext ->
             if (filter is TilbakekrevingFilter.BehandlingId && !tilbakekreving.erGjeldendeBehandling(filter.id)) {
-                throw Feil("Denne behandlingen kan ikke endres fordi den har allerede en revurdering.", logContext = SecureLog.Context.fra(tilbakekreving))
+                throw ModellFeil.UgyldigOperasjonException(tittel = "Kan ikke opprette revurderingen", melding = "Det finnes allerede en revurdering for denne behandlingen.", sporing = tilbakekreving.sporingsinformasjon(filter.id))
             }
             val behandler = ContextService.hentBehandler(filter.logContext())
             tilgangskontrollService.validerTilgangTilbakekreving(tilbakekreving, valideringContext, behandler)

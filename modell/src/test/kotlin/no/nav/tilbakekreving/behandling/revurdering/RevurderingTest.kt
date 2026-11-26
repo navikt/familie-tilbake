@@ -5,7 +5,6 @@ import io.kotest.inspectors.forOne
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -112,7 +111,7 @@ class RevurderingTest {
             vurdering shouldBe opprinneligFakta.vurdering
             rettsgebyrÅrFraSaksbehandler shouldBe opprinneligFakta.rettsgebyrÅrFraSaksbehandler
             status4xRettsgebyret shouldBe opprinneligFakta.status4xRettsgebyret
-            tilbakeført shouldBe null
+            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
         }
 
         revurderingForhåndsvarsel shouldNotBeNull {
@@ -133,7 +132,7 @@ class RevurderingTest {
             vilkårsperioder.first().vilkårsvurdering.tom shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.tom
             vilkårsperioder.first().feilutbetaltBeløp shouldBe opprinneligVilkår.vilkårsperioder.first().feilutbetaltBeløp
             vilkårsperioder.first().vilkårsvurdering.valg shouldBe opprinneligVilkår.vilkårsperioder.first().vilkårsvurdering.valg
-            tilbakeført shouldBe null
+            tilbakeført shouldBe ArsakTilTilbakeforingDto.Revurdering
         }
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
@@ -453,8 +452,8 @@ class RevurderingTest {
         val tilbakekreving = tilbakekrevingTilAvsluttet(opprettTilbakekrevingHendelse(), context)
         tilbakekreving.opprettRevurdering(
             TilbakekrevingRevurderingsårsak.EtterKlage(
-                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
-                beskrivelse = "Begrunnelse fra klageinstansen",
+                vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                beskrivelse = "Begrunnelse fra Førsteinstansen",
             ),
             context,
         )
@@ -462,17 +461,18 @@ class RevurderingTest {
         tilbakekreving.håndter(
             kravgrunnlag(),
             TilbakekrevingRevurderingsårsak.EtterKlage(
-                vedtakOmgjortAv = VedtakOmgjortAv.Klageinstansen,
-                beskrivelse = "Begrunnelse fra klageinstansen",
+                vedtakOmgjortAv = VedtakOmgjortAv.Førsteinstansen,
+                beskrivelse = "Begrunnelse fra Førsteinstansen",
             ),
             context,
         )
 
         tilbakekreving.frontendDtoForBehandling(tilbakekreving.nåværendeBehandlingId(), context, true, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
-            behandlingsstegsinfo.shouldHaveSize(6)
-            behandlingsstegsinfo.last().behandlingssteg shouldBe Behandlingssteg.FORESLÅ_VEDTAK
-            behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.VENTER
-            behandlingsstegsinfo.shouldNotContain(Behandlingssteg.FATTE_VEDTAK)
+            behandlingsstegsinfo.shouldHaveSize(2)
+            behandlingsstegsinfo.first().behandlingssteg shouldBe Behandlingssteg.GRUNNLAG
+            behandlingsstegsinfo.first().behandlingsstegstatus shouldBe Behandlingsstegstatus.AUTOUTFØRT
+            behandlingsstegsinfo.last().behandlingssteg shouldBe Behandlingssteg.FAKTA
+            behandlingsstegsinfo.last().behandlingsstegstatus shouldBe Behandlingsstegstatus.TILBAKEFØRT
         }
     }
 

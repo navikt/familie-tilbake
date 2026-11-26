@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.familie.tilbake.common.exceptionhandler.Feil
 import no.nav.familie.tilbake.config.OppdragClientRestMock
 import no.nav.familie.tilbake.kravgrunnlag.domain.Kravstatuskode
 import no.nav.tilbakekreving.Testdata
@@ -19,14 +18,18 @@ import no.nav.tilbakekreving.api.v1.dto.FritekstavsnittDto
 import no.nav.tilbakekreving.breeeev.begrunnelse.Forklaringstekster.HOVEDAVSNITT_REVURDERING
 import no.nav.tilbakekreving.brev.Vedtaksbrev
 import no.nav.tilbakekreving.fagsystem.Ytelse
+import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPeriodeDto
 import no.nav.tilbakekreving.integrasjoner.oppdrag.kontrakter.DetaljerPosteringDto
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingsstatus
 import no.nav.tilbakekreving.kontrakter.behandling.Behandlingstype
 import no.nav.tilbakekreving.kontrakter.frontend.models.EtterKlageDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.FeilutbetaltBelopEndretDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingsarsakDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.UnntakDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.UtenKlageDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VarslingsunntakDto
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
@@ -36,6 +39,8 @@ import no.nav.tilbakekreving.test.FellesTestdata.SAKSBEHANDLER_IDENT
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.util.kroner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import java.math.BigDecimal
@@ -63,7 +68,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = behandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
                     revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
+                        instans = RevurderingsinstansDto.Førsteinstansen,
                         begrunnelse = "Begrunnelse for revurdering",
                     ),
                 ),
@@ -79,7 +84,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
             type shouldBe Behandlingstype.REVURDERING_TILBAKEKREVING
             tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
                 revurderingsarsak = EtterKlageDto(
-                    instans = RevurderingsinstansDto.Klageinstansen,
+                    instans = RevurderingsinstansDto.Førsteinstansen,
                     begrunnelse = "Begrunnelse for revurdering",
                 ),
             )
@@ -96,7 +101,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = opprinneligBehandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
                     revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
+                        instans = RevurderingsinstansDto.Førsteinstansen,
                         begrunnelse = "Begrunnelse for revurdering",
                     ),
                 ),
@@ -109,14 +114,14 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
             behandlingController.hentBehandling(revurderingBehandlingId).data!!.kanEndres shouldBe true
         }
 
-        shouldThrow<Feil> {
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
             somSaksbehandler(SAKSBEHANDLER_IDENT) {
                 behandlingApiController.behandlingOppdaterFakta(
                     behandlingId = opprinneligBehandlingId.toString(),
                     oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(opprinneligBehandlingId)),
                 )
             }
-        }.message shouldBe "Denne behandlingen kan ikke endres fordi den har allerede en revurdering."
+        }.message shouldBe "Det finnes allerede en revurdering for denne behandlingen."
     }
 
     @Test
@@ -129,26 +134,29 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = opprinneligBehandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
                     revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
+                        instans = RevurderingsinstansDto.Førsteinstansen,
                         begrunnelse = "Begrunnelse for revurdering",
                     ),
                 ),
             )
         }
 
-        shouldThrow<Feil> {
+        shouldThrow<ModellFeil.UgyldigOperasjonException> {
             somSaksbehandler(SAKSBEHANDLER_IDENT) {
                 behandlingApiController.behandlingOpprettRevurdering(
                     behandlingId = opprinneligBehandlingId,
                     revurderingDto = TilbakekrevingRevurderingDto(
                         revurderingsarsak = EtterKlageDto(
-                            instans = RevurderingsinstansDto.Klageinstansen,
+                            instans = RevurderingsinstansDto.Førsteinstansen,
                             begrunnelse = "Begrunnelse for revurdering",
                         ),
                     ),
                 )
             }
-        }.message shouldBe "Denne behandlingen kan ikke endres fordi den har allerede en revurdering."
+        }.shouldNotBeNull {
+            message shouldBe "Det finnes allerede en revurdering for denne behandlingen."
+            tittel shouldBe "Kan ikke opprette revurderingen"
+        }
     }
 
     @Test
@@ -166,7 +174,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = opprinneligBehandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
                     revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
+                        instans = RevurderingsinstansDto.Førsteinstansen,
                         begrunnelse = "Begrunnelse for revurdering",
                     ),
                 ),
@@ -184,7 +192,14 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
-
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = revurderingBehandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(revurderingBehandlingId)),
+            )
+        }
+        utførSteg(revurderingBehandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(revurderingBehandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
         utførSteg(
             revurderingBehandlingId,
             BehandlingsstegForeslåVedtaksstegDto(
@@ -220,7 +235,7 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 behandlingId = opprinneligBehandlingId,
                 revurderingDto = TilbakekrevingRevurderingDto(
                     revurderingsarsak = EtterKlageDto(
-                        instans = RevurderingsinstansDto.Klageinstansen,
+                        instans = RevurderingsinstansDto.Førsteinstansen,
                         begrunnelse = "Begrunnelse for revurdering",
                     ),
                 ),
@@ -228,6 +243,13 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         }
 
         val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterFakta(
+                behandlingId = revurderingBehandlingId.toString(),
+                oppdaterFaktaOmFeilutbetalingDto = BehandlingsstegGenerator.lagFaktastegVurderingFritekst(allePeriodeIder(revurderingBehandlingId)),
+            )
+        }
         somSaksbehandler(SAKSBEHANDLER_IDENT) {
             behandlingApiController.behandlingLagreForhaandsvarselUnntak(
                 behandlingId = revurderingBehandlingId,
@@ -237,7 +259,8 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 ),
             )
         }
-
+        utførSteg(revurderingBehandlingId, BehandlingsstegGenerator.lagIkkeForeldetVurdering())
+        utførSteg(revurderingBehandlingId, BehandlingsstegGenerator.lagVilkårsvurderingFullTilbakekreving())
         utførSteg(
             revurderingBehandlingId,
             BehandlingsstegForeslåVedtaksstegDto(
@@ -332,5 +355,50 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
             kravstatuskode = Kravstatuskode.BEHANDLET,
         )
         return behandlingId
+    }
+
+    @ParameterizedTest
+    @MethodSource("revurderingsårsakerUtenforFørsteinstansen")
+    fun `opprettelse av revurdering feiler når det ikke er fra førsteinstansen`(revurderingsarsak: TilbakekrevingRevurderingsarsakDto) {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val behandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId)
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            somSaksbehandler(SAKSBEHANDLER_IDENT) {
+                behandlingApiController.behandlingOpprettRevurdering(
+                    behandlingId = behandlingId,
+                    revurderingDto = TilbakekrevingRevurderingDto(
+                        revurderingsarsak = revurderingsarsak,
+                    ),
+                )
+            }
+        }.melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+    }
+
+    companion object {
+        @JvmStatic
+        fun revurderingsårsakerUtenforFørsteinstansen(): List<TilbakekrevingRevurderingsarsakDto> {
+            return RevurderingsinstansDto.entries
+                .filter { it != RevurderingsinstansDto.Førsteinstansen }
+                .flatMap { instans ->
+                    listOf(
+                        EtterKlageDto(
+                            instans = instans,
+                            begrunnelse = "Begrunnelse for revurdering",
+                        ),
+                        FeilutbetaltBelopEndretDto(
+                            instans = instans,
+                            begrunnelse = "Begrunnelse for revurdering",
+                        ),
+                    )
+                } + UtenKlageDto.Instans.entries
+                .filter { it != UtenKlageDto.Instans.Førsteinstansen }
+                .map { instans ->
+                    UtenKlageDto(
+                        instans = instans,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    )
+                }
+        }
     }
 }
