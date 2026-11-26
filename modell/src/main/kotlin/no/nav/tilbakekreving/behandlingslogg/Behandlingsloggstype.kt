@@ -155,6 +155,12 @@ enum class Behandlingsloggstype(
         type = Historikkinnslagstype.BREV,
         steg = null,
     ),
+    BREVMOTTAKER_OPPDATERT(
+        tittel = "Adressen til mottaker er endret",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     BEHANDLING_NULLSTILLT(
         tittel = "Behandling nullstilt",
         tekst = null,
