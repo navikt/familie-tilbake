@@ -357,6 +357,46 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
         return behandlingId
     }
 
+    @Test
+    fun `oppdatere revurderingsårsak`() {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val behandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = behandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Førsteinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        val revurderingBehandlingId = behandlingIdFor(FagsystemDTO.TS, fagsystemId).shouldNotBeNull()
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOppdaterRevurderingsarsak(
+                behandlingId = revurderingBehandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = FeilutbetaltBelopEndretDto(
+                        instans = RevurderingsinstansDto.Førsteinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        tilbakekreving(revurderingBehandlingId).frontendDtoForBehandling(revurderingBehandlingId, saksbehandlerContext(), false, BehandlerRolle.SAKSBEHANDLER) shouldNotBeNull {
+            tilbakekrevingRevurdering shouldBe TilbakekrevingRevurderingDto(
+                revurderingsarsak = FeilutbetaltBelopEndretDto(
+                    instans = RevurderingsinstansDto.Førsteinstansen,
+                    begrunnelse = "Begrunnelse for revurdering",
+                ),
+            )
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("revurderingsårsakerUtenforFørsteinstansen")
     fun `opprettelse av revurdering feiler når det ikke er fra førsteinstansen`(revurderingsarsak: TilbakekrevingRevurderingsarsakDto) {
@@ -372,7 +412,43 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                     ),
                 )
             }
-        }.melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+        }.shouldNotBeNull {
+            tittel shouldBe "Kunne ikke opprette/oppdatere revurderingen"
+            melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("revurderingsårsakerUtenforFørsteinstansen")
+    fun `oppdatering av revurderingsårsak feiler når det ikke er fra førsteinstansen`(revurderingsarsak: TilbakekrevingRevurderingsarsakDto) {
+        val fagsystemId = KravgrunnlagGenerator.nextPaddedId(6)
+        val behandlingId = gjørBehandlingKlarTilRevurdering(fagsystemId)
+
+        somSaksbehandler(SAKSBEHANDLER_IDENT) {
+            behandlingApiController.behandlingOpprettRevurdering(
+                behandlingId = behandlingId,
+                revurderingDto = TilbakekrevingRevurderingDto(
+                    revurderingsarsak = EtterKlageDto(
+                        instans = RevurderingsinstansDto.Førsteinstansen,
+                        begrunnelse = "Begrunnelse for revurdering",
+                    ),
+                ),
+            )
+        }
+
+        shouldThrow<ModellFeil.UtenforScopeException> {
+            somSaksbehandler(SAKSBEHANDLER_IDENT) {
+                behandlingApiController.behandlingOppdaterRevurderingsarsak(
+                    behandlingId = behandlingId,
+                    revurderingDto = TilbakekrevingRevurderingDto(
+                        revurderingsarsak = revurderingsarsak,
+                    ),
+                )
+            }
+        }.shouldNotBeNull {
+            tittel shouldBe "Kunne ikke opprette/oppdatere revurderingen"
+            melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+        }
     }
 
     companion object {

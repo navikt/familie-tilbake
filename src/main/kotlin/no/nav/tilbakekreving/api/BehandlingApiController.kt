@@ -344,19 +344,7 @@ class BehandlingApiController(
     }
 
     override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<OpprettRevurderingResponseDto> {
-        val støttetInstans = when (val årsak = revurderingDto.revurderingsarsak) {
-            is EtterKlageDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
-            is FeilutbetaltBelopEndretDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
-            is UtenKlageDto -> årsak.instans == UtenKlageDto.Instans.Førsteinstansen
-            is ForeldelseDto -> true
-        }
-        if (!støttetInstans) {
-            throw ModellFeil.UtenforScopeException(
-                UtenforScope.IkkeStøttetRevurderingInstans,
-                Sporing("Ukjent", behandlingId.toString()),
-            )
-        }
-
+        sjekkStøttetInstans(behandlingId, revurderingDto)
         tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
@@ -372,6 +360,7 @@ class BehandlingApiController(
     }
 
     override fun behandlingOppdaterRevurderingsarsak(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+        sjekkStøttetInstans(behandlingId, revurderingDto)
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
@@ -402,5 +391,20 @@ class BehandlingApiController(
             vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
             beskrivelse = dto.begrunnelse,
         )
+    }
+
+    private fun sjekkStøttetInstans(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto) {
+        val støttetInstans = when (val årsak = revurderingDto.revurderingsarsak) {
+            is EtterKlageDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
+            is FeilutbetaltBelopEndretDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
+            is UtenKlageDto -> årsak.instans == UtenKlageDto.Instans.Førsteinstansen
+            is ForeldelseDto -> true
+        }
+        if (!støttetInstans) {
+            throw ModellFeil.UtenforScopeException(
+                UtenforScope.IkkeStøttetRevurderingInstans,
+                Sporing("Ukjent", behandlingId.toString()),
+            )
+        }
     }
 }
