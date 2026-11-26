@@ -173,6 +173,12 @@ enum class Behandlingsloggstype(
         Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    FULLMEKTIG_FJERNET(
+        tittel = "Fullmektig fjernet",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     VERGE_LAGT_TIL(
         tittel = "Verge lagt til",
         tekst = null,
@@ -181,6 +187,12 @@ enum class Behandlingsloggstype(
     ),
     VERGE_ENDRET(
         tittel = "Verge endret",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    VERGE_FJERNET(
+        tittel = "Verge fjernet",
         tekst = null,
         Historikkinnslagstype.HENDELSE,
         steg = null,

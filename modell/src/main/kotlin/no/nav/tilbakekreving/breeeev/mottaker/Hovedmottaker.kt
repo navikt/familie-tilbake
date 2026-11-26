@@ -12,7 +12,7 @@ sealed interface Hovedmottaker : Addresse {
             return FregAdresseDto
         }
 
-        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: AddresseEntity.TilleggsmottakerType?): AddresseEntity? {
+        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: Tilleggsmottaker.TilleggsmottakerType?): AddresseEntity? {
             return null
         }
     }

@@ -10,19 +10,27 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VergeDto
 import java.util.UUID
 
 sealed interface Tilleggsmottaker {
+    val mottakerType: TilleggsmottakerType
+
     fun tilEntity(tilbakekrevingRef: String): AddresseEntity
 
     fun tilFrontendDto(): TilleggsmottakerDto
+
+    fun gjelder(id: UUID): Boolean
 
     data class VergeMedManuellAddresse(
         private val navn: String,
         private val addresse: ManuellAddresse,
     ) : Tilleggsmottaker {
+        override val mottakerType = TilleggsmottakerType.Verge
+
+        override fun gjelder(id: UUID): Boolean = addresse.id == id
+
         override fun tilEntity(tilbakekrevingRef: String): AddresseEntity {
             return addresse.tilEntity(
                 tilbakekrevingRef = tilbakekrevingRef,
                 navn = navn,
-                tilleggsmottakerType = AddresseEntity.TilleggsmottakerType.Verge,
+                tilleggsmottakerType = mottakerType,
             )
         }
 
@@ -41,12 +49,16 @@ sealed interface Tilleggsmottaker {
         private val id: UUID,
         private val fødselsnummer: String,
     ) : Tilleggsmottaker {
+        override val mottakerType = TilleggsmottakerType.Verge
+
+        override fun gjelder(id: UUID): Boolean = this.id == id
+
         override fun tilEntity(tilbakekrevingRef: String): AddresseEntity {
             return AddresseEntity(
                 id = id,
                 tilbakekrevingRef = tilbakekrevingRef,
                 type = null,
-                tilleggsmottakerType = AddresseEntity.TilleggsmottakerType.Verge,
+                tilleggsmottakerType = mottakerType,
                 land = null,
                 addresselinje = null,
                 postnummer = null,
@@ -70,11 +82,15 @@ sealed interface Tilleggsmottaker {
         private val navn: String,
         private val addresse: ManuellAddresse,
     ) : Tilleggsmottaker {
+        override val mottakerType = TilleggsmottakerType.Fullmektig
+
+        override fun gjelder(id: UUID): Boolean = addresse.id == id
+
         override fun tilEntity(tilbakekrevingRef: String): AddresseEntity {
             return addresse.tilEntity(
                 tilbakekrevingRef = tilbakekrevingRef,
                 navn = navn,
-                tilleggsmottakerType = AddresseEntity.TilleggsmottakerType.Fullmektig,
+                tilleggsmottakerType = mottakerType,
             )
         }
 
@@ -92,12 +108,16 @@ sealed interface Tilleggsmottaker {
         private val navn: String,
         private val organisasjonsnummer: String,
     ) : Tilleggsmottaker {
+        override val mottakerType = TilleggsmottakerType.Fullmektig
+
+        override fun gjelder(id: UUID): Boolean = this.id == id
+
         override fun tilEntity(tilbakekrevingRef: String): AddresseEntity {
             return AddresseEntity(
                 id = id,
                 tilbakekrevingRef = tilbakekrevingRef,
                 type = null,
-                tilleggsmottakerType = AddresseEntity.TilleggsmottakerType.Fullmektig,
+                tilleggsmottakerType = mottakerType,
                 land = null,
                 addresselinje = null,
                 postnummer = null,
@@ -122,12 +142,16 @@ sealed interface Tilleggsmottaker {
         private val id: UUID,
         private val fødselsnummer: String,
     ) : Tilleggsmottaker {
+        override val mottakerType = TilleggsmottakerType.Fullmektig
+
+        override fun gjelder(id: UUID): Boolean = this.id == id
+
         override fun tilEntity(tilbakekrevingRef: String): AddresseEntity {
             return AddresseEntity(
                 id = id,
                 tilbakekrevingRef = tilbakekrevingRef,
                 type = null,
-                tilleggsmottakerType = AddresseEntity.TilleggsmottakerType.Fullmektig,
+                tilleggsmottakerType = mottakerType,
                 land = null,
                 addresselinje = null,
                 postnummer = null,
@@ -145,5 +169,10 @@ sealed interface Tilleggsmottaker {
                 ),
             )
         }
+    }
+
+    enum class TilleggsmottakerType {
+        Verge,
+        Fullmektig,
     }
 }

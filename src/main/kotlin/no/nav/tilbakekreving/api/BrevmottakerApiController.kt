@@ -60,6 +60,15 @@ class BrevmottakerApiController(
         } ?: ResponseEntity.notFound().build()
     }
 
+    override fun brevmottakerSlettBrevmottaker(tilbakekrevingId: String, brevmottakerId: UUID): ResponseEntity<Unit> {
+        return tilbakekrevingService.endreTilbakekreving(
+            filter = TilbakekrevingFilter.tilbakekreving(tilbakekrevingId),
+            valideringContext = ValideringContext.FjernTilleggsmottaker,
+        ) { tilbakekreving, sideeffektContext ->
+            ResponseEntity.ok(tilbakekreving.brevmottakere.fjernTilleggsmottaker(sideeffektContext, brevmottakerId, tilbakekreving.sporingsinformasjon()))
+        } ?: ResponseEntity.notFound().build()
+    }
+
     private fun tilDomene(tilleggsmottakerDto: TilleggsmottakerDto): Tilleggsmottaker = when (tilleggsmottakerDto) {
         is VergeDto -> when (val mottaker = tilleggsmottakerDto.mottaker) {
             is ManuellAdresseDto -> Tilleggsmottaker.VergeMedManuellAddresse(

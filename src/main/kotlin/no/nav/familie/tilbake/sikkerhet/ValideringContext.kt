@@ -55,6 +55,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.CREATE,
         handling = "Endre tilleggsmottaker",
     ),
+    FjernTilleggsmottaker(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.CREATE,
+        handling = "Fjerne tilleggsmottaker",
+    ),
     ForhåndsvisBrev(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,

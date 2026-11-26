@@ -26,11 +26,12 @@ sealed class ModellFeil(
     class BehandlingIkkeEndretException(
         melding: String,
         sporing: Sporing,
-    ) : ModellFeil(
-            "Behandling ble ikke endret",
-            melding,
-            sporing,
-        )
+    ) : ModellFeil("Behandling ble ikke endret", melding, sporing)
+
+    class IkkeFunnetException(
+        melding: String,
+        sporing: Sporing,
+    ) : ModellFeil("Ikke funnet", melding, sporing)
 }
 
 data class Sporing(

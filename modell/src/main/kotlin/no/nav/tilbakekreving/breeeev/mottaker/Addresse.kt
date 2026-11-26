@@ -7,14 +7,14 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.UtenlandskAdresseDto
 import java.util.UUID
 
 sealed interface Addresse {
-    fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: AddresseEntity.TilleggsmottakerType?): AddresseEntity?
+    fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: Tilleggsmottaker.TilleggsmottakerType?): AddresseEntity?
 
     class Norsk(
         override val id: UUID,
         private val addresselinje: String,
         private val postnummer: String,
     ) : ManuellAddresse, Hovedmottaker {
-        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: AddresseEntity.TilleggsmottakerType?): AddresseEntity {
+        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: Tilleggsmottaker.TilleggsmottakerType?): AddresseEntity {
             return AddresseEntity(
                 id = id,
                 tilbakekrevingRef = tilbakekrevingRef,
@@ -48,7 +48,7 @@ sealed interface Addresse {
             )
         }
 
-        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: AddresseEntity.TilleggsmottakerType?): AddresseEntity {
+        override fun tilEntity(tilbakekrevingRef: String, navn: String?, tilleggsmottakerType: Tilleggsmottaker.TilleggsmottakerType?): AddresseEntity {
             return AddresseEntity(
                 id = id,
                 tilbakekrevingRef = tilbakekrevingRef,
@@ -72,6 +72,6 @@ sealed interface ManuellAddresse : Addresse {
     override fun tilEntity(
         tilbakekrevingRef: String,
         navn: String?,
-        tilleggsmottakerType: AddresseEntity.TilleggsmottakerType?,
+        tilleggsmottakerType: Tilleggsmottaker.TilleggsmottakerType?,
     ): AddresseEntity
 }

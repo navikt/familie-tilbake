@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.entity
 
+import no.nav.tilbakekreving.breeeev.mottaker.Tilleggsmottaker
 import no.nav.tilbakekreving.entities.AddresseEntity
 import java.sql.ResultSet
 import java.util.UUID
@@ -24,7 +25,7 @@ object BrevmottakerEntityMapper : Entity<AddresseEntity, UUID, UUID>(
     private val tilleggsmottakerType = field(
         "tilleggsmottaker_type",
         AddresseEntity::tilleggsmottakerType,
-        FieldConverter.EnumConverter.of<AddresseEntity.TilleggsmottakerType>(),
+        FieldConverter.EnumConverter.of<Tilleggsmottaker.TilleggsmottakerType>(),
     )
 
     private val land = field(
