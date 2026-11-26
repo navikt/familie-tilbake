@@ -6,11 +6,12 @@ import no.nav.tilbakekreving.behandlingslogg.LoggInnslag
 import no.nav.tilbakekreving.entities.BrevmottakereEntity
 import no.nav.tilbakekreving.kontrakter.frontend.models.BrevmottakereDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.HovedmottakerAddresseDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.TilleggsmottakerDto
 import java.time.LocalDateTime
 
 class Brevmottakere(
     private var hovedmottaker: Hovedmottaker,
-    private val tilleggsmottaker: Tilleggsmottaker?,
+    private var tilleggsmottaker: Tilleggsmottaker?,
 ) {
     companion object {
         internal fun opprett() = Brevmottakere(
@@ -38,6 +39,43 @@ class Brevmottakere(
             ),
         )
         return hovedmottaker.tilFrontendDto()
+    }
+
+    fun oppdaterTilleggsmottaker(sideeffektContext: SideeffektContext, tilleggsmottaker: Tilleggsmottaker): TilleggsmottakerDto {
+        val logginnslagType = when (this.tilleggsmottaker) {
+            null -> when (tilleggsmottaker) {
+                is Tilleggsmottaker.FullmektigMedManuellAddresse,
+                is Tilleggsmottaker.FullmektigMedOrganisasjonsnummer,
+                is Tilleggsmottaker.FullmektigPerson,
+                -> Behandlingsloggstype.FULLMEKTIG_LAGT_TIL
+                is Tilleggsmottaker.VergeMedFolkeregistrertAddresse,
+                is Tilleggsmottaker.VergeMedManuellAddresse,
+                -> Behandlingsloggstype.VERGE_LAGT_TIL
+            }
+            else -> when (tilleggsmottaker) {
+                is Tilleggsmottaker.FullmektigMedManuellAddresse,
+                is Tilleggsmottaker.FullmektigMedOrganisasjonsnummer,
+                is Tilleggsmottaker.FullmektigPerson,
+                -> Behandlingsloggstype.FULLMEKTIG_ENDRET
+                is Tilleggsmottaker.VergeMedFolkeregistrertAddresse,
+                is Tilleggsmottaker.VergeMedManuellAddresse,
+                -> Behandlingsloggstype.VERGE_ENDRET
+            }
+        }
+
+        this.tilleggsmottaker = tilleggsmottaker
+
+        sideeffektContext.behandlingslogg.lagre(
+            LoggInnslag.opprett(
+                behandlingId = null,
+                opprettetTid = LocalDateTime.now(),
+                behandlingsloggstype = logginnslagType,
+                rolle = sideeffektContext.behandler.rolle,
+                behandlerIdent = sideeffektContext.behandler.ident,
+                ekstraInfo = emptyMap(),
+            ),
+        )
+        return tilleggsmottaker.tilFrontendDto()
     }
 
     fun tilFrontendDto() = BrevmottakereDto(

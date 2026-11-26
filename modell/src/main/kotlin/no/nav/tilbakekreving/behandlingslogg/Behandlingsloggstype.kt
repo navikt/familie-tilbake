@@ -161,6 +161,30 @@ enum class Behandlingsloggstype(
         Historikkinnslagstype.HENDELSE,
         steg = null,
     ),
+    FULLMEKTIG_LAGT_TIL(
+        tittel = "Fullmektig lagt til",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    FULLMEKTIG_ENDRET(
+        tittel = "Fullmektig endret",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    VERGE_LAGT_TIL(
+        tittel = "Verge lagt til",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
+    VERGE_ENDRET(
+        tittel = "Verge endret",
+        tekst = null,
+        Historikkinnslagstype.HENDELSE,
+        steg = null,
+    ),
     BEHANDLING_NULLSTILLT(
         tittel = "Behandling nullstilt",
         tekst = null,

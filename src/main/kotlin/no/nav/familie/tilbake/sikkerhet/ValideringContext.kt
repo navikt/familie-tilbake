@@ -50,6 +50,11 @@ enum class ValideringContext(
         auditLoggerEvent = AuditLoggerEvent.CREATE,
         handling = "Endre brevmottaker",
     ),
+    EndreTilleggsmottaker(
+        minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
+        auditLoggerEvent = AuditLoggerEvent.CREATE,
+        handling = "Endre tilleggsmottaker",
+    ),
     ForhåndsvisBrev(
         minimumBehandlerrolle = Behandlerrolle.SAKSBEHANDLER,
         auditLoggerEvent = AuditLoggerEvent.ACCESS,
