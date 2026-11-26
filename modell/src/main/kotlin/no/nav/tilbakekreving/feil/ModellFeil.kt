@@ -10,7 +10,8 @@ sealed class ModellFeil(
     class UgyldigOperasjonException(
         melding: String,
         sporing: Sporing,
-    ) : ModellFeil("Kan ikke utføre handling", melding, sporing)
+        tittel: String? = "Kan ikke utføre handling",
+    ) : ModellFeil(tittel!!, melding, sporing)
 
     class UtenforScopeException(
         val utenforScope: UtenforScope,

@@ -7,6 +7,7 @@ import no.nav.familie.tilbake.sikkerhet.ValideringContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.tilbakekreving.SystemKlokke
 import no.nav.tilbakekreving.TilbakekrevingService
+import no.nav.tilbakekreving.UtenforScope
 import no.nav.tilbakekreving.behandling.BegrunnelseForUnntak
 import no.nav.tilbakekreving.behandling.TilbakekrevingRevurderingsårsak
 import no.nav.tilbakekreving.behandling.VedtakOmgjortAv
@@ -14,6 +15,8 @@ import no.nav.tilbakekreving.brev.varselbrev.ForhåndsvarselService
 import no.nav.tilbakekreving.brev.vedtaksbrev.NyVedtaksbrevService
 import no.nav.tilbakekreving.config.ApplicationProperties
 import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
+import no.nav.tilbakekreving.feil.ModellFeil
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.frontend.apis.BehandlingApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.BeregningsresultatDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.DokumentInfoDto
@@ -28,6 +31,7 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.LogginnslagDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaOmFeilutbetalingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OpprettRevurderingResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.RevurderingsinstansDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SendForhaandsvarselDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SplittPeriodeDto
@@ -340,6 +344,7 @@ class BehandlingApiController(
     }
 
     override fun behandlingOpprettRevurdering(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<OpprettRevurderingResponseDto> {
+        sjekkStøttetInstans(behandlingId, revurderingDto)
         tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
@@ -355,6 +360,7 @@ class BehandlingApiController(
     }
 
     override fun behandlingOppdaterRevurderingsarsak(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto): ResponseEntity<Unit> {
+        sjekkStøttetInstans(behandlingId, revurderingDto)
         return tilbakekrevingService.endreTilbakekreving(
             filter = TilbakekrevingFilter.behandling(behandlingId),
             valideringContext = ValideringContext.OpprettRevurdering,
@@ -385,5 +391,20 @@ class BehandlingApiController(
             vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
             beskrivelse = dto.begrunnelse,
         )
+    }
+
+    private fun sjekkStøttetInstans(behandlingId: UUID, revurderingDto: TilbakekrevingRevurderingDto) {
+        val støttetInstans = when (val årsak = revurderingDto.revurderingsarsak) {
+            is EtterKlageDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
+            is FeilutbetaltBelopEndretDto -> årsak.instans == RevurderingsinstansDto.Førsteinstansen
+            is UtenKlageDto -> årsak.instans == UtenKlageDto.Instans.Førsteinstansen
+            is ForeldelseDto -> true
+        }
+        if (!støttetInstans) {
+            throw ModellFeil.UtenforScopeException(
+                UtenforScope.IkkeStøttetRevurderingInstans,
+                Sporing("Ukjent", behandlingId.toString()),
+            )
+        }
     }
 }

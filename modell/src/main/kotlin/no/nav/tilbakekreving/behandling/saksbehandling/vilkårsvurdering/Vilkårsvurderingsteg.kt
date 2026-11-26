@@ -57,7 +57,7 @@ class Vilkårsvurderingsteg(
                 forrigeVurdering = it.klon(forrigeVurdering)
                 forrigeVurdering
             },
-            tilbakeført = null,
+            tilbakeført = ÅrsakTilTilbakeføring.Revurdering,
         )
     }
 
