@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -15,6 +16,7 @@ import no.nav.tilbakekreving.behandling
 import no.nav.tilbakekreving.behandling.saksbehandling.FatteVedtakSteg
 import no.nav.tilbakekreving.behandling.saksbehandling.Foreldelsesteg
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.NivåAvForståelse
+import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.beslutterContext
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.faktastegVurdering
@@ -32,11 +34,14 @@ import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.saksbehandlerContext
+import no.nav.tilbakekreving.test.februar
 import no.nav.tilbakekreving.test.forsettelig
 import no.nav.tilbakekreving.test.januar
 import no.nav.tilbakekreving.test.mars
 import no.nav.tilbakekreving.tilstand.TilBehandling
+import no.nav.tilbakekreving.ytelsesbeløp
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class BehandlingTest {
@@ -95,7 +100,7 @@ class BehandlingTest {
             )
             lagreUttalelse(UttalelseVurdering.JA, null, null)
             vurderFakta(faktastegVurdering(listOf(periode)))
-            vurderForeldelse(periode, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", null))
+            vurderForeldelse(periode, Foreldelsesteg.Vurdering.IkkeForeldet("Begrunnelse"))
             vurderVilkår(periode, forårsaketAvNav().burdeForstått(aktsomhet = forsettelig()))
             behandling.vilkårsvurderingsstegDto.tilFrontendDto(saksbehandlerContext()).perioder.first().begrunnelse.shouldNotBeNull()
             flyttTilbakeTilFakta()
@@ -383,6 +388,73 @@ class BehandlingTest {
             vilkårsperioder.last().fakta.rettsligGrunnlag.size shouldBe 0
             vilkårsperioder.last().simulertBeløp shouldBe 0
             vilkårsperioder.last().vilkårsvurdering.valg.shouldBeInstanceOf<GodTroDto>()
+        }
+    }
+
+    @Test
+    fun `foreldet periode er fjernet fra vilkårsvurderissteg`() {
+        val foreldetPeriode1 = 1.januar(2021) til 31.januar(2021)
+        val foreldetPeriode2 = 1.mars(2021) til 31.mars(2021)
+        val ikkeForeldetPeriode = 1.februar(2025) til 28.februar(2025)
+
+        val behandling = behandling(
+            kravgrunnlag = kravgrunnlag(
+                perioder = mutableListOf(
+                    kravgrunnlagPeriode(
+                        periode = foreldetPeriode1,
+                        ytelsesbeløp(2000.kroner, 3000.kroner),
+                    ),
+                    kravgrunnlagPeriode(
+                        periode = foreldetPeriode2,
+                        ytelsesbeløp(10000.kroner, 30000.kroner),
+                    ),
+                    kravgrunnlagPeriode(periode = ikkeForeldetPeriode),
+                ),
+            ),
+        )
+        val saksbehandlerContext = saksbehandlerContext()
+
+        val vilkårDtoFørVurdertForeldelse = behandling.vilkårsvurderingDto(
+            LesContext(
+                behandler = saksbehandlerContext.behandler,
+                features = saksbehandlerContext.features,
+                klokke = saksbehandlerContext.klokke,
+            ),
+        )
+
+        vilkårDtoFørVurdertForeldelse.vilkårsperioder.shouldHaveSize(1)
+        vilkårDtoFørVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.fom shouldBe 1.januar(2021)
+        vilkårDtoFørVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.tom shouldBe 28.februar(2025)
+        vilkårDtoFørVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.delbarePerioder.shouldHaveSize(3)
+        vilkårDtoFørVurdertForeldelse.foreldetPeriode shouldBe null
+
+        behandling.medSaksbehandling(saksbehandlerContext) {
+            vurderFakta(faktastegVurdering())
+            lagreForhåndsvarselUnntak(
+                BegrunnelseForUnntak.ÅPENBART_UNØDVENDIG,
+                "Forhåndsvarsel er ikke nødvendig i testen",
+            )
+            vurderForeldelse(foreldetPeriode1, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", LocalDate.now()))
+            vurderForeldelse(foreldetPeriode2, Foreldelsesteg.Vurdering.Foreldet("Begrunnelse", LocalDate.now()))
+            vurderForeldelse(ikkeForeldetPeriode, Foreldelsesteg.Vurdering.IkkeForeldet("Ikke foreldet"))
+        }
+
+        val vilkårDtoEtterVurdertForeldelse = behandling.vilkårsvurderingDto(
+            LesContext(
+                behandler = saksbehandlerContext.behandler,
+                features = saksbehandlerContext.features,
+                klokke = saksbehandlerContext.klokke,
+            ),
+        )
+
+        vilkårDtoEtterVurdertForeldelse.vilkårsperioder.shouldHaveSize(1)
+        vilkårDtoEtterVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.fom shouldBe 1.februar(2025)
+        vilkårDtoEtterVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.tom shouldBe 28.februar(2025)
+        vilkårDtoEtterVurdertForeldelse.vilkårsperioder.first().vilkårsvurdering.delbarePerioder.shouldHaveSize(1)
+        vilkårDtoEtterVurdertForeldelse.foreldetPeriode.shouldNotBeNull {
+            periode.fom shouldBe 1.januar(2021)
+            periode.tom shouldBe 31.mars(2021)
+            feilutbetaltBeløp shouldBe 12000
         }
     }
 }

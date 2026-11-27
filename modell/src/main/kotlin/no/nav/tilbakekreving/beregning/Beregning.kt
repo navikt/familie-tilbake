@@ -14,6 +14,7 @@ import no.nav.tilbakekreving.feil.ModellFeil
 import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.periode.Datoperiode
+import java.math.BigDecimal
 import java.math.RoundingMode
 
 class Beregning(
@@ -83,6 +84,8 @@ class Beregning(
     }
 
     fun vedtaksresultat(): Vedtaksresultat = bestemVedtaksresultat(beregn())
+
+    fun foreldetFeilutbetaltBeløp(): BigDecimal = foreldetUtbetalinger.sumOf { it.beregningsresultat().feilutbetaltBeløp }
 
     companion object {
         fun bestemVedtaksresultat(delperioder: List<Delperiode<out Delperiode.Beløp>>): Vedtaksresultat {

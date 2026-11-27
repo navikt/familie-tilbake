@@ -86,10 +86,12 @@ import no.nav.tilbakekreving.kontrakter.beregning.Vedtaksresultat
 import no.nav.tilbakekreving.kontrakter.bruker.Språkkode
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.FaktaOmFeilutbetalingDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.ForeldetPeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.ForhaandsvarselResponseDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.MomentDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdagetDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.OppdaterFaktaPeriodeDto
+import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.PeriodeInfoDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.SammenslaaingDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.TilbakekrevingRevurderingDto
@@ -103,6 +105,7 @@ import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.RelevantMomentTypeGodTro
 import no.nav.tilbakekreving.kontrakter.vilkårsvurdering.SærligGrunnType
 import no.nav.tilbakekreving.kontrakter.ytelse.FagsystemDTO
+import no.nav.tilbakekreving.kravgrunnlag.KravgrunnlagSammenligning
 import no.nav.tilbakekreving.saksbehandler.Behandler
 import no.nav.tilbakekreving.tekst.slåSammen
 import no.nav.tilbakekreving.tilstand.Tilstand
@@ -789,7 +792,7 @@ class Behandling internal constructor(
             vurdering: ForårsaketAvBruker,
         ) {
             validerBehandlingstatus(vilkårsvurderingsteg, context.klokke)
-            vilkårsvurderingsteg.vurder(periode, vurdering)
+            vilkårsvurderingsteg.vurder(periode, vurdering, sporingsinformasjon())
             oppdaterBehandler(context)
 
             context.logg(Behandlingsloggstype.VILKÅRSVURDERING_VURDERT)
@@ -812,7 +815,10 @@ class Behandling internal constructor(
             validerBehandlingstatus(foreldelsesteg, context.klokke)
             foreldelsesteg.vurderForeldelse(periode, vurdering)
             oppdaterBehandler(context)
-
+            if (vurdering is Foreldelsesteg.Vurdering.Foreldet) {
+                val kravgrunnlagPeriode = kravgrunnlag.entry.perioder().single { periode.overlapper(it.periode()) }
+                vilkårsvurderingsteg.periodeFjernet(KravgrunnlagSammenligning.Forskjell.FjernetPeriode(periode, kravgrunnlagPeriode.feilutbetaltYtelsesbeløp()))
+            }
             context.logg(Behandlingsloggstype.FORELDELSE_VURDERT)
         }
 
@@ -1061,10 +1067,11 @@ class Behandling internal constructor(
     }
 
     fun vilkårsvurderingDto(lesecontext: LesContext): VilkaarDto {
-        val beregning = lagBeregning().beregn()
+        val beregning = lagBeregning()
+        val foreldetPerioder = foreldelsesteg.foreldetPerioder()
         return VilkaarDto(
             vilkårsperioder = vilkårsvurderingsteg.tilFrontendDto().map { vurdering ->
-                tilVilkaarsperiodeDto(vurdering, beregning)
+                tilVilkaarsperiodeDto(vurdering, beregning.beregn())
             },
             ferdigvurdert = vilkårsvurderingsteg.erFullstendig(lesecontext.klokke),
             tilbakeført = vilkårsvurderingsteg.trengerNyVurdering()?.frontendDto,
@@ -1074,6 +1081,15 @@ class Behandling internal constructor(
                 KanUnnlates4xRettsgebyr.KanUnnlates.Ja -> true
                 KanUnnlates4xRettsgebyr.KanUnnlates.Nei -> false
                 KanUnnlates4xRettsgebyr.KanUnnlates.Usikkert -> throw ModellFeil.UgyldigOperasjonException("Trenger spesifisering av år for rettsgebyr i fakta-steget", sporingsinformasjon())
+            },
+            foreldetPeriode = foreldetPerioder.takeIf { it.isNotEmpty() }?.let { perioder ->
+                ForeldetPeriodeDto(
+                    periode = PeriodeDto(
+                        fom = perioder.minOf { it.fom },
+                        tom = perioder.maxOf { it.tom },
+                    ),
+                    feilutbetaltBeløp = beregning.foreldetFeilutbetaltBeløp().toInt(),
+                )
             },
         )
     }

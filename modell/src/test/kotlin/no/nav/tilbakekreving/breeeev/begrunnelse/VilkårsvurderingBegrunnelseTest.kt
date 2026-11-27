@@ -8,6 +8,7 @@ import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Forårs
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.beregning.BeregningTest.TestKravgrunnlagPeriode.Companion.kroner
 import no.nav.tilbakekreving.eksternFagsakBehandling
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -38,7 +39,7 @@ class VilkårsvurderingBegrunnelseTest {
             ),
         )
 
-        vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), vurdering)
+        vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), vurdering, Sporing("", ""))
 
         val vurderinger = vilkårsvurdering.vurdertePerioderForBrev(emptySet())
         vurderinger shouldHaveSize 1
