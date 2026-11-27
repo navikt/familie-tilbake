@@ -59,6 +59,7 @@ tilbakekreving:
     - QA.P_TILLEGGSSTONADER.KRAVGRUNNLAG
     - QA.P_TILBAKEKREVING.KRAVGRUNNLAG
     - QA.P_TILTAKSPENGER.KRAVGRUNNLAG
+    - QA.P_TILBAKEKREVING.KRAVGRUNNLAG.DAGPENGER
   toggles:
     ny-modell:
       EndretKravgrunnlagVisning: true
