@@ -4,5 +4,5 @@ openApiGenerate {
 }
 
 dependencies {
-    compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.22")
+    compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.23")
 }
