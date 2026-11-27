@@ -91,7 +91,7 @@ enum class Behandlingsloggstype(
     ),
 
     BEHANDLING_SENDT_TILBAKE_TIL_SAKSBEHANDLER(
-        tittel = "Vedtak underkjent",
+        tittel = "Vedtak ikke godkjent, sendt tilbake til saksbehandler",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
@@ -138,7 +138,7 @@ enum class Behandlingsloggstype(
         steg = null,
     ),
     VEDTAKSBREV_JOURNALFØRT(
-        tittel = "Vedtksbrev journalført",
+        tittel = "Vedtaksbrev journalført",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
@@ -225,7 +225,7 @@ enum class Behandlingsloggstype(
         }
     },
     BRUKER_UTTALELSE(
-        tittel = "Bruker uttalelse er registrert",
+        tittel = "Brukeruttalelse er registrert",
         tekst = null,
         type = Historikkinnslagstype.HENDELSE,
         steg = null,
