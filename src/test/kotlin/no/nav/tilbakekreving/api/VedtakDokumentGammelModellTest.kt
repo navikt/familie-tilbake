@@ -47,7 +47,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `tomt token`() {
-        shouldThrow<Feil> { vedtakDokumentController.dokumenterHentVedtaksdokumenter("", nyttVedtakId().toString()) }
+        shouldThrow<Feil> { vedtakDokumentController.dokumentHentVedtaksdokumenter("", nyttVedtakId().toString()) }
             .httpStatus shouldBe HttpStatus.UNAUTHORIZED
     }
 
@@ -61,7 +61,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `token uten påkrevd rolle`() {
-        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumenterHentVedtaksdokumenter(UTEN_ROLLE, nyttVedtakId().toString()) }
+        shouldThrow<ForbiddenError> { vedtakDokumentController.dokumentHentVedtaksdokumenter(UTEN_ROLLE, nyttVedtakId().toString()) }
     }
 
     @Test
@@ -90,7 +90,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(behandlingPåAnnenFagsak, journalpostId = "journalpost-4", dokumentId = "dokument-4"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
+        val response = vedtakDokumentController.dokumentHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldContainExactlyInAnyOrder listOf(
@@ -109,7 +109,7 @@ class VedtakDokumentGammelModellTest : OppslagSpringRunnerTest() {
             Testdata.lagBrevsporing(annenBehandling, journalpostId = "journalpost-annen", dokumentId = "dokument-annen"),
         )
 
-        val response = vedtakDokumentController.dokumenterHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
+        val response = vedtakDokumentController.dokumentHentVedtaksdokumenter(GODKJENT, vedtakId.toString())
 
         response.statusCode shouldBe HttpStatus.OK
         response.body.shouldNotBeNull() shouldBe emptyList<VedtaksdokumentDto>()

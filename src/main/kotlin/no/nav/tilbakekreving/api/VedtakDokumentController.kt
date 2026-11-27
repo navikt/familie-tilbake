@@ -3,10 +3,12 @@ package no.nav.tilbakekreving.api
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.tilbakekreving.TilbakekrevingService
 import no.nav.tilbakekreving.auth.VedtaksdokumentTilgang
+import no.nav.tilbakekreving.dokumentHåndtering.saf.SafService
 import no.nav.tilbakekreving.kontrakter.frontend.apis.DokumenterApi
 import no.nav.tilbakekreving.kontrakter.frontend.models.VedtaksdokumentDto
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
 import no.nav.tilbakekreving.vedtak.VedtakDokumentRepository
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -20,8 +22,9 @@ class VedtakDokumentController(
     private val vedtakDokumentRepository: VedtakDokumentRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vedtaksdokumentTilgang: VedtaksdokumentTilgang,
+    private val safService: SafService,
 ) : DokumenterApi {
-    override fun dokumenterHentVedtaksdokumenter(
+    override fun dokumentHentVedtaksdokumenter(
         authorization: String,
         vedtakId: String,
     ): ResponseEntity<List<VedtaksdokumentDto>> {
@@ -47,6 +50,24 @@ class VedtakDokumentController(
         val dokumentreferanser = vedtakDokumentService.hentBehandlingIderGammelModell(id)
             .flatMap(vedtakDokumentService::hentDokumentreferanserGammelModell)
         return ResponseEntity.ok(dokumentreferanser.distinct())
+    }
+
+    override fun dokumentHentDokument(
+        journalpostId: String,
+        dokumentInfoId: String,
+        behandlingId: String?,
+        fagsakId: String?,
+    ): ResponseEntity<Any> {
+        return ResponseEntity.ok(
+            ByteArrayResource(
+                safService.hentDokument(
+                    journalpostId = journalpostId,
+                    dokumentInfoId = dokumentInfoId,
+                    fagsakId = fagsakId,
+                    behandlingId = behandlingId,
+                ),
+            ),
+        )
     }
 
     private companion object {

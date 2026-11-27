@@ -11,11 +11,9 @@ import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.Bruker
 import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.IntegrasjonTema
 import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.JournalpostResponse
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
-import java.util.UUID
 
 interface SafClient {
     fun hentDokument(
-        behandlingId: UUID,
         journalpostId: String,
         dokumentInfoId: String,
         callContext: CallContext.Saksbehandler,

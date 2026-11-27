@@ -42,7 +42,7 @@ class VedtakDokumentE2ETest : TilbakekrevingE2EBase() {
         tilbakekrevVedtak(behandlingId, listOf(periode))
 
         val response = ContextServiceHelpers.somSaksbehandler {
-            vedtakDokumentController.dokumenterHentVedtaksdokumenter("Bearer godkjent-token", vedtakId)
+            vedtakDokumentController.dokumentHentVedtaksdokumenter("Bearer godkjent-token", vedtakId)
         }
 
         response.statusCode shouldBe HttpStatus.OK

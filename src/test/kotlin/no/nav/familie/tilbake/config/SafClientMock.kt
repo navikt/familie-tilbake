@@ -7,12 +7,11 @@ import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.JournalpostRespon
 import no.nav.tilbakekreving.integrasjoner.dokument.saf.SafClient
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 @Primary
 class SafClientMock : SafClient {
-    override fun hentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String, callContext: CallContext.Saksbehandler): ByteArray {
+    override fun hentDokument(journalpostId: String, dokumentInfoId: String, callContext: CallContext.Saksbehandler): ByteArray {
         return ByteArray(0)
     }
 

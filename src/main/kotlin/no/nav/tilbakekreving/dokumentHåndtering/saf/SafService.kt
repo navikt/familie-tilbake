@@ -21,7 +21,6 @@ import no.nav.tilbakekreving.integrasjoner.felles.graphqlQuery
 import no.nav.tilbakekreving.kontrakter.ytelse.Tema
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class SafService(
@@ -29,12 +28,12 @@ class SafService(
     private val safClient: SafClient,
 ) {
     fun hentDokument(
-        behandlingId: UUID,
         journalpostId: String,
         dokumentInfoId: String,
         fagsakId: String?,
+        behandlingId: String?,
     ): ByteArray {
-        val logContext = SecureLog.Context.medBehandling(fagsakId, behandlingId.toString())
+        val logContext = SecureLog.Context.medBehandling(fagsakId, behandlingId)
         val token = tokenValidationContextHolder.getTokenValidationContext().firstValidToken ?: throw Feil(
             message = "Finner ikke token",
             logContext = logContext,
@@ -42,7 +41,6 @@ class SafService(
         )
 
         return safClient.hentDokument(
-            behandlingId = behandlingId,
             journalpostId = journalpostId,
             dokumentInfoId = dokumentInfoId,
             callContext = CallContext.Saksbehandler(

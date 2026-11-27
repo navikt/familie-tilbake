@@ -22,7 +22,6 @@ import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.SafHentJournalpos
 import no.nav.tilbakekreving.integrasjoner.dokument.kontrakter.SafJournalpostRequest
 import no.nav.tilbakekreving.integrasjoner.feil.UnexpectedResponseException
 import no.nav.tilbakekreving.integrasjoner.tokenexchange.TokenExchangeService
-import java.util.UUID
 
 class SafClientImpl(
     private val config: SafClient.Companion.Config,
@@ -30,18 +29,16 @@ class SafClientImpl(
     private val httpClient: HttpClient,
 ) : SafClient {
     override fun hentDokument(
-        behandlingId: UUID,
         journalpostId: String,
         dokumentInfoId: String,
         callContext: CallContext.Saksbehandler,
     ): ByteArray {
         return runBlocking {
-            safHentDokument(behandlingId, journalpostId, dokumentInfoId, callContext)
+            safHentDokument(journalpostId, dokumentInfoId, callContext)
         }
     }
 
     private suspend fun safHentDokument(
-        behandlingId: UUID,
         journalpostId: String,
         dokumentInfoId: String,
         callContext: CallContext.Saksbehandler,
@@ -62,7 +59,7 @@ class SafClientImpl(
                 return response.body<ByteArray>()
             }
             else -> throw UnexpectedResponseException(
-                message = "Henting av dokument for behandling: $behandlingId feilet.",
+                message = "Henting av dokument for journalpost $journalpostId med dokumentInfoId $dokumentInfoId feilet.",
                 endpoint = "$baseUrl/rest/hentdokument/{journalpostId}/{dokumentInfoId}/ARKIV",
                 statusCode = response.status,
                 response = response.bodyAsText(),

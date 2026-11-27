@@ -40,10 +40,10 @@ class JournalpostController(
         if (tilbakekreving != null) {
             return Ressurs.success(
                 safService.hentDokument(
-                    behandlingId = behandlingId,
                     journalpostId = journalpostId,
                     dokumentInfoId = dokumentInfoId,
-                    tilbakekreving.eksternFagsak.eksternId(),
+                    fagsakId = tilbakekreving.eksternFagsak.eksternId(),
+                    behandlingId = behandlingId.toString(),
                 ),
                 "OK",
             )

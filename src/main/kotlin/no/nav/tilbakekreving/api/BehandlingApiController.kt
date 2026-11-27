@@ -280,10 +280,10 @@ class BehandlingApiController(
         return ResponseEntity.ok(
             ByteArrayResource(
                 safService.hentDokument(
-                    behandlingId = behandlingId,
                     journalpostId = journalpostId,
                     dokumentInfoId = dokumentInfoId,
                     tilbakekreving.eksternFagsak.eksternId(),
+                    behandlingId = behandlingId.toString(),
                 ),
             ),
         )
@@ -380,13 +380,16 @@ class BehandlingApiController(
             vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
             beskrivelse = dto.begrunnelse,
         )
+
         is FeilutbetaltBelopEndretDto -> TilbakekrevingRevurderingsårsak.FeilutbetaltBelopEndret(
             vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
             beskrivelse = dto.begrunnelse,
         )
+
         is ForeldelseDto -> TilbakekrevingRevurderingsårsak.Foreldelse(
             beskrivelse = dto.begrunnelse,
         )
+
         is UtenKlageDto -> TilbakekrevingRevurderingsårsak.UtenKlage(
             vedtakOmgjortAv = VedtakOmgjortAv.valueOf(dto.instans.name),
             beskrivelse = dto.begrunnelse,

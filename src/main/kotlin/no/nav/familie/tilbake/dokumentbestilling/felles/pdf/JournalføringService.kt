@@ -52,7 +52,7 @@ class JournalføringService(
         behandlingId: UUID,
     ): ByteArray {
         if (featureService.modellFeatures[Toggle.Dokumenthenting]) {
-            safService.hentDokument(behandlingId, journalpostId, dokumentInfoId, null)
+            safService.hentDokument(journalpostId, dokumentInfoId, null, behandlingId.toString())
         }
         return integrasjonerClient.hentDokument(dokumentInfoId, journalpostId)
     }
