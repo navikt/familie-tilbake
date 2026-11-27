@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.api.v1.dto.Aktsomhetsgrad
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.ForårsaketAvBruker
 import no.nav.tilbakekreving.behandling.saksbehandling.vilkårsvurdering.Vilkårsvurderingsteg
 import no.nav.tilbakekreving.eksternFagsakBehandling
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -29,7 +30,7 @@ class VilkårsvurderingBigQueryTest {
     fun `kjede av kopierte vurderinger beholder egne perioder`() {
         val steg = opprettSteg()
         val perioderFør = steg.tilFrontendDto().flatMap { it.delbarePerioder }
-        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro())
+        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro(), Sporing("", ""))
 
         steg.bigqueryPerioder().shouldHaveSize(3).forAll { eksportert ->
             perioderFør.filter { it.periodeId == eksportert.periodeId }.forSingle {
@@ -46,7 +47,7 @@ class VilkårsvurderingBigQueryTest {
         val perioderFør = steg.tilFrontendDto().flatMap { it.delbarePerioder }
         val sisteId = perioderFør.single { it.periode.fom == 1.mars(2021) }.periodeId
         steg.vurder(sisteId, ForårsaketAvBruker.IkkeVurdert())
-        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro())
+        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro(), Sporing("", ""))
 
         steg.bigqueryPerioder().shouldHaveSize(2).forAll { eksportert ->
             perioderFør.filter { it.periodeId == eksportert.periodeId }.forSingle {
@@ -61,8 +62,8 @@ class VilkårsvurderingBigQueryTest {
     @Test
     fun `kopierte perioder følger endret underliggende vurdering`() {
         val steg = opprettSteg()
-        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro())
-        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod())
+        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().godTro(), Sporing("", ""))
+        steg.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvNav().forstod(), Sporing("", ""))
         steg.bigqueryPerioder().shouldHaveSize(3).forAll {
             it.aktsomhetsgrad shouldBe Aktsomhetsgrad.FORSTOD
         }

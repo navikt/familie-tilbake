@@ -92,9 +92,14 @@ class Vilkårsvurderingsteg(
     internal fun vurder(
         periode: Datoperiode,
         vurdering: ForårsaketAvBruker,
+        sporing: Sporing,
     ) {
-        val funnetVurdering = vurderinger.single { it.vurdering !is ForårsaketAvBruker.KopiertVurdering && it.periode().overlapper(periode) }.id
-        vurder(funnetVurdering, vurdering)
+        val funnetVurdering = vurderinger.singleOrNull { it.vurdering !is ForårsaketAvBruker.KopiertVurdering && it.periode().overlapper(periode) }
+            ?: throw ModellFeil.UgyldigOperasjonException(
+                melding = "Fant ingen Vilkårsvurderingsperiode for periode $periode. Perioden kan være foreldet",
+                sporing = sporing,
+            )
+        vurder(funnetVurdering.id, vurdering)
     }
 
     internal fun vurder(

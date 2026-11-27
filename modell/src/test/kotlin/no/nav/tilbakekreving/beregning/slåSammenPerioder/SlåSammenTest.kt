@@ -110,6 +110,7 @@ class SlåSammenTest {
                 beløpIBehold = NivåAvForståelse.GodTro.BeløpIBehold.Nei("Begrunnelse for beløp i behold"),
                 begrunnelseForGodTro = "begrunnelse for god tro",
             ),
+            Sporing("", ""),
         )
 
         vilkårsvurderingsteg.vurder(
@@ -125,6 +126,7 @@ class SlåSammenTest {
                     ),
                 ),
             ),
+            Sporing("", ""),
         )
 
         vilkårsvurderingsteg.splittVilkårsvurdering(perioder[3].periodeId)

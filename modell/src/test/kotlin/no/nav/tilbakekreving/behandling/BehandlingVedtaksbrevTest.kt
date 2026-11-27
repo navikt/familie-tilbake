@@ -10,6 +10,7 @@ import no.nav.tilbakekreving.breeeev.BegrunnetPeriode
 import no.nav.tilbakekreving.breeeev.begrunnelse.VilkårsvurderingBegrunnelse
 import no.nav.tilbakekreving.eksternFagsakBehandling
 import no.nav.tilbakekreving.eksternfagsak.EksternFagsakRevurdering
+import no.nav.tilbakekreving.feil.Sporing
 import no.nav.tilbakekreving.kontrakter.periode.til
 import no.nav.tilbakekreving.kravgrunnlag
 import no.nav.tilbakekreving.kravgrunnlagPeriode
@@ -48,7 +49,7 @@ class BehandlingVedtaksbrevTest {
             ),
         )
 
-        vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvBruker)
+        vilkårsvurdering.vurder(1.januar(2021) til 31.januar(2021), forårsaketAvBruker, Sporing("", ""))
 
         val vurderingForPeriode = vilkårsvurdering.vurdertePerioderForBrev(emptySet()).single()
         vurderingForPeriode.periode shouldBe (1.januar(2021) til 31.januar(2021))
