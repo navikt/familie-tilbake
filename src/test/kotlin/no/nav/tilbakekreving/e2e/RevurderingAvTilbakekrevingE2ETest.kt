@@ -413,8 +413,8 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 )
             }
         }.shouldNotBeNull {
-            tittel shouldBe "Kunne ikke opprette/oppdatere revurderingen"
-            melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+            tittel shouldBe "Kunne ikke opprette eller oppdatere revurderingen"
+            melding shouldBe "Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
         }
     }
 
@@ -446,8 +446,8 @@ class RevurderingAvTilbakekrevingE2ETest : TilbakekrevingE2EBase() {
                 )
             }
         }.shouldNotBeNull {
-            tittel shouldBe "Kunne ikke opprette/oppdatere revurderingen"
-            melding shouldBe "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
+            tittel shouldBe "Kunne ikke opprette eller oppdatere revurderingen"
+            melding shouldBe "Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen."
         }
     }
 

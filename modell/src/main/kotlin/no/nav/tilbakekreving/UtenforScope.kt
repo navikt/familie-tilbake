@@ -42,7 +42,7 @@ enum class UtenforScope(val tittel: String, val feilmelding: String) {
         feilmelding = "Kan ikke sette behandling på vent",
     ),
     IkkeStøttetRevurderingInstans(
-        tittel = "Kunne ikke opprette/oppdatere revurderingen",
-        feilmelding = "Vi har per nå kun støtte for å opprette en revurdering fra førsteinstansen. Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen.",
+        tittel = "Kunne ikke opprette eller oppdatere revurderingen",
+        feilmelding = "Vi har ikke støtte for revurdering fra klageinstansen, trygderetten eller domstolen.",
     ),
 }
