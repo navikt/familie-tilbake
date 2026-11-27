@@ -51,8 +51,6 @@ import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarDto
 import no.nav.tilbakekreving.kontrakter.frontend.models.VilkaarsvurderingDto
 import no.nav.tilbakekreving.mapper.ForårsaketAvBrukerMapper
 import no.nav.tilbakekreving.repository.TilbakekrevingFilter
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -269,24 +267,6 @@ class BehandlingApiController(
         ) ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(tilbakekreving.hentDokumentInfo(dokumentType))
-    }
-
-    override fun behandlingHentDokument(behandlingId: UUID, journalpostId: String, dokumentInfoId: String): ResponseEntity<Resource> {
-        val tilbakekreving = tilbakekrevingService.lesTilbakekreving(
-            filter = TilbakekrevingFilter.behandling(behandlingId),
-            valideringContext = ValideringContext.HentDokument,
-        ) ?: return ResponseEntity.notFound().build()
-
-        return ResponseEntity.ok(
-            ByteArrayResource(
-                safService.hentDokument(
-                    journalpostId = journalpostId,
-                    dokumentInfoId = dokumentInfoId,
-                    tilbakekreving.eksternFagsak.eksternId(),
-                    behandlingId = behandlingId.toString(),
-                ),
-            ),
-        )
     }
 
     override fun behandlingVilkaarsvurdering(behandlingId: UUID): ResponseEntity<VilkaarDto> {
